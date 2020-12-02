@@ -21,7 +21,7 @@ nu = p.c * p.m.^(-1/3);
 %
 % Clearance rates:
 %
-factor = (1e-6)^(1/3)/1.5
+factor = (1e-6)^(1/3)/1.5;
 p.AN = 0.00012; %0.00004 % 0.000162 % Mathilde.  (2.5e-3 l/d/cm) * (1e6 mug/g)^(-1/3) / 1.5 (g/cm); Andersen et al 2015
 p.cN = 0.1;
 p.AL = 0.000914; % if using Andys shading formula for non-diatoms

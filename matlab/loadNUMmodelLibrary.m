@@ -1,4 +1,4 @@
-function sLibname = loadLibrary
+function sLibname = loadNUMmodelLibrary
 
 sLibname = 'libNUMmodel_colmajor';
 % Should be removed when library is mature

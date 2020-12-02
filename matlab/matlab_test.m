@@ -10,18 +10,15 @@
 % Matlab reference:
 % http://www.mathworks.co.uk/help/matlab/ref/loadlibrary.html#btjfvd3
 
-libname = 'libNUMmodel_colmajor';
-if libisloaded(libname)
-    unloadlibrary(libname);
-end
-[notfound,warnings]=loadlibrary(strcat('../Fortran/',libname,'.so'), ...
-    '../Fortran/NUMmodel_wrap_colmajor4matlab.h');
-
-n = int32(10);
-u = linspace(0,5,n);
-dudt = 0*u;
-[u,dudt] = calllib(libname, 'f_calcrates',n,u,dudt);
-dudt
+%loadLibrary();
 
 
 p = parameters;
+setParameters();
+
+
+%n = int32(10);
+%u = linspace(0,5,n);
+%dudt = 0*u;
+%[u,dudt] = calllib(libname, 'f_calcrates',n,u,dudt);
+%dudt

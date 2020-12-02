@@ -3,10 +3,13 @@ module NUMmodel
   implicit none
   private
   integer, parameter :: dp=kind(0.d0) ! double precision
-
+  integer, parameter :: idxN = 1
+  integer, parameter :: idxDOC = 2
+  integer, parameter :: idxB = 3
+  
   type typeParameters
      integer:: n
-     real(dp), dimension(:), allocatable:: m(:), AN(:), AL(:), AF(:), Jmax(:), JFmax(:), Jresp(:)
+     real(dp), dimension(:), allocatable:: m(:), AN(:), AL(:), AF(:), Jmax(:), JFmax(:), Jresp(:), JlossPassive(:)
      real(dp), dimension(:,:), allocatable:: theta(:,:)
      real(dp), dimension(:), allocatable:: mort(:), mortHTL(:)
      real(dp):: rhoCN, epsilonL, epsilonF, mort2, remin, remin2, cLeakage
@@ -33,12 +36,12 @@ contains
     write(unitDebug,*) '------------------------------------'
   end subroutine openDebug
   
-  subroutine setParameters(n, m, rhoCN, epsilonL, epsilonF, AN, AL, AF, Jmax, JFmax, Jresp, &
+  subroutine setParameters(n, m, rhoCN, epsilonL, epsilonF, AN, AL, AF, Jmax, JFmax, Jresp, JlossPassive, &
          theta, mort, mort2, mortHTL, remin, remin2, cLeakage)
     integer, intent(in):: n
     real(dp), intent(in), dimension(:):: m(:)
     real(dp), intent(in):: rhoCN, epsilonL, epsilonF, mort2, remin, remin2, cLeakage
-    real(dp), intent(in), dimension(:):: AN(:), AL(:), AF(:), Jmax(:), JFmax(:), Jresp(:), mort(:), mortHTL(:)
+    real(dp), intent(in), dimension(:):: AN(:), AL(:), AF(:), Jmax(:), JFmax(:), Jresp(:), JlossPassive(:), mort(:), mortHTL(:)
     real(dp), intent(in), dimension(:,:):: theta(:,:)
     
     allocate(p%m(n))
@@ -48,6 +51,7 @@ contains
     allocate(p%Jmax(n))
     allocate(p%JFmax(n))
     allocate(p%Jresp(n))
+    allocate(p%JlossPassive(n))
     allocate(p%theta(n,n))
     allocate(p%mort(n))
     allocate(p%mortHTL(n))
@@ -63,6 +67,7 @@ contains
     p%Jmax = Jmax
     p%JFmax = JFmax
     p%Jresp = Jresp
+    p%JlossPassive = JlossPassive
     p%theta = theta
     p%mort = mort
     p%mort2 = mort2
@@ -105,27 +110,24 @@ contains
 
   end subroutine setParameters
     
-  function calcRates(T, L, u, dudt, gammaN, gammaDOC) result(dudt)
-    real(dp), intent(in):: u(:)
+  function calcRates(T, L, u, gammaN, gammaDOC) result(dudt)
+    real(dp), intent(in):: T, L, gammaN, gammaDOC, u(:)
     real(dp):: dudt(size(u))
-
-    dudt = 0.01*u
+    real(dp):: N, DOC
+    integer:: i
+    !
+    ! Make sure values are positive
+    !
+    N = max(0., u(idxN))
+    DOC = max(0., u(idxDOC))
+    do i = 1, p%n
+       B(i) = max(0., u(idxB+i-1))
+    end do
+    
+    
   end function calcRates
 
-  void calcRates(const double& T, const double& L, const double* u, 
-               double* dudt, const double gammaN, const double gammaDOC) {
-  int i;
-  double f;
-  static double Tsaved;
-  static double f15, f20;
-  /*
-   * Make sure values of B and DOC are positive:
-   */
-  for (i=0; i<p.n; i++)
-    B[i] = max(0, u[idxB+i]); 
-  double DOC = max(0, u[idxDOC]);
-  double N = max(0, u[idxN]);
-
+  
 end module NUMmodel
 
 

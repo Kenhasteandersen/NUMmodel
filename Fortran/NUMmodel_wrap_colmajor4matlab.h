@@ -20,4 +20,4 @@ void f_setparameters(
     const double cLeakage
 );
 
-void f_calcrates(int n, double u[], double *out);
+ void f_calcrates(double T, double L, int n, double u[], double gammaN, double gammaDOC, double *dudt);
