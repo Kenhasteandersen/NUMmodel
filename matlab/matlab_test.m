@@ -23,3 +23,5 @@ dudt = 0*u;
 [u,dudt] = calllib(libname, 'f_calcrates',n,u,dudt);
 dudt
 
+
+p = parameters;
