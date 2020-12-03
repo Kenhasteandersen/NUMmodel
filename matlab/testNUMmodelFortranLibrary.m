@@ -14,11 +14,11 @@
 
 
 p = parameters;
-setParameters();
+%%
+setParameters(p);
 
 
-%n = int32(10);
-%u = linspace(0,5,n);
-%dudt = 0*u;
-%[u,dudt] = calllib(libname, 'f_calcrates',n,u,dudt);
-%dudt
+u = linspace(0,10,p.n);
+dudt = 0*u;
+dudt = calllib(loadNUMmodelLibrary(), 'f_calcrates',10., 10.,p.n,u, 1.0, 1.0, dudt);
+dudt
