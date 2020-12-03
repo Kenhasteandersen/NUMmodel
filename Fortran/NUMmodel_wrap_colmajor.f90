@@ -31,9 +31,10 @@ contains
          JlossPassive, theta, mort, mort2, mortHTL, remin, remin2, cLeakage)
   end subroutine f_setParameters
     
-  subroutine f_calcRates(T, L, n, u, gammaN, gammaDOC, dudt) bind(c)
+  subroutine f_calcRates(T, L, n, u,  gammaN, gammaDOC, dudt) bind(c)
     integer(c_int), intent(in), value:: n
-    real(c_double), intent(in):: T, L, u(n), gammaN, gammaDOC
+    real(c_double), intent(in), value:: T, L, gammaN, gammaDOC
+    real(c_double), intent(in):: u(n)
     real(c_double), intent(out):: dudt(n)
     
     dudt = calcrates(T,L,u,gammaN,gammaDOC)

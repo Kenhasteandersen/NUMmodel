@@ -109,6 +109,11 @@ contains
     allocate(rates%mortpred(n))
 
   end subroutine setParameters
+
+  subroutine printRates
+    call openDebug
+    write(unitDebug, *) 'B: ',B(1),B(2)
+  end subroutine printRates
     
   function calcRates(T, L, u, gammaN, gammaDOC) result(dudt)
     real(dp), intent(in):: T, L, gammaN, gammaDOC, u(:)
@@ -118,13 +123,13 @@ contains
     !
     ! Make sure values are positive
     !
-    N = max(0., u(idxN))
-    DOC = max(0., u(idxDOC))
-    do i = 1, p%n
-       B(i) = max(0., u(idxB+i-1))
-    end do
+    !N = max(0., u(idxN))
+    !DOC = max(0., u(idxDOC))
+    !do i = 1, p%n
+    !   B(i) = max(0., u(idxB+i-1))
+    !end do
     
-    
+    !call printRates()
   end function calcRates
 
   
