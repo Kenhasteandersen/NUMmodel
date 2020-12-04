@@ -266,7 +266,7 @@ contains
             + p%mortHTL(i)))*B(i)
     end do
        
-    call printRates
+    !call printRates
   end function calcRates
 
   

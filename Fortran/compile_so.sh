@@ -1,10 +1,10 @@
 #!/bin/sh
 # Compiles various shared libraries.
 
-gfortran -c -fPIC NUMmodel.f90 -o NUMmodel.o
+gfortran -c -fPIC -O3 NUMmodel.f90 -o NUMmodel.o
 # c-wrap in two forms
 #gfortran -shared -fPIC NUMmodel.o NUMmodel_wrap.f90 -o libNUMmodel.so
-gfortran -shared -fPIC NUMmodel.o NUMmodel_wrap_colmajor.f90 -o libNUMmodel_colmajor.so
+gfortran -shared -fPIC -O3 NUMmodel.o NUMmodel_wrap_colmajor.f90 -o libNUMmodel_colmajor.so
 # c-wrap with openMP
 #gfortran -fopenmp -c -fPIC NUMmodel.f90 -o NUMmodel_openMP.o
 #gfortran -fopenmp -shared -fPIC NUMmodel_openMP.o NUMmodel_wrap.f90 -o libNUMmodel_openMP.so
