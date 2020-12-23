@@ -9,7 +9,8 @@ for iGroup = 1:p.nGroups
     loglog(p.m(ix), sim.B(ixTime,ix-2), 'linewidth',2)
     hold on
 end
-ylim([0.001,500])
+ylim([0.0001,500])
+xlim([1e-9, max(sim.p.m)])
 hold off
 
 xlabel('Mass ({\mu}gC)')

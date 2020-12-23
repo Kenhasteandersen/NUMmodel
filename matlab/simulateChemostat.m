@@ -3,11 +3,11 @@ function sim = simulateChemostat(p, L)
 % Find ix for nutrients and unicellulars:
 %
 ix = [1,2]; % Nutrients and DOC
-for i = 1:p.nGroups
-    if (p.typeGroups(i)==1)
-        ix = [ix, p.ixStart(i):p.ixEnd(i)];
-    end
-end
+%for i = 1:p.nGroups
+%    if (p.typeGroups(i)==1)
+%        ix = [ix, p.ixStart(i):p.ixEnd(i)];
+%    end
+%end
 %
 % Concentrations in the deep layer:
 %
@@ -16,7 +16,7 @@ uDeep(1:2) = p.u0(1:2);
 %
 % Simulate:
 %
-[t,u] = ode23(@deriv, [0 365], p.u0);
+[t,u] = ode23(@deriv, [0 p.tEnd], p.u0);
 %
 % Assemble result:
 %

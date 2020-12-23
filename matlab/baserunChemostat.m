@@ -1,10 +1,11 @@
-p = parameters(25);
-setParameters(p);
+p = parameters(10);
+%setParameters(p);
 
 p = parametersChemostat(p);
+p.tEnd = 500;
+
 tic
-sim = simulateChemostat(p, 10, 60);
+sim = simulateChemostat(p, 150);
 toc
-clf
-loglog(p.m, sim.B(end,:))
-ylim([1 1000])
+
+plotSimulation(sim)
