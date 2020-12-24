@@ -32,9 +32,9 @@ p.cF = 0.6; % Just a guess
 %
 p.ANm = p.AN*p.m.^(1/3) ./ (1 + p.cN*p.m.^(-1/3));
 p.ALm = p.AL*p.m.^(2/3) .* (1-exp(- p.cL*p.m.^(1/3) ));  % shading formula
-p.AFm = p.AF*p.m;
+p.AF = p.AF*p.m;
 p.Jloss_passive_m = p.cLeakage * p.m.^(2/3); % in units of C
-p.JFmaxm = p.cF*p.m.^(2/3);
+p.JFmax = p.cF*p.m.^(2/3);
 %
 % Prey encounter
 %
@@ -46,7 +46,7 @@ p.sigma = 1.3;
 p.alphaJ = 1.5; % per day
 p.Jmax = p.alphaJ * p.m .* (1-nu); % mugC/day
 p.cR = 0.1;
-p.Jrespm = p.cR*p.alphaJ*p.m;
+p.Jresp = p.cR*p.alphaJ*p.m;
 %
 % Losses:
 %

@@ -1,6 +1,6 @@
-function rates = calcDerivatives(p,u, L)
+function rates = calcDerivatives(p, u, L)
 %
-% Split u
+% Split uthe biomasses out of u:
 %
 ix = 3:length(u);
 B = max(zeros(1,length(u)-2), u(ix));
@@ -14,12 +14,7 @@ rates.JF(ix) = rates.f(ix) .* p.JFmax(ix);
 %
 % Calc resource uptake of unicellular groups:
 %
-for iGroup = 1:p.nGroups
-    %switch p.typeGroups(iGroup)
-    %    case 1 % Generalists
-            rates = calcRatesGeneralists(p.ixStart(1),p.ixEnd(1), u, rates, p.pGeneralists, L);
-    %end
-end 
+rates = calcRatesGeneralists(p.ixStart(1),p.ixEnd(1), u, rates, p.pGeneralists, L);
 %
 % Calc predation mortality for all groups:
 %
@@ -31,7 +26,7 @@ for iGroup = 1:p.nGroups
     switch(p.typeGroups(iGroup))
         case(1) % Generalists
             rates = calcDerivativesGeneralists(p.ixStart(iGroup), p.ixEnd(iGroup), u, rates, p);
-        case(2) % Copepods
+        case(10) % Copepods
             rates = calcDerivativesCopepods(p.ixStart(iGroup), p.ixEnd(iGroup), u, rates, p);
     end
 end

@@ -9,8 +9,8 @@ DOC = max(0, u(2));
 ANmT = p.ANm*fTemp(1.5,p.T);
 f2 = fTemp(2,p.T);
 JmaxT = p.Jmax*f2;
-JR = p.Jrespm*f2;
-JFmaxmT = p.JFmaxm*f2;
+JR = p.Jresp*f2;
+JFmaxmT = p.JFmax*f2;
 %
 % Uptakes
 %
