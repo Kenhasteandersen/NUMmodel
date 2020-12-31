@@ -1,0 +1,2 @@
+ - I had to increase the clearance rate of copepods
+ - Include temperature
