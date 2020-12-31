@@ -1,11 +1,11 @@
-p = parameters(10);
+p = parameters(100);
 %setParameters(p);
 
 p = parametersChemostat(p);
-p.tEnd = 500;
+p.tEnd = 365;
 
 tic
-sim = simulateChemostat(p, 150);
+sim = simulateChemostat(p, 100);
 toc
 
 plotSimulation(sim)

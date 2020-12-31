@@ -6,8 +6,9 @@ DOC = max(0, u(2));
 %
 % Temperature corrections:
 %
-ANmT = p.ANm*fTemp(1.5,p.T);
-f2 = fTemp(2,p.T);
+T = 10;
+ANmT = p.ANm*fTemp(1.5,T);
+f2 = fTemp(2,T);
 JmaxT = p.Jmax*f2;
 JR = p.Jresp*f2;
 JFmaxmT = p.JFmax*f2;
@@ -15,20 +16,11 @@ JFmaxmT = p.JFmax*f2;
 % Uptakes
 %
 rates.JN(ix) =   ANmT*N*p.rhoCN; % Diffusive nutrient uptake in units of C/time
-%
 rates.JDOC(ix) = ANmT*DOC; % Diffusive DOC uptake, units of C/time
-
 rates.JL(ix) =   p.epsilonL * p.ALm*L;  % Photoharvesting
 
 % Light acclimation:
 %JLreal = pmax( 0, JL - pmax(0,(JL+JDOC-JR - JN)) )
-
-% Feeding as type II with surface limitation:
-%F = theta %*% B
-%JF = epsilonF * JFmaxmT * AFm*F / (AFm*F + JFmaxmT) %        % Feeding
-
-% Passive losses:
-%Jloss_passive = p.cLeakage * m^(2/3) % in units of C
 
 % Total nitrogen uptake:
 rates.JNtot(ix) = rates.JN(ix)+rates.JF(ix)-p.Jloss_passive_m; % In units of C
@@ -48,7 +40,7 @@ rates.Jtot(ix) = f.*JmaxT;
 rates.JLreal(ix) = rates.JL(ix) - max(zeros(1,length(ix)), ...
     min((rates.JCtot(ix) - (rates.JF(ix)-rates.JFreal(ix))-rates.Jtot(ix)), rates.JL(ix)));
 
-% Actual uptakes:
+% Actual uptakes:b
 rates.JCtot(ix) = rates.JLreal(ix) + rates.JDOC(ix) + rates.JFreal(ix) - JR - ....
     p.Jloss_passive_m;
 rates.JNtot(ix) = rates.JN(ix) + rates.JFreal(ix) - p.Jloss_passive_m;
@@ -63,3 +55,5 @@ rates.JClossLiebig(ix) = max(zeros(1,length(ix)), rates.JCtot(ix)-rates.Jtot(ix)
 rates.JNloss(ix) = rates.JCloss_feeding(ix) + rates.JNlossLiebig(ix) + p.Jloss_passive_m; % In units of C
 rates.JCloss(ix) = rates.JCloss_feeding(ix) + rates.JCloss_photouptake(ix) + ...
     rates.JClossLiebig(ix) + p.Jloss_passive_m;
+
+rates.JF(ix) = rates.JFreal(ix);

@@ -6,7 +6,7 @@ for iGroup = 1:p.nGroups
     semilogx(m, rates.mortpred(ix), 'r-o','linewidth',2)
     hold on
     semilogx(m, p.Jresp(ix)./m, 'k-o', 'linewidth',2)
-    loglog(m, rates.mortStarve(ix), 'b-o','linewidth',2)
+%    loglog(m, rates.mortStarve(ix), 'b-o','linewidth',2)
 end
 loglog(p.m, p.mortHTLm, 'm-o','linewidth',2)
 

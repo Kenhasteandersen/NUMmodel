@@ -1,138 +1,254 @@
-
 module NUMmodel
+  use globals
+  use generalists
+  use debug
   implicit none
-  private
-  integer, parameter :: dp=kind(0.d0) ! double precision
-  integer, parameter :: idxN = 1
-  integer, parameter :: idxDOC = 2
-  integer, parameter :: idxB = 3
-  
-  type typeParameters
-     integer:: n
-     real(dp), dimension(:), allocatable:: m(:), AN(:), AL(:), AF(:), Jmax(:), JFmax(:), Jresp(:), JlossPassive(:)
-     real(dp), dimension(:,:), allocatable:: theta(:,:)
-     real(dp), dimension(:), allocatable:: mort(:), mortHTL(:)
-     real(dp):: rhoCN, epsilonL, epsilonF, mort2, remin, remin2, cLeakage
-  end type typeParameters
 
-  type typeRates
-     real(dp), dimension(:), allocatable:: JN, JDOC, JL, JF, F, JFreal
-     real(dp), dimension(:), allocatable:: JNtot, JLreal, JCtot, Jtot;
-     real(dp), dimension(:), allocatable:: JCloss_feeding, JCloss_photouptake, JNlossLiebig, JClossLiebig
-     real(dp), dimension(:), allocatable:: JNloss, JCloss
-     real(dp), dimension(:), allocatable:: mortpred
-  end type typeRates
-
-  type(typeParameters):: p
-  type(typeRates):: rates
-  integer, parameter:: unitDebug = 10
-  real(dp), dimension(:), allocatable:: B, ANmT, JmaxT, JFmaxT, JrespT
+  integer:: nGroups, iGroup
+  integer, dimension(:), allocatable:: typeGroups
+  type(typeSpectrum), dimension(:), allocatable:: group
  
-  public setParameters, calcRates
+  real(dp), dimension(:,:), allocatable:: theta
+  real(dp), dimension(:), allocatable:: u, u0, upositive
+  type(typeRates):: rates
+
 contains
+  ! -----------------------------------------------
+  ! A basic setup with only generalists and 10 size classes
+  ! -----------------------------------------------
+  subroutine parametersGeneralistsOnly()
+    call parametersInit(1, 10)
+    call parametersAddGroup(typeGeneralist, 10, 0.d0)
+    call parametersFinalize()
+  end subroutine parametersGeneralistsOnly
+  ! -----------------------------------------------
+  ! Initialize parameters
+  ! In:
+  !    nnGroups: number of size spectrum groups
+  !    nnGrid: total length of the grid (excl 2 points for N and DOC)
+  ! -----------------------------------------------
+  subroutine parametersInit(nnGroups, nnGrid)
+    integer, intent(in):: nnGrid, nnGroups
 
-  subroutine openDebug
-    open(unit=unitDebug, FILE='debug.out', status='replace')
-    write(unitDebug,*) '------------------------------------'
-  end subroutine openDebug
+    nGroups = nnGroups
+    iGroup = 0
+
+    call initGlobals(nnGrid)
+    allocate(group(nGroups))
+    allocate(typeGroups(nGroups))
+
+    allocate(u(nGrid))
+    allocate(upositive(nGrid))
+    allocate(u0(nGrid))
+
+    ! Interaction matrix:
+    allocate(theta(nGrid,nGrid))
+    !
+    ! Allocate rates:
+    !
+    allocate(rates%dudt(nGrid))
+
+    allocate(rates%F(nGrid))
+    allocate(rates%flvl(nGrid))
+    allocate(rates%JF(nGrid))
+    allocate(rates%JEnc(nGrid))
+
+    allocate(rates%JN(nGrid))
+    allocate(rates%JL(nGrid))
+    allocate(rates%JDOC(nGrid))
+    allocate(rates%JNtot(nGrid))
+    allocate(rates%JCtot(nGrid))
+    allocate(rates%Jtot(nGrid))
+    allocate(rates%JLreal(nGrid))
+    allocate(rates%JCloss_feeding(nGrid))
+    allocate(rates%JCloss_photouptake(nGrid))
+    allocate(rates%JNlossLiebig(nGrid))
+    allocate(rates%JClossLiebig(nGrid))
+    allocate(rates%JNloss(nGrid))
+    allocate(rates%JCloss(nGrid))
+
+    allocate(rates%mortpred(nGrid))
+    allocate(rates%mortHTL(nGrid))
+
+  end subroutine parametersInit
+  ! -----------------------------------------------
+  !  Add a size spectrum group
+  !  In:
+  !    typeGroup: the group type (see definitions in Globals.f90
+  !    n: number of grid points
+  !    mMax: the maximum size (mid-point in grid cell)
+  ! -----------------------------------------------
+  subroutine parametersAddGroup(typeGroup, n, mMax)
+    integer, intent(in):: typeGroup, n
+    real(dp), intent(in):: mMax
+    integer ixStart
+    !
+    ! Find the group number and grid location:
+    !
+    iGroup = iGroup + 1
+    if (iGroup.eq.1) then
+       ixStart = idxB
+    else
+       ixStart = group(iGroup-1)%ixEnd+1
+    end if
+    !
+    ! Add the group
+    !
+    typeGroups(iGroup) = typeGroup
+    select case (typeGroup)
+    case (typeGeneralist)
+       call initGeneralists(group(iGroup), n, ixStart)
+    end select
+  end subroutine parametersAddGroup
+  ! -----------------------------------------------
+  !  Finalize the setting of parameters
+  ! -----------------------------------------------
+  subroutine parametersFinalize()
+    integer:: i,j
+    real(dp):: betaHTL, mHTL
+    !
+    ! Calc theta:
+    !
+    do i = idxB, nGrid
+       do j = idxB, nGrid
+          theta(i,j) = exp( -(log(m(i)/m(j)/beta(i)))**2/(2*sigma(i)**2))
+       end do
+    end do
+    !
+    ! Calc htl mortality
+    !
+    betaHTL = 500
+    mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
+    rates%mortHTL = 0.01*(1/(1+(m/mHTL)**(-2)))
+    ! 
+    !  Initial conditions (also used for deep conditions of chemostat)
+    ! 
+    u0(idxN) = 150. ! Nutrients
+    u0(idxDOC) = 0. ! DOC
+    u0(idxB:nGrid) = 10. ! Biomasses
+  end subroutine parametersFinalize
+  ! -----------------------------------------------
+  !  Calculate the derivatives for all groups:
+  !  In:
+  !    L: light level
+  ! -----------------------------------------------
+  subroutine calcDerivatives(u, L, dt)
+    real(dp), intent(in):: L, dt, u(:)
+    integer:: i, j, iGroup
+    real(dp):: gammaN, gammaDOC
+    !
+    ! Use only the positive part of biomasses for calculation of derivatives:
+    !
+    upositive(1:idxB-1) = u(1:idxB-1)
+    do i = idxB, nGrid
+       upositive(i) = max( 0.d0, u(i) )
+    end do
+    !
+    ! Calc uptakes of food
+    !
+    do i = idxB, nGrid
+       rates%F(i) = 0.d0
+       do j = idxB, nGrid
+          rates%F(i) = rates%F(i) + theta(i,j)*upositive(j)
+       end do
+    end do
+    rates%flvl = AF*rates%F / (AF*rates%F + JFmax)
+    rates%JF = rates%flvl * JFmax
+    !
+    ! Calc other uptakes of unicellular groups
+    !
+    gammaN = 1.d0
+    gammaDOC = 1.d0
+    call calcRatesGeneralists(group(1), upositive, rates, L, gammaN, gammaDOC)
+    !
+    ! Calc predation mortality
+    !
+    do i=idxB, nGrid
+       rates%mortpred(i) = 0.d0
+
+       do j=idxB, nGrid
+          if (rates%F(j) .ne. 0) then
+             rates%mortpred(i) = rates%mortpred(i)  &
+                 + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
+          end if
+       end do
+    end do
+    !
+    ! Assemble derivatives:
+    !
+    rates%dudt(idxN) = 0
+    rates%dudt(idxDOC) = 0
+    do iGroup = 1, nGroups
+       select case (typeGroups(iGroup))
+       case (typeGeneralist)
+          call calcDerivativesGeneralists(group(1), upositive, rates)
+       end select
+    end do
+    !
+    ! Make a correction if nutrient fields will become less than zero:
+    !
+    if ((u(idxN) + rates%dudt(idxN)*dt) .lt. 0) then
+       gammaN = max(0.d0, min(1.d0, -u(idxN)/(rates%dudt(idxN)*dt)))
+    end if
+    if ((u(idxDOC) + rates%dudt(idxDOC)*dt) .lt. 0) then
+       gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(rates%dudt(idxDOC)*dt)))
+    end if
+    if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0)) then
+       write(6,*) u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
+
+       call calcRatesGeneralists(group(1), upositive, rates, L, gammaN, gammaDOC)
+       !
+       ! Calc predation mortality
+       !
+       do i=idxB, nGrid
+          rates%mortpred(i) = 0.d0
+          do j=idxB, nGrid
+             if (rates%F(j) .ne. 0) then
+                rates%mortpred(i) = rates%mortpred(i)  &
+                     + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
+             end if
+          end do
+       end do
+       !
+       ! Assemble derivatives:
+       !
+       rates%dudt(idxN) = 0
+       rates%dudt(idxDOC) = 0
+       do iGroup = 1, nGroups
+          select case (typeGroups(iGroup))
+          case (typeGeneralist)
+             call calcDerivativesGeneralists(group(1), upositive, rates)
+          end select
+       end do
+       write(6,*) '->', u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
+    end if
+    
+  end subroutine calcDerivatives
+  ! -----------------------------------------------
+  ! Simulate a chemostat with Euler
+  ! -----------------------------------------------
+  subroutine simulateChemostatEuler(L, diff, tEnd, dt, usave)
+    real(dp), intent(in):: L      ! Light level
+    real(dp), intent(in):: diff      ! Diffusivity
+    real(dp), intent(in):: tEnd ! Time to simulate
+    real(dp), intent(in):: dt    ! time step
+    real(dp), intent(out), allocatable:: usave(:,:)  ! Results (timestep, grid)
+    real(dp):: t
+    integer:: i, iEnd
+
+    iEnd = floor(tEnd/dt)
+    allocate(usave(iEnd, nGrid))
+
+    usave(1,:) = u0
+    do i=2, iEnd
+       call calcDerivatives(usave(i-1,:), L, dt)
+       rates%dudt(idxN) = rates%dudt(idxN) + diff*(u0(idxN)-usave(i-1,idxN))
+       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - usave(i-1,idxDOC))
+       rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - usave(i-1,idxB:nGrid))
+       usave(i,:) = usave(i-1,:) + rates%dudt*dt
+    end do
+  end subroutine simulateChemostatEuler
   
-  subroutine setParameters(n, m, rhoCN, epsilonL, epsilonF, AN, AL, AF, Jmax, JFmax, Jresp, JlossPassive, &
-         theta, mort, mort2, mortHTL, remin, remin2, cLeakage)
-    integer, intent(in):: n
-    real(dp), intent(in), dimension(:):: m(:)
-    real(dp), intent(in):: rhoCN, epsilonL, epsilonF, mort2, remin, remin2, cLeakage
-    real(dp), intent(in), dimension(:):: AN(:), AL(:), AF(:), Jmax(:), JFmax(:), Jresp(:), JlossPassive(:), mort(:), mortHTL(:)
-    real(dp), intent(in), dimension(:,:):: theta(:,:)
-    
-    allocate(p%m(n))
-    allocate(p%AN(n))
-    allocate(p%AL(n))
-    allocate(p%AF(n))
-    allocate(p%Jmax(n))
-    allocate(p%JFmax(n))
-    allocate(p%Jresp(n))
-    allocate(p%JlossPassive(n))
-    allocate(p%theta(n,n))
-    allocate(p%mort(n))
-    allocate(p%mortHTL(n))
-
-    p%n = n
-    p%m = m
-    p%rhoCN = rhoCN
-    p%epsilonL = epsilonL
-    p%epsilonF = epsilonF
-    p%AN = AN
-    p%AL = AL    
-    p%AF = AF
-    p%Jmax = Jmax
-    p%JFmax = JFmax
-    p%Jresp = Jresp
-    p%JlossPassive = JlossPassive
-    p%theta = theta
-    p%mort = mort
-    p%mort2 = mort2
-    p%mortHTL = mortHTL
-    p%remin = remin
-    p%remin2 = remin2
-    p%cLeakage = cLeakage
-    
-    !call openDebug
-    !write(unitDebug,*) p%cLeakage    
-    !close(unitDebug)
-    !
-    ! Init private temps:
-    !
-    allocate(B(n))
-    allocate(ANmT(n))
-    allocate(JmaxT(n))
-    allocate(JFmaxT(n))
-    allocate(JrespT(n))
-    !
-    !  Init rates:
-    !
-    allocate(rates%JN(n))
-    allocate(rates%JDOC(n))
-    allocate(rates%JL(n))
-    allocate(rates%JF(n))
-    allocate(rates%JFreal(n))
-    allocate(rates%F(n))
-    allocate(rates%JNtot(n))
-    allocate(rates%JLreal(n))
-    allocate(rates%JCtot(n))
-    allocate(rates%Jtot(n))
-    allocate(rates%JCloss_feeding(n))
-    allocate(rates%JCloss_photouptake(n))
-    allocate(rates%JNlossLiebig(n))
-    allocate(rates%JClossLiebig(n))
-    allocate(rates%JNloss(n))
-    allocate(rates%JCloss(n))
-    allocate(rates%mortpred(n))
-
-  end subroutine setParameters
-
-  subroutine printRates
-    call openDebug
-    !write(unitDebug, *) 'N: ', N
-    !write(unitDebug, *) 'DOC: ', DOC
-    write(unitDebug, *) 'B: ', B
-    write(unitDebug, *) 'JN/m: ', rates%Jn/p%m
-    write(unitDebug, *) 'JL/m: ', rates%JL/p%m
-    write(unitDebug, *) 'F/m: ', rates%F/p%m
-    write(unitDebug, *) 'JF/m: ', rates%JF/p%m
-    write(unitDebug, *) 'JFreal/m: ', rates%JFreal/p%m
-    write(unitDebug, *) 'Jtot/m: ', rates%Jtot/p%m
-    write(unitDebug, *) 'mortpred: ', rates%mortpred
-    
-    close(unitDebug)
-  end subroutine printRates
-
-  subroutine printU(u)
-    real(dp), intent(in):: u(:)
-    call openDebug
-    write(unitDebug, *) 'u: ', u
-    close(unitDebug)
-  end subroutine printU
-
   function fTemp(Q10, T) result(f)
     real(dp), intent(in), value:: Q10, T
     real(dp):: f
@@ -140,136 +256,8 @@ contains
     f = Q10**(T/10.-1.)
   end function fTemp
   
-  function calcRates(T, L, u, gammaN, gammaDOC) result(dudt)
-    real(dp), intent(in):: T, L, gammaN, gammaDOC, u(:)
-    real(dp):: dudt(size(u))
-    real(dp):: N, DOC
-    real(dp):: f, mortloss
-    real(dp), save:: Tsaved, f15, f20
-    integer:: i, j
-    !
-    ! Make sure values are positive
-    !
-    N = max(0., u(idxN))
-    DOC = max(0., u(idxDOC))
-    do i = 1, p%n
-       B(i) = max(0., u(idxB+i-1))
-    end do
-    !
-    ! Temperature corrections:
-    !
-    if (T .ne. Tsaved) then
-       f15 = fTemp(1.5d0, T);
-       f20 = fTemp(2.0d0, T);
-       Tsaved = T
-       do i=1, p%n
-          ANmT(i) = p%AN(i)*f15;
-          JmaxT(i) = p%Jmax(i)*f20;
-          JrespT(i) = p%Jresp(i)*f20;
-          JFmaxT(i) = p%JFmax(i)*f20;
-       end do
-    end if
-    !
-    ! Uptakes
-    !
-    do i=1, p%n
-       !
-       ! Uptakes:
-       ! 
-       
-       ! Nutrients:
-       rates%JN(i) = gammaN * ANmT(i)*N*p%rhoCN    
-       ! DOC:
-       rates%JDOC(i) = gammaDOC * ANmT(i)*DOC
-       ! Light:
-       rates%JL(i) = p%epsilonL * p%AL(i)*L
-       ! Feeding:
-       rates%F(i) = 0.d0
-       do j = 1, p%n
-          rates%F(i) = rates%F(i) + p%theta(i,j)*B(j)
-       enddo
-       rates%JF(i) = p%epsilonF * JFmaxT(i) * p%AF(i)*rates%F(i) &
-            / (p%AF(i)*rates%F(i) + JFmaxT(i))
-    
-       ! Combined N and C fluxes:
-       rates%JNtot(i) = rates%JN(i) + rates%JF(i) - p%JlossPassive(i)
-       rates%JCtot(i) = rates%JL(i) + rates%JF(i) + rates%JDOC(i)  &
-            - JrespT(i) - p%JlossPassive(i)
-    
-       ! Synthesis:
-       rates%Jtot(i) = min( rates%JNtot(i), rates%JCtot(i) ) 
-       f = rates%Jtot(i)/(rates%Jtot(i) + JmaxT(i)) ! Feeding level
-    
-       !If synthesis-limited then down-regulate feeding:
-       if (rates%Jtot(i) .gt. 0) then
-          rates%JFreal(i) = max(0.d0, rates%JF(i) - (rates%Jtot(i)-f*JmaxT(i)))
-       else
-          rates%JFreal(i) = max(0.d0, rates%JF(i))
-       end if
-       rates%Jtot(i) = f*JmaxT(i)
-       rates%JLreal(i) = rates%JL(i) & 
-            - max(0.d0, min((rates%JCtot(i) - (rates%JF(i)-rates%JFreal(i))-rates%Jtot(i)), rates%JL(i)))
-    
-       ! Actual uptakes:
-       rates%JCtot(i) = rates%JLreal(i) + rates%JDOC(i) &
-            + rates%JFreal(i) - p%Jresp(i) - p%JlossPassive(i) 
-       rates%JNtot(i) = rates%JN(i) + rates%JFreal(i) - p%JlossPassive(i)
-    
-       ! Losses:
-       rates%JCloss_feeding(i) = (1-p%epsilonF)/p%epsilonF*rates%JFreal(i)
-       rates%JCloss_photouptake(i) = (1-p%epsilonL)/p%epsilonL*rates%JLreal(i)
-       rates%JNlossLiebig(i) = max(0.d0, rates%JNtot(i)-rates%Jtot(i))
-       rates%JClossLiebig(i) = max(0.d0, rates%JCtot(i)-rates%Jtot(i)) 
-    
-       rates%JNloss(i) = rates%JCloss_feeding(i) &
-            +rates%JNlossLiebig(i) &
-            +p%JlossPassive(i) 
-       rates%JCloss(i) = rates%JCloss_feeding(i) &
-            + rates%JCloss_photouptake(i) &
-            + rates%JClossLiebig(i) &
-            + p%JlossPassive(i)
-    enddo
-    !
-    ! Mortality:
-    !
-    do i=1, p%n
-       rates%mortpred(i) = 0
-       do j=1, p%n
-          if (rates%F(j) .ne. 0) then
-             rates%mortpred(i) = rates%mortpred(i) + &
-                  p%theta(j,i) * rates%JFreal(j)*B(j)/(p%epsilonF*p%m(j)*rates%F(j))
-          end if
-       end do
-    end do
-    !
-    ! Reaction terms:
-    !
-    dudt(idxN) = 0
-    dudt(idxDOC) = 0
-    do i = 1, p%n
-       mortloss = B(i)*((1-p%remin2)*p%mort2*B(i) + p%mortHTL(i))
-       dudt(idxN) = dudt(idxN) + &
-            ((-rates%JN(i) &
-            + rates%JNloss(i))*B(i)/p%m(i) &
-            + p%remin2*p%mort2*B(i)*B(i) &
-            + p%remin*mortloss)/p%rhoCN
-       dudt(idxDOC) = dudt(idxDOC) + &
-            (-rates%JDOC(i) &
-            + rates%JCloss(i))*B(i)/p%m(i) &
-            + p%remin2*p%mort2*B(i)*B(i) &
-            + p%remin*mortloss
-       
-       dudt(idxB+i-1) = (rates%Jtot(i)/p%m(i)  &
-            - (p%mort(i) &
-            + rates%mortpred(i) &
-            + p%mort2*B(i) &
-            + p%mortHTL(i)))*B(i)
-    end do
-       
-    !call printRates
-  end function calcRates
 
-  
+   
 end module NUMmodel
 
 

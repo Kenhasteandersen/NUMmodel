@@ -54,10 +54,7 @@ p.mort = 0*0.005*(p.Jmax./p.m) .* p.m.^(-1/4);
 p.mort2 = 0.0002*double(p.n);
 
 p.remin = 0.0; % fraction of mortality losses reminerilized to N and DOC
-p.remin2 = 1; % fraction of virulisus remineralized to N and DOC
-
-p.T = 10;
-p.L = 60;
+p.remin2 = 1; % fraction of virulysis remineralized to N and DOC
 %
 % Initial conditions:
 %

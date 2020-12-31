@@ -1,4 +1,12 @@
 function sim = simulateChemostat(p, L)
+if (p.bUseLibrary)
+    %unloadlibrary(loadNUMmodelLibrary())
+    loadNUMmodelLibrary();
+    fDeriv = @fDerivLibrary;
+    fprintf('Using fortran library\n')
+else
+    fDeriv = @fDerivMatlab;
+end
 %
 % Find ix for nutrients and unicellulars:
 %
@@ -16,7 +24,7 @@ uDeep(1:2) = p.u0(1:2);
 %
 % Simulate:
 %
-[t,u] = ode23(@deriv, [0 p.tEnd], p.u0);
+[t,u] = ode23(fDeriv, [0 p.tEnd], p.u0);
 %
 % Assemble result:
 %
@@ -33,7 +41,7 @@ end
     %
     % Function to assemble derivative for chemostat:
     %
-    function dudt = deriv(t,u)
+    function dudt = fDerivMatlab(t,u)
         rates = calcDerivatives(p,u',L);
         dudt = rates.dudt;
         %
@@ -43,6 +51,19 @@ end
         dudt = dudt';
     end
     
+    %
+    % Function to assemble derivative for chemostat:
+    %
+    function dudt = fDerivLibrary(t,u)
+        dudt = 0*u';
+        [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', 12, u, L, 0.0, dudt);
+        %
+        % Chemostat dynamics for nutrients and unicellulars:
+        %
+        dudt(ix) = dudt(ix) + p.d*(uDeep-u(ix)');
+        dudt = dudt';
+    end
+
     %function dudt = deriv(t,u)
     %    dudt = zeros(p.n+2,1);
     %    [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcrates',T, L, 2+p.n, u, 1.0, 1.0, dudt);
