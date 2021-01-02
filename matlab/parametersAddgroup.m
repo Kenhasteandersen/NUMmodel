@@ -17,7 +17,7 @@ ix = p.ixStart(p.nGroups):p.ixEnd(p.nGroups);
 %
 switch typeGroup
     case p.typeGeneralists % Generalists
-        pGroup = parametersGeneralists(n);
+        pGroup = parametersGeneralists(n, mass);
         p.pGeneralists = pGroup;
     case p.typeCopepods % Copepods
         pGroup = parametersCopepods(mass, n);

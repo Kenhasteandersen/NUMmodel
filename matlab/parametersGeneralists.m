@@ -1,4 +1,4 @@
-function p = parametersGeneralists(n)
+function p = parametersGeneralists(n, mMax)
 if (nargin==0)
     n = 25;
 end
@@ -6,7 +6,7 @@ end
 % Define parameters:
 %
 p.n = n;
-[p.m, p.mLower, p.mDelta] = parametersCalcGrid(10^-8.5, 1, p.n);
+[p.m, p.mLower, p.mDelta] = parametersCalcGrid(10^-8.5, mMax, p.n);
 
 p.rhoCN = 5.68; % C:N mass ratio
 p.epsilonL = 0.9; % Light uptake efficiency

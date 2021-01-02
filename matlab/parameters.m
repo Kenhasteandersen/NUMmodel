@@ -20,7 +20,7 @@ n = 10; % No of bins in each group
 %
 % Parameters for unicellular generalists
 %
-p = parametersAddgroup(iGeneralists, p, n);
+p = parametersAddgroup(iGeneralists, p, n, 0.1);
 %
 % Parameters for copepods:
 %

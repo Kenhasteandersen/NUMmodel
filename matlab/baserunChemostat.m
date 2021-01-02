@@ -14,11 +14,11 @@ end
 p = parameters(mAdult);
 p = parametersChemostat(p);
 p.tEnd = 365;
+p.bUseLibrary = bUseFortran;
 %
 % Setup fortran library:
 %
 if bUseFortran
-    p.bUseLibrary = true;
     if libisloaded('NUMmodel')
         unloadlibrary('NUMmodel')
     end

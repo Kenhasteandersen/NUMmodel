@@ -27,7 +27,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsCopepod()
     call parametersInit(2, 20)
-    call parametersAddGroup(typeGeneralist, 10, 0.d0)
+    call parametersAddGroup(typeGeneralist, 10, 0.1d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize()
   end subroutine setupGeneralistsCopepod
@@ -40,7 +40,7 @@ contains
     integer:: iCopepod
 
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1))
-    call parametersAddGroup(typeGeneralist, n, 0.d0)
+    call parametersAddGroup(typeGeneralist, n, 0.1d0)
     do iCopepod = 1, size(mAdult)
        call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
     end do
@@ -132,7 +132,7 @@ contains
     typeGroups(iGroup) = typeGroup
     select case (typeGroup)
     case (typeGeneralist)
-      group(iGroup) = initGeneralists(n, ixStart)
+      group(iGroup) = initGeneralists(n, ixStart, mMax)
     case(typeCopepod)
        group(iGroup) = initCopepod(n, ixStart, mMax)
     end select
