@@ -32,8 +32,10 @@ contains
     mMin = exp(log(mAdult/AdultOffspring)+0.5*lnDelta);
     this = initSpectrum(n, ixStart, mMin, mAdult)
 
-    allocate(Jresp(n))
-    allocate(gamma(n))
+    if (.not. allocated(Jresp)) then
+       allocate(Jresp(n))
+       allocate(gamma(n))
+    end if
     
     this%AF = alphaF*this%m**q
     this%JFmax = h*this%m**hExponent

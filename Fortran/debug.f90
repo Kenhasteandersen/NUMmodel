@@ -23,7 +23,7 @@ subroutine openDebug
     
     !call openDebug
     write(unitDebug, *) 'm: ', m(idxB:nGrid)
-1 format(10E1.4)
+!1 format(10E1.4)
     !write(unitDebug, *) 'N: ', N
     !write(unitDebug, *) 'DOC: ', DOC
     !write(unitDebug, *) 'B: ', B

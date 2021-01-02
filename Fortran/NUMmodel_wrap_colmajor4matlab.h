@@ -1,6 +1,8 @@
-void f_parametersgeneralistsonly();
+void f_setupgeneralistsonly();
 
-void f_parametersgeneralistscopepod();
+void f_setupgeneralistscopepod();
+
+void f_setupgeneric(const int nCopepods, double mAdult[]);
 
 void f_calcderivatives(
 		       const int nGrid,

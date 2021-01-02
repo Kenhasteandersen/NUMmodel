@@ -1,18 +1,26 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int
-  use NUMmodel, only:  parametersGeneralistsOnly, parametersGeneralistsCopepod, calcderivatives, rates
+  use NUMmodel, only:  setupGeneralistsOnly, setupGeneralistsCopepod, &
+       setupGeneric, calcderivatives, rates
 
   implicit none
 
 contains
 
-  subroutine f_parametersGeneralistsOnly() bind(c)
-    call parametersGeneralistsOnly()
-  end subroutine f_parametersGeneralistsOnly
+  subroutine f_setupGeneralistsOnly() bind(c)
+    call setupGeneralistsOnly()
+  end subroutine f_setupGeneralistsOnly
 
-  subroutine f_parametersGeneralistsCopepod() bind(c)
-    call parametersGeneralistsCopepod()
-  end subroutine f_parametersGeneralistsCopepod  
+  subroutine f_setupGeneralistsCopepod() bind(c)
+    call setupGeneralistsCopepod()
+  end subroutine f_setupGeneralistsCopepod
+
+  subroutine f_setupGeneric(nCopepods, mAdult) bind(c)
+    integer(c_int), intent(in), value:: nCopepods
+    real(c_double), intent(in):: mAdult(nCopepods)
+
+    call setupGeneric(mAdult)
+  end subroutine f_setupGeneric
   
   subroutine f_calcDerivatives(nGrid, u, L, dt, dudt) bind(c)
     integer(c_int), intent(in), value:: nGrid

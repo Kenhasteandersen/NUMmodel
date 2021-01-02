@@ -1,15 +1,16 @@
 program NUMmodeltest
   use NUMmodel
 
-  real(dp), allocatable:: usave(:,:)
+!  real(dp), allocatable:: usave(:,:)
   integer:: i
-  
-  call parametersGeneralistsCopepod()
-!  call parametersGeneralistsOnly()
+
+  call setupGeneric( (/0.1d0, 1.0d0 /) )
+ ! call setupGeneralistsCopepod()
+! call setupGeneralistsOnly()
   u0(1) = 150.d0
   u0(2) = 1.d0
-  do i = 1, 20
-     u0(2+i) = 1.0d0*i
+  do i = 1, 30
+     u0(2+i) = 1.0d0
   end do
   call calcDerivatives(u0, 100.d0, 0.001d0)
   !call simulateChemostatEuler(100.d0, 0.05d0, 3650.d0, 0.1d0, usave)

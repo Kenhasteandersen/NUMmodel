@@ -1,17 +1,18 @@
 #!/bin/sh
 #
-# For testing using: -g3 -fbounds-check 
+# For testing using: -g -Wall -Wextra -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace -ffree-line-length-0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow -finit-real=nan
+
 # Compile each file:
-gfortran -c -fPIC  -g3 -fbounds-check  Globals.f90 -o Globals.o
-gfortran -c -fPIC  -g3 -fbounds-check  debug.f90 -o debug.o
-gfortran -c -fPIC  -g3 -fbounds-check  Spectrum.f90 -o Spectrum.o
-gfortran -c -fPIC  -g3 -fbounds-check  Generalists.f90 -o Generalists.o
-gfortran -c -fPIC  -g3 -fbounds-check  copepods.f90 -o copepods.o
-gfortran -c -fPIC  -g3 -fbounds-check  NUMmodel.f90 -o NUMmodel.o
-gfortran -c -fPIC  -g3 -fbounds-check  NUMmodeltest.f90 -o NUMmodeltest.o
-gfortran -c -fPIC  -g3 -fbounds-check  NUMmodel_wrap_colmajor.f90 -o NUMmodel_wrap_colmajor.o
+gfortran -c -fPIC  -O3 Globals.f90 -o Globals.o
+gfortran -c -fPIC  -O3 debug.f90 -o debug.o
+gfortran -c -fPIC  -O3 Spectrum.f90 -o Spectrum.o
+gfortran -c -fPIC  -O3 Generalists.f90 -o Generalists.o
+gfortran -c -fPIC  -O3 copepods.f90 -o copepods.o
+gfortran -c -fPIC  -O3 NUMmodel.f90 -o NUMmodel.o
+gfortran -c -fPIC  -O3 NUMmodeltest.f90 -o NUMmodeltest.o
+gfortran -c -fPIC  -O3 NUMmodel_wrap_colmajor.f90 -o NUMmodel_wrap_colmajor.o
 # Make executable:
-gfortran -fPIC  -g3 -fbounds-check   Globals.o debug.o Spectrum.o Generalists.o copepods.o NUMmodel.o NUMmodeltest.o -o NUMmodel
+gfortran -fPIC  -O3  Globals.o debug.o Spectrum.o Generalists.o copepods.o NUMmodel.o NUMmodeltest.o -o NUMmodel
 # Make library
 gfortran -fPIC -shared Globals.o debug.o Spectrum.o Generalists.o copepods.o NUMmodel.o NUMmodel_wrap_colmajor.o -o NUMmodel.so
 

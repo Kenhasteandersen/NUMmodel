@@ -17,20 +17,35 @@ contains
   ! -----------------------------------------------
   ! A basic setup with only generalists
   ! -----------------------------------------------
-  subroutine parametersGeneralistsOnly()
+  subroutine setupGeneralistsOnly()
     call parametersInit(1, 10) ! 1 group, 10 size classes (excl nutrients and DOC)
     call parametersAddGroup(typeGeneralist, 10, 0.d0) ! generalists with 10 size classes
     call parametersFinalize()
-  end subroutine parametersGeneralistsOnly
+  end subroutine setupGeneralistsOnly
   ! -----------------------------------------------
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------
-  subroutine parametersGeneralistsCopepod()
+  subroutine setupGeneralistsCopepod()
     call parametersInit(2, 20)
     call parametersAddGroup(typeGeneralist, 10, 0.d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize()
-  end subroutine parametersGeneralistsCopepod
+  end subroutine setupGeneralistsCopepod
+  ! -----------------------------------------------
+  ! A generic setup with generalists and a number of copepod species
+  ! -----------------------------------------------
+  subroutine setupGeneric(mAdult)
+    real(dp), intent(in):: mAdult(:)
+    integer, parameter:: n = 10 ! number of size classes in each group
+    integer:: iCopepod
+
+    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1))
+    call parametersAddGroup(typeGeneralist, n, 0.d0)
+    do iCopepod = 1, size(mAdult)
+       call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
+    end do
+    call parametersFinalize()
+  end subroutine setupGeneric
   ! -----------------------------------------------
   ! Initialize parameters
   ! In:
@@ -40,10 +55,16 @@ contains
   subroutine parametersInit(nnGroups, nnGrid)
     integer, intent(in):: nnGrid, nnGroups
 
+    if (iGroup .ne. 0) then
+       write(6,*) 'parametersInit can only be called once'
+       stop 1
+    end if
+    
     nGroups = nnGroups
     iGroup = 0
 
     call initGlobals(nnGrid)
+
     allocate(group(nGroups))
     allocate(typeGroups(nGroups))
 
@@ -111,7 +132,7 @@ contains
     typeGroups(iGroup) = typeGroup
     select case (typeGroup)
     case (typeGeneralist)
-       group(iGroup) = initGeneralists(n, ixStart)
+      group(iGroup) = initGeneralists(n, ixStart)
     case(typeCopepod)
        group(iGroup) = initCopepod(n, ixStart, mMax)
     end select
@@ -163,7 +184,7 @@ contains
     do i=idxB, nGrid
        rates%mortpred(i) = 0.d0
        do j=idxB, nGrid
-          if (rates%F(j) .ne. 0) then
+          if (rates%F(j) .ne. 0.d0) then
              rates%mortpred(i) = rates%mortpred(i)  &
                   + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
           end if
@@ -246,7 +267,6 @@ contains
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
     real(dp), intent(out), allocatable:: usave(:,:)  ! Results (timestep, grid)
-    real(dp):: t
     integer:: i, iEnd
 
     iEnd = floor(tEnd/dt)
