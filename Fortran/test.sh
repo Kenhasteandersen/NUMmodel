@@ -1,4 +1,4 @@
-./compile_so.sh
+./compile.sh
 #rm debug.out
 ./NUMmodel
 #cat debug.out
