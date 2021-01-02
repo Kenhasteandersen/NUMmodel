@@ -20,6 +20,7 @@ module globals
      real(dp), dimension(:), allocatable:: JCloss_feeding, JCloss_photouptake, JNlossLiebig, JClossLiebig
      real(dp), dimension(:), allocatable:: JNloss, JCloss
      real(dp), dimension(:), allocatable:: mortpred, mortHTL
+     real(dp), dimension(:), allocatable:: g, mortStarve, mort ! Multicellular rates
      real(dp), dimension(:), allocatable:: dudt
   end type typeRates
 

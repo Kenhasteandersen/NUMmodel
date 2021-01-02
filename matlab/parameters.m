@@ -24,9 +24,9 @@ p = parametersAddgroup(iGeneralists, p, n);
 %
 % Parameters for copepods:
 %
-%for i = 1:length(mCopepods)
-%    p = parametersAddgroup(iCopepods, p, n, mCopepods(i));
-%end
+for i = 1:length(mCopepods)
+    p = parametersAddgroup(iCopepods, p, n, mCopepods(i));
+end
 % =========================================
 % Calculate interaction matrix:
 % =========================================

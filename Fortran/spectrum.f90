@@ -15,8 +15,8 @@ module sizespectrum
   public initSpectrum
 contains
   
-  subroutine initSpectrum(this, n, ixStart, mMin, mMax)
-    type (typeSpectrum), intent(out):: this
+  function initSpectrum(n, ixStart, mMin, mMax) result(this)
+    type (typeSpectrum):: this
     integer, intent(in):: n, ixStart
     real(dp), intent(in):: mMin, mMax
 
@@ -31,7 +31,7 @@ contains
 
     allocate(this%AF(n))
     allocate(this%JFmax(n))
-  end subroutine initSpectrum
+  end function initSpectrum
 
   subroutine calcGrid(this, mMin, mMax)
     type (typeSpectrum), intent(inout):: this    

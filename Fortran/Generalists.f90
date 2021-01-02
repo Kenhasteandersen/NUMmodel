@@ -22,16 +22,16 @@ module generalists
   
   real(dp),  dimension(:), allocatable:: AN(:), AL(:), Jmax(:),  JlossPassive(:)
   real(dp),  dimension(:), allocatable:: nu(:), mort(:)
-  real(dp),  dimension(:), allocatable:: JN(:), JL(:), Jresp(:), num(:), JFreal(:)
+  real(dp),  dimension(:), allocatable:: JN(:), JL(:), Jresp(:), JFreal(:)
   real(dp):: mort2
 
 contains
 
-  subroutine initGeneralists(this, n, ixStart)
-      type(typeSpectrum), intent(out):: this
+  function initGeneralists(n, ixStart) result(this)
+      type(typeSpectrum):: this
       integer, intent(in):: n, ixStart
 
-      call initSpectrum(this, n, ixStart, 10.d0**(-8.5), 1.d0)
+      this = initSpectrum(n, ixStart, 10.d0**(-8.5), 1.d0)
 
       allocate(AN(n))
       allocate(AL(n))
@@ -40,7 +40,6 @@ contains
       allocate(nu(n))
       allocate(mort(n))
 
-      allocate(num(n))
       allocate(JN(n))
       allocate(JL(n))
       allocate(JFreal(n))
@@ -68,7 +67,7 @@ contains
       JFmax(this%ixStart : this%ixEnd) = this%JFmax
       epsilonF(this%ixStart : this%ixEnd) = epsilonFF
       
-    end subroutine initGeneralists
+    end function initGeneralists
 
     subroutine calcRatesGeneralists(this, u, rates, L, gammaN, gammaDOC)
       type(typeSpectrum), intent(in):: this
@@ -84,7 +83,7 @@ contains
       DOC = max(0., u(idxDOC))
 
       do ix = this%ixStart, this%ixEnd
-         i = ix-idxB+1
+         i = ix-this%ixStart+1
          !
          ! Uptakes
          !
@@ -147,10 +146,9 @@ contains
       real(dp):: mortloss
       
       integer:: i, ix
-      num = u(this%ixStart:this%ixEnd)/this%m ! Calculate number of cells
       
       do ix = this%ixStart, this%ixEnd
-         i = ix - idxB+1
+         i = ix - this%ixStart+1
          mortloss = u(ix)*((1.d0-remin2)*mort2*u(ix) + rates%mortHTL(ix))
          !
          ! Update nitrogen:

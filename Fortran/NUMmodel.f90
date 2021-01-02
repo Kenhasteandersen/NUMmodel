@@ -1,6 +1,7 @@
 module NUMmodel
   use globals
   use generalists
+  use copepods
   use debug
   implicit none
 
@@ -14,13 +15,22 @@ module NUMmodel
 
 contains
   ! -----------------------------------------------
-  ! A basic setup with only generalists and 10 size classes
+  ! A basic setup with only generalists
   ! -----------------------------------------------
   subroutine parametersGeneralistsOnly()
-    call parametersInit(1, 10)
-    call parametersAddGroup(typeGeneralist, 10, 0.d0)
+    call parametersInit(1, 10) ! 1 group, 10 size classes (excl nutrients and DOC)
+    call parametersAddGroup(typeGeneralist, 10, 0.d0) ! generalists with 10 size classes
     call parametersFinalize()
   end subroutine parametersGeneralistsOnly
+  ! -----------------------------------------------
+  ! A basic setup with generalists and 1 copepod
+  ! -----------------------------------------------
+  subroutine parametersGeneralistsCopepod()
+    call parametersInit(2, 20)
+    call parametersAddGroup(typeGeneralist, 10, 0.d0)
+    call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
+    call parametersFinalize()
+  end subroutine parametersGeneralistsCopepod
   ! -----------------------------------------------
   ! Initialize parameters
   ! In:
@@ -70,6 +80,10 @@ contains
     allocate(rates%mortpred(nGrid))
     allocate(rates%mortHTL(nGrid))
 
+    allocate(rates%g(nGrid))
+    allocate(rates%mortStarve(nGrid))
+    allocate(rates%mort(nGrid))    
+
   end subroutine parametersInit
   ! -----------------------------------------------
   !  Add a size spectrum group
@@ -97,7 +111,9 @@ contains
     typeGroups(iGroup) = typeGroup
     select case (typeGroup)
     case (typeGeneralist)
-       call initGeneralists(group(iGroup), n, ixStart)
+       group(iGroup) = initGeneralists(n, ixStart)
+    case(typeCopepod)
+       group(iGroup) = initCopepod(n, ixStart, mMax)
     end select
   end subroutine parametersAddGroup
   ! -----------------------------------------------
@@ -127,6 +143,47 @@ contains
     u0(idxDOC) = 0. ! DOC
     u0(idxB:nGrid) = 10. ! Biomasses
   end subroutine parametersFinalize
+  !
+  ! Calculate derivatives for unicellular groups
+  ! In:
+  !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
+  !   used for correction of Euler integration. If no correction is used, just set to 1.0
+  !
+  subroutine calcDerivativesUnicellulars(upositive, rates, L, gammaN, gammaDOC)
+    real(dp), intent(in):: L, upositive(:), gammaN, gammaDOC
+    type(typeRates), intent(inout):: rates
+    integer:: i,j
+    !
+    ! Calc uptakes of all unicellular groups:
+    !
+    call calcRatesGeneralists(group(1), upositive, rates, L, gammaN, gammaDOC)
+    !
+    ! Calc predation mortality
+    !
+    do i=idxB, nGrid
+       rates%mortpred(i) = 0.d0
+       do j=idxB, nGrid
+          if (rates%F(j) .ne. 0) then
+             rates%mortpred(i) = rates%mortpred(i)  &
+                  + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
+          end if
+       end do
+    end do
+    !
+    ! Assemble derivatives:
+    !
+    rates%dudt(idxN) = 0
+    rates%dudt(idxDOC) = 0
+    do iGroup = 1, nGroups
+       select case (typeGroups(iGroup))
+       case (typeGeneralist)
+          call calcDerivativesGeneralists(group(iGroup), upositive, rates)
+       end select
+    end do
+  end subroutine calcDerivativesUnicellulars
+  
+  
+  
   ! -----------------------------------------------
   !  Calculate the derivatives for all groups:
   !  In:
@@ -155,35 +212,11 @@ contains
     rates%flvl = AF*rates%F / (AF*rates%F + JFmax)
     rates%JF = rates%flvl * JFmax
     !
-    ! Calc other uptakes of unicellular groups
+    ! Calc derivatives of unicellular groups
     !
     gammaN = 1.d0
     gammaDOC = 1.d0
-    call calcRatesGeneralists(group(1), upositive, rates, L, gammaN, gammaDOC)
-    !
-    ! Calc predation mortality
-    !
-    do i=idxB, nGrid
-       rates%mortpred(i) = 0.d0
-
-       do j=idxB, nGrid
-          if (rates%F(j) .ne. 0) then
-             rates%mortpred(i) = rates%mortpred(i)  &
-                 + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
-          end if
-       end do
-    end do
-    !
-    ! Assemble derivatives:
-    !
-    rates%dudt(idxN) = 0
-    rates%dudt(idxDOC) = 0
-    do iGroup = 1, nGroups
-       select case (typeGroups(iGroup))
-       case (typeGeneralist)
-          call calcDerivativesGeneralists(group(1), upositive, rates)
-       end select
-    end do
+    call calcDerivativesUnicellulars(upositive, rates, L, gammaN, gammaDOC)
     !
     ! Make a correction if nutrient fields will become less than zero:
     !
@@ -194,38 +227,18 @@ contains
        gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(rates%dudt(idxDOC)*dt)))
     end if
     if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0)) then
-       write(6,*) u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
-
-       call calcRatesGeneralists(group(1), upositive, rates, L, gammaN, gammaDOC)
-       !
-       ! Calc predation mortality
-       !
-       do i=idxB, nGrid
-          rates%mortpred(i) = 0.d0
-          do j=idxB, nGrid
-             if (rates%F(j) .ne. 0) then
-                rates%mortpred(i) = rates%mortpred(i)  &
-                     + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
-             end if
-          end do
-       end do
-       !
-       ! Assemble derivatives:
-       !
-       rates%dudt(idxN) = 0
-       rates%dudt(idxDOC) = 0
-       do iGroup = 1, nGroups
-          select case (typeGroups(iGroup))
-          case (typeGeneralist)
-             call calcDerivativesGeneralists(group(1), upositive, rates)
-          end select
-       end do
-       write(6,*) '->', u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
+       !write(6,*) u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
+       call calcDerivativesUnicellulars(upositive, rates, L, gammaN, gammaDOC)
     end if
-    
+    !
+    ! Calc derivatives of multicellular groups:
+    !
+    do iGroup = 2, nGroups
+       call calcDerivativesCopepod(group(iGroup), upositive, rates)
+    end do
   end subroutine calcDerivatives
   ! -----------------------------------------------
-  ! Simulate a chemostat with Euler
+  ! Simulate a chemostat with Euler integration
   ! -----------------------------------------------
   subroutine simulateChemostatEuler(L, diff, tEnd, dt, usave)
     real(dp), intent(in):: L      ! Light level
@@ -256,8 +269,4 @@ contains
     f = Q10**(T/10.-1.)
   end function fTemp
   
-
-   
 end module NUMmodel
-
-

@@ -2,17 +2,18 @@
 #
 # For testing using: -g3 -fbounds-check 
 # Compile each file:
-gfortran -c -fPIC -O2 Globals.f90 -o Globals.o
-gfortran -c -fPIC -O2 debug.f90 -o debug.o
-gfortran -c -fPIC -O2 Spectrum.f90 -o Spectrum.o
-gfortran -c -fPIC -O2 Generalists.f90 -o Generalists.o
-gfortran -c -fPIC -O2 NUMmodel.f90 -o NUMmodel.o
-gfortran -c -fPIC -O2 NUMmodeltest.f90 -o NUMmodeltest.o
-gfortran -c -fPIC -O2 NUMmodel_wrap_colmajor.f90 -o NUMmodel_wrap_colmajor.o
+gfortran -c -fPIC  -g3 -fbounds-check  Globals.f90 -o Globals.o
+gfortran -c -fPIC  -g3 -fbounds-check  debug.f90 -o debug.o
+gfortran -c -fPIC  -g3 -fbounds-check  Spectrum.f90 -o Spectrum.o
+gfortran -c -fPIC  -g3 -fbounds-check  Generalists.f90 -o Generalists.o
+gfortran -c -fPIC  -g3 -fbounds-check  copepods.f90 -o copepods.o
+gfortran -c -fPIC  -g3 -fbounds-check  NUMmodel.f90 -o NUMmodel.o
+gfortran -c -fPIC  -g3 -fbounds-check  NUMmodeltest.f90 -o NUMmodeltest.o
+gfortran -c -fPIC  -g3 -fbounds-check  NUMmodel_wrap_colmajor.f90 -o NUMmodel_wrap_colmajor.o
 # Make executable:
-gfortran -fPIC -O2  Globals.o debug.o Spectrum.o Generalists.o NUMmodel.o NUMmodeltest.o -o NUMmodel
+gfortran -fPIC  -g3 -fbounds-check   Globals.o debug.o Spectrum.o Generalists.o copepods.o NUMmodel.o NUMmodeltest.o -o NUMmodel
 # Make library
-gfortran -fPIC -shared Globals.o debug.o Spectrum.o Generalists.o NUMmodel.o NUMmodel_wrap_colmajor.o -o NUMmodel.so
+gfortran -fPIC -shared Globals.o debug.o Spectrum.o Generalists.o copepods.o NUMmodel.o NUMmodel_wrap_colmajor.o -o NUMmodel.so
 
 #gfortran -shared -fPIC  -o Globals.o debug.o Spectrum.o Generalists.o NUMmodel.o -o NUMmodel.so
 #gfortran -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib -lSystem -fPIC  -o Globals.o debug.o Spectrum.o Generalists.o NUMmodel.o -o NUMmodel

@@ -1,2 +1,4 @@
  - I had to increase the clearance rate of copepods
  - Include temperature
+ - Avoid that biomasses -> zero. Set some lower threshold
+ - Make diagnostics of N and C conservation
