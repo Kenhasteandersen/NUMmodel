@@ -12,11 +12,10 @@ module NUMmodel
   integer, dimension(:), allocatable:: ixStart, ixEnd
 
   real(dp), dimension(:,:), allocatable:: theta
-  real(dp), dimension(:), allocatable:: u, upositive
+  real(dp), dimension(:), allocatable:: upositive
   type(typeRates):: rates
 
   real(dp), dimension(:), allocatable:: m, beta, sigma, AF, JFmax, epsilonF ! Feeding parameters
-
 
 contains
   ! ======================================
@@ -29,7 +28,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsOnly()
     call parametersInit(1, 10) ! 1 group, 10 size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, 10, 0.d0) ! generalists with 10 size classes
+    call parametersAddGroup(typeGeneralist, 10, 0.1d0) ! generalists with 10 size classes
     call parametersFinalize()
   end subroutine setupGeneralistsOnly
   ! -----------------------------------------------
@@ -99,7 +98,6 @@ contains
     allocate(ixStart(nGroups))
     allocate(ixEnd(nGroups))
 
-    allocate(u(nGrid))
     allocate(upositive(nGrid))
 
     ! Interaction matrix:
@@ -217,8 +215,8 @@ contains
   !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
   !   used for correction of Euler integration. If no correction is used, just set to 1.0
   !
-  subroutine calcDerivativesUnicellulars(L, gammaN, gammaDOC)
-    real(dp), intent(in):: L, gammaN, gammaDOC
+  subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
+    real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC
     !type(typeRates), intent(inout):: rates
     integer:: i,j
     !
@@ -285,7 +283,7 @@ contains
     !
     gammaN = 1.d0
     gammaDOC = 1.d0
-    call calcDerivativesUnicellulars(L, gammaN, gammaDOC)
+    call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
     !
     ! Make a correction if nutrient fields will become less than zero:
     !
@@ -297,7 +295,7 @@ contains
     end if
     if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0)) then
        !write(6,*) u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
-       call calcDerivativesUnicellulars(L, gammaN, gammaDOC)
+       call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
     end if
     !
     ! Calc derivatives of multicellular groups:
@@ -311,27 +309,29 @@ contains
   ! -----------------------------------------------
   ! Simulate a chemostat with Euler integration
   ! -----------------------------------------------
-  function simulateChemostatEuler(u0, L, diff, tEnd, dt) result(usave)
-    real(dp), allocatable:: usave(:,:)  ! Results (timestep, grid)
-    real(dp), intent(in):: u0(:) ! Initial conditions
+  subroutine simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
+    real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
     real(dp), intent(in):: L      ! Light level
+    real(dp), intent(in):: Ndeep ! Nutrient in the deep layer
     real(dp), intent(in):: diff      ! Diffusivity
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
     integer:: i, iEnd
 
     iEnd = floor(tEnd/dt)
-    allocate(usave(iEnd, nGrid))
 
-    usave(1,:) = u0
-    do i=2, iEnd
-       call calcDerivatives(usave(i-1,:), L, dt)
-       rates%dudt(idxN) = rates%dudt(idxN) + diff*(u0(idxN)-usave(i-1,idxN))
-       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - usave(i-1,idxDOC))
-       rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - usave(i-1,idxB:nGrid))
-       usave(i,:) = usave(i-1,:) + rates%dudt*dt
+    do i=1, iEnd
+       call calcDerivatives(u, L, dt)
+       rates%dudt(idxN) = rates%dudt(idxN) + diff*(Ndeep-u(idxN))
+       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - u(idxDOC))
+       !
+       ! Note: should not be done for copepods:
+       !
+       !rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
+       u = u + rates%dudt*dt
+       write(6,*) i, u
     end do
-  end function simulateChemostatEuler
+  end subroutine simulateChemostatEuler
 
   function fTemp(Q10, T) result(f)
     real(dp), intent(in), value:: Q10, T

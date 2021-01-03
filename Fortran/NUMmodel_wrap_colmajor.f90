@@ -32,13 +32,12 @@ contains
     dudt = rates%dudt
   end subroutine f_calcDerivatives
 
-  subroutine f_simulateChemostatEuler(nGrid, iEnd, usave, u0, L, diff, tEnd, dt) bind(c)
-    integer(c_int), intent(in), value:: nGrid, iEnd
-    real(c_double), intent(out):: usave(nGrid, iEnd)
-    real(c_double), intent(in):: u0(nGrid)
-    real(c_double), intent(in), value:: L, diff, tEnd, dt
+  subroutine f_simulateChemostatEuler(nGrid, u, L, Ndeep, diff, tEnd, dt) bind(c)
+    integer(c_int), intent(in), value:: nGrid
+    real(c_double), intent(inout):: u(nGrid)
+    real(c_double), intent(in), value:: L, Ndeep, diff, tEnd, dt
     
-    usave = simulateChemostatEuler(u0, L, diff, tEnd, dt)
+    call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
   end subroutine f_simulateChemostatEuler
 end module NUMmodel_wrap
 

@@ -13,10 +13,9 @@ void f_calcderivatives(
 
 void f_simulatechemostateuler(
 			      const int nGrid,
-			      const int iEnd,
-			      double usave[],
-			      const double u0[],
-			      const doubleL,
+			      const double u[],
+			      const double L,
+			      const double Ndeep,
 			      const double diff,
 			      const double tEnd,
 			      const double dt); 
