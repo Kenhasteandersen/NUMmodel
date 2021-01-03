@@ -12,7 +12,7 @@ module NUMmodel
   integer, dimension(:), allocatable:: ixStart, ixEnd
 
   real(dp), dimension(:,:), allocatable:: theta
-  real(dp), dimension(:), allocatable:: u, u0, upositive
+  real(dp), dimension(:), allocatable:: u, upositive
   type(typeRates):: rates
 
   real(dp), dimension(:), allocatable:: m, beta, sigma, AF, JFmax, epsilonF ! Feeding parameters
@@ -68,7 +68,9 @@ contains
   ! -----------------------------------------------
   subroutine parametersInit(nnGroups, nnGrid)
     integer, intent(in):: nnGrid, nnGroups
-
+    !
+    ! Set groups:
+    !
     if (iGroup .ne. 0) then
        write(6,*) 'parametersInit can only be called once'
        stop 1
@@ -77,6 +79,13 @@ contains
     nGroups = nnGroups
     nGrid = nnGrid+2
     iGroup = 0
+    !
+    ! Allocate variables:
+    !
+    if (allocated(m)) then
+      write(6,*) 'Cannot call parametersInit twice. Reload library to reinitialize.'
+      stop 1
+    end if
 
     allocate(m(nGrid))
     allocate(beta(nGrid))
@@ -92,7 +101,6 @@ contains
 
     allocate(u(nGrid))
     allocate(upositive(nGrid))
-    allocate(u0(nGrid))
 
     ! Interaction matrix:
     allocate(theta(nGrid,nGrid))
@@ -149,6 +157,7 @@ contains
        ixStart(iGroup) = ixEnd(iGroup-1)+1
     end if
     ixEnd(iGroup) = ixStart(iGroup)+n-1
+    
     if (ixEnd(iGroup) .gt. nGrid) then
        write(6,*) 'Attempting to add more grid points than allocated', ixEnd(igroup), nGrid
        stop 1
@@ -197,12 +206,6 @@ contains
     betaHTL = 500
     mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
     rates%mortHTL = 0.01*(1/(1+(m/mHTL)**(-2)))
-    !
-    !  Initial conditions (also used for deep conditions of chemostat)
-    !
-    u0(idxN) = 150. ! Nutrients
-    u0(idxDOC) = 0. ! DOC
-    u0(idxB:nGrid) = 10. ! Biomasses
   end subroutine parametersFinalize
   ! ======================================
   !  Calculate rates and derivatives:
@@ -308,27 +311,28 @@ contains
   ! -----------------------------------------------
   ! Simulate a chemostat with Euler integration
   ! -----------------------------------------------
-!!$  subroutine simulateChemostatEuler(L, diff, tEnd, dt, usave)
-!!$    real(dp), intent(in):: L      ! Light level
-!!$    real(dp), intent(in):: diff      ! Diffusivity
-!!$    real(dp), intent(in):: tEnd ! Time to simulate
-!!$    real(dp), intent(in):: dt    ! time step
-!!$    real(dp), intent(out), allocatable:: usave(:,:)  ! Results (timestep, grid)
-!!$    integer:: i, iEnd
-!!$
-!!$    iEnd = floor(tEnd/dt)
-!!$    allocate(usave(iEnd, nGrid))
-!!$
-!!$    usave(1,:) = u0
-!!$    do i=2, iEnd
-!!$       call calcDerivatives(usave(i-1,:), L, dt)
-!!$       rates%dudt(idxN) = rates%dudt(idxN) + diff*(u0(idxN)-usave(i-1,idxN))
-!!$       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - usave(i-1,idxDOC))
-!!$       rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - usave(i-1,idxB:nGrid))
-!!$       usave(i,:) = usave(i-1,:) + rates%dudt*dt
-!!$    end do
-!!$  end subroutine simulateChemostatEuler
-!!$
+  function simulateChemostatEuler(u0, L, diff, tEnd, dt) result(usave)
+    real(dp), allocatable:: usave(:,:)  ! Results (timestep, grid)
+    real(dp), intent(in):: u0(:) ! Initial conditions
+    real(dp), intent(in):: L      ! Light level
+    real(dp), intent(in):: diff      ! Diffusivity
+    real(dp), intent(in):: tEnd ! Time to simulate
+    real(dp), intent(in):: dt    ! time step
+    integer:: i, iEnd
+
+    iEnd = floor(tEnd/dt)
+    allocate(usave(iEnd, nGrid))
+
+    usave(1,:) = u0
+    do i=2, iEnd
+       call calcDerivatives(usave(i-1,:), L, dt)
+       rates%dudt(idxN) = rates%dudt(idxN) + diff*(u0(idxN)-usave(i-1,idxN))
+       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - usave(i-1,idxDOC))
+       rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - usave(i-1,idxB:nGrid))
+       usave(i,:) = usave(i-1,:) + rates%dudt*dt
+    end do
+  end function simulateChemostatEuler
+
   function fTemp(Q10, T) result(f)
     real(dp), intent(in), value:: Q10, T
     real(dp):: f

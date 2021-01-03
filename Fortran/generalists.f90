@@ -81,7 +81,6 @@ contains
        ! Uptakes
        !
        rates%JN(ix) =   gammaN * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-       write(6,*) i, rates%JN(ix), AN(i), gammaN, N
 
        rates%JDOC(ix) = gammaDOC * AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
