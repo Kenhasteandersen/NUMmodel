@@ -70,11 +70,6 @@ contains
     !
     ! Set groups:
     !
-    if (iGroup .ne. 0) then
-       write(6,*) 'parametersInit can only be called once'
-       stop 1
-    end if
-
     nGroups = nnGroups
     nGrid = nnGrid+2
     iGroup = 0
