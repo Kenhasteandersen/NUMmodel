@@ -1,3 +1,7 @@
+!
+! Module to handle copepods defined by their adult mass.
+! All parameters are for active copepods
+!
 module copepods
   use globals
   use spectrum
@@ -74,19 +78,19 @@ contains
     end do
     b = epsilonR * rates%g(this%ixEnd) ! Birth rate
     !
-      ! Assemble derivative:
-      !
-      rates%dudt(this%ixStart) = b*u(this%n) &
-           + (rates%g(this%ixStart)-gamma(1)-rates%mort(this%ixStart))*u(1)
-      do i = 2, this%n-1
-         ix = i+this%ixOffset
-         rates%dudt(ix) = &
-              gamma(i-1)*u(i-1) & ! growth into group
-              + (rates%g(ix)-gamma(i)-rates%mort(ix))*u(i)  ! growth out of group
-      end do
-      rates%dudt(this%ixEnd) = &
-           gamma(this%n-1)*u(this%n-1) & ! growth into adult group
-           - rates%mort(this%ixEnd)*u(this%n); ! adult mortality
-    end subroutine calcDerivativesCopepod
-
+    ! Assemble derivatives:
+    !
+    rates%dudt(this%ixStart) = b*u(this%n) &
+         + (rates%g(this%ixStart)-gamma(1)-rates%mort(this%ixStart))*u(1)
+    do i = 2, this%n-1
+       ix = i+this%ixOffset
+       rates%dudt(ix) = &
+            gamma(i-1)*u(i-1) & ! growth into group
+            + (rates%g(ix)-gamma(i)-rates%mort(ix))*u(i)  ! growth out of group
+    end do
+    rates%dudt(this%ixEnd) = &
+         gamma(this%n-1)*u(this%n-1) & ! growth into adult group
+         - rates%mort(this%ixEnd)*u(this%n); ! adult mortality
+  end subroutine calcDerivativesCopepod
+  
   end module copepods

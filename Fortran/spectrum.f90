@@ -1,3 +1,6 @@
+!
+! Module that handles the general methods for all spectrum groups.
+!
 module spectrum
   use globals
   implicit none
@@ -5,10 +8,13 @@ module spectrum
   type typeSpectrum
      integer:: typeGroup
      integer:: n  ! Number of size classes
-     integer:: ixStart, ixEnd ! Start and end indexes into u and rates
+     integer:: ixStart, ixEnd ! Start and end indices into u and rates
      integer:: ixOffset ! ixStart-1
      ! Grid:
-     real(dp), dimension(:), allocatable:: m(:), mLower(:), mDelta(:), z(:)
+     real(dp), dimension(:), allocatable:: m(:)  ! Geometric center mass of size-bin
+     real(dp), dimension(:), allocatable:: mLower(:)  ! Smallest size in the bin
+     real(dp), dimension(:), allocatable:: mDelta(:)   ! Width of the bin
+     real(dp), dimension(:), allocatable:: z(:) ! Ratio btw upper and lower size of bin
      ! Feeding:
      real(dp):: beta, sigma, epsilonF
      real(dp), dimension(:), allocatable:: AF(:), JFmax(:)
@@ -35,7 +41,9 @@ contains
     allocate(this%AF(n))
     allocate(this%JFmax(n))
   end function initSpectrum
-
+  !
+  ! Set up a grid given minimum and maximum center masses
+  !
   subroutine calcGrid(this, mMin, mMax)
     type (typeSpectrum), intent(inout):: this
     real(dp), intent(in):: mMin, mMax
@@ -51,6 +59,5 @@ contains
        this%z(i) = this%mLower(i)/(this%mLower(i) + this%mDelta(i))
     end do
   end subroutine calcGrid
-
 
  end module spectrum

@@ -1,3 +1,6 @@
+!
+! Module to handle generalists unicellulars
+!
 module generalists
   use globals
   use spectrum
@@ -64,7 +67,6 @@ contains
     Jresp = cR*alphaJ*this%m
     mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);
     mort2 = 0.0002*n
-
   end function initGeneralists
 
   subroutine calcRatesGeneralists(this, u, rates, L, N, DOC, gammaN, gammaDOC)
@@ -142,32 +144,32 @@ contains
 
     do i = 1, this%n
       ix = i+this%ixOffset
-       mortloss = u(i)*((1.d0-remin2)*mort2*u(i) + rates%mortHTL(ix))
-       !
-       ! Update nitrogen:
-       !
-       rates%dudt(idxN) = rates%dudt(idxN)  &
-            + (-rates%JN(ix) &
-            + rates%JNloss(ix))*u(i)/this%m(i) &
-            + (remin2*mort2*u(i)*u(i) &
-            + remin*mortloss)/rhoCN
-       !
-       ! Update DOC:
-       !
-       rates%dudt(idxDOC) = rates%dudt(idxDOC) &
-            + (-rates%JDOC(ix) &
-            + rates%JCloss(ix))*u(i)/this%m(i) &
-            + remin2*mort2*u(i)*u(i) &
-            + remin*mortloss
-       !
-       ! Update the generalists:
-       !
-       rates%dudt(ix) = (rates%Jtot(ix)/this%m(i)  &
-            - mort(ix) &
-            - rates%mortpred(ix) &
-            - mort2*u(i) &
-            - rates%mortHTL(ix))*u(i)
-    end do
-  end subroutine calcDerivativesGeneralists
-
+      mortloss = u(i)*((1.d0-remin2)*mort2*u(i) + rates%mortHTL(ix))
+      !
+      ! Update nitrogen:
+      !
+      rates%dudt(idxN) = rates%dudt(idxN)  &
+           + (-rates%JN(ix) &
+           + rates%JNloss(ix))*u(i)/this%m(i) &
+           + (remin2*mort2*u(i)*u(i) &
+           + remin*mortloss)/rhoCN
+      !
+      ! Update DOC:
+      !
+      rates%dudt(idxDOC) = rates%dudt(idxDOC) &
+           + (-rates%JDOC(ix) &
+           + rates%JCloss(ix))*u(i)/this%m(i) &
+           + remin2*mort2*u(i)*u(i) &
+           + remin*mortloss
+      !
+      ! Update the generalists:
+      !
+      rates%dudt(ix) = (rates%Jtot(ix)/this%m(i)  &
+           - mort(ix) &
+           - rates%mortpred(ix) &
+           - mort2*u(i) &
+           - rates%mortHTL(ix))*u(i)
+   end do
+ end subroutine calcDerivativesGeneralists
+ 
 end module generalists

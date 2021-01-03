@@ -1,3 +1,6 @@
+!
+! Module to handle the NUM model framework
+!
 module NUMmodel
   use globals
   use spectrum
@@ -55,6 +58,7 @@ contains
     end do
     call parametersFinalize()
   end subroutine setupGeneric
+  
   ! ======================================
   !  Model initialization stuff:
   ! ======================================
@@ -225,7 +229,8 @@ contains
 
   end subroutine parametersAddGroup
   ! -----------------------------------------------
-  !  Finalize the setting of parameters
+  !  Finalize the setting of parameters. Must be called when
+  !  all groups have been added.
   ! -----------------------------------------------
   subroutine parametersFinalize()
     integer:: i,j
@@ -245,6 +250,7 @@ contains
     mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
     rates%mortHTL = 0.01*(1/(1+(m/mHTL)**(-2)))
   end subroutine parametersFinalize
+  
   ! ======================================
   !  Calculate rates and derivatives:
   ! ======================================
@@ -254,7 +260,7 @@ contains
   ! In:
   !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
   !   used for correction of Euler integration. If no correction is used, just set to 1.0
-  !
+  !   This correction procedure is needed for correct Euler integration.
   subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
     real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC
     !type(typeRates), intent(inout):: rates
