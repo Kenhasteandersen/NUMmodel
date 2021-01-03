@@ -1,28 +1,31 @@
-module sizespectrum
+module spectrum
   use globals
   implicit none
-  
+
   type typeSpectrum
      integer:: typeGroup
-     integer:: ixStart, ixEnd, n
+     integer:: n  ! Number of size classes
+     integer:: ixStart, ixEnd ! Start and end indexes into u and rates
+     integer:: ixOffset ! ixStart-1
      ! Grid:
      real(dp), dimension(:), allocatable:: m(:), mLower(:), mDelta(:), z(:)
      ! Feeding:
+     real(dp):: beta, sigma, epsilonF
      real(dp), dimension(:), allocatable:: AF(:), JFmax(:)
-     
   end type typeSpectrum
-  
+
   public initSpectrum
 contains
-  
-  function initSpectrum(n, ixStart, mMin, mMax) result(this)
+
+  function initSpectrum(n, ixOffset, mMin, mMax) result(this)
     type (typeSpectrum):: this
-    integer, intent(in):: n, ixStart
+    integer, intent(in):: n, ixOffset
     real(dp), intent(in):: mMin, mMax
 
     this%n = n
-    this%ixStart = ixStart
-    this%ixEnd = ixStart + n - 1
+    this%ixOffset = ixOffset
+    this%ixStart = ixOffset+1
+    this%ixEnd = ixOffset+n
     allocate(this%m(n))
     allocate(this%mLower(n))
     allocate(this%mDelta(n))
@@ -34,11 +37,11 @@ contains
   end function initSpectrum
 
   subroutine calcGrid(this, mMin, mMax)
-    type (typeSpectrum), intent(inout):: this    
+    type (typeSpectrum), intent(inout):: this
     real(dp), intent(in):: mMin, mMax
     real(dp):: deltax, x
     integer:: i
-    
+
     deltax = (log(mMax)-log(mMin))/(this%n-1)
     do i=1, this%n
        x = log(mMin) + (i-1)*deltax
@@ -50,5 +53,4 @@ contains
   end subroutine calcGrid
 
 
- end module sizespectrum
-  
+ end module spectrum

@@ -5,7 +5,7 @@ function rates = calcDerivatives(p, u, L)
 ix = 3:length(u);
 B = max(zeros(1,length(u)-2), u(ix));
 %
-% Calc food uptake for all groups (generalists might down-regulate further):
+% Calc food uptake for all groups (generalists might down-regulate later):
 %
 rates.F(ix) = (p.theta*B')';
 rates.f(ix) = p.AF(ix).*rates.F(ix) ./ (p.AF(ix).*rates.F(ix) + p.JFmax(ix));

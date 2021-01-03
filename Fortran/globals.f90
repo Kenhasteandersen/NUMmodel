@@ -25,21 +25,20 @@ module globals
   end type typeRates
 
   integer:: nGrid ! Total number of grid points incl. two points for N and DOC
-  real(dp), dimension(:), allocatable:: m, beta, sigma, AF, JFmax, epsilonF ! Feeding parameters
 
-contains
+!contains
   
-  subroutine initGlobals(nnGrid)
-    integer, intent(in):: nnGrid
-
-    nGrid = nnGrid+2
-
-    allocate(m(nGrid))
-    allocate(beta(nGrid))
-    allocate(sigma(nGrid))
-    allocate(AF(nGrid))
-    allocate(JFmax(nGrid))
-    allocate(epsilonF(nGrid))
-  end subroutine initGlobals
+!!$  subroutine initGlobals(nnGrid)
+!!$    integer, intent(in):: nnGrid
+!!$
+!!$    nGrid = nnGrid+2
+!!$
+!!$    allocate(m(nGrid))
+!!$    allocate(beta(nGrid))
+!!$    allocate(sigma(nGrid))
+!!$    allocate(AF(nGrid))
+!!$    allocate(JFmax(nGrid))
+!!$    allocate(epsilonF(nGrid))
+!!$  end subroutine initGlobals
 
 end module globals

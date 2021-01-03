@@ -18,32 +18,33 @@ subroutine openDebug
     close(unit=unitDebug)
   end subroutine closeDebug
 
-  subroutine printRates(rates)
+  subroutine printRates(m, rates)
     type(typeRates), intent(in):: rates
+    real(dp):: m(:)
     
     !call openDebug
-    write(unitDebug, *) 'm: ', m(idxB:nGrid)
+    write(unitDebug, *) 'm: ', m
 !1 format(10E1.4)
     !write(unitDebug, *) 'N: ', N
     !write(unitDebug, *) 'DOC: ', DOC
     !write(unitDebug, *) 'B: ', B
-    write(unitDebug, *) 'JN/m: ', rates%JN(idxB:nGrid)/m(idxB:nGrid)
-    write(unitDebug, *) 'JL/m: ', rates%JL(idxB:nGrid)/m(idxB:nGrid)
-    write(unitDebug, *) 'JDOC/m: ', rates%JDOC(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'JN/m: ', rates%JN/m
+    write(unitDebug, *) 'JL/m: ', rates%JL/m
+    write(unitDebug, *) 'JDOC/m: ', rates%JDOC/m
     
-    write(unitDebug, *) 'F/m: ', rates%F(idxB:nGrid)/m(idxB:nGrid)
-    write(unitDebug, *) 'JF/m: ', rates%JF(idxB:nGrid)/m(idxB:nGrid)
-    write(unitDebug, *) 'f: ', rates%flvl(idxB:nGrid)
+    write(unitDebug, *) 'F/m: ', rates%F/m
+    write(unitDebug, *) 'JF/m: ', rates%JF/m
+    write(unitDebug, *) 'f: ', rates%flvl
 
-    write(unitDebug, *) 'JLreal/m: ', rates%JLreal(idxB:nGrid)/m(idxB:nGrid)
-    write(unitDebug, *) 'JNtot/m: ', rates%JNtot(idxB:nGrid)/m(idxB:nGrid)
-    write(unitDebug, *) 'JCtot/m: ', rates%JCtot(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'JLreal/m: ', rates%JLreal/m
+    write(unitDebug, *) 'JNtot/m: ', rates%JNtot/m
+    write(unitDebug, *) 'JCtot/m: ', rates%JCtot/m
     
    ! write(unitDebug, *) 'JFreal/m: ', rates%JFreal/p%m
-    write(unitDebug, *) 'Jtot/m: ', rates%Jtot(idxB:nGrid)/m(idxB:nGrid)
-    write(unitDebug, *) 'mortpred: ', rates%mortpred(idxB:nGrid)
-    write(unitDebug, *) 'JNloss/m: ', rates%JNloss(idxB:nGrid)/m(idxB:nGrid)
-    write(unitDebug, *) 'JCloss/m: ', rates%JCloss(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'Jtot/m: ', rates%Jtot/m
+    write(unitDebug, *) 'mortpred: ', rates%mortpred
+    write(unitDebug, *) 'JNloss/m: ', rates%JNloss/m
+    write(unitDebug, *) 'JCloss/m: ', rates%JCloss/m
 
     write(unitDebug, *) 'dudt', rates%dudt
     

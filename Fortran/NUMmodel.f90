@@ -1,5 +1,6 @@
 module NUMmodel
   use globals
+  use spectrum
   use generalists
   use copepods
   use debug
@@ -8,12 +9,21 @@ module NUMmodel
   integer:: nGroups, iGroup
   integer, dimension(:), allocatable:: typeGroups
   type(typeSpectrum), dimension(:), allocatable:: group
- 
+  integer, dimension(:), allocatable:: ixStart, ixEnd
+
   real(dp), dimension(:,:), allocatable:: theta
   real(dp), dimension(:), allocatable:: u, u0, upositive
   type(typeRates):: rates
 
+  real(dp), dimension(:), allocatable:: m, beta, sigma, AF, JFmax, epsilonF ! Feeding parameters
+
+
 contains
+  ! ======================================
+  !  Various model setups
+  ! ======================================
+
+
   ! -----------------------------------------------
   ! A basic setup with only generalists
   ! -----------------------------------------------
@@ -46,6 +56,10 @@ contains
     end do
     call parametersFinalize()
   end subroutine setupGeneric
+  ! ======================================
+  !  Model initialization stuff:
+  ! ======================================
+
   ! -----------------------------------------------
   ! Initialize parameters
   ! In:
@@ -59,14 +73,22 @@ contains
        write(6,*) 'parametersInit can only be called once'
        stop 1
     end if
-    
+
     nGroups = nnGroups
+    nGrid = nnGrid+2
     iGroup = 0
 
-    call initGlobals(nnGrid)
+    allocate(m(nGrid))
+    allocate(beta(nGrid))
+    allocate(sigma(nGrid))
+    allocate(AF(nGrid))
+    allocate(JFmax(nGrid))
+    allocate(epsilonF(nGrid))
 
     allocate(group(nGroups))
     allocate(typeGroups(nGroups))
+    allocate(ixStart(nGroups))
+    allocate(ixEnd(nGroups))
 
     allocate(u(nGrid))
     allocate(upositive(nGrid))
@@ -103,7 +125,7 @@ contains
 
     allocate(rates%g(nGrid))
     allocate(rates%mortStarve(nGrid))
-    allocate(rates%mort(nGrid))    
+    allocate(rates%mort(nGrid))
 
   end subroutine parametersInit
   ! -----------------------------------------------
@@ -116,15 +138,20 @@ contains
   subroutine parametersAddGroup(typeGroup, n, mMax)
     integer, intent(in):: typeGroup, n
     real(dp), intent(in):: mMax
-    integer ixStart
+    integer iStart
     !
     ! Find the group number and grid location:
     !
     iGroup = iGroup + 1
     if (iGroup.eq.1) then
-       ixStart = idxB
+       ixStart(iGroup) = idxB
     else
-       ixStart = group(iGroup-1)%ixEnd+1
+       ixStart(iGroup) = ixEnd(iGroup-1)+1
+    end if
+    ixEnd(iGroup) = ixStart(iGroup)+n-1
+    if (ixEnd(iGroup) .gt. nGrid) then
+       write(6,*) 'Attempting to add more grid points than allocated', ixEnd(igroup), nGrid
+       stop 1
     end if
     !
     ! Add the group
@@ -132,10 +159,23 @@ contains
     typeGroups(iGroup) = typeGroup
     select case (typeGroup)
     case (typeGeneralist)
-      group(iGroup) = initGeneralists(n, ixStart, mMax)
+      group(iGroup) = initGeneralists(n, ixStart(iGroup)-1, mMax)
     case(typeCopepod)
-       group(iGroup) = initCopepod(n, ixStart, mMax)
+       group(iGroup) = initCopepod(n, ixStart(iGroup)-1, mMax)
     end select
+    !
+    ! Import grid to globals:
+    !
+    m(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%m
+    !
+    ! Import feeding parameters:
+    !
+    beta(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%beta
+    sigma(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%sigma
+    AF(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%AF
+    JFmax(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%JFmax
+    epsilonF(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%epsilonF
+
   end subroutine parametersAddGroup
   ! -----------------------------------------------
   !  Finalize the setting of parameters
@@ -157,27 +197,32 @@ contains
     betaHTL = 500
     mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
     rates%mortHTL = 0.01*(1/(1+(m/mHTL)**(-2)))
-    ! 
+    !
     !  Initial conditions (also used for deep conditions of chemostat)
-    ! 
+    !
     u0(idxN) = 150. ! Nutrients
     u0(idxDOC) = 0. ! DOC
     u0(idxB:nGrid) = 10. ! Biomasses
   end subroutine parametersFinalize
+  ! ======================================
+  !  Calculate rates and derivatives:
+  ! ======================================
+
   !
   ! Calculate derivatives for unicellular groups
   ! In:
   !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
   !   used for correction of Euler integration. If no correction is used, just set to 1.0
   !
-  subroutine calcDerivativesUnicellulars(upositive, rates, L, gammaN, gammaDOC)
-    real(dp), intent(in):: L, upositive(:), gammaN, gammaDOC
-    type(typeRates), intent(inout):: rates
+  subroutine calcDerivativesUnicellulars(L, gammaN, gammaDOC)
+    real(dp), intent(in):: L, gammaN, gammaDOC
+    !type(typeRates), intent(inout):: rates
     integer:: i,j
     !
     ! Calc uptakes of all unicellular groups:
     !
-    call calcRatesGeneralists(group(1), upositive, rates, L, gammaN, gammaDOC)
+    call calcRatesGeneralists(group(1), upositive(group(1)%ixStart:group(1)%ixEnd), &
+         rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
     !
     ! Calc predation mortality
     !
@@ -198,13 +243,13 @@ contains
     do iGroup = 1, nGroups
        select case (typeGroups(iGroup))
        case (typeGeneralist)
-          call calcDerivativesGeneralists(group(iGroup), upositive, rates)
+          call calcDerivativesGeneralists(group(iGroup),&
+               upositive(group(1)%ixStart:group(1)%ixEnd), &
+               rates)
        end select
     end do
   end subroutine calcDerivativesUnicellulars
-  
-  
-  
+
   ! -----------------------------------------------
   !  Calculate the derivatives for all groups:
   !  In:
@@ -237,7 +282,7 @@ contains
     !
     gammaN = 1.d0
     gammaDOC = 1.d0
-    call calcDerivativesUnicellulars(upositive, rates, L, gammaN, gammaDOC)
+    call calcDerivativesUnicellulars(L, gammaN, gammaDOC)
     !
     ! Make a correction if nutrient fields will become less than zero:
     !
@@ -249,44 +294,46 @@ contains
     end if
     if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0)) then
        !write(6,*) u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
-       call calcDerivativesUnicellulars(upositive, rates, L, gammaN, gammaDOC)
+       call calcDerivativesUnicellulars(L, gammaN, gammaDOC)
     end if
     !
     ! Calc derivatives of multicellular groups:
     !
     do iGroup = 2, nGroups
-       call calcDerivativesCopepod(group(iGroup), upositive, rates)
+        call calcDerivativesCopepod(group(iGroup),&
+          upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+          rates)
     end do
   end subroutine calcDerivatives
   ! -----------------------------------------------
   ! Simulate a chemostat with Euler integration
   ! -----------------------------------------------
-  subroutine simulateChemostatEuler(L, diff, tEnd, dt, usave)
-    real(dp), intent(in):: L      ! Light level
-    real(dp), intent(in):: diff      ! Diffusivity
-    real(dp), intent(in):: tEnd ! Time to simulate
-    real(dp), intent(in):: dt    ! time step
-    real(dp), intent(out), allocatable:: usave(:,:)  ! Results (timestep, grid)
-    integer:: i, iEnd
-
-    iEnd = floor(tEnd/dt)
-    allocate(usave(iEnd, nGrid))
-
-    usave(1,:) = u0
-    do i=2, iEnd
-       call calcDerivatives(usave(i-1,:), L, dt)
-       rates%dudt(idxN) = rates%dudt(idxN) + diff*(u0(idxN)-usave(i-1,idxN))
-       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - usave(i-1,idxDOC))
-       rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - usave(i-1,idxB:nGrid))
-       usave(i,:) = usave(i-1,:) + rates%dudt*dt
-    end do
-  end subroutine simulateChemostatEuler
-  
+!!$  subroutine simulateChemostatEuler(L, diff, tEnd, dt, usave)
+!!$    real(dp), intent(in):: L      ! Light level
+!!$    real(dp), intent(in):: diff      ! Diffusivity
+!!$    real(dp), intent(in):: tEnd ! Time to simulate
+!!$    real(dp), intent(in):: dt    ! time step
+!!$    real(dp), intent(out), allocatable:: usave(:,:)  ! Results (timestep, grid)
+!!$    integer:: i, iEnd
+!!$
+!!$    iEnd = floor(tEnd/dt)
+!!$    allocate(usave(iEnd, nGrid))
+!!$
+!!$    usave(1,:) = u0
+!!$    do i=2, iEnd
+!!$       call calcDerivatives(usave(i-1,:), L, dt)
+!!$       rates%dudt(idxN) = rates%dudt(idxN) + diff*(u0(idxN)-usave(i-1,idxN))
+!!$       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - usave(i-1,idxDOC))
+!!$       rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - usave(i-1,idxB:nGrid))
+!!$       usave(i,:) = usave(i-1,:) + rates%dudt*dt
+!!$    end do
+!!$  end subroutine simulateChemostatEuler
+!!$
   function fTemp(Q10, T) result(f)
     real(dp), intent(in), value:: Q10, T
     real(dp):: f
 
     f = Q10**(T/10.-1.)
   end function fTemp
-  
+
 end module NUMmodel

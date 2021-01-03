@@ -8,6 +8,7 @@ u(13:22) = 1.;
 u(3:22) = 1:20;
 dudt = 0*u;
 L = 100;
+calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(1), 0.1);
 [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', length(u), u, L, 0.0, dudt);
 
 
