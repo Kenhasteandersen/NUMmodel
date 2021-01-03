@@ -82,8 +82,53 @@ contains
     ! Allocate variables:
     !
     if (allocated(m)) then
-      write(6,*) 'Cannot call parametersInit twice. Reload library to reinitialize.'
-      stop 1
+       deallocate(m)
+       deallocate(beta)
+       deallocate(sigma)
+       deallocate(AF)
+       deallocate(JFmax)
+       deallocate(epsilonF)
+       
+       deallocate(group)
+       deallocate(typeGroups)
+       deallocate(ixStart)
+       deallocate(ixEnd)
+       
+       deallocate(upositive)
+       
+       ! Interaction matrix:
+       deallocate(theta)
+       !
+       ! Deallocate rates:
+       !
+       deallocate(rates%dudt)
+       
+       deallocate(rates%F)
+       deallocate(rates%flvl)
+       deallocate(rates%JF)
+       deallocate(rates%JEnc)
+       
+       deallocate(rates%JN)
+       deallocate(rates%JL)
+       deallocate(rates%JDOC)
+       deallocate(rates%JNtot)
+       deallocate(rates%JCtot)
+       deallocate(rates%Jtot)
+       deallocate(rates%JLreal)
+       deallocate(rates%JCloss_feeding)
+       deallocate(rates%JCloss_photouptake)
+       deallocate(rates%JNlossLiebig)
+       deallocate(rates%JClossLiebig)
+       deallocate(rates%JNloss)
+       deallocate(rates%JCloss)
+       
+       deallocate(rates%mortpred)
+       deallocate(rates%mortHTL)
+
+       deallocate(rates%g)
+       deallocate(rates%mortStarve)
+       deallocate(rates%mort)
+
     end if
 
     allocate(m(nGrid))
