@@ -72,15 +72,4 @@ end
         dudt(ix) = dudt(ix) + p.d*(uDeep-u(ix)');
         dudt = dudt';
     end
-
-    %function dudt = deriv(t,u)
-    %    dudt = zeros(p.n+2,1);
-    %    [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcrates',T, L, 2+p.n, u, 1.0, 1.0, dudt);
-    %    dudt(1) = dudt(1) + p.d*(150-u(1));
-    %    dudt(2) = dudt(2) - p.d*u(2);
-    %    dudt(3:end) = dudt(3:end) - p.d*u(3:end);
-    %end
-    
-    
-
 end
