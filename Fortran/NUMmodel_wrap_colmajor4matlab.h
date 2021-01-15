@@ -19,3 +19,10 @@ void f_simulatechemostateuler(
 			      const double diff,
 			      const double tEnd,
 			      const double dt); 
+
+void f_simulateeuler(
+			      const int nGrid,
+			      const double u[],
+			      const double L,
+			      const double tEnd,
+			      const double dt); 

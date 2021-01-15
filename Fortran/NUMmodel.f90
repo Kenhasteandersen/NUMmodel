@@ -375,10 +375,29 @@ contains
        !
        !rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
        u = u + rates%dudt*dt
-       write(6,*) i, u
+       !write(6,*) i, u
     end do
   end subroutine simulateChemostatEuler
+  ! -----------------------------------------------
+  ! Simulate with Euler integration
+  ! -----------------------------------------------
+  subroutine simulateEuler(u, L, tEnd, dt)
+    real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
+    real(dp), intent(in):: L      ! Light level
+    real(dp), intent(in):: tEnd ! Time to simulate
+    real(dp), intent(in):: dt    ! time step
+    integer:: i, iEnd
 
+    iEnd = floor(tEnd/dt)
+
+    do i=1, iEnd
+       call calcDerivatives(u, L, dt)
+       u = u + rates%dudt*dt
+    end do
+  end subroutine simulateEuler
+  ! -----------------------------------------------
+  ! Temperature Q10 function
+  ! -----------------------------------------------
   function fTemp(Q10, T) result(f)
     real(dp), intent(in), value:: Q10, T
     real(dp):: f

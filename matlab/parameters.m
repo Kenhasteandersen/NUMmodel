@@ -1,4 +1,4 @@
-function p = parameters(mCopepods)
+function p = parameters(mAdult)
 %
 % Clarification of the grid:
 %
@@ -12,6 +12,7 @@ iGeneralists = 1;
 iCopepods = 10;
 
 p = parametersInit();
+p.mAdult = mAdult;
 n = 10; % No of bins in each group
 % =========================================
 % Set up the specific systems to simulate
@@ -24,8 +25,8 @@ p = parametersAddgroup(iGeneralists, p, n, 0.1);
 %
 % Parameters for copepods:
 %
-for i = 1:length(mCopepods)
-    p = parametersAddgroup(iCopepods, p, n, mCopepods(i));
+for i = 1:length(mAdult)
+    p = parametersAddgroup(iCopepods, p, n, mAdult(i));
 end
 % =========================================
 % Calculate interaction matrix:
@@ -44,4 +45,6 @@ p.mortHTLm = 0.01*(1./(1+(p.m./p.mHTL).^(-2)));
 p.u0 = 10*p.m./p.m; % Biomasses
 p.u0(1) = 150; % Nutrients
 p.u0(2) = 0; % DOC
+
+p.nGrid = length(p.u0)-2;
 
