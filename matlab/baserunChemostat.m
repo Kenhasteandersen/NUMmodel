@@ -15,7 +15,7 @@ p = parameters(mAdult);
 p = parametersChemostat(p);
 p.tEnd = 365;
 p.bUseLibrary = bUseFortran;
-%
+%s
 % Setup fortran library:
 %
 if bUseFortran
