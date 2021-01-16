@@ -38,7 +38,7 @@ p.theta = parametersCalcTheta(p.m(ix),p.mLower(ix),p.mDelta(ix),p.beta(ix),p.sig
 %
 betaHTL = 500; % The predator-prey size ratio of HTLs
 p.mHTL = max(p.m)/betaHTL^1.5; % Bins affected by HTL mortality
-p.mortHTLm = 0.01*(1./(1+(p.m./p.mHTL).^(-2)));
+p.mortHTLm = 0.1*(1./(1+(p.m./p.mHTL).^(-2)));
 % ================================================================
 %  Initial conditions (also used for deep conditions of chemostat
 % ================================================================

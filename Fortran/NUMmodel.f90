@@ -248,7 +248,7 @@ contains
     !
     betaHTL = 500
     mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
-    rates%mortHTL = 0.01*(1/(1+(m/mHTL)**(-2)))
+    rates%mortHTL = 0.1*(1/(1+(m/mHTL)**(-2)))
   end subroutine parametersFinalize
   
   ! ======================================

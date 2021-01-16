@@ -13,5 +13,5 @@ loglog(p.m, p.mortHTLm, 'm-o','linewidth',2)
 hold off
 ylabel('Losses (day^{-1})')
 xlabel('Mass ({\mu}gC)')
-legend({'Predation','Respiration','Starvation','HTL'}, ...
+legend({'Predation','Respiration','HTL'}, ...
     'location','eastoutside')
