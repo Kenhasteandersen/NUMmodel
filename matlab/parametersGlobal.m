@@ -38,7 +38,7 @@ end
 p.tEnd = 365; % In days
 p.tSave = 365/12; % How often to save results (monthly)
 p.dt = 0.1; % For Euler time stepping
-p.bParallel = false;
+p.bParallel = true;
 p.bTransport = true;
 %
 % Light environment (??):

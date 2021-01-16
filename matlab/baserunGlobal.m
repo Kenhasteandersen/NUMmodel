@@ -13,7 +13,7 @@ p = parametersGlobal(p); % Use standard low-res model
 %p.tSave = 1; % Save every 10th day
 %p.tEnd = 5;
 
-p.tEnd = 10*365;
+p.tEnd = 1*365;
 sim = simulateGlobal(p);%,sim); % Simulate
 sim.B(sim.B<0)=0; % Get rid of negative biomasses
 disp('Calculating functions')

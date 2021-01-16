@@ -37,7 +37,9 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 if p.bParallel
     if isempty(gcp('nocreate'))
-        parpool('AttachedFiles',{'../Cpp/model.so','../Cpp/model.h'});
+        parpool('AttachedFiles',...
+            {'../Fortran/NUMmodel.so',...
+            '../Fortran/NUMmodel_wrap_colmajor4matlab.h'});
     end
     %
     % Set parameters:
@@ -46,7 +48,8 @@ if p.bParallel
     poolsize = h.NumWorkers;
     parfor i=1:poolsize
         loadNUMmodelLibrary();
-        calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult);
+        %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult);
+        calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly');
     end
 else
     loadNUMmodelLibrary();
@@ -136,7 +139,7 @@ for i=1:simtime
     dt = p.dt;
     if p.bParallel
         parfor k = 1:nb
-            u(k,:) = calllib('model','simulateEuler', u(k,:), dudt, L(k), T(k), dt, 0.5);
+            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', int32(p.nGrid+2), u(k,:), L(k), 0.5, dt);
         end
     else
         for k = 1:nb
@@ -193,10 +196,6 @@ sim.p = p;
     function dudt = fDerivLibrary(t,u,L)
         dudt = 0*u';
         [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', length(u), u, L, 0.0, dudt);
-        %
-        % Chemostat dynamics for nutrients and unicellulars:
-        %
-        %dudt(ix) = dudt(ix) + p.d*(uDeep-u(ix)');
         dudt = dudt';
     end
 
