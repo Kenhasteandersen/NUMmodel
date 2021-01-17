@@ -147,7 +147,6 @@ for i=1:simtime
             %u(k,:) = utmp(end,:);
         end
     end
-    sum(u(:,1))
     
     if any(isnan(u))
         warning('NaNs after running current time step');
@@ -187,6 +186,7 @@ fprintf('Solving time: %2u:%02u:%02u\n', ...
 % ---------------------------------------
 sim.t = tSave; % days where solution was saved
 sim.p = p;
+sim.Ntot = calcGlobalN(sim);
 
 %
 % Function to assemble derivative for chemostat:
