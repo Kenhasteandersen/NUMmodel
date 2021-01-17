@@ -22,7 +22,7 @@ dBdt = (rates.Jtot(ix)./m - rates.mort(ix)).*B;
 dDOCdt =  - sum(rates.JDOC(ix).*B./m) + ...
     sum(rates.JCloss(ix).*B./m) + ...
     mortloss;
-
+%
 rates.dudt(1) = dNdt;
 rates.dudt(2) = dDOCdt;
 rates.dudt(ix) = dBdt;
