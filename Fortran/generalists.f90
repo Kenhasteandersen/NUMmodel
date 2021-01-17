@@ -23,6 +23,7 @@ module generalists
   real(dp), parameter:: cR = 0.1
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
   real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
+  real(dp), parameter:: reminHTL = 1.d0 ! fraction of HTL mortality remineralized
   real(dp), parameter:: beta = 500.d0
   real(dp), parameter:: sigma = 1.3d0
 
@@ -144,23 +145,31 @@ contains
 
     do i = 1, this%n
       ix = i+this%ixOffset
-      mortloss = u(i)*((1.d0-remin2)*mort2*u(i) + rates%mortHTL(ix))
+      mortloss = u(i)*(remin2*mort2*u(i) +reminHTL* rates%mortHTL(ix))
       !
       ! Update nitrogen:
       !
+!!$      rates%dudt(idxN) = rates%dudt(idxN)  &
+!!$           + (-rates%JN(ix) &
+!!$           + rates%JNloss(ix))*u(i)/this%m(i) &
+!!$           + (remin2*mort2*u(i)*u(i) &
+!!$           + remin*mortloss)/rhoCN
       rates%dudt(idxN) = rates%dudt(idxN)  &
-           + (-rates%JN(ix) &
+           + ((-rates%JN(ix) &
            + rates%JNloss(ix))*u(i)/this%m(i) &
-           + (remin2*mort2*u(i)*u(i) &
-           + remin*mortloss)/rhoCN
+           + mortloss)/rhoCN
       !
       ! Update DOC:
       !
+!!$      rates%dudt(idxDOC) = rates%dudt(idxDOC) &
+!!$           + (-rates%JDOC(ix) &
+!!$           + rates%JCloss(ix))*u(i)/this%m(i) &
+!!$           + remin2*mort2*u(i)*u(i) &
+!!$           + remin*mortloss
       rates%dudt(idxDOC) = rates%dudt(idxDOC) &
            + (-rates%JDOC(ix) &
            + rates%JCloss(ix))*u(i)/this%m(i) &
-           + remin2*mort2*u(i)*u(i) &
-           + remin*mortloss
+           + mortloss
       !
       ! Update the generalists:
       !

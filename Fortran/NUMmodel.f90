@@ -375,10 +375,24 @@ contains
        !
        !rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
        u = u + rates%dudt*dt
-       !write(6,*) i, u
+       write(6,*) calcN(u)
     end do
   end subroutine simulateChemostatEuler
-  ! -----------------------------------------------
+
+  function calcN(u) result(N)
+      real(dp), intent(in):: u(:) 
+      integer:: i
+      real(dp):: N
+
+      N = 0
+      N = u(idxN)
+      do i = 1, nGrid
+         N = N + u(2+i)/5.68
+      end do
+    end function calcN
+      
+
+      ! -----------------------------------------------
   ! Simulate with Euler integration
   ! -----------------------------------------------
   subroutine simulateEuler(u, L, tEnd, dt)

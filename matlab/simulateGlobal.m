@@ -18,23 +18,12 @@ ixN = 1;
 ixDOC = 2;
 ixB = 3:(2+p.nGrid);
 
-
-Tbc = [];
+%Tbc = [];
 
 disp('Preparing simulation')
-
-% Load grid data:
-%load(p.pathGrid);
-%load(p.pathConfigData);
-load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
-
-% Preparing for timestepping
-Ix = speye(nb,nb);
-month = 0;
-mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
-%
+% ---------------------------------
 % Load library:
-%
+% ---------------------------------
 if p.bParallel
     if isempty(gcp('nocreate'))
         parpool('AttachedFiles',...
@@ -56,10 +45,19 @@ else
 %    calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
     calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly');
 end
-%
+% ---------------------------------------
 % Initialize run:
-%
+% ---------------------------------------
 simtime = p.tEnd*2; %simulation time in half days
+% Load grid data:
+%load(p.pathGrid);
+%load(p.pathConfigData);
+load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
+
+% Preparing timestepping
+Ix = speye(nb,nb);
+month = 0;
+mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 % Initial conditions:
 %
@@ -104,9 +102,9 @@ sim.L = sim.N;
 sim.T = sim.N;
 dudt = zeros(1,2+p.nGrid);
 tSave = [];
-%
+% ---------------------------------------
 % Run transport matrix simulation
-%
+% ---------------------------------------
 elapsed_time = zeros(1,simtime);
 disp('Starting simulation')
 tic
@@ -149,6 +147,7 @@ for i=1:simtime
             %u(k,:) = utmp(end,:);
         end
     end
+    sum(u(:,1))
     
     if any(isnan(u))
         warning('NaNs after running current time step');
@@ -177,26 +176,25 @@ for i=1:simtime
         sim.L(:,:,:,iSave) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
         sim.T(:,:,:,iSave) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
         tSave = [tSave, i*0.5];
-        fprintf('.\n');
-        
+        fprintf('.\n');      
     end
 end
 time = toc;
 fprintf('Solving time: %2u:%02u:%02u\n', ...
     [floor(time/3600), mod(floor(time/60),60), floor(mod(time,60))]);
-%
+% ---------------------------------------
 % Put results into sim structure:
-%
+% ---------------------------------------
 sim.t = tSave; % days where solution was saved
 sim.p = p;
 
 %
 % Function to assemble derivative for chemostat:
 %
-    function dudt = fDerivLibrary(t,u,L)
-        dudt = 0*u';
-        [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', length(u), u, L, 0.0, dudt);
-        dudt = dudt';
-    end
+%    function dudt = fDerivLibrary(t,u,L)
+%        dudt = 0*u';
+%        [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', length(u), u, L, 0.0, dudt);
+%        dudt = dudt';
+%    end
 
 end

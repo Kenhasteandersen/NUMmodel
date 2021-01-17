@@ -16,17 +16,18 @@ p = parametersGlobal(p); % Use standard low-res model
 p.tEnd = 1*365;
 sim = simulateGlobal(p);%,sim); % Simulate
 sim.B(sim.B<0)=0; % Get rid of negative biomasses
-disp('Calculating functions')
+%disp('Calculating functions')
 %sim = calcGlobalFunction(sim); % Calculate functions
 %
 % Plots:
 %
 disp('Plotting')
-close all
-figure
+figure(1)
+clf
 plotGlobal(sim);
 
-figure
+figure(2)
+clf
 plotGlobalWatercolumnTime(60,-10,sim);
 %
 % CPU-heavy plots:
