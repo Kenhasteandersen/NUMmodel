@@ -106,7 +106,6 @@ tSave = [];
 % ---------------------------------------
 disp('Starting simulation')
 tic
-    old = 0;
 for i=1:simtime
     %
     % Test for time to change monthly transport matrix
@@ -145,12 +144,6 @@ for i=1:simtime
             %u(k,:) = utmp(end,:);
         end
     end
-    tmp = u(1,1) + sum(u(1,3:end))/5.68;
-    u(1,:);
-    if ((round(tmp) ~= round(old)) )
-        old,tmp
-    end
-    old = tmp;
     
     if any(isnan(u))
         warning('NaNs after running current time step');

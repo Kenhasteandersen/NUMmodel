@@ -1,20 +1,24 @@
-function sim = baserunGlobal()
+function sim = baserunGlobal(sim)
 if libisloaded('NUMmodel')
     unloadlibrary('NUMmodel')
 end
 %
 % Make a basic run of the global model
 %
-p = parameters([]);
-p = parametersGlobal(p); % Use standard low-res model
+if (nargin==0)
+    p = parameters([]);
+    p = parametersGlobal(p); % Use standard low-res model
 %p = parametersGlobal(10,2); % Use MITgcm_ECCO
+    p.tEnd = 365;
+else
+    p = sim.p;
+end
 
-%load(p.pathInit); % Load decent initial conditions
-%p.tSave = 1; % Save every 10th day
-%p.tEnd = 5;
+if exist(p.pathInit, 'file');
+    % Load decent initial conditions
+    load(p.pathInit);
+end
 
-p.tEnd = 1*365;
-p.dt = 0.02;
 sim = simulateGlobal(p);%,sim); % Simulate
 sim.B(sim.B<0)=0; % Get rid of negative biomasses
 %disp('Calculating functions')
