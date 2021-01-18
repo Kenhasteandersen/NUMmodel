@@ -14,6 +14,7 @@ p = parametersGlobal(p); % Use standard low-res model
 %p.tEnd = 5;
 
 p.tEnd = 1*365;
+p.dt = 0.02;
 sim = simulateGlobal(p);%,sim); % Simulate
 sim.B(sim.B<0)=0; % Get rid of negative biomasses
 %disp('Calculating functions')

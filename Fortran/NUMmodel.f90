@@ -309,8 +309,8 @@ contains
     !
     ! Use only the positive part of biomasses for calculation of derivatives:
     !
-    upositive(1:idxB-1) = u(1:idxB-1)
-    do i = idxB, nGrid
+    !upositive(1:idxB-1) = u(1:idxB-1)
+    do i = 1, nGrid
        upositive(i) = max( 0.d0, u(i) )
     end do
     !
@@ -342,6 +342,7 @@ contains
     if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0)) then
        !write(6,*) u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
        call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
+       !write(6,*) '->', rates%dudt(idxN), rates%dudt(idxDOC)
     end if
     !
     ! Calc derivatives of multicellular groups:
@@ -375,7 +376,7 @@ contains
        !
        !rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
        u = u + rates%dudt*dt
-       write(6,*) calcN(u)
+       !write(6,*) calcN(u)
     end do
   end subroutine simulateChemostatEuler
 

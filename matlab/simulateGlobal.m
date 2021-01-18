@@ -65,7 +65,7 @@ if (nargin==2)
     disp('Starting from previous simulation.');
     u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
     u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
-    for i = 1:p.n
+    for i = 1:p.nGrid
         u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],sim.p.pathBoxes, sim.p.pathGrid);
     end
 else
@@ -100,16 +100,14 @@ sim.DOC = sim.N;
 sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.nGrid, nSave));
 sim.L = sim.N;
 sim.T = sim.N;
-dudt = zeros(1,2+p.nGrid);
 tSave = [];
 % ---------------------------------------
 % Run transport matrix simulation
 % ---------------------------------------
-elapsed_time = zeros(1,simtime);
 disp('Starting simulation')
 tic
+    old = 0;
 for i=1:simtime
-    telapsed = tic;
     %
     % Test for time to change monthly transport matrix
     %
@@ -141,12 +139,18 @@ for i=1:simtime
         end
     else
         for k = 1:nb
-            %u(k,:) = calllib('model','simulateEuler', u(k,:), dudt, L(k), T(k), dt, 0.5);
             u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', int32(p.nGrid+2), u(k,:), L(k), 0.5, dt);
+            % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
             %u(k,:) = utmp(end,:);
         end
     end
+    tmp = u(1,1) + sum(u(1,3:end))/5.68;
+    u(1,:);
+    if ((round(tmp) ~= round(old)) )
+        old,tmp
+    end
+    old = tmp;
     
     if any(isnan(u))
         warning('NaNs after running current time step');
@@ -156,11 +160,11 @@ for i=1:simtime
     % Transport
     %
     if p.bTransport
+        % Could perhaps be parfor'ed for large matrices:
         for k = 1:p.nGrid+2
             u(:,k) =  Aimp * (Aexp * u(:,k));
         end
     end
-    elapsed_time(i) = toc(telapsed);
     %
     % Save timeseries in grid format
     %
