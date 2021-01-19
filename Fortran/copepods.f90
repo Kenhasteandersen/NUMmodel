@@ -13,7 +13,7 @@ module copepods
   real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency
   real(dp), parameter:: beta = 10000.d0
   real(dp), parameter:: sigma = 1.5d0
-  real(dp), parameter:: alphaF = 0.1 !  PROBABLY WRONG!
+  real(dp), parameter:: alphaF = 0.01 !  PROBABLY WRONG!
   real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
   real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
   real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
@@ -80,14 +80,17 @@ contains
     !
     ! Assemble derivatives:
     !
+    ! 1st stage:
     rates%dudt(this%ixStart) = b*u(this%n) &
          + (rates%g(this%ixStart)-gamma(1)-rates%mort(this%ixStart))*u(1)
+    ! Middle stages:
     do i = 2, this%n-1
        ix = i+this%ixOffset
        rates%dudt(ix) = &
             gamma(i-1)*u(i-1) & ! growth into group
             + (rates%g(ix)-gamma(i)-rates%mort(ix))*u(i)  ! growth out of group
     end do
+    !Adults
     rates%dudt(this%ixEnd) = &
          gamma(this%n-1)*u(this%n-1) & ! growth into adult group
          - rates%mort(this%ixEnd)*u(this%n); ! adult mortality

@@ -57,6 +57,10 @@ end
         % Chemostat dynamics for nutrients and unicellulars:
         %
         dudt(ix) = dudt(ix) + p.d*(uDeep-u(ix)');
+        %iix = dudt<0 & u'<0.0001;
+        %iix(1:2) = false;
+        %dudt(iix) = 0;
+
         dudt = dudt';
     end
     

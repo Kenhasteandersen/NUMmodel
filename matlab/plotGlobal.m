@@ -22,9 +22,14 @@ subplot(4,1,2)
 c = panelGlobal(sim.x,sim.y,sim.N(:,:,1,iTime),'N',sProjection);
 c.Label.String  = 'Concentration [\mug N l^{-1}]';
 
-% Plankton
+% Unicellular plankton
 subplot(4,1,3)
-panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,:,iTime),4)),'Plankton (log10)',sProjection);
+panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,findIxUnicellular(sim.p),iTime),4)),'Unicellular plankton (log10)',sProjection);
+caxis([1 3])
+
+% Multicellular plankton
+subplot(4,1,4)
+panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,findIxMulticellular(sim.p),iTime),4)),'Multicellular plankton (log10)',sProjection);
 caxis([1 3])
 
 if isfield(sim,'CnetPerArea')
