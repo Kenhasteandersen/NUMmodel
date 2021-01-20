@@ -348,7 +348,7 @@ contains
     ! Calc derivatives of multicellular groups:
     !
     do iGroup = 2, nGroups
-        call calcDerivativesCopepod(group(iGroup),&
+        call calcDerivativesCopepod(group(iGroup), &
           upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
           rates)
     end do

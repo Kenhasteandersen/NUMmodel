@@ -13,7 +13,7 @@ module copepods
   real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency
   real(dp), parameter:: beta = 10000.d0
   real(dp), parameter:: sigma = 1.5d0
-  real(dp), parameter:: alphaF = 0.01 !  PROBABLY WRONG!
+  real(dp), parameter:: alphaF = 0.01 !  
   real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
   real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
   real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
