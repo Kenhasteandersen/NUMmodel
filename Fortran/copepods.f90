@@ -13,7 +13,7 @@ module copepods
   real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency
   real(dp), parameter:: beta = 10000.d0
   real(dp), parameter:: sigma = 1.5d0
-  real(dp), parameter:: alphaF = 0.01 !  
+  real(dp), parameter:: alphaF = 0.01 !
   real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
   real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
   real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
@@ -70,7 +70,7 @@ contains
        rates%mortStarve(ix) = -min(0.d0, nu)/this%m(i)
        !
        ! Mortality:
-       !
+       rates%mortHTL(ix)=rates%mortHTL(ix)*u(ix)
        rates%mort(ix) = rates%mortpred(ix) + rates%mortHTL(ix) + rates%mortStarve(ix)
        ! Flux:
        gamma(i) = (rates%g(ix)-rates%mort(ix)) / (1 - this%z(i)**(1-rates%mort(ix)/rates%g(ix)))
@@ -95,5 +95,5 @@ contains
          gamma(this%n-1)*u(this%n-1) & ! growth into adult group
          - rates%mort(this%ixEnd)*u(this%n); ! adult mortality
   end subroutine calcDerivativesCopepod
-  
+
   end module copepods

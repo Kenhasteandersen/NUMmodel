@@ -9,6 +9,7 @@ rates.mortStarve(ix) = min(zeros(1,length(ix)), nu)./p.m;
 b = p.epsilonR * g(end); % Birth rate
 %
 % Mortality:
+% p.mortHTL(ix)=p.mortHTL(ix).*u(ix);
 %
 rates.mort(ix) = rates.mortpred(ix) + p.mortHTL(ix) + rates.mortStart(ix);
 %

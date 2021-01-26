@@ -5,6 +5,7 @@ module NUMmodel
   use globals
   use spectrum
   use generalists
+  use generalists_csp
   use copepods
   use debug
   implicit none
@@ -34,6 +35,17 @@ contains
     call parametersAddGroup(typeGeneralist, 10, 0.1d0) ! generalists with 10 size classes
     call parametersFinalize()
   end subroutine setupGeneralistsOnly
+
+  ! -----------------------------------------------
+  ! A basic setup with only generalists -- Camila
+  ! -----------------------------------------------
+  subroutine setupGeneralistsOnly_csp()
+    call parametersInit(1, 10) ! 1 group, 10 size classes (excl nutrients and DOC)
+    call parametersAddGroup(typeGeneralist_csp, 10, 0.1d0) ! generalists with 10 size classes
+    call parametersFinalize()
+  end subroutine setupGeneralistsOnly_csp
+
+
   ! -----------------------------------------------
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------
@@ -58,7 +70,7 @@ contains
     end do
     call parametersFinalize()
   end subroutine setupGeneric
-  
+
   ! ======================================
   !  Model initialization stuff:
   ! ======================================
@@ -87,26 +99,26 @@ contains
        deallocate(AF)
        deallocate(JFmax)
        deallocate(epsilonF)
-       
+
        deallocate(group)
        deallocate(typeGroups)
        deallocate(ixStart)
        deallocate(ixEnd)
-       
+
        deallocate(upositive)
-       
+
        ! Interaction matrix:
        deallocate(theta)
        !
        ! Deallocate rates:
        !
        deallocate(rates%dudt)
-       
+
        deallocate(rates%F)
        deallocate(rates%flvl)
        deallocate(rates%JF)
        deallocate(rates%JEnc)
-       
+
        deallocate(rates%JN)
        deallocate(rates%JL)
        deallocate(rates%JDOC)
@@ -120,7 +132,7 @@ contains
        deallocate(rates%JClossLiebig)
        deallocate(rates%JNloss)
        deallocate(rates%JCloss)
-       
+
        deallocate(rates%mortpred)
        deallocate(rates%mortHTL)
 
@@ -199,7 +211,7 @@ contains
        ixStart(iGroup) = ixEnd(iGroup-1)+1
     end if
     ixEnd(iGroup) = ixStart(iGroup)+n-1
-    
+
     if (ixEnd(iGroup) .gt. nGrid) then
        write(6,*) 'Attempting to add more grid points than allocated', ixEnd(igroup), nGrid
        stop 1
@@ -211,6 +223,8 @@ contains
     select case (typeGroup)
     case (typeGeneralist)
       group(iGroup) = initGeneralists(n, ixStart(iGroup)-1, mMax)
+    case (typeGeneralist_csp)
+      group(iGroup) = initGeneralists_csp(n, ixStart(iGroup)-1, mMax)
     case(typeCopepod)
        group(iGroup) = initCopepod(n, ixStart(iGroup)-1, mMax)
     end select
@@ -250,7 +264,7 @@ contains
     mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
     rates%mortHTL = 0.1*(1/(1+(m/mHTL)**(-2)))
   end subroutine parametersFinalize
-  
+
   ! ======================================
   !  Calculate rates and derivatives:
   ! ======================================
@@ -381,7 +395,7 @@ contains
   end subroutine simulateChemostatEuler
 
   function calcN(u) result(N)
-      real(dp), intent(in):: u(:) 
+      real(dp), intent(in):: u(:)
       integer:: i
       real(dp):: N
 
@@ -391,7 +405,7 @@ contains
          N = N + u(2+i)/5.68
       end do
     end function calcN
-      
+
 
       ! -----------------------------------------------
   ! Simulate with Euler integration

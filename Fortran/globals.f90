@@ -8,6 +8,7 @@ module globals
   integer, parameter :: idxDOC = 2
   integer, parameter :: idxB = 3
   integer, parameter :: typeGeneralist = 1
+  integer, parameter :: typeGeneralist_csp = 2
   integer, parameter :: typeCopepod = 10
   real(dp), parameter :: onethird = 1.d0/3.d0
   real(dp), parameter :: twothirds = 2.d0/3.d0
@@ -27,7 +28,7 @@ module globals
   integer:: nGrid ! Total number of grid points incl. two points for N and DOC
 
 !contains
-  
+
 !!$  subroutine initGlobals(nnGrid)
 !!$    integer, intent(in):: nnGrid
 !!$

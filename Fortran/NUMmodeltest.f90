@@ -6,7 +6,8 @@ program NUMmodeltest
 
   !call setupGeneric( (/0.1d0, 1.0d0 /) )
   !call setupGeneralistsCopepod()
-  call setupGeneralistsOnly()
+  !call setupGeneralistsOnly()
+  call setupGeneralistsOnly_csp()
   !call setupGeneralistsOnly()
   allocate(u0(nGrid))
   allocate(u00(nGrid))
