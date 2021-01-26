@@ -282,8 +282,18 @@ contains
     !
     ! Calc uptakes of all unicellular groups:
     !
-    call calcRatesGeneralists(group(1), upositive(group(1)%ixStart:group(1)%ixEnd), &
-         rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
+    do iGroup = 1, nGroups
+       select case (typeGroups(iGroup))
+       case (typeGeneralist)
+          call calcRatesGeneralists(group(iGroup), &
+               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+               rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
+       case(typeGeneralist_csp)
+          call calcRatesGeneralists_csp(group(iGroup), &
+               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+               rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
+       end select
+    end do
     !
     ! Calc predation mortality
     !
@@ -305,7 +315,11 @@ contains
        select case (typeGroups(iGroup))
        case (typeGeneralist)
           call calcDerivativesGeneralists(group(iGroup),&
-               upositive(group(1)%ixStart:group(1)%ixEnd), &
+               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+               rates)
+       case (typeGeneralist_csp)
+          call calcDerivativesGeneralists_csp(group(iGroup),&
+               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
                rates)
        end select
     end do
