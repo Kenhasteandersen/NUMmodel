@@ -1,5 +1,6 @@
 !
-! Module to handle generalists unicellulars
+! Module to handle the protists part of the model in Serra-Pompei et al (2020).
+! In comparison to generalists.f90, this model does not involve DOC uptake.
 !
 module generalists_csp
   use globals

@@ -70,8 +70,8 @@ contains
        rates%mortStarve(ix) = -min(0.d0, nu)/this%m(i)
        !
        ! Mortality:
-       rates%mortHTL(ix)=rates%mortHTL(ix)*u(ix)
-       rates%mort(ix) = rates%mortpred(ix) + rates%mortHTL(ix) + rates%mortStarve(ix)
+       !rates%mortHTL(ix) = rates%mortHTL(ix)*u(ix)
+       rates%mort(ix) = rates%mortpred(ix) + rates%mortHTL(ix)*h + rates%mortStarve(ix)
        ! Flux:
        gamma(i) = (rates%g(ix)-rates%mort(ix)) / (1 - this%z(i)**(1-rates%mort(ix)/rates%g(ix)))
        rates%Jtot(ix) = nu

@@ -10,7 +10,7 @@ for iGroup = 1:sim.p.nGroups
     semilogy(t, sim.Bgroup(:,iGroup),'k-', 'linewidth',0.5*iGroup);
     textLegend{iGroup+2} = sprintf('%2i',iGroup);
 end
-ylim([0.1, 1000])
+ylim([0.1, 10000])
 
 legend(textLegend,'location','eastoutside')
 ylabel('Concentrations')

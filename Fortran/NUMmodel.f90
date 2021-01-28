@@ -17,9 +17,17 @@ module NUMmodel
 
   real(dp), dimension(:,:), allocatable:: theta
   real(dp), dimension(:), allocatable:: upositive
+  
+  real(dp), dimension(:), allocatable:: pHTL ! Selectivity function for HTL mortality
+  real(dp) :: mortHTL ! Level of HTL mortality (see below for override)
+  real(dp):: gammaHTL ! Parameter for quadratic HTL mortality
+  logical:: bQuadraticHTL ! Boolean flag to signify whether mortality is standard or "quadratic"
+  ! Defaults to true; can be overridden but parameters must then be set with a
+  ! call to parametersFinalize()
+  
   type(typeRates):: rates
 
-  real(dp), dimension(:), allocatable:: m, beta, sigma, AF, JFmax, epsilonF ! Feeding parameters
+  real(dp), dimension(:), allocatable:: m, z, beta, sigma, AF, JFmax, epsilonF ! Feeding parameters
 
 contains
   ! ======================================
@@ -33,6 +41,7 @@ contains
   subroutine setupGeneralistsOnly()
     call parametersInit(1, 10) ! 1 group, 10 size classes (excl nutrients and DOC)
     call parametersAddGroup(typeGeneralist, 10, 0.1d0) ! generalists with 10 size classes
+    bQuadraticHTL = .false. ! Use standard "linear" mortality
     call parametersFinalize()
   end subroutine setupGeneralistsOnly
 
@@ -94,6 +103,7 @@ contains
     !
     if (allocated(m)) then
        deallocate(m)
+       deallocate(z)
        deallocate(beta)
        deallocate(sigma)
        deallocate(AF)
@@ -135,6 +145,7 @@ contains
 
        deallocate(rates%mortpred)
        deallocate(rates%mortHTL)
+       deallocate(pHTL)
 
        deallocate(rates%g)
        deallocate(rates%mortStarve)
@@ -143,6 +154,7 @@ contains
     end if
 
     allocate(m(nGrid))
+    allocate(z(nGrid))
     allocate(beta(nGrid))
     allocate(sigma(nGrid))
     allocate(AF(nGrid))
@@ -184,11 +196,13 @@ contains
 
     allocate(rates%mortpred(nGrid))
     allocate(rates%mortHTL(nGrid))
+    allocate(pHTL(nGrid))
 
     allocate(rates%g(nGrid))
     allocate(rates%mortStarve(nGrid))
     allocate(rates%mort(nGrid))
 
+    bQuadraticHTL = .true. ! Default to quadratic mortality
   end subroutine parametersInit
   ! -----------------------------------------------
   !  Add a size spectrum group
@@ -232,6 +246,7 @@ contains
     ! Import grid to globals:
     !
     m(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%m
+    z(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%z
     !
     ! Import feeding parameters:
     !
@@ -248,7 +263,7 @@ contains
   ! -----------------------------------------------
   subroutine parametersFinalize()
     integer:: i,j
-    real(dp):: betaHTL, mHTL
+    real(dp):: betaHTL, mHTL, mMax
     !
     ! Calc theta:
     !
@@ -260,9 +275,32 @@ contains
     !
     ! Calc htl mortality
     !
-    betaHTL = 500
-    mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
-    rates%mortHTL = 0.1*(1/(1+(m/mHTL)**(-2)))
+    betaHTL = 500.
+    if (.not. bQuadraticHTL) then
+       !
+       ! Standard HTL mortality. In this case "pHTL" represent the selectivity of HTL mortality
+       !
+       mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
+       mortHTL = 0.1
+       pHTL = (1/(1+(m/mHTL)**(-2)))
+    else
+       !
+       ! Linear HTL mortality (commonly referred to as "quadratic")
+       ! In this case "pHTL" represents p_HTL*m^-1/4 from eq (16) in Serra-Pompei (2020)
+       !
+       mortHTL = 0.003 ! Serra-Pompei (2020)
+       gammaHTL = 0.2 ! ibid
+       mMax = maxval(m(idxB:nGrid))
+       do i=1, nGrid
+          if (m(i) .lt. (mMax/betaHTL)) then
+             pHTL(i) = exp( -(log(m(i)*betaHTL/mMax))**2/4.)
+          else
+             pHTL(i) = 1.
+          end if
+       end do
+       pHTL = pHTL * m**(-0.25)
+    end if
+    !write(6,*) m,pHTL
   end subroutine parametersFinalize
 
   ! ======================================
@@ -353,6 +391,16 @@ contains
     rates%flvl = AF*rates%F / (AF*rates%F + JFmax)
     rates%JF = rates%flvl * JFmax
     !
+    ! Calc HTL mortality:
+    !
+    if (bQuadraticHTL) then
+       do i = idxB, nGrid
+          rates%mortHTL(i) = calcHTL(upositive, i)*upositive(i)
+       end do
+    else
+       rates%mortHTL(idxB:nGrid) = mortHTL*pHTL(idxB:nGrid)
+    end if
+    !
     ! Calc derivatives of unicellular groups
     !
     gammaN = 1.d0
@@ -376,11 +424,33 @@ contains
     ! Calc derivatives of multicellular groups:
     !
     do iGroup = 2, nGroups
-        call calcDerivativesCopepod(group(iGroup), &
-          upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
-          rates)
+       call calcDerivativesCopepod(group(iGroup), &
+            upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+            rates)
     end do
   end subroutine calcDerivatives
+  !
+  ! Returns the htl mortlity divided by h for size bin i
+  !
+  function calcHTL(u, i) result(mHTL)
+    real(dp) :: mHTL, B
+    real(dp), intent(in):: u(:)
+    integer, intent(in):: i
+    integer:: j
+    
+    !
+    ! First calc the biomass within a size range:
+    !
+    B = 0.d0
+    do j = 1, nGrid
+       if (m(j)>m(i)/3.16 .and. m(j)<m(i)*3.16) then
+          B = B + u(j)
+       end if
+    end do
+    
+    mortHTL = pHTL(i)*mortHTL/z(i)*u(i)**gammaHTL*B**(1.-gammaHTL)
+  end function calcHTL
+  
   ! -----------------------------------------------
   ! Simulate a chemostat with Euler integration
   ! -----------------------------------------------
@@ -409,19 +479,19 @@ contains
   end subroutine simulateChemostatEuler
 
   function calcN(u) result(N)
-      real(dp), intent(in):: u(:)
-      integer:: i
-      real(dp):: N
+    real(dp), intent(in):: u(:)
+    integer:: i
+    real(dp):: N
+    
+    N = 0
+    N = u(idxN)
+    do i = 1, nGrid
+       N = N + u(2+i)/5.68
+    end do
+  end function calcN
+    
 
-      N = 0
-      N = u(idxN)
-      do i = 1, nGrid
-         N = N + u(2+i)/5.68
-      end do
-    end function calcN
-
-
-      ! -----------------------------------------------
+  ! -----------------------------------------------
   ! Simulate with Euler integration
   ! -----------------------------------------------
   subroutine simulateEuler(u, L, tEnd, dt)
