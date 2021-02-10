@@ -214,7 +214,6 @@ contains
   subroutine parametersAddGroup(typeGroup, n, mMax)
     integer, intent(in):: typeGroup, n
     real(dp), intent(in):: mMax
-    integer iStart
     !
     ! Find the group number and grid location:
     !
@@ -291,14 +290,14 @@ contains
        mortHTL = 0.003 ! Serra-Pompei (2020)
        gammaHTL = 0.2 ! ibid
        mMax = maxval(m(idxB:nGrid))
-       do i=1, nGrid
+       do i=idxB, nGrid
           if (m(i) .lt. (mMax/betaHTL)) then
              pHTL(i) = exp( -(log(m(i)*betaHTL/mMax))**2/4.)
           else
              pHTL(i) = 1.
           end if
        end do
-       pHTL = pHTL * m**(-0.25)
+       pHTL(idxB:nGrid) = pHTL(idxB:nGrid) * m(idxB:nGrid)**(-0.25)
     end if
     !write(6,*) m,pHTL
   end subroutine parametersFinalize
@@ -388,8 +387,8 @@ contains
           rates%F(i) = rates%F(i) + theta(i,j)*upositive(j)
        end do
     end do
-    rates%flvl = AF*rates%F / (AF*rates%F + JFmax)
-    rates%JF = rates%flvl * JFmax
+    rates%flvl(idxB:nGrid) = AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid) + JFmax(idxB:nGrid))
+    rates%JF(idxB:nGrid) = rates%flvl(idxB:nGrid) * JFmax(idxB:nGrid)
     !
     ! Calc HTL mortality:
     !
@@ -448,7 +447,7 @@ contains
        end if
     end do
     
-    mortHTL = pHTL(i)*mortHTL/z(i)*u(i)**gammaHTL*B**(1.-gammaHTL)
+    mHTL = pHTL(i)*mortHTL/z(i)*u(i)**gammaHTL*B**(1.-gammaHTL)
   end function calcHTL
   
   ! -----------------------------------------------

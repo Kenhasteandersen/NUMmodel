@@ -73,7 +73,11 @@ contains
        !rates%mortHTL(ix) = rates%mortHTL(ix)*u(ix)
        rates%mort(ix) = rates%mortpred(ix) + rates%mortHTL(ix)*h + rates%mortStarve(ix)
        ! Flux:
-       gamma(i) = (rates%g(ix)-rates%mort(ix)) / (1 - this%z(i)**(1-rates%mort(ix)/rates%g(ix)))
+       if ( rates%g(ix) .ne. 0.) then
+          gamma(i) = (rates%g(ix)-rates%mort(ix)) / (1 - this%z(i)**(1-rates%mort(ix)/rates%g(ix)))
+       else
+          gamma(i) = 0.d0
+       end if
        rates%Jtot(ix) = nu
     end do
     b = epsilonR * rates%g(this%ixEnd) ! Birth rate

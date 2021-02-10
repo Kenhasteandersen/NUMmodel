@@ -174,7 +174,7 @@ contains
       ! Update the generalists:
       !
       rates%dudt(ix) = (rates%Jtot(ix)/this%m(i)  &
-           - mort(ix) &
+           - mort(i) &
            - rates%mortpred(ix) &
            - mort2*u(i) &
            - rates%mortHTL(ix))*u(i)
