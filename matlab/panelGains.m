@@ -12,16 +12,18 @@ for iGroup = 1:p.nGroups
        semilogx(m, rates.JDOC(ix)./m, 'color',[181 100 30]/256,'linewidth',2)
        semilogx(m, p.pGeneralists.Jmax./m, 'k:')
     end
+    % Total:
+    semilogx(m, rates.Jtot(ix)./m, 'k-', 'linewidth',2)
     % Rates for copepods:
     if (p.typeGroups(iGroup)==2)
         semilogx(m, p.JFmax(ix)./m,'k:')
     end
-    % Total:
-    semilogx(m, rates.Jtot(ix)./m, 'k-', 'linewidth',2)
 end
 
 hold off
 ylim([0 2])
+xlim([min(p.m), max(p.m)])
 ylabel('Gains (day^{-1})')
-legend({'Feeding','N','Light','DOC'}, ...
-    'location','eastoutside')
+
+legend({'Feeding','N','Light','DOC','Growth rate'}, ...
+    'location','northwest','box','off')

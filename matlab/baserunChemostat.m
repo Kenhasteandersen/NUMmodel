@@ -1,5 +1,12 @@
 %
 % Make a basic run of the chemostat model
+% In:
+%  mAdult is the adult sizes of copepods (can be left empty to simulate only
+%         unicellular organisms).
+%  bUseFortran: Flag indicating whether the fortran library is used
+%
+% Out:
+%  sim: Structure holding the results of the simulation
 %
 function sim = baserunChemostat(mAdult, bUseFortran)
 if (nargin==0)

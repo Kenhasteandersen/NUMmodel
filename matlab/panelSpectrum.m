@@ -14,7 +14,7 @@ for iGroup = 1:p.nGroups
     hold on
 end
 ylim([0.0001,500])
-xlim([1e-9, max(sim.p.m)])
+xlim([min(sim.p.m), max(sim.p.m)])
 hold off
 
 xlabel('Mass ({\mu}gC)')

@@ -11,7 +11,9 @@ for iGroup = 1:sim.p.nGroups
     textLegend{iGroup+2} = sprintf('%2i',iGroup);
 end
 ylim([0.1, 10000])
+axis('tight')
 
 legend(textLegend,'location','eastoutside')
+
 ylabel('Concentrations')
 xlabel('Time (days)')

@@ -19,6 +19,7 @@ rates = calcRatesGeneralists(p.ixStart(1),p.ixEnd(1), u, rates, p.pGeneralists, 
 %
 rates.mortpred(3:length(u)) = ((p.theta') * (rates.JF(ix)./p.epsilonF(ix).*B./p.m(ix)./(rates.F(ix)+1e-100))')';
 %rates.mortpred(3:length(u)) = ((p.theta') * (rates.JF(ix).*B./p.epsilonF(ix)./p.m(ix))');
+
 %
 % Assemble derivatives
 %

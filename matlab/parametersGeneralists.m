@@ -1,6 +1,7 @@
 function p = parametersGeneralists(n, mMax)
 if (nargin==0)
     n = 25;
+    mMax = 0.1;
 end
 %
 % Define parameters:
