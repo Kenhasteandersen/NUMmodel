@@ -5,7 +5,8 @@ B = u(ix);
 m = p.pGeneralists.m;
 mort2 = p.pGeneralists.mort2*B;
 
-mortloss = sum(B.*(p.pGeneralists.remin2.*mort2 + p.mortHTLm(ix)));
+mortloss = sum(B.*(p.pGeneralists.remin2.*mort2 + ...
+    p.pGeneralists.reminHTL.*p.mortHTLm(ix)));
 
 dNdt   =  (sum((...
     -rates.JN(ix)...

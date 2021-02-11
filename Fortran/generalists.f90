@@ -24,7 +24,7 @@ module generalists
   real(dp), parameter:: cR = 0.1
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
   real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
-  real(dp), parameter:: reminHTL = 1.d0 ! fraction of HTL mortality remineralized
+  real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
   real(dp), parameter:: beta = 500.d0
   real(dp), parameter:: sigma = 1.3d0
 
@@ -68,7 +68,7 @@ contains
     Jmax = alphaJ * this%m * (1.d0-nu) ! mugC/day
     Jresp = cR*alphaJ*this%m
     mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);
-    mort2 = 0.0002*n
+    mort2 = 0.005*n
   end function initGeneralists
 
   subroutine calcRatesGeneralists(this, u, rates, L, N, DOC, gammaN, gammaDOC)
