@@ -25,5 +25,5 @@ ylim([0 2])
 xlim([min(p.m), max(p.m)])
 ylabel('Gains (day^{-1})')
 
-legend({'Feeding','N','Light','DOC','Growth rate'}, ...
+legend({'Feeding','N','Light','DOC','Max. growth rate','Growth rate'}, ...
     'location','northwest','box','off')

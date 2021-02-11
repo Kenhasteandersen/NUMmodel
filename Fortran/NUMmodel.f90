@@ -281,7 +281,7 @@ contains
        !
        mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
        mortHTL = 0.1
-       pHTL = (1/(1+(m/mHTL)**(-2)))
+       pHTL(idxB:nGrid) = (1/(1+(m(idxB:nGrid)/mHTL)**(-2)))
     else
        !
        ! Linear HTL mortality (commonly referred to as "quadratic")
@@ -385,6 +385,7 @@ contains
        rates%F(i) = 0.d0
        do j = idxB, nGrid
           rates%F(i) = rates%F(i) + theta(i,j)*upositive(j)
+          write(6,*) i,j,rates%F(i)
        end do
     end do
     rates%flvl(idxB:nGrid) = AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid) + JFmax(idxB:nGrid))

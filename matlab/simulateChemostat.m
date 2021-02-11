@@ -69,7 +69,8 @@ end
     %
     function dudt = fDerivLibrary(t,u)
         dudt = 0*u';
-        [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', length(u), u, L, 0.0, dudt);
+        [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
+            length(u), u, L, 0.0, dudt);
         %
         % Chemostat dynamics for nutrients and unicellulars:
         %

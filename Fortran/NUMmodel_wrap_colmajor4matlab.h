@@ -11,6 +11,14 @@ void f_calcderivatives(
 		       const double dt,
 		       double dudt[]);
 
+void f_calcrates(
+		       const int nGrid,
+		       const double u[],
+		       const double L,
+		       double jN[],
+		       double jL[],
+		       double jF[]);
+
 void f_simulatechemostateuler(
 			      const int nGrid,
 			      double u[],

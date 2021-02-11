@@ -4,6 +4,7 @@
 module generalists
   use globals
   use spectrum
+  use debug
   implicit none
 
   private
@@ -179,6 +180,7 @@ contains
            - mort2*u(i) &
            - rates%mortHTL(ix))*u(i)
    end do
+
  end subroutine calcDerivativesGeneralists
  
 end module generalists

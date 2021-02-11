@@ -28,23 +28,23 @@ subroutine openDebug
     !write(unitDebug, *) 'N: ', N
     !write(unitDebug, *) 'DOC: ', DOC
     !write(unitDebug, *) 'B: ', B
-    write(unitDebug, *) 'JN/m: ', rates%JN/m
-    write(unitDebug, *) 'JL/m: ', rates%JL/m
-    write(unitDebug, *) 'JDOC/m: ', rates%JDOC/m
+    write(unitDebug, *) 'JN/m(idxB:nGrid): ', rates%JN(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'JL/m(idxB:nGrid): ', rates%JL(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'JDOC/m(idxB:nGrid): ', rates%JDOC(idxB:nGrid)/m(idxB:nGrid)
     
-    write(unitDebug, *) 'F/m: ', rates%F/m
-    write(unitDebug, *) 'JF/m: ', rates%JF/m
-    write(unitDebug, *) 'f: ', rates%flvl
+    write(unitDebug, *) 'F/m(idxB:nGrid): ', rates%F(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'JF/m(idxB:nGrid): ', rates%JF(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'f: ', rates%flvl(idxB:nGrid)
 
-    write(unitDebug, *) 'JLreal/m: ', rates%JLreal/m
-    write(unitDebug, *) 'JNtot/m: ', rates%JNtot/m
-    write(unitDebug, *) 'JCtot/m: ', rates%JCtot/m
+    write(unitDebug, *) 'JLreal/m(idxB:nGrid): ', rates%JLreal(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'JNtot/m(idxB:nGrid): ', rates%JNtot(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'JCtot/m(idxB:nGrid): ', rates%JCtot(idxB:nGrid)/m(idxB:nGrid)
     
-   ! write(unitDebug, *) 'JFreal/m: ', rates%JFreal/p%m
-    write(unitDebug, *) 'Jtot/m: ', rates%Jtot/m
-    write(unitDebug, *) 'mortpred: ', rates%mortpred
-    write(unitDebug, *) 'JNloss/m: ', rates%JNloss/m
-    write(unitDebug, *) 'JCloss/m: ', rates%JCloss/m
+   ! write(unitDebug, *) 'JFreal/m(idxB:nGrid): ', rates%JFreal/p%m
+    write(unitDebug, *) 'Jtot/m(idxB:nGrid): ', rates%Jtot(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'mortpred: ', rates%mortpred(idxB:nGrid)
+    write(unitDebug, *) 'JNloss/m(idxB:nGrid): ', rates%JNloss(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'JCloss/m(idxB:nGrid): ', rates%JCloss(idxB:nGrid)/m(idxB:nGrid)
 
     write(unitDebug, *) 'dudt', rates%dudt
     
