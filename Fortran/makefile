@@ -1,7 +1,13 @@
+#
+# iFortran on macos:
+#
 FORT=ifort
 FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
 #FLAGS=-O3
 LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+
+
+
 OBJ = globals.o debug.o spectrum.o generalists.o generalists_csp.o copepods.o NUMmodel.o
 
 %.o: %.f90

@@ -51,7 +51,7 @@ p.Jresp = p.cR*p.alphaJ*p.m;
 % Losses:
 %
 p.mort = 0*0.005*(p.Jmax./p.m) .* p.m.^(-1/4);
-p.mort2 = 0.005*double(p.n);
+p.mort2 = 0.0002*double(p.n);
 
 p.remin = 0.0; % fraction of mortality losses reminerilized to N and DOC
 p.remin2 = 1.0; % fraction of virulysis remineralized to N and DOC

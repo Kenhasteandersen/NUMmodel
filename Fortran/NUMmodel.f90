@@ -323,7 +323,6 @@ contains
        select case (typeGroups(iGroup))
        case (typeGeneralist)
           call calcRatesGeneralists(group(iGroup), &
-               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
                rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
        case(typeGeneralist_csp)
           call calcRatesGeneralists_csp(group(iGroup), &

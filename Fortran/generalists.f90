@@ -71,9 +71,9 @@ contains
     mort2 = 0.005*n
   end function initGeneralists
 
-  subroutine calcRatesGeneralists(this, u, rates, L, N, DOC, gammaN, gammaDOC)
+  subroutine calcRatesGeneralists(this, rates, L, N, DOC, gammaN, gammaDOC)
     type(typeSpectrum), intent(in):: this
-    real(dp), intent(in):: u(:), gammaN, gammaDOC
+    real(dp), intent(in):: gammaN, gammaDOC
     type(typeRates), intent(inout):: rates
     real(dp), intent(in):: L, N, DOC
     real(dp):: f
