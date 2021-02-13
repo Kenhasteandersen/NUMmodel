@@ -16,6 +16,8 @@ load('tmpparameters');
 %p = parametersGlobal(parameters([]),2);
 if exist(p.pathInit, 'file')
     load(p.pathInit);
+    sim = simulateGlobal(p,sim);
+else
+    sim = simulateGlobal(p);
 end
-sim = simulateGlobal(p,sim);
 save('tmp','sim','-v7.3');
