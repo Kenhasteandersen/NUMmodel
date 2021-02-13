@@ -4,8 +4,6 @@
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
 % (choose MITgcm_2.8deg), and be put into the location '../TMs'
 %
-% ../Cpp/model.cpp must be compiled locally to create model.so
-%
 % Input:
 %  p: parameter structure from parametersGlobal
 %  sim: (optional) simulation to use for initial conditions

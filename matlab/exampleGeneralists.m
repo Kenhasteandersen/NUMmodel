@@ -13,7 +13,7 @@ param.bUseFortran = false; % Make sure not to use the Fortran version of the mod
 Light = 100;
 sim = simulateChemostat(param, Light);
 % Plot the results of the model:
-plotSimulation(sim)
+plotChemostat(sim)
 %
 % The first panel shows the biomass concentration of cells as a fucntion of cell size.
 % The second panel shows the mass-specific uptakes in units of per day. In this case we see that there are high uptakes of nutrients (blue line), while little feeding (red).
@@ -30,12 +30,12 @@ plotSimulation(sim)
 % The default value is 0.5 per day, which is pretty high:
 param.d = 0.05;
 sim = simulateChemostat(param, Light);
-plotSimulation(sim)
+plotChemostat(sim)
 %%
 % ... and even lower:
 param.d = 0.0001;
 sim = simulateChemostat(param, Light);
-plotSimulation( sim );
+plotChemostat( sim );
 
 %%
 % Run across diffusion rates:

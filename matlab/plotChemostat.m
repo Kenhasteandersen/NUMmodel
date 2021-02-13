@@ -1,4 +1,4 @@
-function plotSimulation(sim)
+function plotChemostat(sim)
 
 clf
 %

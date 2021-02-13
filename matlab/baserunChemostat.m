@@ -41,4 +41,4 @@ toc
 %
 % Plot
 %
-plotSimulation(sim)
+plotChemostat(sim)
