@@ -1,3 +1,11 @@
+%
+% Make a basic run of the global transport-matrix model.
+% In:
+%  With no arguments it runs the simple generalist model
+%  With a parameter argument in runs the model specified in the parameters.
+% Out:
+%  A simulation structureedit s
+%
 function sim = baserunGlobal(p)
 if libisloaded('NUMmodel')
     unloadlibrary('NUMmodel')

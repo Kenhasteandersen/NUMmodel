@@ -17,6 +17,7 @@ function sim = simulateGlobal(p, sim)
 ixN = 1;
 ixDOC = 2;
 ixB = 3:(2+p.nGrid);
+addpath("Transport matrix");
 
 %Tbc = [];
 
