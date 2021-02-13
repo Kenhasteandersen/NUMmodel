@@ -1,11 +1,13 @@
-function saveGlobal(s)
+%
+% Save the results of a simulation to be used for initial conditions
+%
+function saveGlobal(sim)
 
-sim.N = s.N(:,:,:,end);
-sim.DOC = s.DOC(:,:,:,end);
-sim.B = s.B(:,:,:,:,end);
+sim.N = sim.N(:,:,:,end);
+sim.DOC = sim.DOC(:,:,:,end);
+sim.B = sim.B(:,:,:,:,end);
 sim.t = 0;
-sim.p = s.p;
-
+sim.p = sim.p;
 
 save(sim.p.pathInit,'sim');
 
