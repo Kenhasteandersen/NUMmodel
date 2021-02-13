@@ -1,3 +1,10 @@
+%
+% Calculate the global N as a function of time.
+% In:
+%  sim struct from a global simulation
+% Out:
+%  N summed over all cells (not corrected for cell volume).
+%
 function N = calcGlobalN(sim)
 
 N = 0*sim.t;
