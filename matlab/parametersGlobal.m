@@ -22,7 +22,7 @@ if (nargin==1 || nargin==0 || nTMmodel == 1)
     p.pathConfigData = '../TMs/MITgcm/config_data.mat';
     p.pathTemp      = '../TMs/MITgcm/BiogeochemData/Theta_bc.mat'; 
     p.pathN0        = '../TMs/MITgcm_N0';
-    p.pathInit      = sprintf('../TMs/globalInitMITgcm_%02i',length(p.u0));
+    p.pathInit      = sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0));
 elseif nTMmodel == 2
     p.pathMatrix = '../TMs/MITgcm_ECCO/Matrix1/TMs/matrix_nocorrection_';
     p.pathBoxes = '../TMs/MITgcm_ECCO/Matrix1/Data/boxes.mat';
@@ -30,7 +30,7 @@ elseif nTMmodel == 2
     p.pathConfigData = '../TMs/MITgcm_ECCO/config_data.mat';
     p.pathTemp = '../TMs/MITgcm_ECCO/BiogeochemData/Theta_bc.mat'; 
     p.pathN0    = '../TMs/MITgcm_ECCO_N0';
-    p.pathInit      = sprintf('../TMs/globalInitMITgcm_%02i',length(p.u0));
+    p.pathInit = sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0));
 end
 %
 % Numerical parameters:
