@@ -1,4 +1,6 @@
+%
 %Test case for running the generalist size-based plankton model.
+%
 close all
 clear
 

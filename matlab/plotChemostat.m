@@ -1,3 +1,6 @@
+%
+% Makes a series of plot of a chemostat run.
+%
 function plotChemostat(sim)
 
 clf

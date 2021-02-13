@@ -1,5 +1,8 @@
 %
 % Make a basic run of the global transport-matrix model.
+% Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
+% (choose MITgcm_2.8deg), and be put into the location '../TMs'
+%
 % In:
 %  With no arguments it runs the simple generalist model
 %  With a parameter argument in runs the model specified in the parameters.

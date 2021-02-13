@@ -1,3 +1,11 @@
+%
+% Plot maps of global run
+%
+% In:
+%  sim: the simulation to plot
+%  iTime: (not needed) the time step to plot (defaults to the last).
+%  sProjection: default 'fast'.
+%
 function plotGlobal(sim, iTime, sProjection)
 
 if (nargin()==1)

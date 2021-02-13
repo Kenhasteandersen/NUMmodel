@@ -1,3 +1,7 @@
+%
+% Plot a water column as a function of time at latitude `lat`
+% and longitude `lon`.
+%
 function plotGlobalWatercolumnTime(lat,lon,sim)
 
 idx = calcGlobalWatercolumn(lat,lon,sim);
