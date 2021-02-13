@@ -72,11 +72,15 @@ contains
     integer, parameter:: n = 10 ! number of size classes in each group
     integer:: iCopepod
 
+    write(6,*) 'Setup'
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1))
+    write(6,*) 'Setup 1'
     call parametersAddGroup(typeGeneralist, n, 0.1d0)
+    write(6,*) 'Setup 2'
     do iCopepod = 1, size(mAdult)
        call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
     end do
+    write(6,*) 'Setup 3'
     call parametersFinalize()
   end subroutine setupGeneric
 
@@ -373,7 +377,6 @@ contains
     !
     ! Use only the positive part of biomasses for calculation of derivatives:
     !
-    !upositive(1:idxB-1) = u(1:idxB-1)
     do i = 1, nGrid
        upositive(i) = max( 0.d0, u(i) )
     end do
@@ -384,7 +387,6 @@ contains
        rates%F(i) = 0.d0
        do j = idxB, nGrid
           rates%F(i) = rates%F(i) + theta(i,j)*upositive(j)
-          write(6,*) i,j,rates%F(i)
        end do
     end do
     rates%flvl(idxB:nGrid) = AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid) + JFmax(idxB:nGrid))

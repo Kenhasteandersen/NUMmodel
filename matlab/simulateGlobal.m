@@ -38,7 +38,7 @@ if p.bParallel
     poolsize = h.NumWorkers;
     parfor i=1:poolsize
         loadNUMmodelLibrary();
-        calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult);
+        calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
         %calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly');
     end
 else

@@ -4,7 +4,7 @@
 %  With no arguments it runs the simple generalist model
 %  With a parameter argument in runs the model specified in the parameters.
 % Out:
-%  A simulation structureedit s
+%  A simulation structure
 %
 function sim = baserunGlobal(p)
 if libisloaded('NUMmodel')
@@ -16,7 +16,7 @@ end
 if (nargin==0)
     p = parameters([]);
     p = parametersGlobal(p); % Use standard low-res model
-%p = parametersGlobal(10,2); % Use MITgcm_ECCO
+    %p = parametersGlobal(10,2); % Use MITgcm_ECCO
     p.tEnd = 365;
 end
 
