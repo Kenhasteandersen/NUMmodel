@@ -9,7 +9,7 @@ LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 # gfortran on macos:
 #
 FORT=gfortran
-#FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
+#FLAGS=-g
 FLAGS=-O2
 LINK=
 
