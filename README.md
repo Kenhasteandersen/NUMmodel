@@ -1,8 +1,8 @@
 # NUMmodel
 Reference implementation of the **Nutrient-Unicellular-Multicellular**
-modelling framework.  The model is described in: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities). Progress in Oceanography (189) 102473.
+modelling framework.  The model is described in: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities "Available on Researchgate"). Progress in Oceanography (189) 102473.
 
-The core library is written in fortran90 and is interfaced from matlab. Most of the modules are also written in matlab, so compilation of the fortran code is not needed - but it speeds up most calculations by a factor 10.
+The core library is written in fortran90 and is interfaced from matlab. Most of the modules are also written in matlab so compilation of the fortran code is not needed - but it speeds up most calculations by a factor 10.
 
 ### Compiling
 Use the makefile in the Fortran directory. Edit the compiler and flags to suit your operating system and compile. Compile by writing: `make lib`.

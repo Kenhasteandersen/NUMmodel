@@ -54,7 +54,6 @@ contains
     call parametersFinalize()
   end subroutine setupGeneralistsOnly_csp
 
-
   ! -----------------------------------------------
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------
@@ -64,6 +63,7 @@ contains
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize()
   end subroutine setupGeneralistsCopepod
+  
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
   ! -----------------------------------------------
@@ -72,15 +72,11 @@ contains
     integer, parameter:: n = 10 ! number of size classes in each group
     integer:: iCopepod
 
-    write(6,*) 'Setup'
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1))
-    write(6,*) 'Setup 1'
     call parametersAddGroup(typeGeneralist, n, 0.1d0)
-    write(6,*) 'Setup 2'
     do iCopepod = 1, size(mAdult)
        call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
     end do
-    write(6,*) 'Setup 3'
     call parametersFinalize()
   end subroutine setupGeneric
 

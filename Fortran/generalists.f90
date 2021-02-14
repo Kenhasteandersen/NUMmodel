@@ -44,6 +44,19 @@ contains
 
     this = initSpectrum(n, ixOffset, mMin, mMax)
 
+    if ( allocated(AN) ) then
+       deallocate(AN)
+       deallocate(AL)
+       deallocate(Jresp)
+       deallocate(JlossPassive)
+       deallocate(nu)
+       deallocate(mort)
+       
+       deallocate(JN)
+       deallocate(JL)
+       deallocate(JFreal)
+    end if
+    
     allocate(AN(n))
     allocate(AL(n))
     allocate(Jresp(n))

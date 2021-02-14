@@ -4,9 +4,9 @@ program NUMmodeltest
   real(dp), allocatable:: u0(:), u00(:)
   integer:: i
 
-  !call setupGeneric( (/0.1d0, 1.0d0 /) )
+  call setupGeneric( (/0.1d0, 1.0d0 /) )
   !call setupGeneralistsCopepod()
-  call setupGeneralistsOnly()
+  !call setupGeneralistsOnly()
   !call setupGeneralistsOnly_csp()
   !call setupGeneralistsOnly()
   allocate(u0(nGrid))
@@ -25,5 +25,7 @@ program NUMmodeltest
  ! write(6,*) theta(3:5, 3:5)
  call printRates(m, rates)
  ! write(6,*) 'xxxx'
+  call setupGeneric( (/0.1d0, 1.0d0 /) )
+!  call setupGeneralistsOnly()
 
 end program NUMmodeltest

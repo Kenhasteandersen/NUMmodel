@@ -40,10 +40,13 @@ contains
     mMin = exp(log(mAdult/AdultOffspring)+0.5*lnDelta);
     this = initSpectrum(n, ixOffset, mMin, mAdult)
 
-    if (.not. allocated(Jresp)) then
-       allocate(Jresp(n))
-       allocate(gamma(n))
-    end if
+    if ( allocated(Jresp) ) then
+       deallocate(Jresp)
+       deallocate(gamma)
+    endif
+
+    allocate(Jresp(n))
+    allocate(gamma(n))
 
     this%beta = beta
     this%sigma = sigma
