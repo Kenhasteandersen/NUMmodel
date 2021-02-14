@@ -6,7 +6,7 @@ clear
 
 %%
 % First set up parameters for the plankton:
-
+%
 param = parameters([]);
 % Then add parameters for the chemostat:
 param = parametersChemostat(param);
@@ -41,7 +41,7 @@ plotChemostat( sim );
 
 %%
 % Run across diffusion rates:
-
+%
 d = logspace( -4, 0, 10);
 for i = 1:length(d)
     param.d = d(i);

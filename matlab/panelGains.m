@@ -3,7 +3,7 @@ function panelGains(p,rates)
 for iGroup = 1:p.nGroups
     ix = p.ixStart(iGroup):p.ixEnd(iGroup);
     m = p.m(ix);
-    semilogx(m, rates.JF(ix)./m, 'r-o', 'linewidth',2)
+    semilogx(m, rates.JF(ix)./m, 'r-', 'linewidth',2)
     hold on
     % Rates for generalists:
     if (p.typeGroups(iGroup)==1)

@@ -9,6 +9,7 @@ clf
 %
 subplot(4,1,1)
 panelSpectrum(sim)
+xlabel('')
 %
 % Rates:
 %
