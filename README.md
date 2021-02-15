@@ -10,7 +10,7 @@ The core library is written in fortran90 and is interfaced from matlab. Most of 
 Use the makefile in the Fortran directory. Edit the compiler and flags to suit your operating system and compile. Compile by writing: `make lib`.
 
 ### Basic structure
-There are three levels of routines: top-level, medium-level and low-level.  See `exampleGeneralists` for some basic runs of the chemostat model.
+There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.  See `exampleGeneralists` for some basic runs of the chemostat model.
 
 #### Top-level routines
 * `baserunChemostat(mAdult, false)`.  Runs a chemostat version of the model and plots the output. The first argument is the adult body masses of copepods (in micro gram carbon) - send in an empty list to run only with unicellular plankton. Change the second argument to `true`to use the Fortran library.
