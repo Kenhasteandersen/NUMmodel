@@ -2,7 +2,7 @@
 Reference implementation of the **Nutrient-Unicellular-Multicellular**
 modelling framework.  The model is described in: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities "Available on Researchgate"). Progress in Oceanography (189) 102473.
 
-**This is alpha-software in development. Things may be broken and results may not be correct**
+:fire: **This is alpha-software in development. Things may be broken and results may not be correct** :fire:
 
 The core library is written in fortran90 and is interfaced from matlab. Most of the modules are also written in matlab so compilation of the fortran code is not needed - but it speeds up most calculations by a factor 10.
 
