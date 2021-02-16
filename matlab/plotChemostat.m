@@ -4,22 +4,24 @@
 function plotChemostat(sim)
 
 clf
+tiledlayout(4,1,'tilespacing','compact','padding','compact')
 %
 % Size spectrum:
 %
-subplot(4,1,1)
+nexttile
 panelSpectrum(sim)
+%set(gca,'xticklabel','')
 xlabel('')
 %
 % Rates:
 %
-subplot(4,1,2)
+nexttile;
 panelGains(sim.p, sim.rates)
 
-subplot(4,1,3)
+nexttile
 panelLosses(sim.p, sim.rates)
 %
 % Time
 %
-subplot(4,1,4)
+nexttile
 panelTime(sim)
