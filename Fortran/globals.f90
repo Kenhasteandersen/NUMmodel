@@ -13,6 +13,7 @@ module globals
   real(dp), parameter :: onethird = 1.d0/3.d0
   real(dp), parameter :: twothirds = 2.d0/3.d0
   real(dp), parameter :: threequarters = 3.d0/4.d0
+  real(dp), parameter :: pi = 4*ATAN(1.d0)
 
   type typeRates
      real(dp), dimension(:), allocatable:: flvl, JF, F, JEnc

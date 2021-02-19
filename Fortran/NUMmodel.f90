@@ -30,6 +30,7 @@ module NUMmodel
   real(dp), dimension(:), allocatable:: m, z, beta, sigma, AF, JFmax, epsilonF ! Feeding parameters
 
 contains
+  
   ! ======================================
   !  Various model setups
   ! ======================================
@@ -268,7 +269,8 @@ contains
     !
     do i = idxB, nGrid
        do j = idxB, nGrid
-          theta(i,j) = exp( -(log(m(i)/m(j)/beta(i)))**2/(2*sigma(i)**2))
+          !theta(i,j) = exp( -(log(m(i)/m(j)/beta(i)))**2/(2*sigma(i)**2))
+          theta(i,j) = calcPhi(m(i)/m(j), beta(i), sigma(i), z(i))
        end do
     end do
     !
@@ -300,6 +302,26 @@ contains
        pHTL(idxB:nGrid) = pHTL(idxB:nGrid) * m(idxB:nGrid)**(-0.25)
     end if
     !write(6,*) m,pHTL
+    
+  contains
+    !
+    ! Calculate the interaction coefficient between two size groups with
+    ! size ratio z:
+    !
+    function calcPhi(z, beta,sigma, Delta) result(res)
+      real(dp), intent(in):: z,beta,sigma,Delta
+      real(dp):: res, s
+      
+      s = 2*sigma*sigma
+      res = max(0.d0, &
+           (Sqrt(s)*((exp(-Log(beta/(Delta*z))**2/s) - 2/exp(Log(z/beta)**2/s) +  &
+           exp(-Log(z/(beta*Delta))**2/s))*Sqrt(s) + &
+           Sqrt(Pi)*(-2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
+           Erf(Log(z/(beta*Delta))/Sqrt(s))*Log(z/(beta*Delta)) - &
+           Erf(Log(beta/(Delta*z))/Sqrt(s))*Log((Delta*z)/beta))))/ &
+           (2.*Log(Delta)**2))
+    end function calcPhi
+    
   end subroutine parametersFinalize
 
   ! ======================================
@@ -514,5 +536,7 @@ contains
 
     f = Q10**(T/10.-1.)
   end function fTemp
+
+  
 
 end module NUMmodel
