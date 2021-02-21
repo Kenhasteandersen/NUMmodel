@@ -1,3 +1,5 @@
+#INC = /Library/Frameworks/R.framework/Resources # For C-wrapper for R
+
 #
 # iFortran on macos:
 #
@@ -17,16 +19,21 @@ LINK=
 
 OBJ = globals.o debug.o spectrum.o generalists.o generalists_csp.o copepods.o NUMmodel.o
 
+all: NUMmodel libMatlab libR
+
 %.o: %.f90
 	$(FORT) -c -fPIC $(FLAGS) -o $@ $< 
 
 NUMmodel: $(OBJ)  NUMmodeltest.o
 	$(FORT) $(LINK) $(FLAGS) -o $@ $^ 
 
-lib: $(OBJ) NUMmodel_wrap_colmajor.o
-	$(FORT) -shared $(LINK) $(FLAGS) -o NUMmodel.so $^ 
+libMatlab: $(OBJ) NUMmodel_wrap_colmajor.o
+	$(FORT) -shared $(LINK) $(FLAGS) -o NUMmodel_matlab.so $^
+
+libR: $(OBJ) NUMmodel_wrap_R.o
+	$(FORT) -shared $(LINK) $(FLAGS) -o NUMmodel_R.so $^
 
 clean:
-	rm *.o NUMmodel NUMmodel.so
+	rm *.o NUMmodel NUMmodel_matlab.so NUMmodel_R
 
 

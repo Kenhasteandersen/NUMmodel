@@ -26,9 +26,6 @@ p.bUseLibrary = bUseFortran;
 % Setup fortran library:
 %
 if bUseFortran
-    if libisloaded('NUMmodel')
-        unloadlibrary('NUMmodel')
-    end
     loadNUMmodelLibrary();
     calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult);
 end

@@ -392,6 +392,7 @@ contains
     real(dp), intent(in):: L, dt, u(:)
     integer:: i, j, iGroup
     real(dp):: gammaN, gammaDOC
+
     !
     ! Use only the positive part of biomasses for calculation of derivatives:
     !

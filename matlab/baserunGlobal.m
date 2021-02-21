@@ -10,9 +10,6 @@
 %  A simulation structure
 %
 function sim = baserunGlobal(p)
-if libisloaded('NUMmodel')
-    unloadlibrary('NUMmodel')
-end
 %
 % Setup a basic run of the global model
 %

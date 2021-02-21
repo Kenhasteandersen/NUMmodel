@@ -4,7 +4,7 @@
 %
 function sLibname = loadNUMmodelLibrary
 
-sLibname = 'NUMmodel';
+sLibname = 'NUMmodel_matlab';
 if ~libisloaded(sLibname)
     [notfound,warnings] = loadlibrary(strcat('../Fortran/',sLibname,'.so'), ...
         '../Fortran/NUMmodel_wrap_colmajor4matlab.h');

@@ -23,13 +23,21 @@ contains
 
     call setupGeneric(mAdult)
   end subroutine f_setupGeneric
+
+  subroutine test(x) bind(c)
+    integer(c_int), intent(in), value:: x
+   write(6,*) 'test'
+    write(6,*) x
+  end subroutine test
   
   subroutine f_calcDerivatives(nGrid, u, L, dt, dudt) bind(c)
     integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(in), value:: L, dt
     real(c_double), intent(in):: u(nGrid)
     real(c_double), intent(out):: dudt(nGrid)
-    
+
+    write(6,*) nGrid
+    write(6,*) L
     call calcDerivatives(u, L, dt)
     dudt = rates%dudt
   end subroutine f_calcDerivatives
