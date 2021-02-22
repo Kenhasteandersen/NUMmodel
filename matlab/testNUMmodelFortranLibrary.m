@@ -34,5 +34,15 @@ disp('jL:')
 disp('jF:')
 [ratesF.jF'; rates.JF./p.m]
 
+disp('jTot:')
+[ratesF.jTot'; rates.Jtot./p.m]
+
+disp('mortHTL:')
+[ratesF.mortHTL'; p.mortHTLm]
+
+disp('g:')
+[ratesF.g'; rates.JF./p.m]
+
+
 disp('dudt:')
 [dudt; rates.dudt]

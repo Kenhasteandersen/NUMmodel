@@ -17,7 +17,10 @@ void f_calcrates(
 		       const double L,
 		       double jN[],
 		       double jL[],
-		       double jF[]);
+		       double jF[],
+		       double jTot[],
+		       double mortHTL[],
+		       double g[]);
 
 void f_simulatechemostateuler(
 			      const int nGrid,
