@@ -40,6 +40,9 @@ disp('jTot:')
 disp('mortHTL:')
 [ratesF.mortHTL'; p.mortHTLm]
 
+disp('mortpred:')
+[ratesF.mortpred'; rates.mortpred]
+
 disp('g:')
 [ratesF.g'; rates.JF./p.m]
 

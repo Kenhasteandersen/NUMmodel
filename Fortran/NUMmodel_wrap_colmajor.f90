@@ -42,12 +42,12 @@ contains
     dudt = rates%dudt
   end subroutine f_calcDerivatives
 
-  subroutine f_calcRates(nGrid, u, L, jN, jL, jF, jTot, mortHTL, g) bind(c)
+  subroutine f_calcRates(nGrid, u, L, jN, jL, jF, jTot, mortHTL, mortpred, g) bind(c)
     integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(in):: u(nGrid)
     real(c_double), intent(in), value:: L
     real(c_double), intent(out):: jN(nGrid), jL(nGrid), jF(nGrid)
-    real(c_double), intent(out):: jTot(nGrid), mortHTL(nGrid), g(nGrid)
+    real(c_double), intent(out):: jTot(nGrid), mortHTL(nGrid), mortpred(nGrid), g(nGrid)
 
     call calcDerivatives(u, L, 0.d0)
     jN(idxB:nGrid) = rates%JN(idxB:nGrid) / m(idxB:nGrid)
@@ -55,6 +55,7 @@ contains
     jF(idxB:nGrid) = rates%JF(idxB:nGrid) / m(idxB:nGrid)
     jtot(idxB:nGrid) = rates%Jtot(idxB:nGrid) / m(idxB:nGrid)
     mortHTL(idxB:nGrid) = rates%mortHTL(idxB:nGrid)
+    mortpred(idxB:nGrid) = rates%mortpred(idxB:nGrid)
     g(idxB:nGrid) = rates%g(idxB:nGrid)
   end subroutine f_calcRates
     

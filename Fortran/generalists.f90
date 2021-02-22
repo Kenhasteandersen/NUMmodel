@@ -81,7 +81,7 @@ contains
     Jmax = alphaJ * this%m * (1.d0-nu) ! mugC/day
     Jresp = cR*alphaJ*this%m
     mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);
-    mort2 = 0.005*n
+    mort2 = 0.0002*n
   end function initGeneralists
 
   subroutine calcRatesGeneralists(this, rates, L, N, DOC, gammaN, gammaDOC)

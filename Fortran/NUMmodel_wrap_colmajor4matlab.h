@@ -20,6 +20,7 @@ void f_calcrates(
 		       double jF[],
 		       double jTot[],
 		       double mortHTL[],
+		       double mortpred[],
 		       double g[]);
 
 void f_simulatechemostateuler(
