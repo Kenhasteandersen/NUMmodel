@@ -17,20 +17,20 @@ module NUMmodel
 
   real(dp), dimension(:,:), allocatable:: theta
   real(dp), dimension(:), allocatable:: upositive
-  
+
   real(dp), dimension(:), allocatable:: pHTL ! Selectivity function for HTL mortality
   real(dp) :: mortHTL ! Level of HTL mortality (see below for override)
   real(dp):: gammaHTL ! Parameter for quadratic HTL mortality
   logical:: bQuadraticHTL ! Boolean flag to signify whether mortality is standard or "quadratic"
   ! Defaults to true; can be overridden but parameters must then be set with a
   ! call to parametersFinalize()
-  
+
   type(typeRates):: rates
 
   real(dp), dimension(:), allocatable:: m, z, beta, sigma, AF, JFmax, epsilonF ! Feeding parameters
 
 contains
-  
+
   ! ======================================
   !  Various model setups
   ! ======================================
@@ -64,7 +64,7 @@ contains
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize()
   end subroutine setupGeneralistsCopepod
-  
+
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
   ! -----------------------------------------------
@@ -80,6 +80,22 @@ contains
     end do
     call parametersFinalize()
   end subroutine setupGeneric
+
+  ! -----------------------------------------------
+  ! A generic setup with generalists and a number of copepod species
+  ! -----------------------------------------------
+  subroutine setupGeneric_csp(mAdult)
+    real(dp), intent(in):: mAdult(:)
+    integer, parameter:: n = 10 ! number of size classes in each group
+    integer:: iCopepod
+
+    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1))
+    call parametersAddGroup(typeGeneralist_csp, n, 0.1d0)
+    do iCopepod = 1, size(mAdult)
+       call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
+    end do
+    call parametersFinalize()
+  end subroutine setupGeneric_csp
 
   ! ======================================
   !  Model initialization stuff:
@@ -302,7 +318,7 @@ contains
        pHTL(idxB:nGrid) = pHTL(idxB:nGrid) * m(idxB:nGrid)**(-0.25)
     end if
     !write(6,*) m,pHTL
-    
+
   contains
     !
     ! Calculate the interaction coefficient between two size groups with
@@ -311,7 +327,7 @@ contains
     function calcPhi(z, beta,sigma, Delta) result(res)
       real(dp), intent(in):: z,beta,sigma,Delta
       real(dp):: res, s
-      
+
       s = 2*sigma*sigma
       res = max(0.d0, &
            (Sqrt(s)*((exp(-Log(beta/(Delta*z))**2/s) - 2/exp(Log(z/beta)**2/s) +  &
@@ -321,7 +337,7 @@ contains
            Erf(Log(beta/(Delta*z))/Sqrt(s))*Log((Delta*z)/beta))))/ &
            (2.*Log(Delta)**2))
     end function calcPhi
-    
+
   end subroutine parametersFinalize
 
   ! ======================================
@@ -457,7 +473,7 @@ contains
     real(dp), intent(in):: u(:)
     integer, intent(in):: i
     integer:: j
-    
+
     !
     ! First calc the biomass within a size range:
     !
@@ -467,10 +483,10 @@ contains
           B = B + u(j)
        end if
     end do
-    
+
     mHTL = pHTL(i)*mortHTL/z(i)*u(i)**gammaHTL*B**(1.-gammaHTL)
   end function calcHTL
-  
+
   ! -----------------------------------------------
   ! Simulate a chemostat with Euler integration
   ! -----------------------------------------------
@@ -502,14 +518,14 @@ contains
     real(dp), intent(in):: u(:)
     integer:: i
     real(dp):: N
-    
+
     N = 0
     N = u(idxN)
     do i = 1, nGrid
        N = N + u(2+i)/5.68
     end do
   end function calcN
-    
+
 
   ! -----------------------------------------------
   ! Simulate with Euler integration
@@ -538,6 +554,6 @@ contains
     f = Q10**(T/10.-1.)
   end function fTemp
 
-  
+
 
 end module NUMmodel

@@ -1,8 +1,12 @@
 void f_setupgeneralistsonly();
 
+void f_setupgeneralistsonly_csp();
+
 void f_setupgeneralistscopepod();
 
 void f_setupgeneric(const int nCopepods, const double mAdult[]);
+
+void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
 
 void f_calcderivatives(
 		       const int nGrid,
@@ -30,11 +34,11 @@ void f_simulatechemostateuler(
 			      const double Ndeep,
 			      const double diff,
 			      const double tEnd,
-			      const double dt); 
+			      const double dt);
 
 void f_simulateeuler(
 			      const int nGrid,
 			      double u[],
 			      const double L,
 			      const double tEnd,
-			      const double dt); 
+			      const double dt);
