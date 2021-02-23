@@ -15,7 +15,7 @@ gfortran -c -fPIC  -O3 NUMmodel_wrap_colmajor.f90 -o NUMmodel_wrap_colmajor.o
 # Make executable:
 gfortran -fPIC  -O3  globals.o debug.o spectrum.o generalists.o generalists_csp.o copepods.o NUMmodel.o NUMmodeltest.o -o NUMmodel
 # Make library
-gfortran -fPIC -shared globals.o debug.o spectrum.o generalists.o generalists_csp.o copepods.o NUMmodel.o NUMmodel_wrap_colmajor.o -o NUMmodel.so
+gfortran -fPIC -shared globals.o debug.o spectrum.o generalists.o generalists_csp.o copepods.o NUMmodel.o NUMmodel_wrap_colmajor.o -o NUMmodel_matlab.so
 
 #gfortran -shared -fPIC  -o Globals.o debug.o Spectrum.o Generalists.o NUMmodel.o -o NUMmodel.so
 #gfortran -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib -lSystem -fPIC  -o Globals.o debug.o Spectrum.o Generalists.o NUMmodel.o -o NUMmodel
