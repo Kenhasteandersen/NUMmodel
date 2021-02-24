@@ -9,7 +9,6 @@
 %
 function sim = simulateChemostat(p, L)
 if (p.bUseLibrary)
-    %unloadlibrary(loadNUMmodelLibrary())
     loadNUMmodelLibrary();
     fDeriv = @fDerivLibrary;
     fprintf('Using fortran library\n')

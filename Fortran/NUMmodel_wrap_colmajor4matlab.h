@@ -1,4 +1,4 @@
-void f_setupgeneralistsonly();
+void f_setupgeneralistsonly(const int n);
 
 void f_setupgeneralistsonly_csp();
 
