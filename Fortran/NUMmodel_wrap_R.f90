@@ -1,9 +1,10 @@
 
-  subroutine f_setupGeneralistsOnly()
-    use NUMmodel, only:  setupGeneralistsOnly
-    use globals
-    call setupGeneralistsOnly()
-  end subroutine f_setupGeneralistsOnly
+subroutine f_setupGeneralistsOnly(n)
+  use NUMmodel, only:  setupGeneralistsOnly
+  use globals
+  integer, intent(in):: n
+  call setupGeneralistsOnly(n)
+end subroutine f_setupGeneralistsOnly
 
 !!$  subroutine f_setupGeneralistsCopepod() 
 !!$    call setupGeneralistsCopepod()

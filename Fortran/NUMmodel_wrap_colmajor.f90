@@ -9,8 +9,9 @@ module NUMmodel_wrap
 
 contains
 
-  subroutine f_setupGeneralistsOnly() bind(c)
-    call setupGeneralistsOnly()
+  subroutine f_setupGeneralistsOnly(n) bind(c)
+    integer(c_int), intent(in), value:: n
+    call setupGeneralistsOnly(n)
   end subroutine f_setupGeneralistsOnly
 
   subroutine f_setupGeneralistsOnly_csp() bind(c)
