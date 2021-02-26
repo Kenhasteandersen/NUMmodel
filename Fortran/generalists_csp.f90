@@ -60,6 +60,27 @@ contains
 
     this = initSpectrum(n, ixOffset, mMin, mMax)
 
+    if (allocated(AN)) then
+       deallocate(AN)
+       deallocate(AL)
+       deallocate(JNmax)
+       deallocate(JLmax)
+       deallocate(volu)
+       deallocate(Jresp)
+       deallocate(JlossPassive)
+       deallocate(nu)
+       deallocate(mort)
+       deallocate(mort2)
+       deallocate(Vol2)
+       deallocate(rhomu)
+       deallocate(Qmu)
+       deallocate(mu_inf)
+       deallocate(mu_max)
+       
+       deallocate(JN)
+       deallocate(JL)
+       deallocate(JFreal)
+    endif
     allocate(AN(n))
     allocate(AL(n))
     allocate(JNmax(n))
@@ -78,8 +99,8 @@ contains
 
     allocate(JN(n))
     allocate(JL(n))
-    allocate(JFreal(n))
-
+    allocate(JFreal(n))   
+ 
     this%beta = beta
     this%sigma = sigma
     this%epsilonF = epsilonF
@@ -95,7 +116,6 @@ contains
     nu = c * this%m**(-onethird)
     Jmax = 0.d0*this%m! alphaJ * this%m * (1.d0-nu) ! mugC/day
 
-
     Vol2=pvol3*this%m**pvol2
     rhomu=rhomup1*Vol2**rhomup2
     Qmu=Qmup1*Vol2**Qmup2
@@ -107,9 +127,6 @@ contains
 
     mort = 0.d0 !0*0.005*(Jmax/this%m) * this%m**(-0.25);
     mort2 = mu_max*0.03/(this%z) !0.0002*n
-
-
-
   end function initGeneralists_csp
 
   subroutine calcRatesGeneralists_csp(this, u, rates, L, N, DOC, gammaN, gammaDOC)
@@ -223,7 +240,7 @@ contains
       ! Update the generalists:
       !
       rates%dudt(ix) = (rates%Jtot(ix)/this%m(i)  &
-           - mort(ix) &
+           - mort(i) &
            - rates%mortpred(ix) &
            - mort2(i)*u(i) &
            - rates%mortHTL(ix))*u(i)
