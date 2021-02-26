@@ -365,8 +365,7 @@ contains
                rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
        case(typeGeneralist_csp)
           call calcRatesGeneralists_csp(group(iGroup), &
-               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
-               rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
+               rates, L, upositive(idxN),  gammaN)
        end select
     end do
     !

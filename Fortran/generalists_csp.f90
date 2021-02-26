@@ -129,12 +129,11 @@ contains
     mort2 = mu_max*0.03/(this%z) !0.0002*n
   end function initGeneralists_csp
 
-  subroutine calcRatesGeneralists_csp(this, u, rates, L, N, DOC, gammaN, gammaDOC)
+  subroutine calcRatesGeneralists_csp(this, rates, L, N, gammaN)
     type(typeSpectrum), intent(in):: this
-    real(dp), intent(in):: u(:), gammaN, gammaDOC
+    real(dp), intent(in):: gammaN
     type(typeRates), intent(inout):: rates
-    real(dp), intent(in):: L, N, DOC
-    real(dp):: f
+    real(dp), intent(in):: L, N
     integer:: ix, i
 
     do i = 1, this%n
