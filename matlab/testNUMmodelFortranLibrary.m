@@ -19,7 +19,8 @@ dudt = 0*u;
 L = 150;
 
 %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(1), 0.1);
-calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly', int32(n));
+%calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly', int32(n));
+calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly_csp');
 [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', length(u), u, L, 0.0, dudt);
 ratesF = calcRates(u,L);
 
