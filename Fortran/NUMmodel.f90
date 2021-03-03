@@ -76,9 +76,13 @@ contains
 
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1))
     call parametersAddGroup(typeGeneralist, n, 0.1d0)
-    do iCopepod = 1, size(mAdult)
-       call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
-    end do
+    if ( size(mAdult) .eq. 0) then
+       bQuadraticHTL = .false. ! Use standard "linear" mortality
+    else
+       do iCopepod = 1, size(mAdult)
+          call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
+       end do
+    end if
     call parametersFinalize()
   end subroutine setupGeneric
 
