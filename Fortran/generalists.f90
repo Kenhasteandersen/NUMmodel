@@ -9,24 +9,44 @@ module generalists
 
   private
   real(dp), parameter:: rhoCN = 5.68
+  !
+  ! Light uptake:
+  !
   real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
+  !real(dp), parameter:: alphaL = 0.000914 ! if using Andys shading formula for non-diatoms
+  real(dp), parameter:: alphaL = 0.206
+  real(dp), parameter:: rLstar = 8.25
+  !real(dp), parameter:: cL = 21 ! if using Andys shading formula for non-diatoms
+  !
+  ! Dissolved nutrient uptake:
+  !
+  !real(dp), parameter:: alphaN = 0.00012 !0.00004 % 0.000162 % Mathilde.  (2.5e-3 l/d/cm) * (1e6 mug/g)^(-1/3) / 1.5 (g/cm); Andersen et al 2015
+  !real(dp), parameter:: cN = 0.1
+
+  real(dp), parameter:: alphaN = 0.682 ! L/d/mugC/mum^2
+  real(dp), parameter:: rNstar = 2 ! mum
+  !
+  ! Phagotrophy:
+  !
   real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
+    real(dp), parameter:: alphaF = 0.018 !  Fits to TK data for protists
+  real(dp), parameter:: cF = 0.3 ! Just a guess
+  real(dp), parameter:: beta = 500.d0
+  real(dp), parameter:: sigma = 1.3d0
+  !
+  ! Metabolism
+  !
   real(dp), parameter:: cLeakage = 0.00015 ! passive leakage of C and N
   real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
             !The constant is increased a bit to limit the lower cell size
-  real(dp), parameter:: alphaN = 0.00012 !0.00004 % 0.000162 % Mathilde.  (2.5e-3 l/d/cm) * (1e6 mug/g)^(-1/3) / 1.5 (g/cm); Andersen et al 2015
-  real(dp), parameter:: cN = 0.1
-  real(dp), parameter:: alphaL = 0.000914 ! if using Andys shading formula for non-diatoms
-  real(dp), parameter:: cL = 21 ! if using Andys shading formula for non-diatoms
-  real(dp), parameter:: alphaF = 0.018 !  Fits to TK data for protists
-  real(dp), parameter:: cF = 0.6 ! Just a guess
   real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
   real(dp), parameter:: cR = 0.1
+  !
+  ! Biogeo:
+  !
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
   real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
   real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
-  real(dp), parameter:: beta = 500.d0
-  real(dp), parameter:: sigma = 1.3d0
 
   real(dp),  dimension(:), allocatable:: AN(:), AL(:), Jmax(:),  JlossPassive(:)
   real(dp),  dimension(:), allocatable:: nu(:), mort(:)
@@ -41,6 +61,8 @@ contains
     real(dp), intent(in):: mMax
     integer, intent(in):: n, ixOffset
     real(dp), parameter:: mMin = 3.1623d-9
+    real(dp):: r(n)
+    real(dp), parameter:: rho = 0.57*1d6*1d-12
 
     this = initSpectrum(n, ixOffset, mMin, mMax)
 
@@ -72,8 +94,11 @@ contains
     this%sigma = sigma
     this%epsilonF = epsilonF
 
-    AN = alphaN*this%m**onethird / (1 + cN*this%m**(-onethird))
-    AL = alphaL*this%m**twothirds * (1-exp(-cL*this%m**onethird ))  ! shading formula
+    r = (3/(4*pi)*this%m/rho)**(1./3.)
+    
+    AN = alphaN*r**(-2.) / (1+(r/rNstar)**(-2.)) * this%m
+    !AL = alphaL*this%m**twothirds * (1-exp(-cL*this%m**onethird ))  ! shading formula
+    AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
     this%AF = alphaF*this%m
     JlossPassive = cLeakage * this%m**twothirds ! in units of C
     this%JFmax = cF*this%m**twothirds
@@ -98,7 +123,6 @@ contains
        ! Uptakes
        !
        rates%JN(ix) =   gammaN * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-
        rates%JDOC(ix) = gammaDOC * AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
