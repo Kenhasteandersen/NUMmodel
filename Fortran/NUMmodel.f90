@@ -303,7 +303,7 @@ contains
        ! Standard HTL mortality. In this case "pHTL" represent the selectivity of HTL mortality
        !
        mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
-       mortHTL = 0.1
+       mortHTL = 0.2
        pHTL(idxB:nGrid) = (1/(1+(m(idxB:nGrid)/mHTL)**(-2)))
     else
        !
@@ -326,8 +326,12 @@ contains
 
   contains
     !
-    ! Calculate the interaction coefficient between two size groups with
-    ! size ratio z:
+    ! Calculate the interaction coefficient between two size groups.
+    ! In:
+    !   z : The predator:prey body mass ratio between the two groups
+    !   beta: preferred predator:prey body mass ratio
+    !   sigma: width of selection
+    !   Delta: ratio between upper and lower body mass in size groups
     !
     function calcPhi(z, beta,sigma, Delta) result(res)
       real(dp), intent(in):: z,beta,sigma,Delta
