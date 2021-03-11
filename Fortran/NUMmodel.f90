@@ -335,12 +335,18 @@ contains
 
       s = 2*sigma*sigma
       res = max(0.d0, &
-           (Sqrt(s)*((exp(-Log(beta/(Delta*z))**2/s) - 2/exp(Log(z/beta)**2/s) +  &
-           exp(-Log(z/(beta*Delta))**2/s))*Sqrt(s) + &
-           Sqrt(Pi)*(-2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
-           Erf(Log(z/(beta*Delta))/Sqrt(s))*Log(z/(beta*Delta)) - &
-           Erf(Log(beta/(Delta*z))/Sqrt(s))*Log((Delta*z)/beta))))/ &
-           (2.*Log(Delta)**2))
+!!$           (Sqrt(s)*((exp(-Log(beta/(Delta*z))**2/s) - 2/exp(Log(z/beta)**2/s) +  &
+!!$           exp(-Log(z/(beta*Delta))**2/s))*Sqrt(s) + &
+!!$           Sqrt(Pi)*(-2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
+!!$           Erf(Log(z/(beta*Delta))/Sqrt(s))*Log(z/(beta*Delta)) - &
+!!$           Erf(Log(beta/(Delta*z))/Sqrt(s))*Log((Delta*z)/beta))))/ &
+!!$           (2.*Log(Delta)**2))
+      (Sqrt(Delta)*(((exp(-Log((beta*Delta)/z)**2/s) - 2/exp(Log(z/beta)**2/s) + &
+      exp(-Log((Delta*z)/beta)**2/s))*s)/2. - &
+      (Sqrt(Pi)*Sqrt(s)*(Erf((-Log(beta*Delta) + Log(z))/Sqrt(s))*Log((beta*Delta)/z) + &
+      2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
+      Erf((Log(beta) - Log(Delta*z))/Sqrt(s))*Log((Delta*z)/beta)))/2.))/ &
+      ((-1 + Delta)*Log(Delta)) )
     end function calcPhi
 
   end subroutine parametersFinalize
