@@ -6,23 +6,23 @@ subroutine f_setupGeneralistsOnly(n)
   call setupGeneralistsOnly(n)
 end subroutine f_setupGeneralistsOnly
 
-!!$  subroutine f_setupGeneralistsCopepod() 
+!!$  subroutine f_setupGeneralistsCopepod()
 !!$    call setupGeneralistsCopepod()
 !!$  end subroutine f_setupGeneralistsCopepod
 !!$
-!!$  subroutine f_setupGeneric(nCopepods, mAdult) 
+!!$  subroutine f_setupGeneric(nCopepods, mAdult)
 !!$    integer, intent(in):: nCopepods
 !!$    real(dp), intent(in):: mAdult(nCopepods)
 !!$
 !!$    call setupGeneric(mAdult)
 !!$  end subroutine f_setupGeneric
 
-!!$  subroutine test(x) 
+!!$  subroutine test(x)
 !!$    integer, intent(in):: x
 !!$   write(6,*) 'test'
 !!$    write(6,*) x
 !!$  end subroutine test
-  
+
   subroutine f_calcDerivatives(nn, u, L, dt, dudt)
     use globals
     use NUMmodel, only: calcDerivatives, rates
@@ -34,35 +34,52 @@ end subroutine f_setupGeneralistsOnly
     call calcDerivatives(u, L, dt)
     dudt = rates%dudt
   end subroutine f_calcDerivatives
+
+! Returns the rates calculated from last call to calcDerivatives
+  subroutine f_getRates(jN, jDOC, jL, jF, &
+    jTot, jMax, jFmax, jR, jLossPassive, &
+    jNloss,jLreal, &
+    mortpred, mortHTL, mort2, mort)
+    use globals
+    use NUMmodel, only: rates, m
+    real(dp), intent(out):: jN(nGrid-2), jDOC(nGrid-2), jL(nGrid-2), jF(nGrid-2)
+    real(dp), intent(out):: jTot(nGrid-2), jMax(nGrid-2), jFMax(nGrid-2),jR(nGrid-2)
+    real(dp), intent(out):: jLossPassive(nGrid-2), jNloss(nGrid-2), jLreal(nGrid-2)
+    real(dp), intent(out):: mortpred(nGrid-2), mortHTL(nGrid-2)
+    real(dp), intent(out):: mort2(nGrid-2), mort(nGrid-2)
+
+    !write(6,*) 't'
+    jN = rates%JN(idxB:nGrid) / m(idxB:nGrid)
+    jDOC = rates%JDOC(idxB:nGrid) / m(idxB:nGrid)
+    jL = rates%JL(idxB:nGrid) / m(idxB:nGrid)
+    jF = rates%JF(idxB:nGrid) / m(idxB:nGrid)
+    jTot = 0*m(idxB:nGrid)
+    jMax = 0*m(idxB:nGrid)
+    jFmax = 0*m(idxB:nGrid)
+    jR = 0*m(idxB:nGrid)
+    jLossPassive = 0* m(idxB:nGrid)
+    jNloss = rates%JNloss(idxB:nGrid) / m(idxB:nGrid)
+    jLreal = rates%JLreal(idxB:nGrid) / m(idxB:nGrid)
+    mortpred = rates%mortpred(idxB:nGrid)
+    mortHTL = rates%mortHTL(idxB:nGrid)
+    mort2 = 0*m(idxB:nGrid)
+    mort = 0*m(idxB:nGrid)
+
+  end subroutine f_getRates
 !!$
-!!$  subroutine f_calcRates(nGrid, u, L, jN, jL, jF) 
-!!$    integer, intent(in):: nGrid
-!!$    real(dp), intent(in):: u(nGrid)
-!!$    real(dp), intent(in):: L
-!!$    real(dp), intent(out):: jN(nGrid), jL(nGrid), jF(nGrid)
-!!$
-!!$    call calcDerivatives(u, L, 0.d0)
-!!$    jN(idxB:nGrid) = rates%JN(idxB:nGrid) / m(idxB:nGrid)
-!!$    jL(idxB:nGrid) = rates%JL(idxB:nGrid) / m(idxB:nGrid)
-!!$    jF(idxB:nGrid) = rates%JF(idxB:nGrid) / m(idxB:nGrid)
-!!$  end subroutine f_calcRates
-!!$    
-!!$  subroutine f_simulateChemostatEuler(nGrid, u, L, Ndeep, diff, tEnd, dt) 
+!!$  subroutine f_simulateChemostatEuler(nGrid, u, L, Ndeep, diff, tEnd, dt)
 !!$    integer, intent(in):: nGrid
 !!$    real(dp), intent(inout):: u(nGrid)
 !!$    real(dp), intent(in):: L, Ndeep, diff, tEnd, dt
-!!$    
+!!$
 !!$    call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
 !!$  end subroutine f_simulateChemostatEuler
-!!$  
-!!$  subroutine f_simulateEuler(nGrid, u, L, tEnd, dt) 
+!!$
+!!$  subroutine f_simulateEuler(nGrid, u, L, tEnd, dt)
 !!$    integer, intent(in):: nGrid
 !!$    real(dp), intent(inout):: u(nGrid)
 !!$    real(dp), intent(in)!:: L, tEnd, dt
-!!$    
+!!$
 !!$    call simulateEuler(u, L, tEnd, dt)
 !!$  end subroutine f_simulateEuler
-!!$  
-
-
-
+!!$
