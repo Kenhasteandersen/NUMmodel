@@ -42,7 +42,7 @@ contains
   subroutine setupGeneralistsOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, n, 0.1d0) ! generalists with 10 size classes
+    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with 10 size classes
     bQuadraticHTL = .false. ! Use standard "linear" mortality
     call parametersFinalize()
   end subroutine setupGeneralistsOnly
