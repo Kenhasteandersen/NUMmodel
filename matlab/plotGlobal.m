@@ -8,12 +8,18 @@
 %
 function plotGlobal(sim, iTime, sProjection)
 
-if (nargin()==1)
-    iTime = length(sim.t); % Choose the last timestep if none is given
+arguments
+    sim struct;
+    iTime double = length(sim.t);
+    sProjection string = 'fast';
 end
-if (nargin()<3)
-    sProjection = 'fast'; % Use fast plotting as default
-end
+
+%if (nargin()==1)
+%    iTime = length(sim.t); % Choose the last timestep if none is given
+%end
+%if (nargin()<3)
+%    sProjection = 'fast'; % Use fast plotting as default
+%end
 %
 % Do the plots:
 %
