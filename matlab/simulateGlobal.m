@@ -21,6 +21,13 @@ addpath("Transport matrix");
 %Tbc = [];
 
 disp('Preparing simulation')
+%
+% Check that files exist:
+%
+if ~exist(p.pathBoxes,'file')
+    error( sprintf('Error: Cannot find transport matrix file: %s.mat',...
+        p.pathBoxes));
+end
 % ---------------------------------
 % Load library:
 % ---------------------------------
