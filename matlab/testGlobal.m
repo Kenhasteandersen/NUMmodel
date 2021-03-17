@@ -8,7 +8,7 @@ p.tSave = 5;
 sim = simulateGlobal(p);
 
 sumB = sum(sim.B(~isnan(sim.B)));
-if ( sumB > 2830000 | sumB < 2820000 )
+if ( sumB > 2.8e6 || sumB < 2.7e6 )
     bSuccess = false;
 else
     bSuccess = true;

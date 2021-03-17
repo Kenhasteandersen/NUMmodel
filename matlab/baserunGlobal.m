@@ -19,16 +19,17 @@ if (nargin==0)
     %p = parametersGlobal(10,2); % Use MITgcm_ECCO
     p.tEnd = 365;
 end
-
-if exist(strcat(p.pathInit,'.mat'), 'file')
-    % Load decent initial conditions
-    disp('Loading initial conditions from file');
-    load(p.pathInit);
-end
 %
 % Simulate
 %
-sim = simulateGlobal(p);%,sim); % Simulate
+if exist(strcat(p.pathInit,'.mat'), 'file')
+    % Load decent initial conditions
+    disp('Loading initial conditions from file');
+    load(p.pathInit,'sim');
+    sim = simulateGlobal(p,sim)
+else
+    sim = simulateGlobal(p);%,sim); % Simulate
+end
 sim.B(sim.B<0)=0; % Get rid of negative biomasses
 %disp('Calculating functions')
 %sim = calcGlobalFunction(sim); % Calculate functions
