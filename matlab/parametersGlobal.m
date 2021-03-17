@@ -11,17 +11,17 @@ function p = parametersGlobal(p, nTMmodel)
 
 arguments
     p struct
-    nTMmodel = 1;
+    nTMmodel {mustBeInteger} = 1;
 end
 %
 % Set load paths for tranport matrices:
 %
 if (nargin==1 || nargin==0 || nTMmodel == 1)
-    p.pathMatrix   = '../TMs/MITgcm/Matrix5/TMs/matrix_nocorrection_';
-    p.pathBoxes     = '../TMs/MITgcm/Matrix5/Data/boxes.mat';
-    p.pathGrid      = '../TMs/MITgcm/grid.mat';
-    p.pathConfigData = '../TMs/MITgcm/config_data.mat';
-    p.pathTemp      = '../TMs/MITgcm/BiogeochemData/Theta_bc.mat'; 
+    p.pathMatrix   = '../TMs/MITgcm_2.8/Matrix5/TMs/matrix_nocorrection_';
+    p.pathBoxes     = '../TMs/MITgcm_2.8/Matrix5/Data/boxes.mat';
+    p.pathGrid      = '../TMs/MITgcm_2.8/grid.mat';
+    p.pathConfigData = '../TMs/MITgcm_2.8/config_data.mat';
+    p.pathTemp      = '../TMs/MITgcm_2.8/BiogeochemData/Theta_bc.mat'; 
     p.pathN0        = '../TMs/MITgcm_N0';
     p.pathInit      = sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0));
 elseif nTMmodel == 2
