@@ -3,7 +3,7 @@
 % library.
 % 
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
-% (choose MITgcm_2.8deg), and be put into the location '../TMs'
+% (choose MITgcm_2.8deg), and be put into the location 'NUMmodel/TMs'
 %
 % Input:
 %  p: parameter structure from parametersGlobal
@@ -69,8 +69,12 @@ if (nargin==2)
         u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],sim.p.pathBoxes, sim.p.pathGrid);
     end
 else
-    load(p.pathN0, 'N');
-    u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
+    if exist(strcat(p.pathN0,'.mat'),'file')
+        load(p.pathN0, 'N');
+        u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
+    else
+        u(:, ixN) = 150*ones(nb,1);
+    end
     u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
 end
