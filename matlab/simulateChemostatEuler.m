@@ -13,7 +13,6 @@ function sim = simulateChemostatEuler(p, L)
 %
 u = p.u0;
 dudt = 0*u;
-L = 100;
 
 u = calllib(loadNUMmodelLibrary(), 'f_simulatechemostateuler', ...
     int32(length(u)), u, L, p.u0(1), p.d, p.tEnd, 0.01);

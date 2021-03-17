@@ -514,6 +514,7 @@ contains
     integer:: i, iEnd
 
     iEnd = floor(tEnd/dt)
+    write(6,*) u
 
     do i=1, iEnd
        call calcDerivatives(u, L, dt)

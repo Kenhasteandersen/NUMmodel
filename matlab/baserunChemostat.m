@@ -35,6 +35,7 @@ p.bUseLibrary = bUseFortran;
 if bUseFortran
     loadNUMmodelLibrary();
     calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult);
+    %calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(p.n+2));
 end
 %
 % Simulate

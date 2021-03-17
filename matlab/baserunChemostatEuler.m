@@ -2,8 +2,8 @@
 % Make a basic run of the chemostat model
 %
 function sim = baserunChemostatEuler(mAdult)
-if (nargin==0)
-    mAdult = [];
+arguments
+    mAdult double = []
 end
 %
 % Set parameters:

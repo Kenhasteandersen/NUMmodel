@@ -5,6 +5,19 @@ VisualStudioVersion = 16.0.808.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "NUMmodel", "NUMmodel.mdproj", "{1321F0E9-2253-4AFB-926D-128A3933301F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1CA16B4E-9EF7-4DDC-B406-10FD4C52DE78}"
+	ProjectSection(SolutionItems) = preProject
+		Fortran\copepods.f90 = Fortran\copepods.f90
+		Fortran\spectrum.f90 = Fortran\spectrum.f90
+		Fortran\globals.f90 = Fortran\globals.f90
+		Fortran\generalists.f90 = Fortran\generalists.f90
+		Fortran\debug.f90 = Fortran\debug.f90
+		Fortran\NUMmodel_wrap_colmajor.f90 = Fortran\NUMmodel_wrap_colmajor.f90
+		Fortran\NUMmodeltest.f90 = Fortran\NUMmodeltest.f90
+		Fortran\NUMmodel.f90 = Fortran\NUMmodel.f90
+		Fortran\generalists_csp.f90 = Fortran\generalists_csp.f90
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|Any CPU = Default|Any CPU

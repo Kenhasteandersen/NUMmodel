@@ -20,8 +20,9 @@ if (nargin==0)
     p.tEnd = 365;
 end
 
-if exist(p.pathInit, 'file')
+if exist(strcat(p.pathInit,'.mat'), 'file')
     % Load decent initial conditions
+    disp('Loading initial conditions from file');
     load(p.pathInit);
 end
 %

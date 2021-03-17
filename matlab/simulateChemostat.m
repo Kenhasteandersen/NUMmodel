@@ -19,11 +19,11 @@ end
 % Find ix for nutrients and unicellulars:
 %
 ix = [1,2]; % Nutrients and DOC
-for i = 1:p.nGroups
-    if (p.typeGroups(i)==1)
-        ix = [ix, p.ixStart(i):p.ixEnd(i)];
-    end
-end
+%for i = 1:p.nGroups
+    %if (p.typeGroups(i)==1)
+    %    ix = [ix, p.ixStart(i):p.ixEnd(i)];
+    %end
+%end
 %
 % Concentrations in the deep layer:
 %

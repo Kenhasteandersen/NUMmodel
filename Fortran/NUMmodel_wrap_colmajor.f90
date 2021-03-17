@@ -48,8 +48,6 @@ contains
     real(c_double), intent(in):: u(nGrid)
     real(c_double), intent(out):: dudt(nGrid)
 
-    write(6,*) nGrid
-    write(6,*) L
     call calcDerivatives(u, L, dt)
     dudt = rates%dudt
   end subroutine f_calcDerivatives
