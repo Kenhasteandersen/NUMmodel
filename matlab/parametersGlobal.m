@@ -4,12 +4,13 @@
 % Input:
 %  n - number of size groups (default 10)
 %  nTMmodel - Which transport matrices to use:
-%       1 = MITgcm_2.8
+%       1 = MITgcm_2.8 (default)
 %       2 = MITgcm_ECCO
 %
 function p = parametersGlobal(p, nTMmodel)
 
-if (nargin==1)
+arguments
+    p struct
     nTMmodel = 1;
 end
 %
