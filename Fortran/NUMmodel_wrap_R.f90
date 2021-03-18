@@ -67,6 +67,15 @@ end subroutine f_setupGeneralistsOnly
     mort = 0*m(idxB:nGrid)
 
   end subroutine f_getRates
+
+  subroutine f_getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+    use globals
+    use NUMmodel, only: getFunctions
+   real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+
+    call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+  end subroutine f_getFunctions
+  
 !!$
 !!$  subroutine f_simulateChemostatEuler(nGrid, u, L, Ndeep, diff, tEnd, dt)
 !!$    integer, intent(in):: nGrid

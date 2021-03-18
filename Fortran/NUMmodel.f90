@@ -236,6 +236,7 @@ contains
   subroutine parametersAddGroup(typeGroup, n, mMax)
     integer, intent(in):: typeGroup, n
     real(dp), intent(in):: mMax
+
     !
     ! Find the group number and grid location:
     !
@@ -263,6 +264,7 @@ contains
     case(typeCopepod)
        group(iGroup) = initCopepod(n, ixStart(iGroup)-1, mMax)
     end select
+    group(iGroup)%typeGroup = typeGroup
     !
     ! Import grid to globals:
     !
@@ -569,6 +571,132 @@ contains
     f = Q10**(T/10.-1.)
   end function fTemp
 
+  !=========================================
+  ! Diagnostic functions
+  !=========================================
 
+  
+  ! ---------------------------------------------------
+  ! Get the ecosystem functions as calculated from the last call
+  ! to calcDerivatives
+  ! ---------------------------------------------------
+  subroutine getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+    real(dp) :: conversion
+    real(dp) :: ESD(nGrid)
+    integer:: i
 
+    ProdGross = 0.d0
+    ProdNet = 0.d0
+    ProdHTL = 0.d0
+    Bpico = 0.d0
+    Bnano = 0.d0
+    Bmicro = 0.d0
+    
+    conversion = 365*1d-6*1000 ! Convert to gC/yr/m3
+    do i = 1, nGroups
+       if (group(i)%typeGroup .eq. typeGeneralist) then
+          ProdGross = ProdGross + conversion * &
+               sum(  rates%JL(idxB:nGrid) * upositive(idxB:nGrid) / m(idxB:nGrid) )
+          
+          ProdNet = ProdNet + conversion * &
+               getProdNet(group(i),  upositive(group(i)%ixStart:group(i)%ixEnd), rates)
+       end if
+    end do
+
+    ESD = 10000 * 1.5 * (m*1d-6)**onethird
+    conversion = 1d-6*1000 ! Convert to gC/m3
+    do i = idxB, nGrid
+       if (ESD(i) .le. 2.) then
+          Bpico = Bpico + conversion*upositive(i)
+       endif
+       
+       if ((ESD(i).gt.2.) .and. (ESD(i) .le. 20.)) then
+          Bnano = Bnano + conversion*upositive(i)
+       endif
+
+       if (ESD(i) .gt. 20.) then
+          Bmicro = Bmicro + conversion*upositive(i)
+       endif
+
+       ProdHTL = ProdHTL + 365*conversion*rates%mortHTL(i)*upositive(i)
+    end do
+
+    eHTL = eHTL / ProdNet
+  end subroutine getFunctions
+!!$ function getFunctions() result(func)
+!!$    integer, parameter:: nFunc = 7
+!!$    integer, parameter:: iProdGross = 1
+!!$    integer, parameter:: iProdNet = 2
+!!$    integer, parameter:: iProdHTL = 3
+!!$    integer, parameter:: iEHTL = 4
+!!$    integer, parameter:: iPico = 5
+!!$    integer, parameter:: iNano = 6
+!!$    integer, parameter:: iMicro = 7
+!!$    real(dp) :: func(nFunc)
+!!$    real(dp) :: conversion
+!!$    real(dp) :: ESD(nGrid)
+!!$    integer:: i
+!!$    
+!!$    conversion = 365*1d-6*1000 ! Convert to gC/yr/m3
+!!$    func(:) = 0.d0
+!!$    do i = 1, nGroups
+!!$       if (group(i)%typeGroup .eq. typeGeneralist) then
+!!$          func(iProdGross) = func(iProdGross) + conversion * &
+!!$               sum(  rates%JL(idxB:nGrid) * upositive(idxB:nGrid) / m(idxB:nGrid) )
+!!$          
+!!$          func(iProdNet) = func(iProdNet) + conversion * &
+!!$               getProdNet(group(i),  upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), rates)
+!!$       end if
+!!$    end do
+!!$
+!!$    ESD = 10000 * 1.5 * (m*1d-6)**onethird
+!!$    conversion = 1d-6*1000 ! Convert to gC/m3
+!!$    do i = idxB, nGrid
+!!$       if (ESD(i) .le. 2.) then
+!!$          func(iPico) = func(iPico) + conversion*upositive(i)
+!!$       endif
+!!$       
+!!$       if ((ESD(i).gt.2.) .and. (ESD(i) .le. 20.)) then
+!!$          func(iNano) = func(iNano) + conversion*upositive(i)
+!!$       endif
+!!$
+!!$       if (ESD(i) .gt. 20.) then
+!!$          func(iMicro) = func(iMicro) + conversion*upositive(i)
+!!$       endif
+!!$
+!!$       func(iProdHTL) = func(iProdHTL) + 365*conversion*rates%mortHTL(i)*upositive(i)
+!!$    end do
+!!$
+!!$    func(iEHTL) = func(iProdHTL) / func(iProdNet)
+
+!!$lnESD = log(ESD);
+!!$delta = diff(lnESD);
+!!$delta = delta(1);
+!!$lnESDmid = lnESD(1:end-1)+0.5*delta;
+!!$
+!!$Bpico = sum(B(ixPico));
+!!$Bnano = sum(B(ixNano));
+!!$Bmicro = sum(B(ixMicro));
+!!$
+!!$if (lnESDmid(ixPico(end))<log(2))
+!!$    tmp = B(ixPico(end)+1)*(lnESD(ixPico(end)+1)-log(2))/delta;
+!!$    Bpico = Bpico + tmp;
+!!$    Bnano = Bnano - tmp;
+!!$else
+!!$    tmp = B(ixPico(end))*(lnESD(ixPico(end))-log(2))/delta;
+!!$    Bpico = Bpico - tmp;
+!!$    Bnano = Bnano + tmp;
+!!$end
+!!$
+!!$if (lnESDmid(ixNano(end))<log(20))
+!!$    tmp = B(ixNano(end)+1)*(lnESD(ixNano(end)+1)-log(20))/delta;
+!!$    Bnano = Bnano + tmp;
+!!$    Bmicro = Bmicro - tmp;
+!!$else
+!!$    tmp = B(ixNano(end))*(lnESD(ixNano(end))-log(20))/delta;
+!!$    Bnano = Bnano - tmp;
+!!$    Bmicro = Bmicro + tmp;
+!!$end
+  
 end module NUMmodel
