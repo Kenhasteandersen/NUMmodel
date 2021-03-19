@@ -623,6 +623,9 @@ contains
     end do
 
     eHTL = eHTL / ProdNet
+    if (eHTL .gt. 1) then
+       eHTL = -1.
+    end if
   end subroutine getFunctions
 !!$ function getFunctions() result(func)
 !!$    integer, parameter:: nFunc = 7

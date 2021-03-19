@@ -25,7 +25,7 @@ disp('Preparing simulation')
 % Check that files exist:
 %
 if ~exist(p.pathBoxes,'file')
-    error( sprintf('Error: Cannot find transport matrix file: %s.mat',...
+    error( sprintf('Error: Cannot find transport matrix file: %s',...
         p.pathBoxes));
 end
 % ---------------------------------

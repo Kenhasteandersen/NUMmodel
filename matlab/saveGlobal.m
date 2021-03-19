@@ -1,7 +1,12 @@
 %
 % Save the results of a simulation to be used for initial conditions
 %
-function saveGlobal(sim)
+function saveGlobal(sim, path)
+
+arguments
+    sim struct
+    path string = sim.p.pathInit;
+end
 
 savesim.N = sim.N(:,:,:,end);
 savesim.DOC = sim.DOC(:,:,:,end);
