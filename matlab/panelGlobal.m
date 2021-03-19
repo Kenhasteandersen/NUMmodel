@@ -3,9 +3,14 @@
 % If sForm = "fast" then it does a rough - but fast - map. Otherwise
 % a nice map is drawn
 function cbar = panelGlobal(x,y,z, sTitle, sProjection)
-if (nargin==4)
-    sProjection = 'fast';
+
+arguments
+    x,y (:,1);
+    z (:,:);
+    sTitle string = '';
+    sProjection string = 'fast';
 end
+
 % Adjust to global plot (close gap at lat 0)
 z = [z;z(1,:)];
 x = [x-x(1);360];
