@@ -49,7 +49,7 @@ module generalists
   real(dp),  dimension(:), allocatable:: JN(:), JL(:), Jresp(:), JFreal(:)
   real(dp):: mort2
 
-  public initGeneralists, calcRatesGeneralists, calcDerivativesGeneralists, getProdNet
+  public initGeneralists, calcRatesGeneralists, calcDerivativesGeneralists, getProdNetGeneralists
 contains
 
   function initGeneralists(n, ixOffset, mMax) result(this)
@@ -218,7 +218,7 @@ contains
 
  end subroutine calcDerivativesGeneralists
 
- function getProdNet(this, u, rates) result(ProdNet)
+ function getProdNetGeneralists(this, u, rates) result(ProdNet)
    real(dp):: ProdNet
    type(typeSpectrum), intent(in):: this
    type(typeRates), intent(in):: rates
@@ -229,6 +229,6 @@ contains
    do i = 1, this%n
       ProdNet = ProdNet + max( 0.d0, (rates%JLreal(i+this%ixOffset)-Jresp(i))*u(i)/this%m(i) )
     end do
-  end function getProdNet
+  end function getProdNetGeneralists
  
 end module generalists

@@ -525,7 +525,7 @@ contains
        !
        ! Note: should not be done for copepods:
        !
-       !rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
+       rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
        u = u + rates%dudt*dt
        !write(6,*) calcN(u)
     end do
@@ -593,18 +593,18 @@ contains
     Bnano = 0.d0
     Bmicro = 0.d0
     
-    conversion = 365*1d-6*1000 ! Convert to gC/yr/m3
+    conversion = 365.*1d-6*1000. ! Convert to gC/yr/m3
     do i = 1, nGroups
        if (group(i)%typeGroup .eq. typeGeneralist) then
           ProdGross = ProdGross + conversion * &
                sum(  rates%JL(idxB:nGrid) * upositive(idxB:nGrid) / m(idxB:nGrid) )
           
           ProdNet = ProdNet + conversion * &
-               getProdNet(group(i),  upositive(group(i)%ixStart:group(i)%ixEnd), rates)
+               getProdNetGeneralists(group(i),  upositive(group(i)%ixStart:group(i)%ixEnd), rates)
        end if
     end do
 
-    ESD = 10000 * 1.5 * (m*1d-6)**onethird
+    ESD = 10000. * 1.5 * (m*1d-6)**onethird
     conversion = 1d-6*1000 ! Convert to gC/m3
     do i = idxB, nGrid
        if (ESD(i) .le. 2.) then
