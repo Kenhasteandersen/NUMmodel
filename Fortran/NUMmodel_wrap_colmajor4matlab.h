@@ -42,3 +42,12 @@ void f_simulateeuler(
 			      const double L,
 			      const double tEnd,
 			      const double dt);
+
+void f_getfunctions(
+		    double *ProdGross,
+		    double *ProdNet,
+		    double *ProdHTL,
+		    double *eHTL,
+		    double *Bpico,
+		    double *Bnano,
+		    double *Bmicro);

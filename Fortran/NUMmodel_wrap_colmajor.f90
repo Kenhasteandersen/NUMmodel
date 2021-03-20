@@ -2,7 +2,7 @@ module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int
   use NUMmodel, only:  setupGeneralistsOnly, setupGeneralistsOnly_csp, setupGeneralistsCopepod, &
        setupGeneric, setupGeneric_csp, calcderivatives, rates, m, &
-       simulateChemostatEuler, simulateEuler
+       simulateChemostatEuler, simulateEuler, getFunctions
   use globals
 
   implicit none
@@ -85,4 +85,10 @@ contains
     call simulateEuler(u, L, tEnd, dt)
   end subroutine f_simulateEuler
 
+  subroutine f_getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro) bind(c)
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+
+    call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+  end subroutine f_getFunctions
+  
 end module NUMmodel_wrap
