@@ -627,79 +627,38 @@ contains
        eHTL = -1.
     end if
   end subroutine getFunctions
-!!$ function getFunctions() result(func)
-!!$    integer, parameter:: nFunc = 7
-!!$    integer, parameter:: iProdGross = 1
-!!$    integer, parameter:: iProdNet = 2
-!!$    integer, parameter:: iProdHTL = 3
-!!$    integer, parameter:: iEHTL = 4
-!!$    integer, parameter:: iPico = 5
-!!$    integer, parameter:: iNano = 6
-!!$    integer, parameter:: iMicro = 7
-!!$    real(dp) :: func(nFunc)
-!!$    real(dp) :: conversion
-!!$    real(dp) :: ESD(nGrid)
-!!$    integer:: i
-!!$    
-!!$    conversion = 365*1d-6*1000 ! Convert to gC/yr/m3
-!!$    func(:) = 0.d0
-!!$    do i = 1, nGroups
-!!$       if (group(i)%typeGroup .eq. typeGeneralist) then
-!!$          func(iProdGross) = func(iProdGross) + conversion * &
-!!$               sum(  rates%JL(idxB:nGrid) * upositive(idxB:nGrid) / m(idxB:nGrid) )
-!!$          
-!!$          func(iProdNet) = func(iProdNet) + conversion * &
-!!$               getProdNet(group(i),  upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), rates)
-!!$       end if
-!!$    end do
-!!$
-!!$    ESD = 10000 * 1.5 * (m*1d-6)**onethird
-!!$    conversion = 1d-6*1000 ! Convert to gC/m3
-!!$    do i = idxB, nGrid
-!!$       if (ESD(i) .le. 2.) then
-!!$          func(iPico) = func(iPico) + conversion*upositive(i)
-!!$       endif
-!!$       
-!!$       if ((ESD(i).gt.2.) .and. (ESD(i) .le. 20.)) then
-!!$          func(iNano) = func(iNano) + conversion*upositive(i)
-!!$       endif
-!!$
-!!$       if (ESD(i) .gt. 20.) then
-!!$          func(iMicro) = func(iMicro) + conversion*upositive(i)
-!!$       endif
-!!$
-!!$       func(iProdHTL) = func(iProdHTL) + 365*conversion*rates%mortHTL(i)*upositive(i)
-!!$    end do
-!!$
-!!$    func(iEHTL) = func(iProdHTL) / func(iProdNet)
 
-!!$lnESD = log(ESD);
-!!$delta = diff(lnESD);
-!!$delta = delta(1);
-!!$lnESDmid = lnESD(1:end-1)+0.5*delta;
-!!$
-!!$Bpico = sum(B(ixPico));
-!!$Bnano = sum(B(ixNano));
-!!$Bmicro = sum(B(ixMicro));
-!!$
-!!$if (lnESDmid(ixPico(end))<log(2))
-!!$    tmp = B(ixPico(end)+1)*(lnESD(ixPico(end)+1)-log(2))/delta;
-!!$    Bpico = Bpico + tmp;
-!!$    Bnano = Bnano - tmp;
-!!$else
-!!$    tmp = B(ixPico(end))*(lnESD(ixPico(end))-log(2))/delta;
-!!$    Bpico = Bpico - tmp;
-!!$    Bnano = Bnano + tmp;
-!!$end
-!!$
-!!$if (lnESDmid(ixNano(end))<log(20))
-!!$    tmp = B(ixNano(end)+1)*(lnESD(ixNano(end)+1)-log(20))/delta;
-!!$    Bnano = Bnano + tmp;
-!!$    Bmicro = Bmicro - tmp;
-!!$else
-!!$    tmp = B(ixNano(end))*(lnESD(ixNano(end))-log(20))/delta;
-!!$    Bnano = Bnano - tmp;
-!!$    Bmicro = Bmicro + tmp;
-!!$end
+  ! ---------------------------------------------------
+  ! Returns the rates calculated from last call to calcDerivatives
+  ! ---------------------------------------------------
+  subroutine getRates(jN, jDOC, jL, jF, jFreal,&
+    jTot, jMax, jFmaxx, jR, jLossPassive, &
+    jNloss,jLreal, &
+    mortpred, mortHTL, mort2, mort)
+    use globals
+    real(dp), intent(out):: jN(nGrid-2), jDOC(nGrid-2), jL(nGrid-2), jF(nGrid-2), jFreal(nGrid-2)
+    real(dp), intent(out):: jTot(nGrid-2), jMax(nGrid-2), jFmaxx(nGrid-2),jR(nGrid-2)
+    real(dp), intent(out):: jLossPassive(nGrid-2), jNloss(nGrid-2), jLreal(nGrid-2)
+    real(dp), intent(out):: mortpred(nGrid-2), mortHTL(nGrid-2)
+    real(dp), intent(out):: mort2(nGrid-2), mort(nGrid-2)
+
+    jN = rates%JN(idxB:nGrid) / m(idxB:nGrid)
+    jDOC = rates%JDOC(idxB:nGrid) / m(idxB:nGrid)
+    jL = rates%JL(idxB:nGrid) / m(idxB:nGrid)
+    jF = rates%flvl(idxB:nGrid) * JFmax(idxB:nGrid)/ m(idxB:nGrid)
+    jFreal = rates%JF(idxB:nGrid) / m(idxB:nGrid)
+    jTot = rates%Jtot(idxB:nGrid) / m(idxB:nGrid)
+    jMax = 1.5 + 0*m(idxB:nGrid) ! NOTE: HARDCODED. Should be taken from generalists
+    jFmaxx = JFmax(idxB:nGrid) / m(idxB:nGrid)
+    jR = 1.5*0.1 + 0*m(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
+    jLossPassive = 0* m(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
+    jNloss = rates%JNloss(idxB:nGrid) / m(idxB:nGrid)
+    jLreal = rates%JLreal(idxB:nGrid) / m(idxB:nGrid)
+    mortpred = rates%mortpred(idxB:nGrid)
+    mortHTL = rates%mortHTL(idxB:nGrid)
+    mort2 = 0.0002*(nGrid-2)*upositive(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
+    mort = 0*m(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
+  end subroutine getRates
+
   
 end module NUMmodel

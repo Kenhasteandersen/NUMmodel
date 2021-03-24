@@ -51,3 +51,21 @@ void f_getfunctions(
 		    double *Bpico,
 		    double *Bnano,
 		    double *Bmicro);
+
+void f_getrates(
+		double *jN,
+		double *jDOC,
+		double *jL,
+		double *jF,
+		double *jFreal,
+		double *jTot,
+		double *jMax,
+		double *jFmaxx,
+		double *jR,
+		double *jLossPassive, 
+		double *jNloss,
+		double *jLreal, 
+		double *mortpred,
+		double *mortHTL,
+		double *mort2,
+		double *mort);

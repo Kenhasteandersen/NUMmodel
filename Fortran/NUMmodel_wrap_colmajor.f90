@@ -90,5 +90,23 @@ contains
 
     call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
   end subroutine f_getFunctions
+
+  subroutine f_getRates(jN, jDOC, jL, jF, jFreal,&
+    jTot, jMax, jFmaxx, jR, jLossPassive, &
+    jNloss,jLreal, &
+    mortpred, mortHTL, mort2, mort) bind(c)
+    use globals
+    use NUMmodel, only: rates, m, upositive, JFmax, getRates
+    real(dp), intent(out):: jN(nGrid-2), jDOC(nGrid-2), jL(nGrid-2), jF(nGrid-2), jFreal(nGrid-2)
+    real(dp), intent(out):: jTot(nGrid-2), jMax(nGrid-2), jFmaxx(nGrid-2),jR(nGrid-2)
+    real(dp), intent(out):: jLossPassive(nGrid-2), jNloss(nGrid-2), jLreal(nGrid-2)
+    real(dp), intent(out):: mortpred(nGrid-2), mortHTL(nGrid-2)
+    real(dp), intent(out):: mort2(nGrid-2), mort(nGrid-2)
+
+    call getRates(jN, jDOC, jL, jF, jFreal,&
+    jTot, jMax, jFmaxx, jR, jLossPassive, &
+    jNloss,jLreal, &
+    mortpred, mortHTL, mort2, mort)
+  end subroutine f_getRates
   
 end module NUMmodel_wrap
