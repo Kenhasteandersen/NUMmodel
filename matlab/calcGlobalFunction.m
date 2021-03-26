@@ -33,14 +33,14 @@ if ~isfield(sim,'ProdGross')
                             squeeze(sim.B(i,j,k,:,iTime))'];
                         [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
                             getFunctions(u, sim.L(i,j,k,iTime));
-                        conv = squeeze(dz(i,j,k))*365*10*10*1000;
+                        conv = squeeze(dz(i,j,k));
                         ProdGross = ProdGross + ProdGross1*conv;
                         ProdNet = ProdNet + ProdNet1*conv;
                         ProdHTL = ProdHTL +ProdHTL1*conv;
                         %eHTL = eHTL + eHTL1/length(sim.z);
-                        Bpico = Bpico + Bpico*dz(i,j,k)*10*10*1000; % gC/m2
-                        Bnano = Bnano + Bnano1*dz(i,j,k)*10*10*1000;
-                        Bmicro = Bmicro + Bmicro1*dz(i,j,k)*10*10*1000;
+                        Bpico = Bpico + Bpico*dz(i,j,k); % gC/m2
+                        Bnano = Bnano + Bnano1*dz(i,j,k);
+                        Bmicro = Bmicro + Bmicro1*dz(i,j,k);
                     end
                 end
                 sim.ProdGross(i,j,iTime) = ProdGross;
@@ -58,7 +58,7 @@ end
 % Global totals
 %
     function tot = calcTotal(u)
-        tot = sum(u(ix(:)).*dv(ix(:)))*10*10; % mug/day
+        tot = sum(u(ix(:)).*dv(ix(:))); % mug/day
     end
 
 for i = 1:length(sim.t)
@@ -92,7 +92,7 @@ if (sim.t(end)>=365)
         sim.ProdNetAnnual(:,:,i) = mean(sim.ProdNet(:,:,ixTime),3)/length(ixTime); % gC/m2/yr
         sim.ProdHTLAnnual(:,:,i) = mean(sim.ProdHTL(:,:,ixTime),3)/length(ixTime); % gC/m2/yr
     end
-    sim.ProdNetTotalAnnual = sim.ProdNetTotalAnnual*365/1000/1000/1000/1000; % GTon carbon/year
+    sim.ProdNetTotalAnnual = sim.ProdNetTotalAnnual/1000/1000/1000/1000; % GTon carbon/year
 end
 
 end

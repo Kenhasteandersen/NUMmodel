@@ -10,23 +10,25 @@ sim = calcGlobalFunction(sim);
 
 %%
 clf
-tiles = tiledlayout(3,1,'TileSpacing','compact','padding','compact');
+tiles = tiledlayout(3,1);%,'TileSpacing','compact');%,'padding','compact');
+tiles.InnerPosition = [0.13,0.11,0.65,0.8150]; % Make space for colorbars
 
 nexttile
-cbar = panelGlobal(sim.x,sim.y,sim.ProdNetAnnual,'Net primary production (gC/m^2/yr)',sProjection);
-cbar.Label.String = 'gC m{^-2} yr^{-1}';
+cbar = panelGlobal(sim.x,sim.y,sim.ProdNetAnnual(:,:,end),'Net primary production',sProjection);
+cbar.Label.String = 'gC m^{-2} yr^{-1}';
 %cbar.Visible='off';
 %caxis([-3,2])
 
 nexttile
-cbar = panelGlobal(sim.x,sim.y,sim.ProdHTLAnnual,'HTL production (gC/m^2/yr)',sProjection);
-cbar.Label.String = 'gC m{^-2} yr^{-1}';
+cbar = panelGlobal(sim.x,sim.y,sim.ProdHTLAnnual(:,:,end),'HTL production',sProjection);
+cbar.Label.String = 'gC m^{-2} yr^{-1}';
 %cbar.Visible='off';
 %caxis([-3,2])
 
 nexttile
-cbar = panelGlobal(sim.x,sim.y,sim.ProdHTLAnnual./sim.ProdNetAnnual,'eHTL',sProjection);
-caxis([0,2])
+cbar = panelGlobal(sim.x,sim.y,sim.ProdHTLAnnual(:,:,end)./sim.ProdNetAnnual(:,:,end),'eHTL',sProjection);
+caxis([0,1])
+cbar.Label.String = '';
 %cbar.Location = 'SouthOutside';
 
 

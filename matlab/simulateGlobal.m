@@ -197,13 +197,4 @@ sim.p = p;
 sim.Ntot = calcGlobalN(sim);
 sim.B(sim.B<0) = 0.;
 
-%
-% Function to assemble derivative for chemostat:
-%
-%    function dudt = fDerivLibrary(t,u,L)
-%        dudt = 0*u';
-%        [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', length(u), u, L, 0.0, dudt);
-%        dudt = dudt';
-%    end
-
 end
