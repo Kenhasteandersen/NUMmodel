@@ -1,4 +1,8 @@
 function p = parameters(mAdult)
+
+arguments
+    mAdult (1,:) {mustBeNumeric} = [];
+end
 %
 % Clarification of the grid:
 %
