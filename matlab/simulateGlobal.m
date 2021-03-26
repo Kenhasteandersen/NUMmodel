@@ -195,6 +195,7 @@ fprintf('Solving time: %2u:%02u:%02u\n', ...
 sim.t = tSave; % days where solution was saved
 sim.p = p;
 sim.Ntot = calcGlobalN(sim);
+sim.B(sim.B<0) = 0.;
 
 %
 % Function to assemble derivative for chemostat:

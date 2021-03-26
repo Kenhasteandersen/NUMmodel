@@ -1,4 +1,7 @@
 function sim = calcGlobalFunction(sim)
+
+loadNUMmodelLibrary();
+calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(sim.p.mAdult)), sim.p.mAdult)
 % Get grid volumes:
 load(sim.p.pathGrid,'dv','dz');
 ix = ~isnan(sim.N(:,:,1,1)); % Find all relevant grid cells
@@ -85,8 +88,9 @@ if (sim.t(end)>=365)
     sim.ProdNetAnnual = zeros(length(sim.x), length(sim.y), floor(sim.t(end)/365));
     for i = 1:sim.t(end)/365
         ixTime = sim.t>365*(i-1) & sim.t<=365*i;
-        sim.ProdNetTotalAnnual(i) = sum(sim.ProdNetTotal(ixTime))/length(ixTime); % mugC/l/day
-        sim.ProdNetAnnual(:,:,i) = sum(sim.ProdNet(:,:,ixTime),3)/length(ixTime); % gC/m2/yr
+        sim.ProdNetTotalAnnual(i) = mean(sim.ProdNetTotal(ixTime))/length(ixTime); % mugC/l/day
+        sim.ProdNetAnnual(:,:,i) = mean(sim.ProdNet(:,:,ixTime),3)/length(ixTime); % gC/m2/yr
+        sim.ProdHTLAnnual(:,:,i) = mean(sim.ProdHTL(:,:,ixTime),3)/length(ixTime); % gC/m2/yr
     end
     sim.ProdNetTotalAnnual = sim.ProdNetTotalAnnual*365/1000/1000/1000/1000; % GTon carbon/year
 end

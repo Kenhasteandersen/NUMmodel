@@ -3,17 +3,17 @@
 #
 # iFortran on macos:
 #
-#FORT=ifort
-#FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
+FORT=ifort
+FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
 #FLAGS=-O2
 #LINK=
 #
 # gfortran on macos:
 #
-FORT=gfortran
+#FORT=gfortran
 #FLAGS=-g3
-FLAGS=-O2
-LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/lib
+#FLAGS=-O2
+#LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/lib
 #LINK=
 
 
