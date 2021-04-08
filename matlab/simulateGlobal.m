@@ -12,7 +12,14 @@
 % Output:
 %  sim: structure with simulation results
 %
-function sim = simulateGlobal(p, sim)
+function sim = simulateGlobal(p, sim, bCalcAnnualAverages)
+
+arguments
+    p struct;
+    sim struct = [];
+    bCalcAnnualAverages = false; % Whether to calculate annual averages
+end
+
 ixN = 1;
 ixDOC = 2;
 ixB = 3:(2+p.nGrid);
@@ -112,6 +119,18 @@ sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.nGrid, nSave
 sim.L = sim.N;
 sim.T = sim.N;
 tSave = [];
+%
+% Matrices for annual averages:
+%
+if bCalcAnnualAverages
+   sim.ProdGrossAnnual = zeros( nb,1 );
+   sim.ProdNetAnnual = zeros( nb,1 );
+   sim.ProdHTLAnnual = zeros( nb,1 );
+   sim.BpicoAnnualMean = zeros( nb,1 );
+   sim.BnanoAnnualMean = zeros( nb,1 );
+   sim.BmicroAnnualMean = zeros( nb,1 );
+end
+
 % ---------------------------------------
 % Run transport matrix simulation
 % ---------------------------------------
@@ -145,7 +164,8 @@ for i=1:simtime
     dt = p.dt;
     if p.bParallel
         parfor k = 1:nb
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', int32(p.nGrid+2), u(k,:), L(k), 0.5, dt);
+            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
+                int32(p.nGrid+2), u(k,:), L(k), 0.5, dt);
         end
     else
         for k = 1:nb
@@ -185,6 +205,22 @@ for i=1:simtime
         tSave = [tSave, i*0.5];
         fprintf('.\n');      
     end
+    %
+    % Update annual averages:
+    %
+    if bCalcAnnualAverages
+        for k = 1:nb
+            [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
+                            getFunctions(u(k,:), L(k));
+            sim.ProdGrossAnnual(k) = sim.ProdGrossAnnual(k) + ProdGross1/(p.tEnd*2);            
+            sim.ProdNetAnnual(k) = sim.ProdNetAnnual(k) + ProdNet1/(p.tEnd*2);
+            sim.ProdHTLAnnual(k) = sim.ProdHTLAnnual(k) + ProdHTL1/(p.tEnd*2);
+            sim.BpicoAnnualMean(k) = sim.BpicoAnnualMean(k) + Bpico1/(p.tEnd*2*365);
+            sim.BnanoAnnualMean(k) = sim.BnanoAnnualMean(k) + Bnano1/(p.tEnd*2*365);
+            sim.BmicroAnnualMean(k) = sim.BmicroAnnualMean(k) + Bmicro1/(p.tEnd*2*365);
+        end
+    end
+    
 end
 time = toc;
 fprintf('Solving time: %2u:%02u:%02u\n', ...
@@ -197,13 +233,18 @@ sim.p = p;
 sim.Ntot = calcGlobalN(sim);
 sim.B(sim.B<0) = 0.;
 
-%
-% Function to assemble derivative for chemostat:
-%
-%    function dudt = fDerivLibrary(t,u,L)
-%        dudt = 0*u';
-%        [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', length(u), u, L, 0.0, dudt);
-%        dudt = dudt';
-%    end
-
+if bCalcAnnualAverages
+    tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
+    sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
+    tmp = single(matrixToGrid(sim.ProdNetAnnual, [], p.pathBoxes, p.pathGrid));
+    sim.ProdNetAnnual = squeeze(tmp(:,:,1));
+    tmp = single(matrixToGrid(sim.ProdHTLAnnual, [], p.pathBoxes, p.pathGrid));
+    sim.ProdHTLAnnual = squeeze(tmp(:,:,1));
+    tmp = single(matrixToGrid(sim.BpicoAnnualMean, [], p.pathBoxes, p.pathGrid));
+    sim.BpicoAnnualMean = squeeze(tmp(:,:,1));
+    tmp = single(matrixToGrid(sim.BnanoAnnualMean, [], p.pathBoxes, p.pathGrid));
+    sim.BnanoAnnualMean = squeeze(tmp(:,:,1));
+    tmp = single(matrixToGrid(sim.BmicroAnnualMean, [], p.pathBoxes, p.pathGrid));
+    sim.BmicroAnnualMean = squeeze(tmp(:,:,1));
+end
 end

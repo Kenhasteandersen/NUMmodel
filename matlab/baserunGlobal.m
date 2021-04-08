@@ -26,7 +26,7 @@ if exist(strcat(p.pathInit,'.mat'), 'file')
     % Load decent initial conditions
     disp('Loading initial conditions from file');
     load(p.pathInit,'sim');
-    sim = simulateGlobal(p,sim)
+    sim = simulateGlobal(p,sim);
 else
     sim = simulateGlobal(p);%,sim); % Simulate
 end
