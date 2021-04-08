@@ -60,7 +60,7 @@ contains
     real(dp):: r(n)
     real(dp), parameter:: rho = 0.57*1d6*1d-12
 
-    this = initSpectrum(n, ixOffset, mMin, mMax)
+    this = initSpectrum(typeGeneralist, n, ixOffset, mMin, mMax)
 
     if ( allocated(AN) ) then
        deallocate(AN)

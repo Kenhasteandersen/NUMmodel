@@ -6,7 +6,7 @@ module spectrum
   implicit none
 
   type typeSpectrum
-     integer:: typeGroup
+     integer:: type
      integer:: n  ! Number of size classes
      integer:: ixStart, ixEnd ! Start and end indices into u and rates
      integer:: ixOffset ! ixStart-1
@@ -23,11 +23,12 @@ module spectrum
   public initSpectrum
 contains
 
-  function initSpectrum(n, ixOffset, mMin, mMax) result(this)
+  function initSpectrum(type, n, ixOffset, mMin, mMax) result(this)
     type (typeSpectrum):: this
-    integer, intent(in):: n, ixOffset
+    integer, intent(in):: type, n, ixOffset
     real(dp), intent(in):: mMin, mMax
 
+    this%type = type
     this%n = n
     this%ixOffset = ixOffset
     this%ixStart = ixOffset+1

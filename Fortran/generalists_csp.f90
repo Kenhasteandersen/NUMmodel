@@ -58,7 +58,7 @@ contains
     integer, intent(in):: n, ixOffset
     real(dp), parameter:: mMin = 3.1623d-9
 
-    this = initSpectrum(n, ixOffset, mMin, mMax)
+    this = initSpectrum(typeGeneralist_csp, n, ixOffset, mMin, mMax)
 
     if (allocated(AN)) then
        deallocate(AN)

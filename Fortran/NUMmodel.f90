@@ -10,14 +10,18 @@ module NUMmodel
   use debug
   implicit none
 
-  integer:: nGroups, iGroup
-  integer, dimension(:), allocatable:: typeGroups
-  type(typeSpectrum), dimension(:), allocatable:: group
-  integer, dimension(:), allocatable:: ixStart, ixEnd
+  !
+  ! Variables that contain the size spectrum groups
+  !
+  integer:: nGroups, iGroup ! Number of groups
+  type(typeSpectrum), dimension(:), allocatable:: group ! Structure for each group
+  integer, dimension(:), allocatable:: ixStart, ixEnd ! Start and end indexes of the group in the state-variable vector "u"
 
-  real(dp), dimension(:,:), allocatable:: theta
-  real(dp), dimension(:), allocatable:: upositive
-
+  real(dp), dimension(:,:), allocatable:: theta ! Interaction matrix
+  real(dp), dimension(:), allocatable:: upositive ! State variable constrained to be positive
+  !
+  ! Variables for HTL mortalities:
+  !
   real(dp), dimension(:), allocatable:: pHTL ! Selectivity function for HTL mortality
   real(dp) :: mortHTL ! Level of HTL mortality (see below for override)
   real(dp):: gammaHTL ! Parameter for quadratic HTL mortality
@@ -133,7 +137,6 @@ contains
        deallocate(epsilonF)
 
        deallocate(group)
-       deallocate(typeGroups)
        deallocate(ixStart)
        deallocate(ixEnd)
 
@@ -184,7 +187,6 @@ contains
     allocate(epsilonF(nGrid))
 
     allocate(group(nGroups))
-    allocate(typeGroups(nGroups))
     allocate(ixStart(nGroups))
     allocate(ixEnd(nGroups))
 
@@ -255,7 +257,6 @@ contains
     !
     ! Add the group
     !
-    typeGroups(iGroup) = typeGroup
     select case (typeGroup)
     case (typeGeneralist)
       group(iGroup) = initGeneralists(n, ixStart(iGroup)-1, mMax)
@@ -264,7 +265,7 @@ contains
     case(typeCopepod)
        group(iGroup) = initCopepod(n, ixStart(iGroup)-1, mMax)
     end select
-    group(iGroup)%typeGroup = typeGroup
+    group(iGroup)%type = typeGroup
     !
     ! Import grid to globals:
     !
@@ -375,7 +376,7 @@ contains
     ! Calc uptakes of all unicellular groups:
     !
     do iGroup = 1, nGroups
-       select case (typeGroups(iGroup))
+       select case (group(iGroup)%type)
        case (typeGeneralist)
           call calcRatesGeneralists(group(iGroup), &
                rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
@@ -402,7 +403,7 @@ contains
     rates%dudt(idxN) = 0
     rates%dudt(idxDOC) = 0
     do iGroup = 1, nGroups
-       select case (typeGroups(iGroup))
+       select case (group(iGroup)%type)
        case (typeGeneralist)
           call calcDerivativesGeneralists(group(iGroup),&
                upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
@@ -503,6 +504,10 @@ contains
     mHTL = pHTL(i)*mortHTL/z(i)*u(i)**gammaHTL*B**(1.-gammaHTL)
   end function calcHTL
 
+  ! ======================================
+  !  Simulate models:
+  ! ======================================
+
   ! -----------------------------------------------
   ! Simulate a chemostat with Euler integration
   ! -----------------------------------------------
@@ -542,7 +547,6 @@ contains
        N = N + u(2+i)/5.68
     end do
   end function calcN
-
 
   ! -----------------------------------------------
   ! Simulate with Euler integration
@@ -595,7 +599,7 @@ contains
     
     conversion = 365.*1d-6*1000. ! Convert to gC/yr/m3
     do i = 1, nGroups
-       if (group(i)%typeGroup .eq. typeGeneralist) then
+       if (group(i)%type .eq. typeGeneralist) then
           ProdGross = ProdGross + conversion * &
                sum(  rates%JL(idxB:nGrid) * upositive(idxB:nGrid) / m(idxB:nGrid) )
           

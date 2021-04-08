@@ -4,12 +4,18 @@ module globals
   !
   ! Useful constants:
   !
+
+  ! Indices into the state-variable vector:
   integer, parameter :: idxN = 1
   integer, parameter :: idxDOC = 2
-  integer, parameter :: idxB = 3
+  integer, parameter :: idxB = 3 ! First index for biomasses
+
+  ! Type of spectra:
   integer, parameter :: typeGeneralist = 1
   integer, parameter :: typeGeneralist_csp = 2
   integer, parameter :: typeCopepod = 10
+
+  ! Useful mathematical constants:
   real(dp), parameter :: onethird = 1.d0/3.d0
   real(dp), parameter :: twothirds = 2.d0/3.d0
   real(dp), parameter :: threequarters = 3.d0/4.d0
@@ -27,20 +33,5 @@ module globals
   end type typeRates
 
   integer:: nGrid ! Total number of grid points incl. two points for N and DOC
-
-!contains
-
-!!$  subroutine initGlobals(nnGrid)
-!!$    integer, intent(in):: nnGrid
-!!$
-!!$    nGrid = nnGrid+2
-!!$
-!!$    allocate(m(nGrid))
-!!$    allocate(beta(nGrid))
-!!$    allocate(sigma(nGrid))
-!!$    allocate(AF(nGrid))
-!!$    allocate(JFmax(nGrid))
-!!$    allocate(epsilonF(nGrid))
-!!$  end subroutine initGlobals
 
 end module globals

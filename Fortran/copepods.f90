@@ -38,7 +38,7 @@ contains
     !
     lnDelta = (log(mAdult)-log(mAdult/AdultOffspring)) / (n-0.5)
     mMin = exp(log(mAdult/AdultOffspring)+0.5*lnDelta);
-    this = initSpectrum(n, ixOffset, mMin, mAdult)
+    this = initSpectrum(typeCopepod, n, ixOffset, mMin, mAdult)
 
     if ( allocated(Jresp) ) then
        deallocate(Jresp)
