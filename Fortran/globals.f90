@@ -8,7 +8,6 @@ module globals
   ! Indices into the state-variable vector:
   integer, parameter :: idxN = 1
   integer, parameter :: idxDOC = 2
-  integer, parameter :: idxB = 3 ! First index for biomasses
 
   ! Type of spectra:
   integer, parameter :: typeGeneralist = 1

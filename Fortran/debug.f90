@@ -21,6 +21,7 @@ subroutine openDebug
   subroutine printRates(m, rates)
     type(typeRates), intent(in):: rates
     real(dp):: m(:)
+    integer, parameter:: idxB = 2
     
     !call openDebug
     write(unitDebug, *) 'm: ', m

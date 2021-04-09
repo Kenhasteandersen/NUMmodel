@@ -13,7 +13,10 @@ module NUMmodel
   !
   ! Variables that contain the size spectrum groups
   !
-  integer:: nGroups, iGroup ! Number of groups
+  integer:: nGroups ! Number of groups
+  integer:: iGroup ! Current number to be added (only used in addGroup)
+  integer:: nNutrients ! Number of nutrient state variables
+  integer:: idxB ! First index into non-nutrient groups (=nNutrients+1)
   type(typeSpectrum), dimension(:), allocatable:: group ! Structure for each group
   integer, dimension(:), allocatable:: ixStart, ixEnd ! Start and end indexes of the group in the state-variable vector "u"
 
@@ -45,7 +48,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsOnly(n)
     integer, intent(in):: n
-    call parametersInit(1, n) ! 1 group, n size classes (excl nutrients and DOC)
+    call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
     call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with 10 size classes
     bQuadraticHTL = .false. ! Use standard "linear" mortality
     call parametersFinalize()
@@ -55,7 +58,7 @@ contains
   ! A basic setup with only generalists -- Camila
   ! -----------------------------------------------
   subroutine setupGeneralistsOnly_csp()
-    call parametersInit(1, 10) ! 1 group, 10 size classes (excl nutrients and DOC)
+    call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
     call parametersAddGroup(typeGeneralist_csp, 10, 0.1d0) ! generalists with 10 size classes
     call parametersFinalize()
   end subroutine setupGeneralistsOnly_csp
@@ -64,7 +67,7 @@ contains
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------
   subroutine setupGeneralistsCopepod()
-    call parametersInit(2, 20)
+    call parametersInit(2, 20, 2)
     call parametersAddGroup(typeGeneralist, 10, 0.1d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize()
@@ -78,7 +81,7 @@ contains
     integer, parameter:: n = 10 ! number of size classes in each group
     integer:: iCopepod
 
-    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1))
+    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
     call parametersAddGroup(typeGeneralist, n, 0.1d0)
     if ( size(mAdult) .eq. 0) then
        bQuadraticHTL = .false. ! Use standard "linear" mortality
@@ -98,7 +101,7 @@ contains
     integer, parameter:: n = 10 ! number of size classes in each group
     integer:: iCopepod
 
-    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1))
+    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
     call parametersAddGroup(typeGeneralist_csp, n, 0.1d0)
     do iCopepod = 1, size(mAdult)
        call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
@@ -114,15 +117,17 @@ contains
   ! Initialize parameters
   ! In:
   !    nnGroups: number of size spectrum groups
-  !    nnGrid: total length of the grid (excl 2 points for N and DOC)
+  !    nnGrid: total length of the grid (excl nnNutrients points for N, DOC, etc.)
   ! -----------------------------------------------
-  subroutine parametersInit(nnGroups, nnGrid)
-    integer, intent(in):: nnGrid, nnGroups
+  subroutine parametersInit(nnGroups, nnGrid, nnNutrients)
+    integer, intent(in):: nnGrid, nnGroups, nnNutrients
     !
     ! Set groups:
     !
     nGroups = nnGroups
-    nGrid = nnGrid+2
+    nNutrients = nnNutrients
+    nGrid = nnGrid+nnNutrients
+    idxB = nNutrients + 1
     iGroup = 0
     !
     ! Allocate variables:
@@ -544,7 +549,7 @@ contains
     N = 0
     N = u(idxN)
     do i = 1, nGrid
-       N = N + u(2+i)/5.68
+       N = N + u(nNutrients+i)/5.68
     end do
   end function calcN
 
@@ -640,11 +645,13 @@ contains
     jNloss,jLreal, &
     mortpred, mortHTL, mort2, mort)
     use globals
-    real(dp), intent(out):: jN(nGrid-2), jDOC(nGrid-2), jL(nGrid-2), jF(nGrid-2), jFreal(nGrid-2)
-    real(dp), intent(out):: jTot(nGrid-2), jMax(nGrid-2), jFmaxx(nGrid-2),jR(nGrid-2)
-    real(dp), intent(out):: jLossPassive(nGrid-2), jNloss(nGrid-2), jLreal(nGrid-2)
-    real(dp), intent(out):: mortpred(nGrid-2), mortHTL(nGrid-2)
-    real(dp), intent(out):: mort2(nGrid-2), mort(nGrid-2)
+    real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
+    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
+    real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmaxx(nGrid-nNutrients)
+    real(dp), intent(out):: jR(nGrid-nNutrients)
+    real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
+    real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
     jN = rates%JN(idxB:nGrid) / m(idxB:nGrid)
     jDOC = rates%JDOC(idxB:nGrid) / m(idxB:nGrid)
@@ -660,7 +667,7 @@ contains
     jLreal = rates%JLreal(idxB:nGrid) / m(idxB:nGrid)
     mortpred = rates%mortpred(idxB:nGrid)
     mortHTL = rates%mortHTL(idxB:nGrid)
-    mort2 = 0.0002*(nGrid-2)*upositive(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
+    mort2 = 0.0002*(nGrid-nNutrients)*upositive(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
     mort = 0*m(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
   end subroutine getRates
 

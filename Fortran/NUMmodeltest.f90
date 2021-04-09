@@ -27,7 +27,7 @@ program NUMmodeltest
   call calcDerivatives(u00, 150.d0, 0.1d0)
 
  ! write(6,*) theta(3:5, 3:5)
- ! call printRates(m, rates)
+ call printRates(m, rates)
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
 !  call setupGeneralistsOnly()

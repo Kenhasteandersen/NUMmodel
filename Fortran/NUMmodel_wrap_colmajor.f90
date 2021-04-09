@@ -53,6 +53,7 @@ contains
   end subroutine f_calcDerivatives
 
   subroutine f_calcRates(nGrid, u, L, jN, jL, jF, jTot, mortHTL, mortpred, g) bind(c)
+    use NUMmodel, only: idxB
     integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(in):: u(nGrid)
     real(c_double), intent(in), value:: L
@@ -96,12 +97,14 @@ contains
     jNloss,jLreal, &
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
-    use NUMmodel, only: rates, m, upositive, JFmax, getRates
-    real(dp), intent(out):: jN(nGrid-2), jDOC(nGrid-2), jL(nGrid-2), jF(nGrid-2), jFreal(nGrid-2)
-    real(dp), intent(out):: jTot(nGrid-2), jMax(nGrid-2), jFmaxx(nGrid-2),jR(nGrid-2)
-    real(dp), intent(out):: jLossPassive(nGrid-2), jNloss(nGrid-2), jLreal(nGrid-2)
-    real(dp), intent(out):: mortpred(nGrid-2), mortHTL(nGrid-2)
-    real(dp), intent(out):: mort2(nGrid-2), mort(nGrid-2)
+    use NUMmodel, only: getRates, nNutrients
+    real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
+    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
+    real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmaxx(nGrid-nNutrients)
+    real(dp), intent(out):: jR(nGrid-nNutrients)
+    real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
+    real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
     call getRates(jN, jDOC, jL, jF, jFreal,&
     jTot, jMax, jFmaxx, jR, jLossPassive, &
