@@ -1,0 +1,15 @@
+{
+    "configurations":[
+        {
+            "name": "Run GDB",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/Fortran/NUMmodel",
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/Fortran",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "make"
+        }
+    ]
+}
