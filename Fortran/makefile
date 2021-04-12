@@ -11,8 +11,8 @@
 # gfortran on macos:
 #
 FORT=gfortran
-#FLAGS=-g3
-FLAGS=-O2
+FLAGS=-g3
+#FLAGS=-O2
 #LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/lib
 #LINK=
 

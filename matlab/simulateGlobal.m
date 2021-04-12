@@ -184,7 +184,6 @@ for i=1:simtime
     % Transport
     %
     if p.bTransport
-        % Could perhaps be parfor'ed for large matrices:
         for k = 1:p.nGrid+2
             u(:,k) =  Aimp * (Aexp * u(:,k));
         end

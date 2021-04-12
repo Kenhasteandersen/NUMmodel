@@ -52,6 +52,7 @@ contains
     call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with 10 size classes
     bQuadraticHTL = .false. ! Use standard "linear" mortality
     call parametersFinalize()
+
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
