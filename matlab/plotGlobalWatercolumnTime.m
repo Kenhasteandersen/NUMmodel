@@ -4,6 +4,12 @@
 %
 function plotGlobalWatercolumnTime(lat,lon,sim)
 
+arguments
+    lat double;
+    lon double;
+    sim struct;
+end
+
 idx = calcGlobalWatercolumn(lat,lon,sim);
 t = sim.t;
 z = sim.z(idx.z);

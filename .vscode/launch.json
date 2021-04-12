@@ -9,7 +9,7 @@
             "cwd": "${workspaceRoot}/Fortran",
             "externalConsole": false,
             "MIMode": "gdb",
-            "preLaunchTask": "make"
+            "preLaunchTask": "make debugging"
         }
     ]
 }

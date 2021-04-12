@@ -43,7 +43,7 @@ if (ismac || ispc)
 else
     v = VideoWriter(sFilename, 'Motion JPEG AVI');
 end
-v.FrameRate = 5/n;
+v.FrameRate = n/5;
 
 open(v);
 for i = 1:n
