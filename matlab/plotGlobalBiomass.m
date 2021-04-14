@@ -24,7 +24,7 @@ if ~isfield(sim,'Bpnm')
 end
 %%
 clf
-tiles = tiledlayout(3,1,'TileSpacing','compact','padding','compact')
+tiles = tiledlayout(3,1,'TileSpacing','compact','padding','compact');
 
 nexttile
 cbar = panelGlobal(sim.x,sim.y,(log10(sim.Bpnm(:,:,1))),'Pico',sProjection);
@@ -39,8 +39,8 @@ caxis([-3,2])
 nexttile
 cbar = panelGlobal(sim.x,sim.y,(log10(sim.Bpnm(:,:,3))),'Micro',sProjection);
 caxis([-3,2])
-cbar.Label.String = 'log10(gC m{^-2})';
-cbar.Location = 'SouthOutside'
+cbar.Label.String = 'log10(gC m^{-2})';
+cbar.Location = 'SouthOutside';
 
 
 
