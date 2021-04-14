@@ -8,10 +8,12 @@ module globals
   ! Indices into the state-variable vector:
   integer, parameter :: idxN = 1
   integer, parameter :: idxDOC = 2
+  integer, parameter :: idxSi = 3
 
   ! Type of spectra:
   integer, parameter :: typeGeneralist = 1
   integer, parameter :: typeGeneralist_csp = 2
+  integer, parameter :: typeDiatom = 3
   integer, parameter :: typeCopepod = 10
 
   ! Useful mathematical constants:
@@ -22,10 +24,10 @@ module globals
 
   type typeRates
      real(dp), dimension(:), allocatable:: flvl, JF, F, JEnc
-     real(dp), dimension(:), allocatable:: JN, JDOC, JL
+     real(dp), dimension(:), allocatable:: JN, JDOC, JSi, JL
      real(dp), dimension(:), allocatable:: JNtot, JLreal, JCtot, Jtot
      real(dp), dimension(:), allocatable:: JCloss_feeding, JCloss_photouptake, JNlossLiebig, JClossLiebig
-     real(dp), dimension(:), allocatable:: JNloss, JCloss
+     real(dp), dimension(:), allocatable:: JNloss, JCloss, JSiloss
      real(dp), dimension(:), allocatable:: mortpred, mortHTL
      real(dp), dimension(:), allocatable:: g, mortStarve, mort ! Multicellular rates
      real(dp), dimension(:), allocatable:: dudt

@@ -6,6 +6,7 @@ module NUMmodel
   use spectrum
   use generalists
   use generalists_csp
+  use diatoms
   use copepods
   use debug
   implicit none
@@ -49,10 +50,9 @@ contains
   subroutine setupGeneralistsOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with 10 size classes
+    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
     bQuadraticHTL = .false. ! Use standard "linear" mortality
     call parametersFinalize()
-
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
@@ -63,6 +63,17 @@ contains
     call parametersAddGroup(typeGeneralist_csp, 10, 0.1d0) ! generalists with 10 size classes
     call parametersFinalize()
   end subroutine setupGeneralistsOnly_csp
+
+  ! -----------------------------------------------
+  ! A basic setup with only diatoms:
+  ! -----------------------------------------------
+  subroutine setupDiatomsOnly(n)
+   integer, intent(in):: n
+   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
+   call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
+   bQuadraticHTL = .false. ! Use standard "linear" mortality
+   call parametersFinalize()
+ end subroutine setupDiatomsOnly
 
   ! -----------------------------------------------
   ! A basic setup with generalists and 1 copepod
@@ -163,6 +174,7 @@ contains
        deallocate(rates%JN)
        deallocate(rates%JL)
        deallocate(rates%JDOC)
+       deallocate(rates%JSi)
        deallocate(rates%JNtot)
        deallocate(rates%JCtot)
        deallocate(rates%Jtot)
@@ -173,6 +185,7 @@ contains
        deallocate(rates%JClossLiebig)
        deallocate(rates%JNloss)
        deallocate(rates%JCloss)
+       deallocate(rates%JSiloss)
 
        deallocate(rates%mortpred)
        deallocate(rates%mortHTL)
@@ -213,6 +226,7 @@ contains
     allocate(rates%JN(nGrid))
     allocate(rates%JL(nGrid))
     allocate(rates%JDOC(nGrid))
+    allocate(rates%JSi(nGrid))
     allocate(rates%JNtot(nGrid))
     allocate(rates%JCtot(nGrid))
     allocate(rates%Jtot(nGrid))
@@ -223,6 +237,7 @@ contains
     allocate(rates%JClossLiebig(nGrid))
     allocate(rates%JNloss(nGrid))
     allocate(rates%JCloss(nGrid))
+    allocate(rates%JSiloss(nGrid))
 
     allocate(rates%mortpred(nGrid))
     allocate(rates%mortHTL(nGrid))
@@ -268,6 +283,8 @@ contains
       group(iGroup) = initGeneralists(n, ixStart(iGroup)-1, mMax)
     case (typeGeneralist_csp)
       group(iGroup) = initGeneralists_csp(n, ixStart(iGroup)-1, mMax)
+    case (typeDiatom)
+      group(iGroup) = initDiatoms(n, ixStart(iGroup)-1, mMax)
     case(typeCopepod)
        group(iGroup) = initCopepod(n, ixStart(iGroup)-1, mMax)
     end select
@@ -346,20 +363,18 @@ contains
       real(dp), intent(in):: z,beta,sigma,Delta
       real(dp):: res, s
 
-      s = 2*sigma*sigma
-      res = max(0.d0, &
-!!$           (Sqrt(s)*((exp(-Log(beta/(Delta*z))**2/s) - 2/exp(Log(z/beta)**2/s) +  &
-!!$           exp(-Log(z/(beta*Delta))**2/s))*Sqrt(s) + &
-!!$           Sqrt(Pi)*(-2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
-!!$           Erf(Log(z/(beta*Delta))/Sqrt(s))*Log(z/(beta*Delta)) - &
-!!$           Erf(Log(beta/(Delta*z))/Sqrt(s))*Log((Delta*z)/beta))))/ &
-!!$           (2.*Log(Delta)**2))
-      (Sqrt(Delta)*(((exp(-Log((beta*Delta)/z)**2/s) - 2/exp(Log(z/beta)**2/s) + &
-      exp(-Log((Delta*z)/beta)**2/s))*s)/2. - &
-      (Sqrt(Pi)*Sqrt(s)*(Erf((-Log(beta*Delta) + Log(z))/Sqrt(s))*Log((beta*Delta)/z) + &
-      2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
-      Erf((Log(beta) - Log(Delta*z))/Sqrt(s))*Log((Delta*z)/beta)))/2.))/ &
-      ((-1 + Delta)*Log(Delta)) )
+      if (beta .eq. 0.d0) then
+         res = 0.d0
+      else
+         s = 2*sigma*sigma
+         res = max(0.d0, &
+         (Sqrt(Delta)*(((exp(-Log((beta*Delta)/z)**2/s) - 2/exp(Log(z/beta)**2/s) + &
+         exp(-Log((Delta*z)/beta)**2/s))*s)/2. - &
+         (Sqrt(Pi)*Sqrt(s)*(Erf((-Log(beta*Delta) + Log(z))/Sqrt(s))*Log((beta*Delta)/z) + &
+         2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
+         Erf((Log(beta) - Log(Delta*z))/Sqrt(s))*Log((Delta*z)/beta)))/2.))/ &
+         ((-1 + Delta)*Log(Delta)) )
+      end if
     end function calcPhi
 
   end subroutine parametersFinalize
@@ -374,8 +389,8 @@ contains
   !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
   !   used for correction of Euler integration. If no correction is used, just set to 1.0
   !   This correction procedure is needed for correct Euler integration.
-  subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
-    real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC
+  subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
+    real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC, gammaSi
     !type(typeRates), intent(inout):: rates
     integer:: i,j
     !
@@ -389,6 +404,10 @@ contains
        case(typeGeneralist_csp)
           call calcRatesGeneralists_csp(group(iGroup), &
                rates, L, upositive(idxN),  gammaN)
+       case(typeDiatom)
+          call calcRatesDiatoms(group(iGroup), &
+          rates, L, upositive(idxN), upositive(idxDOC) , upositive(idxSi), &
+          gammaN, gammaDOC, gammaSi)
        end select
     end do
     !
@@ -418,6 +437,10 @@ contains
           call calcDerivativesGeneralists_csp(group(iGroup),&
                upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
                rates)
+       case (typeDiatom)
+            call calcDerivativesDiatoms(group(iGroup),&
+            upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+            rates)
        end select
     end do
   end subroutine calcDerivativesUnicellulars
@@ -430,7 +453,7 @@ contains
   subroutine calcDerivatives(u, L, dt)
     real(dp), intent(in):: L, dt, u(:)
     integer:: i, j, iGroup
-    real(dp):: gammaN, gammaDOC
+    real(dp):: gammaN, gammaDOC, gammaSi
 
     !
     ! Use only the positive part of biomasses for calculation of derivatives:
@@ -464,7 +487,9 @@ contains
     !
     gammaN = 1.d0
     gammaDOC = 1.d0
-    call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
+    gammaSi = 1.d0
+
+    call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
     !
     ! Make a correction if nutrient fields will become less than zero:
     !
@@ -474,9 +499,12 @@ contains
     if ((u(idxDOC) + rates%dudt(idxDOC)*dt) .lt. 0) then
        gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(rates%dudt(idxDOC)*dt)))
     end if
-    if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0)) then
+    if ((u(idxSi) + rates%dudt(idxSi)*dt) .lt. 0) then
+      gammaSi = max(0.d0, min(1.d0, -u(idxSi)/(rates%dudt(idxSi)*dt)))
+    end if
+    if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0) .or. (gammaSi .lt. 1.d0)) then
        !write(6,*) u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
-       call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
+       call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
        !write(6,*) '->', rates%dudt(idxN), rates%dudt(idxDOC)
     end if
     !
@@ -489,7 +517,7 @@ contains
     end do
   end subroutine calcDerivatives
   !
-  ! Returns the htl mortlity divided by h for size bin i
+  ! Returns the htl mortality divided by h for size bin i
   !
   function calcHTL(u, i) result(mHTL)
     real(dp) :: mHTL, B

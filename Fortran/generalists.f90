@@ -1,5 +1,5 @@
 !
-! Module to handle generalists unicellulars
+! Module to handle generalist unicellulars
 !
 module generalists
   use globals
