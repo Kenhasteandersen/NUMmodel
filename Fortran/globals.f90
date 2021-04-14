@@ -31,6 +31,5 @@ module globals
      real(dp), dimension(:), allocatable:: dudt
   end type typeRates
 
-  integer:: nGrid ! Total number of grid points incl. two points for N and DOC
-
+  integer:: nGrid ! Total number of grid points incl.  points for nutrients
 end module globals

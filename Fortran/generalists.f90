@@ -90,9 +90,9 @@ contains
     this%sigma = sigma
     this%epsilonF = epsilonF
 
-    r = (3/(4*pi)*this%m/rho)**onethird
+    r = (3./(4.*pi)*this%m/rho)**onethird
     
-    AN = alphaN*r**(-2.) / (1+(r/rNstar)**(-2.)) * this%m
+    AN = alphaN*r**(-2.) / (1.+(r/rNstar)**(-2.)) * this%m
     AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
     this%AF = alphaF*this%m
     this%JFmax = cF/r * this%m

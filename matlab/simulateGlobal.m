@@ -8,6 +8,7 @@
 % Input:
 %  p: parameter structure from parametersGlobal
 %  sim: (optional) simulation to use for initial conditions
+%  bCalcAnnualAverages: increases the simulation time by a factor 2-3
 %
 % Output:
 %  sim: structure with simulation results
@@ -51,13 +52,13 @@ if p.bParallel
     poolsize = h.NumWorkers;
     parfor i=1:poolsize
         loadNUMmodelLibrary();
-        calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-        %calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly');
+        %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
+        calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
     end
 else
     loadNUMmodelLibrary();
-    calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-    %calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly');
+    %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
+    calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
 end
 % ---------------------------------------
 % Initialize run:

@@ -4,7 +4,8 @@
 % and the nutrients.
 %
 % In: 
-%  field with three dimensions: x, y, and time
+%  x,y: ranges typically from sim.x and sim.y
+%  field: with three dimensions: x, y, and time
 %
 %
 function F = animateGlobal(x,y,field, options)
@@ -12,11 +13,11 @@ function F = animateGlobal(x,y,field, options)
 arguments
     x,y (:,:) double;
     field (:,:,:) double;
-    options.limit double = max(field(:));
+    options.limit double = max(field(:)); % max limit for the colorscale
     options.sTitle char = "";
-    options.sUnits char = "Concentration (\mug N l^{-1})";
+    options.sUnits char = ""; % e.g.: "Concentration (\mug C l^{-1})";
     options.sFilename char = "Global";
-    options.sProjection char = "fast";
+    options.sProjection char = "fast"; % or use e.g. "eckert4"
 end
 
 n = size(field,3);

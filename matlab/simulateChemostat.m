@@ -8,6 +8,12 @@
 %  sim - simulation object
 %
 function sim = simulateChemostat(p, L)
+
+arguments
+    p struct = parameters([]);
+    L double = 100;
+end
+
 if (p.bUseLibrary)
     loadNUMmodelLibrary();
     fDeriv = @fDerivLibrary;

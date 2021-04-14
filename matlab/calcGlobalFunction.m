@@ -17,16 +17,20 @@ if ~isfield(sim,'ProdGross')
     sim.Bnano = sim.ProdGross;
     sim.Bmicro = sim.ProdGross;
     
-    for iTime = 1:length(sim.t)
-        for i = 1:length(sim.x)
-            for j = 1:length(sim.y)
+    nTime = length(sim.t);
+    nX = length(sim.x);
+    nY = length(sim.y);
+    nZ = length(sim.z);
+    for iTime = 1:nTime
+        for i = 1:nX
+            for j = 1:nY
                 ProdGross = 0;
                 ProdNet = 0;
                 ProdHTL = 0;
                 Bpico = 0;
                 Bnano = 0;
                 Bmicro = 0;
-                for k = 1:length(sim.z)
+                for k = 1:nZ
                     if ~isnan(sim.N(i,j,k,iTime))
                         u = [squeeze(sim.N(i,j,k,iTime)), ...
                             squeeze(sim.DOC(i,j,k,iTime)), ...
@@ -46,7 +50,7 @@ if ~isfield(sim,'ProdGross')
                 sim.ProdGross(i,j,iTime) = ProdGross;
                 sim.ProdNet(i,j,iTime) = ProdNet;
                 sim.ProdHTL(i,j,iTime) = ProdHTL;
-                %sim.eHTL(i,j,iTime) = eHTL;
+                %%sim.eHTL(i,j,iTime) = eHTL;
                 sim.Bpico(i,j,iTime) = Bpico;
                 sim.Bnano(i,j,iTime) = Bnano;
                 sim.Bmicro(i,j,iTime) = Bmicro;
