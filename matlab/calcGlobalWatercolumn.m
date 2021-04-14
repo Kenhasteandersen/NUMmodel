@@ -1,5 +1,10 @@
 function idx = calcGlobalWatercolumn(lat, lon, sim)
 
+arguments
+    lat, lon {mustBeInteger};
+    sim struct;
+end
+
 if (lon<0)
     lon = lon+360;
 end

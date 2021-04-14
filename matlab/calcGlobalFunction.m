@@ -42,7 +42,7 @@ if ~isfield(sim,'ProdGross')
                         ProdNet = ProdNet + ProdNet1*conv;
                         ProdHTL = ProdHTL +ProdHTL1*conv;
                         %eHTL = eHTL + eHTL1/length(sim.z);
-                        Bpico = Bpico + Bpico*dz(i,j,k); % gC/m2
+                        Bpico = Bpico + Bpico1*dz(i,j,k); % gC/m2
                         Bnano = Bnano + Bnano1*dz(i,j,k);
                         Bmicro = Bmicro + Bmicro1*dz(i,j,k);
                     end

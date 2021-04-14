@@ -10,5 +10,15 @@
             },
             "group": "build",
         }
+        ,
+        {
+            "label": "make debugging",
+            "type": "shell",
+            "command": "make debugging",
+            "options": {
+                "cwd": "${workspaceFolder}/Fortran"
+            },
+            "group": "build",
+        }
     ]
 } 

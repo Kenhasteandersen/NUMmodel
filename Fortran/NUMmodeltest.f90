@@ -33,5 +33,6 @@ program NUMmodeltest
 !  call setupGeneralistsOnly()
 
   call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+  write(*,*) Bpico, Bnano, Bmicro
   
 end program NUMmodeltest

@@ -11,7 +11,6 @@ arguments
 end
 
 idx = calcGlobalWatercolumn(lat,lon,sim);
-z = sim.z(idx.z);
 
 clf
 B = squeeze(double(sim.B(idx.x, idx.y, :, :, iTime)));
