@@ -1,18 +1,19 @@
 #INC = /Library/Frameworks/R.framework/Resources # For C-wrapper for R
 
 #
-# iFortran on macos:
+# iFortran:
 #
-FORT=ifort
+#FORT=ifort
 #FLAGS=-O2
 #LINK=
 #
-# gfortran on macos:
+# gfortran:
 #
-#FORT=gfortran
+FORT=gfortran
 #FLAGS=-g3
 FLAGS=-O2
-#LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/lib
+# Link needed on Macos:
+LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/lib
 #LINK=
 
 
@@ -20,8 +21,8 @@ OBJ = globals.o debug.o spectrum.o generalists.o generalists_csp.o diatoms.o cop
 
 all: NUMmodel libMatlab libR
 
-#debugging: FLAGS = -g3
-debugging: FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
+debugging: FLAGS = -g3 -fbounds-check
+#debugging: FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
 
 debugging: clean all
 
