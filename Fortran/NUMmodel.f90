@@ -1,3 +1,4 @@
+
 !
 ! Module to handle the NUM model framework
 !
@@ -364,7 +365,7 @@ contains
       real(dp):: res, s
 
       if (beta .eq. 0.d0) then
-         res = 0.d0
+         res = 0.d0 ! If beta = 0 it is interpreted as if the group is not feeding
       else
          s = 2*sigma*sigma
          res = max(0.d0, &
@@ -425,8 +426,8 @@ contains
     !
     ! Assemble derivatives:
     !
-    rates%dudt(idxN) = 0
-    rates%dudt(idxDOC) = 0
+    rates%dudt(1:(idxB-1)) = 0.d0 ! Set derivatives of nutrients to zero
+    
     do iGroup = 1, nGroups
        select case (group(iGroup)%type)
        case (typeGeneralist)
@@ -470,6 +471,7 @@ contains
           rates%F(i) = rates%F(i) + theta(i,j)*upositive(j)
        end do
     end do
+
     rates%flvl(idxB:nGrid) = AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid) + JFmax(idxB:nGrid))
     rates%JF(idxB:nGrid) = rates%flvl(idxB:nGrid) * JFmax(idxB:nGrid)
     !
@@ -503,9 +505,7 @@ contains
       gammaSi = max(0.d0, min(1.d0, -u(idxSi)/(rates%dudt(idxSi)*dt)))
     end if
     if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0) .or. (gammaSi .lt. 1.d0)) then
-       !write(6,*) u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
        call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
-       !write(6,*) '->', rates%dudt(idxN), rates%dudt(idxDOC)
     end if
     !
     ! Calc derivatives of multicellular groups:

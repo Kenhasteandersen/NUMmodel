@@ -36,11 +36,3 @@ p.mDelta = [p.mDelta, pGroup.mDelta];
 % Extract the feeding parameters into the main parameter structure
 %
 
-p.beta(ix) = pGroup.beta;
-p.sigma(ix) = pGroup.sigma;
-
-p.AF(ix) = pGroup.AF;
-p.JFmax(ix) = pGroup.JFmax;
-p.epsilonF(ix) = pGroup.epsilonF;
-p.Jresp(ix) = pGroup.Jresp;
-

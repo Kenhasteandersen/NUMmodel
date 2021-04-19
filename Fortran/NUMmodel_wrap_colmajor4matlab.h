@@ -2,6 +2,8 @@ void f_setupgeneralistsonly(const int n);
 
 void f_setupgeneralistsonly_csp();
 
+void f_setupdiatomsonly(const int n);
+
 void f_setupgeneralistscopepod();
 
 void f_setupgeneric(const int nCopepods, const double mAdult[]);

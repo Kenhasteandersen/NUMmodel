@@ -4,6 +4,9 @@ t = sim.t;
 semilogy(t, sim.N,'b-')
 hold on
 semilogy(t, sim.DOC,'color',[181 100 30]/256)
+if isfield(sim,'Si')
+    semilogy(t, sim.DOC,'color',[181 100 30]/256)
+end
 
 textLegend = {'N','DOC'};
 for iGroup = 1:sim.p.nGroups

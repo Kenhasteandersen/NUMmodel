@@ -1,6 +1,7 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int
-  use NUMmodel, only:  setupGeneralistsOnly, setupGeneralistsOnly_csp, setupGeneralistsCopepod, &
+  use NUMmodel, only:  setupGeneralistsOnly, setupGeneralistsOnly_csp, setupDiatomsOnly, &
+       setupGeneralistsCopepod, &
        setupGeneric, setupGeneric_csp, calcderivatives, rates, m, &
        simulateChemostatEuler, simulateEuler, getFunctions
   use globals
@@ -18,9 +19,16 @@ contains
     call setupGeneralistsOnly_csp()
   end subroutine f_setupGeneralistsOnly_csp
 
+  subroutine f_setupDiatomsOnly(n) bind(c)
+    integer(c_int), intent(in), value:: n
+    call setupDiatomsOnly(n)
+  end subroutine f_setupDiatomsOnly
+
   subroutine f_setupGeneralistsCopepod() bind(c)
     call setupGeneralistsCopepod()
   end subroutine f_setupGeneralistsCopepod
+
+
 
   subroutine f_setupGeneric(nCopepods, mAdult) bind(c)
     integer(c_int), intent(in), value:: nCopepods
@@ -87,7 +95,7 @@ contains
   end subroutine f_simulateEuler
 
   subroutine f_getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro) bind(c)
-    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+    real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
 
     call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
   end subroutine f_getFunctions

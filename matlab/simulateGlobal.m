@@ -21,9 +21,9 @@ arguments
     bCalcAnnualAverages = false; % Whether to calculate annual averages
 end
 
-ixN = 1;
-ixDOC = 2;
-ixB = 3:(2+p.nGrid);
+ixN = p.idxN;
+ixDOC = p.idxDOC;
+ixB = p.idxB;
 addpath("Transport matrix");
 
 %Tbc = [];
@@ -116,7 +116,7 @@ nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
 sim = load(p.pathGrid,'x','y','z');
 sim.N = single(zeros(length(sim.x), length(sim.y), length(sim.z),nSave));
 sim.DOC = sim.N;
-sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.nGrid, nSave));
+sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.n-p.idxB+1, nSave));
 sim.L = sim.N;
 sim.T = sim.N;
 tSave = [];
@@ -166,11 +166,11 @@ for i=1:simtime
     if p.bParallel
         parfor k = 1:nb
             u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-                int32(p.nGrid+2), u(k,:), L(k), 0.5, dt);
+                int32(p.n-p.idxB+1), u(k,:), L(k), 0.5, dt);
         end
     else
         for k = 1:nb
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', int32(p.nGrid+2), u(k,:), L(k), 0.5, dt);
+            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', int32(p.n-p.idxB+1), u(k,:), L(k), 0.5, dt);
             % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
             %u(k,:) = utmp(end,:);
@@ -185,7 +185,7 @@ for i=1:simtime
     % Transport
     %
     if p.bTransport
-        for k = 1:p.nGrid+2
+        for k = 1:p.n+p.idxB-1
             u(:,k) =  Aimp * (Aexp * u(:,k));
         end
     end

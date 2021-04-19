@@ -24,7 +24,7 @@ sim.N = u(1);
 sim.DOC = u(2);
 sim.B = u(3:end);
 sim.p = p;
-sim.rates = calcDerivatives(p,u,L);
+sim.rates = getRates(u(end,:), L);
 for iGroup = 1:p.nGroups
     sim.Bgroup(:,iGroup) = sum( u(p.ixStart(iGroup):p.ixEnd(iGroup)));
 end

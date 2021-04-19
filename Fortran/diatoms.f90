@@ -8,7 +8,7 @@ module diatoms
   
     private
     real(dp), parameter:: rhoCN = 5.68
-    real(dp), parameter:: rhoCSi = 1. ! TO BE FIXED!!!
+    real(dp), parameter:: rhoCSi = 100. ! TO BE FIXED!!!
     !
     ! Light uptake:
     !
@@ -134,7 +134,6 @@ module diatoms
          rates%JCloss_photouptake(ix) = (1.-epsilonL)/epsilonL * rates%JLreal(ix)
          rates%JNlossLiebig(ix) = max( 0.d0, rates%JNtot(ix)-rates%Jtot(ix))  ! In units of C
          rates%JClossLiebig(ix) = max( 0.d0, rates%JCtot(ix)-rates%Jtot(ix)) ! C losses from Liebig, not counting losses from photoharvesting
-
          
          rates%JNloss(ix) = &
               + rates%JNlossLiebig(ix)&
