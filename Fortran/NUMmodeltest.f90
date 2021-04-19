@@ -26,7 +26,7 @@ program NUMmodeltest
   end do
 
   call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
-  write(*,*) u00
+  write(*,*) m
 !!$  !call calcDerivatives(u, 100.d0, 0.d0)
 !!$  u0=u00
 !!$  call simulateChemostatEuler(u0, 100.d0, 150.d0, 0.05d0, 300.d0, 0.01d0)

@@ -20,8 +20,7 @@ ix = 1:(p.idxB-1); % Nutrients
 %
 % Concentrations in the deep layer:
 %
-uDeep = ix*0;
-uDeep(ix) = p.u0(ix);
+uDeep = p.u0(ix);
 %
 % Simulate:
 %
