@@ -612,6 +612,15 @@ contains
   ! Diagnostic functions
   !=========================================
 
+  subroutine getMass(m_, mDelta)
+   real(dp), intent(inout):: m_(nGrid), mDelta(nGrid)
+   integer:: i
+
+   m_ = m;
+   do i = 1,nGroups
+      mDelta(group(i)%ixStart:group(i)%ixEnd) = group(i)%mDelta
+   end do
+   end subroutine getMass
   
   ! ---------------------------------------------------
   ! Get the ecosystem functions as calculated from the last call

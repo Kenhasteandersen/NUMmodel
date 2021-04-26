@@ -100,6 +100,15 @@ contains
     call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
   end subroutine f_getFunctions
 
+  subroutine f_getMass(m, mDelta) bind(c)
+    use globals
+    use NUMmodel, only: getMass
+
+    real(c_double), intent(inout):: m(nGrid), mDelta(nGrid)
+    
+    call getMass(m, mDelta) 
+  end subroutine f_getMass
+
   subroutine f_getRates(jN, jDOC, jL, jF, jFreal,&
     jTot, jMax, jFmaxx, jR, jLossPassive, &
     jNloss,jLreal, &

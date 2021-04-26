@@ -45,6 +45,10 @@ void f_simulateeuler(
 			      const double tEnd,
 			      const double dt);
 
+void f_getmass(
+				double *m,
+				double *mDelta);
+
 void f_getfunctions(
 		    double *ProdGross,
 		    double *ProdNet,
