@@ -2,7 +2,7 @@ function panelLosses(p,rates)
 
 for iGroup = 1:p.nGroups
     ix = (p.ixStart(iGroup):p.ixEnd(iGroup))-p.idxB+1;
-    m = p.m(ix);
+    m = p.m(ix+p.idxB-1);
     semilogx(m, rates.mortpred(ix), 'r-','linewidth',2)
     hold on
     semilogx(m, rates.jR(ix), 'k-', 'linewidth',2)

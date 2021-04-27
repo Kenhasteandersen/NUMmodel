@@ -1,10 +1,17 @@
+%
+% Get the mass grid from the Fortran library and return it in the
+% p-structure
+%
 function p = getMass(p)
-
+%
+% Get mass and cell width (Delta-mass) from the library:
+%
 p.m = zeros(1,p.n);
 p.mDelta = p.m;
 [p.m, p.mDelta] = calllib(loadNUMmodelLibrary(), 'f_getmass', p.m, p.mDelta);
-p.m = logspace(-8.5, 0.1, p.n);
-p.m(1:p.idxB-1) = 0;
+%
+% Calculate the upper and lower mass of a cell:
+%
+%p.mLower = p.m./sqrt(p.mDelta);
+%p.mUpper = p.m.*sqrt(p.mDelta);
 
-x = log(p.m);
-p.mDelta = p.m+exp(gradient(x));
