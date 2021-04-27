@@ -1,5 +1,5 @@
 !
-! Module to handle generalist unicellulars
+! Module to handle diatoms
 !
 module diatoms
     use globals
@@ -7,6 +7,9 @@ module diatoms
     implicit none
 
     private
+    !
+    ! Stoichiometry:
+    !
     real(dp), parameter:: rhoCN = 5.68
     real(dp), parameter:: rhoCSi = 100. ! TO BE FIXED!!!
     !
@@ -26,19 +29,20 @@ module diatoms
     real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
     real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
     real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
-              !The constant is increased a bit to limit the lower cell size
     real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
     real(dp), parameter:: cR = 0.1
     !
-    ! Biogeo:
+    ! Bio-geo:
     !
     real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
     real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
     real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
-  
-    real(dp),  dimension(:), allocatable:: AN(:), AL(:), Jmax(:),  JlossPassive(:)
-    real(dp),  dimension(:), allocatable:: nu(:), mort(:)
-    real(dp),  dimension(:), allocatable:: Jresp(:)
+    !
+    ! Needed internal variables:
+    !
+    real(dp), dimension(:), allocatable:: AN(:), AL(:), Jmax(:), JlossPassive(:)
+    real(dp), dimension(:), allocatable:: nu(:), mort(:)
+    real(dp), dimension(:), allocatable:: Jresp(:)
     real(dp):: mort2
   
     public initDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
@@ -62,10 +66,6 @@ module diatoms
          deallocate(JlossPassive)
          deallocate(nu)
          deallocate(mort)
-         
-         !deallocate(JN)
-         !deallocate(JL)
-         !deallocate(JFreal)
       end if
       
       allocate(AN(n))
@@ -75,13 +75,13 @@ module diatoms
       allocate(JlossPassive(n))
       allocate(nu(n))
       allocate(mort(n))
-  
-      !allocate(JN(n))
-      !allocate(JL(n))
-      !allocate(JFreal(n))
-    
+      !
+      ! Radius:
+      !
       r = (3./(4.*pi)*this%m/rho)**onethird
-      
+      !
+      ! Affinities:
+      !
       AN = alphaN*r**(-2.) / (1.+(r/rNstar)**(-2.)) * this%m
       AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
       
@@ -89,8 +89,7 @@ module diatoms
 
       JlossPassive = cLeakage/r * this%m ! in units of C
   
-      !nu = c * this%m**(-onethird)
-      nu = 3*delta/r
+      nu = 3*delta/r ! wall fraction
       Jmax = alphaJ * this%m * (1.d0-nu) ! mugC/day
       Jresp = cR*alphaJ*this%m
       mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);
