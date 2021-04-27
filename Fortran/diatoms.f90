@@ -57,6 +57,7 @@ module diatoms
       if ( allocated(AN) ) then
          deallocate(AN)
          deallocate(AL)
+         deallocate(Jmax)
          deallocate(Jresp)
          deallocate(JlossPassive)
          deallocate(nu)
@@ -69,6 +70,7 @@ module diatoms
       
       allocate(AN(n))
       allocate(AL(n))
+      allocate(Jmax(n))
       allocate(Jresp(n))
       allocate(JlossPassive(n))
       allocate(nu(n))
@@ -100,7 +102,6 @@ module diatoms
       real(dp), intent(in):: gammaN, gammaDOC, gammaSi
       type(typeRates), intent(inout):: rates
       real(dp), intent(in):: L, N, DOC, Si
-      real(dp):: f
       integer:: ix, i
   
       do i = 1, this%n
@@ -134,7 +135,8 @@ module diatoms
          rates%JCloss_photouptake(ix) = (1.-epsilonL)/epsilonL * rates%JLreal(ix)
          rates%JNlossLiebig(ix) = max( 0.d0, rates%JNtot(ix)-rates%Jtot(ix))  ! In units of C
          rates%JClossLiebig(ix) = max( 0.d0, rates%JCtot(ix)-rates%Jtot(ix)) ! C losses from Liebig, not counting losses from photoharvesting
-         
+         rates%JSiloss(ix) = 0.d0 ! NEEDS TO BE FIXED
+
          rates%JNloss(ix) = &
               + rates%JNlossLiebig(ix)&
               + JlossPassive(i) ! In units of C
@@ -184,8 +186,8 @@ module diatoms
              - rates%mortpred(ix) &
              - mort2*u(i) &
              - rates%mortHTL(ix))*u(i)
+
      end do
-  
    end subroutine calcDerivativesDiatoms
      
   end module diatoms

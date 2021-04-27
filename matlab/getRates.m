@@ -1,5 +1,5 @@
 %
-% Returns all rates from the generalists for a given state (u) and light
+% Returns all rates from the unicellulars for a given state (u) and light
 % level.
 %
 function rates = getRates(u, L)
@@ -7,7 +7,7 @@ function rates = getRates(u, L)
 % First make a call to calc a derivative:
 %
 dudt = 0*u';
-[u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
+calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
             length(u), u, L, 0.0, dudt);
 %
 % Then extract the rates:
