@@ -5,7 +5,7 @@ module diatoms
     use globals
     use spectrum
     implicit none
-  
+
     private
     real(dp), parameter:: rhoCN = 5.68
     real(dp), parameter:: rhoCSi = 100. ! TO BE FIXED!!!
@@ -38,7 +38,7 @@ module diatoms
   
     real(dp),  dimension(:), allocatable:: AN(:), AL(:), Jmax(:),  JlossPassive(:)
     real(dp),  dimension(:), allocatable:: nu(:), mort(:)
-    real(dp),  dimension(:), allocatable:: JN(:), JL(:), Jresp(:), JFreal(:)
+    real(dp),  dimension(:), allocatable:: Jresp(:)
     real(dp):: mort2
   
     public initDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
@@ -63,9 +63,9 @@ module diatoms
          deallocate(nu)
          deallocate(mort)
          
-         deallocate(JN)
-         deallocate(JL)
-         deallocate(JFreal)
+         !deallocate(JN)
+         !deallocate(JL)
+         !deallocate(JFreal)
       end if
       
       allocate(AN(n))
@@ -76,9 +76,9 @@ module diatoms
       allocate(nu(n))
       allocate(mort(n))
   
-      allocate(JN(n))
-      allocate(JL(n))
-      allocate(JFreal(n))
+      !allocate(JN(n))
+      !allocate(JL(n))
+      !allocate(JFreal(n))
     
       r = (3./(4.*pi)*this%m/rho)**onethird
       
