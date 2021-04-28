@@ -113,9 +113,9 @@ module diatoms
          rates%JSi(ix) = gammaSi * AN(i)*Si*rhoCSi ! Diffusive Si uptake, units of C/time
          rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
          ! Total nitrogen uptake:
-         rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix)-Jlosspassive(i) ! In units of C
+         rates%JNtot(ix) = rates%JN(ix)-Jlosspassive(i) ! In units of C
          ! Total carbon uptake
-         rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-Jresp(i)-JlossPassive(i)
+         rates%JCtot(ix) = rates%JL(ix)+rates%JDOC(ix)-Jresp(i)-JlossPassive(i)
          ! Liebig + synthesis limitation:
          rates%Jtot(ix) = min( rates%JNtot(ix), rates%JCtot(ix), rates%JSi(ix) )
   
@@ -131,7 +131,7 @@ module diatoms
          !
          ! Losses:
          !
-         rates%JCloss_photouptake(ix) = (1.-epsilonL)/epsilonL * rates%JLreal(ix)
+         rates%JCloss_photouptake(ix) = (1.-epsilonL)/epsilonL * rates%JL(ix)
          rates%JNlossLiebig(ix) = max( 0.d0, rates%JNtot(ix)-rates%Jtot(ix))  ! In units of C
          rates%JClossLiebig(ix) = max( 0.d0, rates%JCtot(ix)-rates%Jtot(ix)) ! C losses from Liebig, not counting losses from photoharvesting
          rates%JSiloss(ix) = 0.d0 ! NEEDS TO BE FIXED
