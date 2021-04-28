@@ -5,13 +5,14 @@ for iGroup = 1:p.nGroups
     m = p.m(ix+p.idxB-1);
     semilogx(m, rates.jF(ix), 'r-', 'linewidth',2)
     hold on
-    % Rates for generalists:
-    if (p.typeGroups(iGroup)==1)
+    % Rates for unicellulars:
+    if (p.typeGroups(iGroup)<10)
        semilogx(m, rates.jN(ix), 'b-','linewidth',2)
        semilogx(m, rates.jLreal(ix), 'g-','linewidth',2)
        semilogx(m, rates.jDOC(ix), 'color',[181 100 30]/256,'linewidth',2)
-       %semilogx(m, p.pGeneralists.Jmax./m, 'k:')
+       semilogx(m, rates.jMax(ix), 'k:')
     end
+    
     % Total:
     semilogx(m, rates.jTot(ix), 'k-', 'linewidth',2)
     % Rates for copepods:
