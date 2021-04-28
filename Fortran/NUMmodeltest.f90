@@ -26,6 +26,8 @@ program NUMmodeltest
      u00(i) = 1.0d0*(i-2)
   end do
 
+  call calcDerivatives(u00, 150.d0, 0.1d0)
+  write(*,*) rates%dudt
  
   call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
   write(*,*) u00

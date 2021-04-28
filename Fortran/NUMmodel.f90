@@ -20,7 +20,7 @@ module NUMmodel
   integer:: nNutrients ! Number of nutrient state variables
   integer:: idxB ! First index into non-nutrient groups (=nNutrients+1)
   type(typeSpectrum), dimension(:), allocatable:: group ! Structure for each group
-  integer, dimension(:), allocatable:: ixStart, ixEnd ! Start and end indexes of the group in the state-variable vector "u"
+  !integer, dimension(:), allocatable:: ixStart, ixEnd ! Start and end indexes of the group in the state-variable vector "u"
 
   real(dp), dimension(:,:), allocatable:: theta ! Interaction matrix
   real(dp), dimension(:), allocatable:: upositive ! State variable constrained to be positive
@@ -155,8 +155,6 @@ contains
        deallocate(epsilonF)
 
        deallocate(group)
-       deallocate(ixStart)
-       deallocate(ixEnd)
 
        deallocate(upositive)
 
@@ -207,8 +205,6 @@ contains
     allocate(epsilonF(nGrid))
 
     allocate(group(nGroups))
-    allocate(ixStart(nGroups))
-    allocate(ixEnd(nGroups))
 
     allocate(upositive(nGrid))
 
@@ -260,20 +256,20 @@ contains
   subroutine parametersAddGroup(typeGroup, n, mMax)
     integer, intent(in):: typeGroup, n
     real(dp), intent(in):: mMax
-
     !
     ! Find the group number and grid location:
     !
     iGroup = iGroup + 1
     if (iGroup.eq.1) then
-       ixStart(iGroup) = idxB
+       group(iGroup)%ixStart = idxB
     else
-       ixStart(iGroup) = ixEnd(iGroup-1)+1
+       group(iGroup)%ixStart = group(iGroup-1)%ixEnd+1
     end if
-    ixEnd(iGroup) = ixStart(iGroup)+n-1
+    group(iGroup)%ixEnd = group(iGroup)%ixStart+n-1
 
-    if (ixEnd(iGroup) .gt. nGrid) then
-       write(6,*) 'Attempting to add more grid points than allocated', ixEnd(igroup), nGrid
+    if (group(iGroup)%ixEnd .gt. nGrid) then
+       write(6,*) 'Attempting to add more grid points than allocated', &
+           group(iGroup)%ixEnd, nGrid
        stop 1
     end if
     !
@@ -281,28 +277,28 @@ contains
     !
     select case (typeGroup)
     case (typeGeneralist)
-      group(iGroup) = initGeneralists(n, ixStart(iGroup)-1, mMax)
+      group(iGroup) = initGeneralists(n, group(iGroup)%ixStart-1, mMax)
     case (typeGeneralist_csp)
-      group(iGroup) = initGeneralists_csp(n, ixStart(iGroup)-1, mMax)
+      group(iGroup) = initGeneralists_csp(n, group(iGroup)%ixStart-1, mMax)
     case (typeDiatom)
-      group(iGroup) = initDiatoms(n, ixStart(iGroup)-1, mMax)
+      group(iGroup) = initDiatoms(n, group(iGroup)%ixStart-1, mMax)
     case(typeCopepod)
-       group(iGroup) = initCopepod(n, ixStart(iGroup)-1, mMax)
+       group(iGroup) = initCopepod(n, group(iGroup)%ixStart-1, mMax)
     end select
     group(iGroup)%type = typeGroup
     !
     ! Import grid to globals:
     !
-    m(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%m
-    z(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%z
+    m(group(iGroup)%ixStart : group(iGroup)%ixEnd) = group(iGroup)%m
+    z(group(iGroup)%ixStart : group(iGroup)%ixEnd) = group(iGroup)%z
     !
     ! Import feeding parameters:
     !
-    beta(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%beta
-    sigma(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%sigma
-    AF(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%AF
-    JFmax(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%JFmax
-    epsilonF(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%epsilonF
+    beta(group(iGroup)%ixStart : group(iGroup)%ixEnd) = group(iGroup)%beta
+    sigma(group(iGroup)%ixStart : group(iGroup)%ixEnd) = group(iGroup)%sigma
+    AF(group(iGroup)%ixStart : group(iGroup)%ixEnd) = group(iGroup)%AF
+    JFmax(group(iGroup)%ixStart : group(iGroup)%ixEnd) = group(iGroup)%JFmax
+    epsilonF(group(iGroup)%ixStart : group(iGroup)%ixEnd) = group(iGroup)%epsilonF
 
   end subroutine parametersAddGroup
   ! -----------------------------------------------
