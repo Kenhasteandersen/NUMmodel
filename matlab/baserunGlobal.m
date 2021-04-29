@@ -14,7 +14,7 @@ function sim = baserunGlobal(p)
 % Setup a basic run of the global model
 %
 if (nargin==0)
-    p = parameters([]);
+    p = setupGeneralistsOnly;
     p = parametersGlobal(p); % Use standard low-res model
     %p = parametersGlobal(10,2); % Use MITgcm_ECCO
     p.tEnd = 365;
