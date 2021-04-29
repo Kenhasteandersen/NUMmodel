@@ -23,7 +23,7 @@ end
 
 ixN = p.idxN;
 ixDOC = p.idxDOC;
-ixB = p.idxB;
+ixB = p.idxB:p.n;
 addpath("Transport matrix");
 
 %Tbc = [];
@@ -170,7 +170,7 @@ for i=1:simtime
         end
     else
         for k = 1:nb
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', int32(p.n-p.idxB+1), u(k,:), L(k), 0.5, dt);
+            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', int32(p.n), u(k,:), L(k), 0.5, dt);
             % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
             %u(k,:) = utmp(end,:);
@@ -185,7 +185,7 @@ for i=1:simtime
     % Transport
     %
     if p.bTransport
-        for k = 1:p.n+p.idxB-1
+        for k = 1:p.n
             u(:,k) =  Aimp * (Aexp * u(:,k));
         end
     end
@@ -197,7 +197,7 @@ for i=1:simtime
         iSave = iSave + 1;
         sim.N(:,:,:,iSave) = single(matrixToGrid(u(:,ixN), [], p.pathBoxes, p.pathGrid));
         sim.DOC(:,:,:,iSave) = single(matrixToGrid(u(:,ixDOC), [], p.pathBoxes, p.pathGrid));
-        for j = 1:p.nGrid
+        for j = 1:p.n-p.idxB+1
             sim.B(:,:,:,j,iSave) = single(matrixToGrid(u(:,ixB(j)), [], p.pathBoxes, p.pathGrid));
         end
         sim.L(:,:,:,iSave) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));

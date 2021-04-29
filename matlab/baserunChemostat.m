@@ -3,8 +3,6 @@
 % In:
 %  mAdult is the adult sizes of copepods (can be left empty to simulate only
 %         unicellular organisms) (default = [], ie only generalists).
-%  bUseFortran: Flag indicating whether the fortran library is used
-%  (default to false)
 %
 % Out:
 %  sim: Structure holding the results of the simulation
@@ -18,7 +16,7 @@ end
 %
 % Set parameters:
 %
-p = setupGeneralistsOnly();
+p = setupGeneric(mAdult);
 p = parametersChemostat(p);
 p.tEnd = 365;
 %

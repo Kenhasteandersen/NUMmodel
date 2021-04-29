@@ -11,11 +11,9 @@ p.idxN = 1;
 p.idxDOC = 2;
 p.idxB = 3; % We have two nutrient groups so biomass groups starts at index 3.
 
-p.n = n+p.idxB-1;
-p.nGroups = 1;
-p.typeGroups = 1;
-p.ixStart = p.idxB;
-p.ixEnd = p.n;
+p.n = 2;
+% Generalists:
+p = parametersAddgroup(1,p,n);
 
 p = getMass(p);
 %[p.m(p.idxB:p.n), p.mLower(p.idxB:p.n), p.mDelta(p.idxB:p.n)] = parametersCalcGrid(10^-8.5, 0.1, n);

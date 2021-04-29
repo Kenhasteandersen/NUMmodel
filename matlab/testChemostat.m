@@ -1,4 +1,4 @@
-function bSuccess = testChemostatFortran
+function bSuccess = testChemostat
 
 sim = baserunChemostat(1.0);
 

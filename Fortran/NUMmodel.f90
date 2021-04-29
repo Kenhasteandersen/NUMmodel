@@ -20,7 +20,6 @@ module NUMmodel
   integer:: nNutrients ! Number of nutrient state variables
   integer:: idxB ! First index into non-nutrient groups (=nNutrients+1)
   type(typeSpectrum), dimension(:), allocatable:: group ! Structure for each group
-  !integer, dimension(:), allocatable:: ixStart, ixEnd ! Start and end indexes of the group in the state-variable vector "u"
 
   real(dp), dimension(:,:), allocatable:: theta ! Interaction matrix
   real(dp), dimension(:), allocatable:: upositive ! State variable constrained to be positive
@@ -704,5 +703,4 @@ contains
     mort = 0*m(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
   end subroutine getRates
 
-  
 end module NUMmodel
