@@ -1,7 +1,7 @@
 function p = setupGeneralistsOnly(n, bParallel)
 
 arguments
-    n {mustBeInteger, mustBePositive} = 10;
+    n int32 {mustBeInteger, mustBePositive} = 10;
     bParallel logical = false;
 end
 
