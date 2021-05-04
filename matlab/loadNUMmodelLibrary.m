@@ -5,7 +5,7 @@
 function sLibname = loadNUMmodelLibrary(bParallel)
 
 arguments
-    bParallel=false;
+    bParallel logical = false;
 end
 
 sLibname = 'NUMmodel_matlab';

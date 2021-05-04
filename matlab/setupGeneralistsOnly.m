@@ -2,7 +2,7 @@ function p = setupGeneralistsOnly(n, bParallel)
 
 arguments
     n {mustBeInteger, mustBePositive} = 10;
-    bParallel = false;
+    bParallel logical = false;
 end
 
 loadNUMmodelLibrary(bParallel);
