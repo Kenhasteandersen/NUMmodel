@@ -1,6 +1,7 @@
 function bSuccess = testGlobal
 
-p = parametersGlobal(setupGeneralistsOnly); % Use standard low-res model
+p = setupGeneralistsOnly(10, true);
+p = parametersGlobal(p); % Use standard low-res model
 p.tEnd = 5;
 p.tSave = 5;
 

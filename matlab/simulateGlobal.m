@@ -39,27 +39,27 @@ end
 % ---------------------------------
 % Load library:
 % ---------------------------------
-if p.bParallel
-    if isempty(gcp('nocreate'))
-        parpool('AttachedFiles',...
-            {'../Fortran/NUMmodel_matlab.so',...
-             '../Fortran/NUMmodel_wrap_colmajor4matlab.h'});
-    end
-    %
-    % Set parameters:
-    %
-    h = gcp('nocreate');
-    poolsize = h.NumWorkers;
-    parfor i=1:poolsize
-        loadNUMmodelLibrary();
-        %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-        calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
-    end
-else
-    loadNUMmodelLibrary();
-    %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-    calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
-end
+% if p.bParallel
+%     if isempty(gcp('nocreate'))
+%         parpool('AttachedFiles',...
+%             {'../Fortran/NUMmodel_matlab.so',...
+%              '../Fortran/NUMmodel_wrap_colmajor4matlab.h'});
+%     end
+%     %
+%     % Set parameters:
+%     %
+%     h = gcp('nocreate');
+%     poolsize = h.NumWorkers;
+%     parfor i=1:poolsize
+%         loadNUMmodelLibrary();
+%         %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
+%         calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
+%     end
+% else
+%     loadNUMmodelLibrary();
+%     %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
+%     calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
+% end
 % ---------------------------------------
 % Initialize run:
 % ---------------------------------------

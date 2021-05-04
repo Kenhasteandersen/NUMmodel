@@ -1,11 +1,22 @@
-function p = setupGeneralistsOnly(n)
+function p = setupGeneralistsOnly(n, bParallel)
 
 arguments
     n {mustBeInteger, mustBePositive} = 10;
+    bParallel = false;
 end
 
-loadNUMmodelLibrary();
-calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly', int32(n) );
+loadNUMmodelLibrary(bParallel);
+
+if bParallel
+    h = gcp('nocreate');
+    poolsize = h.NumWorkers;
+    parfor i=1:poolsize
+        loadNUMmodelLibrary();
+        calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
+    end
+else
+    calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly', int32(n) );
+end
 
 p.idxN = 1;
 p.idxDOC = 2;
