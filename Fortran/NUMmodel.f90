@@ -519,10 +519,12 @@ contains
     !
     ! Calc derivatives of multicellular groups:
     !
-    do iGroup = 2, nGroups
-       call calcDerivativesCopepod(group(iGroup), &
+    do iGroup = 1, nGroups
+      if (group(iGroup)%type .eq. typeCopepod) then
+         call calcDerivativesCopepod(group(iGroup), &
             upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
             rates)
+      end if
     end do
   end subroutine calcDerivatives
   !

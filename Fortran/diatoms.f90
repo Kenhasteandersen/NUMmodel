@@ -117,7 +117,7 @@ module diatoms
          ! Total carbon uptake
          rates%JCtot(ix) = rates%JL(ix)+rates%JDOC(ix)-Jresp(i)-JlossPassive(i)
          ! Liebig + synthesis limitation:
-         rates%Jtot(ix) = min( Jmax(ix), rates%JNtot(ix), rates%JCtot(ix), rates%JSi(ix) )
+         rates%Jtot(ix) = min( Jmax(i), rates%JNtot(ix), rates%JCtot(ix), rates%JSi(ix) )
          ! Actual uptakes:
          rates%JCtot(ix) = &
               + rates%JL(ix)  &

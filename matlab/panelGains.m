@@ -16,9 +16,9 @@ for iGroup = 1:p.nGroups
     % Total:
     semilogx(m, rates.jTot(ix), 'k-', 'linewidth',2)
     % Rates for copepods:
-    if (p.typeGroups(iGroup)==2)
-        semilogx(m, p.jFmax(ix),'k:')
-    end
+    %if (p.typeGroups(iGroup)~=2)
+    %    semilogx(m, p.jFmax(ix),'k:')
+    %end
 end
 
 hold off
