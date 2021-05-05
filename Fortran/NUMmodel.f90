@@ -76,6 +76,18 @@ contains
  end subroutine setupDiatomsOnly
 
   ! -----------------------------------------------
+  ! Generalists and diatoms:
+  ! -----------------------------------------------
+   subroutine setupGeneralistsDiatoms(n)
+      integer, intent(in):: n
+      call parametersInit(2, 2*n, 3)
+      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
+      bQuadraticHTL = .false. ! Use standard "linear" mortality
+      call parametersFinalize()
+   end subroutine setupGeneralistsDiatoms
+   
+  ! -----------------------------------------------
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------
   subroutine setupGeneralistsCopepod()
@@ -120,6 +132,8 @@ contains
     end do
     call parametersFinalize()
   end subroutine setupGeneric_csp
+
+
 
   ! ======================================
   !  Model initialization stuff:

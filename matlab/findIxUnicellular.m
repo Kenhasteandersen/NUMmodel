@@ -7,4 +7,4 @@ for iGroup = 1:p.nGroups
     end
 end
       
-ix = ix - 2;
+ix = ix - p.idxB+1;
