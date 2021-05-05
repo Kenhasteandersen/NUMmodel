@@ -24,7 +24,7 @@ p.idxB = 4; % We have three nutrient groups so biomass groups starts at index 4.
 
 p.n = 3;
 % Diatoms:
-p = parametersAddgroup(2,p,n);
+p = parametersAddgroup(3,p,n);
 
 p = getMass(p); % Get masses
 

@@ -6,6 +6,18 @@ else
     p.nGroups = p.nGroups+1;
 end
 p.typeGroups(p.nGroups) = typeGroup;
+
+switch p.typeGroups(p.nGroups)
+    case 1
+        p.nameGroup{p.nGroups} = 'Generalists';
+    case 2
+        p.nameGroup{p.nGroups} = 'Generalists CSP';
+    case 3
+        p.nameGroup{p.nGroups} = 'Diatoms';
+    case 10
+        p.nameGroup{p.nGroups} = 'Copepod';
+end
+
 %
 % Set up indexing into u:
 %

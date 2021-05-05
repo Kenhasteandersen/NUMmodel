@@ -26,7 +26,7 @@ p.n = 3;
 % Generalists
 p = parametersAddgroup(1,p,n);
 % Diatoms:
-p = parametersAddgroup(2,p,n);
+p = parametersAddgroup(3,p,n);
 
 p = getMass(p); % Get masses
 
