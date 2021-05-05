@@ -1,6 +1,6 @@
 %
 % Load fortran library. If it is already loaded, it returns the library
-% name.b
+% name.
 %
 function sLibname = loadNUMmodelLibrary(bParallel)
 
@@ -18,7 +18,8 @@ if bParallel
     end
 else
     if ~libisloaded(sLibname)
-        [notfound,warnings] = loadlibrary(strcat('../Fortran/',sLibname,'.so'), ...
+        [notfound,warnings] = loadlibrary(strcat(...
+            '../Fortran/',sLibname,'.so'), ...
             '../Fortran/NUMmodel_wrap_colmajor4matlab.h');
     end
 end

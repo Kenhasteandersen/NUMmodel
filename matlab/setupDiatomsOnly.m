@@ -1,11 +1,21 @@
-function p = setupDiatomsOnly(n)
+function p = setupDiatomsOnly(n, bParallel)
 
 arguments
-   n {mustBeInteger, mustBePositive} = 10;  % Number of grid points
+   n int32 {mustBeInteger, mustBePositive} = 10; % Number of grid points
+   bParallel logical = false;
 end
 
-loadNUMmodelLibrary();
-calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly', int32(n) );
+loadNUMmodelLibrary(bParallel);
+
+if bParallel
+    h = gcp('nocreate');
+    poolsize = h.NumWorkers;
+    parfor i=1:poolsize
+        calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly',int32(n));
+    end
+else
+    calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly', int32(n) );
+end
 
 p.idxN = 1;
 p.idxDOC = 2;
