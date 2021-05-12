@@ -13,25 +13,28 @@ arguments
     p struct
     nTMmodel {mustBeInteger} = 1;
 end
+
+path = fileparts(mfilename('fullpath'));
+
 %
 % Set load paths for tranport matrices:
 %
 if (nargin==1 || nargin==0 || nTMmodel == 1)
-    p.pathMatrix   = '../TMs/MITgcm_2.8deg/Matrix5/TMs/matrix_nocorrection_';
-    p.pathBoxes     = '../TMs/MITgcm_2.8deg/Matrix5/Data/boxes.mat';
-    p.pathGrid      = '../TMs/MITgcm_2.8deg/grid.mat';
-    p.pathConfigData = '../TMs/MITgcm_2.8deg/config_data.mat';
-    p.pathTemp      = '../TMs/MITgcm_2.8deg/BiogeochemData/Theta_bc.mat'; 
-    p.pathN0        = '../TMs/MITgcm_N0';
-    p.pathInit      = sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0));
+    p.pathMatrix   = strcat(path,'/../TMs/MITgcm_2.8deg/Matrix5/TMs/matrix_nocorrection_');
+    p.pathBoxes     = strcat(path,'/../TMs/MITgcm_2.8deg/Matrix5/Data/boxes.mat');
+    p.pathGrid      = strcat(path,'/../TMs/MITgcm_2.8deg/grid.mat');
+    p.pathConfigData = strcat(path,'/../TMs/MITgcm_2.8deg/config_data.mat');
+    p.pathTemp      = strcat(path,'/../TMs/MITgcm_2.8deg/BiogeochemData/Theta_bc.mat'); 
+    p.pathN0        = strcat(path,'/../TMs/MITgcm_N0');
+    p.pathInit      = strcat(sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0)));
 elseif nTMmodel == 2
-    p.pathMatrix = '../TMs/MITgcm_ECCO/Matrix1/TMs/matrix_nocorrection_';
-    p.pathBoxes = '../TMs/MITgcm_ECCO/Matrix1/Data/boxes.mat';
-    p.pathGrid = '../TMs/MITgcm_ECCO/grid.mat';
-    p.pathConfigData = '../TMs/MITgcm_ECCO/config_data.mat';
-    p.pathTemp = '../TMs/MITgcm_ECCO/BiogeochemData/Theta_bc.mat'; 
-    p.pathN0    = '../TMs/MITgcm_ECCO_N0';
-    p.pathInit = sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0));
+    p.pathMatrix = strcat(path,'/../TMs/MITgcm_ECCO/Matrix1/TMs/matrix_nocorrection_');
+    p.pathBoxes = strcat(path,'/../TMs/MITgcm_ECCO/Matrix1/Data/boxes.mat');
+    p.pathGrid = strcat(path,'/../TMs/MITgcm_ECCO/grid.mat');
+    p.pathConfigData = strcat(path,'/../TMs/MITgcm_ECCO/config_data.mat');
+    p.pathTemp = strcat(path,'/../TMs/MITgcm_ECCO/BiogeochemData/Theta_bc.mat'); 
+    p.pathN0    = strcat(path,'/../TMs/MITgcm_ECCO_N0');
+    p.pathInit = strcat(sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0)));
 end
 %
 % Numerical parameters:

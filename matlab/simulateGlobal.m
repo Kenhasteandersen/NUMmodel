@@ -24,7 +24,6 @@ end
 ixN = p.idxN;
 ixDOC = p.idxDOC;
 ixB = p.idxB:p.n;
-addpath("Transport matrix");
 
 %Tbc = [];
 
@@ -32,6 +31,9 @@ disp('Preparing simulation')
 %
 % Check that files exist:
 %
+path = fileparts(mfilename('fullpath'));
+addpath(strcat(path,'/Transport matrix'));
+
 if ~exist(p.pathBoxes,'file')
     error( sprintf('Error: Cannot find transport matrix file: %s',...
         p.pathBoxes));
