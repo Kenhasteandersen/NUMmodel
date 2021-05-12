@@ -51,7 +51,7 @@ sim.rates = calcDerivatives(p,u(end,:),L);
 for iGroup = 1:p.nGroups
     sim.Bgroup(:,iGroup) = sum( u(:, p.ixStart(iGroup):p.ixEnd(iGroup)),2);
 end
-Bpnm = calcPicoNanoMicro(sim.B(end,:), sim.p.pGeneralists);
+Bpnm = calcPicoNanoMicro(sim.B(end,:), sim.p.pGeneralists.m);
 sim.Bpico = Bpnm(1);
 sim.Bnano = Bpnm(2);
 sim.Bmicro = Bpnm(3);

@@ -59,6 +59,25 @@ ylim([0 1])
 % and micro plankton in until of mugC/liter:
 
 [sim.Bpico, sim.Bnano, sim.Bmicro]
+
+%%
+% Calculate average rates of uptakes of DOC, light, and feeding across
+% pico-nano-micro groups (units 1/day):
+%
+
+% DOC uptake:
+jDOC = sim.rates.JDOC./sim.p.m;
+jDOC_PicoNanoMicro = calcPicoNanoMicroRate(sim.p.m(3:end), jDOC(3:end))
+
+% Light uptake:
+jL = sim.rates.JLreal./sim.p.m;
+jL_PicoNanoMicro = calcPicoNanoMicroRate(sim.p.m(3:end), jL(3:end))
+
+% Feeding:
+jF = sim.rates.JFreal./sim.p.m;
+jF_PicoNanoMicro = calcPicoNanoMicroRate(sim.p.m(3:end), jF(3:end))
+
+
 %%
 % We can adjust the diffusion rate with the parameter "d" in the param structure. 
 % The default value is 0.5 per day, which is pretty high:
