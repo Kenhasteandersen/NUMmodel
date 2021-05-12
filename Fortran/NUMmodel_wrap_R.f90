@@ -56,6 +56,16 @@ end subroutine f_setupGeneralistsOnly
     mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates
 
+  subroutine f_simulateChemostatEuler(nGri, u, L, Ndeep, diff, tEnd, dt)
+    use globals
+    use NUMmodel, only: simulateChemostatEuler
+    integer, intent(in):: nGri
+    real(dp), intent(inout):: u(nGri)
+    real(dp), intent(in):: L, Ndeep, diff, tEnd, dt
+
+    call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
+end subroutine f_simulateChemostatEuler
+
   subroutine f_getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
     use globals
     use NUMmodel, only: getFunctions

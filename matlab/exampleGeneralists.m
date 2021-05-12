@@ -23,6 +23,38 @@ plotChemostat(sim)
 % The last panel shows nutrient and dissolved organic carbon as a function of time. The black line is the total biomass of plankton.
 
 %%
+% Plot of photosynthetic vs phagotrophic production:
+%
+figure
+clf
+m = sim.p.m;
+
+NetFixationRate = max(0, (sim.rates.JLreal - sim.p.Jresp))./m; % Subtract respiration
+FeedingRate = sim.rates.JFreal./m;
+g = sim.rates.Jtot./m;
+DOCrate = min(g, sim.rates.JDOC./m);
+
+subplot(2,1,1)
+semilogx(m, NetFixationRate, 'g',... 
+    m, FeedingRate, 'r', ...
+    m, DOCrate, 'm',...
+    m, g, 'k', ...
+    'linewidth',3)
+ylabel('rates (day^{-1})')
+ylim([0 1.5])
+legend({'Net fixation','Feeding','DOC','Total'})
+ 
+subplot(2,1,2)
+semilogx(m, NetFixationRate./g, 'g',...
+    m,FeedingRate./g,'r',...
+    m,DOCrate./g,'m',...
+    'linewidth',3)
+xlabel('mass (mugC)')
+ylabel('Fraction of growth rate')
+ylim([0 1])
+
+
+%%
 % We can get the biomass divided into pico (smaller than 2 mum), nano (2-20 mum), 
 % and micro plankton in until of mugC/liter:
 

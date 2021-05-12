@@ -1,3 +1,8 @@
+%
+% Return the biomass within the size range m1:m2.
+% Also output the fraction of biomass from each size
+% group that falls into the range.
+%
 function [Brange,f] = calcBiomassRange(B,m, m1, m2)
 m2 = min(max(m),m2);
 %
