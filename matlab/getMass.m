@@ -12,6 +12,6 @@ p.mDelta = p.m;
 %
 % Calculate the upper and lower mass of a cell:
 %
-%p.mLower = p.m./sqrt(p.mDelta);
-%p.mUpper = p.m.*sqrt(p.mDelta);
+p.mLower = (sqrt(4*p.m.^2+p.mDelta.^2)-p.mDelta)/2;
+p.mUpper = p.mLower+p.mDelta;
 
