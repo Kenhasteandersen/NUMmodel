@@ -115,7 +115,7 @@ end
 %
 iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
-sim = load(p.pathGrid,'x','y','z');
+sim = load(p.pathGrid,'x','y','z','dznom');
 sim.N = single(zeros(length(sim.x), length(sim.y), length(sim.z),nSave));
 sim.DOC = sim.N;
 sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.n-p.idxB+1, nSave));
@@ -234,6 +234,7 @@ sim.t = tSave; % days where solution was saved
 sim.p = p;
 sim.Ntot = calcGlobalN(sim);
 sim.B(sim.B<0) = 0.;
+sim.DOC(sim.DOC<0) = 0.;
 
 if bCalcAnnualAverages
     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));

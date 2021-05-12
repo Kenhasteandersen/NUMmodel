@@ -4,6 +4,7 @@
 % group that falls into the range.
 %
 function [Brange,f] = calcBiomassRange(B,m, m1, m2)
+B = reshape(B,1,length(B));
 m2 = min(max(m),m2);
 %
 % Find lower and upper cell boundaries:
@@ -18,8 +19,17 @@ ix = find(mUpper>=m1 & mLower<=m2);
 %
 % Find fractions to take from boundary size groups:
 %
-fLower = 1-(log(m1)-log(mLower(ix(1)))) / (log(mUpper(ix(1)))-log(mLower(ix(1))));
-fUpper = (log(m2)-log(mLower(ix(end)))) / (log(mUpper(ix(end)))-log(mLower(ix(end))));
+if mLower>m1
+    fLower = 1;
+else
+    fLower = 1-(log(m1)-log(mLower(ix(1)))) / (log(mUpper(ix(1)))-log(mLower(ix(1))));
+end
+
+if mUpper<m2
+    fUpper = 1;
+else
+    fUpper = (log(m2)-log(mLower(ix(end)))) / (log(mUpper(ix(end)))-log(mLower(ix(end))));
+end
 %
 % Assemble fractions:
 %

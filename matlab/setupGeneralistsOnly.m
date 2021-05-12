@@ -7,14 +7,13 @@ end
 
 loadNUMmodelLibrary(bParallel);
 
+calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly', int32(n) );
 if bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
     parfor i=1:poolsize
         calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(n));
     end
-else
-    calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly', int32(n) );
 end
 
 p.idxN = 1;
