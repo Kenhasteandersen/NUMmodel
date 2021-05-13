@@ -1,3 +1,6 @@
+%
+% Returns the idx of the watercolumn closes to lat and lon
+%
 function idx = calcGlobalWatercolumn(lat, lon, sim)
 
 arguments

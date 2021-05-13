@@ -15,12 +15,14 @@ end
 %
 % Check size of z:
 %
-if isequal(size(z), [length(y)-1, length(x)-1])
-    z = z';
-end
 
-if ~isequal(size(z), [length(x)-1, length(y)-1])
-    error('Wrong dimension of z(%i,%i). Should be (%i,%i)\n',...
+%if isequal(size(z), [length(y)-1, length(x)-1])
+%    z = z';
+%end
+
+dim = size(z);
+if ~isequal(dim(1:2), [length(x)-1, length(y)-1])
+    error('Wrong dimension of z(%i,%i,:). Should be (%i,%i,:)\n',...
         size(z,1),size(z,2),length(x)-1, length(y)-1);
 end
 %
@@ -28,7 +30,11 @@ end
 %
 for i = 1:length(x)-1
     for j = 1:length(y)-1
-        patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j), 'edgecolor','none')
+        if length(dim)==2
+            patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j), 'edgecolor','none')
+        else
+            patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j,:), 'edgecolor','none')
+        end
     end
 end
 
