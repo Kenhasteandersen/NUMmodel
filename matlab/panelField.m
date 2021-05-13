@@ -7,7 +7,9 @@
 %   being the lower side of the last cell
 % z values of all cells
 %
-function panelField(x,y,z)
+% Returns a handle to all the patches
+%
+function h = panelField(x,y,z)
 
 arguments
     x,y,z double;
@@ -31,9 +33,9 @@ end
 for i = 1:length(x)-1
     for j = 1:length(y)-1
         if length(dim)==2
-            patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j), 'edgecolor','none')
+            h(i,j) = patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j), 'edgecolor','none');
         else
-            patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j,:), 'edgecolor','none')
+            h(i,j) = patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j,:), 'edgecolor','none');
         end
     end
 end

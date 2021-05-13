@@ -37,6 +37,7 @@ for i = 1:length(rates.jL)
         strategy{i} = 'Heterotroph';
         col(i,:) = [1,0,0];
     end
+      
 end
 
 
