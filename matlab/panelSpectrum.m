@@ -2,9 +2,13 @@
 % Plot Sheldon biomass spectrum. The biomasses are normalised by the width
 % of the cell and multiplied by mass.
 %
-function panelSpectrum(sim)
+function panelSpectrum(sim, ixTime)
+
+arguments
+    sim struct;
+    ixTime {mustBeInteger} = length(sim.t);
+end
 p = sim.p;
-ixTime = length(sim.t);
 
 sLegend = {};
 

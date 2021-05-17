@@ -1,5 +1,6 @@
 %
-% Plot a size spectrum at a given lat, lon, and depth
+% Plot a size spectrum at a given lat, lon, depth (in meters), and time
+% (index).
 %
 function plotGlobalSizespectrum(sim, lat, lon, depth, iTime)
 arguments

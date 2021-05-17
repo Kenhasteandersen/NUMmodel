@@ -16,6 +16,18 @@ z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(en
 
 clf
 tiledlayout(2,1,'tilespacing','compact','padding','compact')
+arguments
+    sim struct;
+    lat, lon double;
+    iTime {mustBeInteger} = length(sim.t);
+end
+
+idx = calcGlobalWatercolumn(lat,lon,sim);
+m = [sim.p.mLower(3:end), sim.p.mLower(end)+sim.p.mDelta(end)];
+z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
+
+clf
+tiledlayout(2,1,'tilespacing','compact','padding','compact')
 %
 % Biomass spectrum:
 %
