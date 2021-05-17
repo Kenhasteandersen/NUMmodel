@@ -2,7 +2,7 @@
 % Plot a size spectrum at a given lat, lon, depth (in meters), and time
 % (index).
 %
-function plotGlobalSizespectrum(sim, lat, lon, depth, iTime)
+function s = plotGlobalSizespectrum(sim, lat, lon, depth, iTime)
 arguments
     sim struct;
     lat, lon, depth double;
@@ -34,10 +34,13 @@ nexttile
 u = [sim.N(idx.x, idx.y,iDepth,iTime), ...
     sim.DOC(idx.x, idx.y,iDepth,iTime), ...
     squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))'];
-rates = getRates(u, sim.L(idx.x, idx.y, iDepth,iTime));
+s.L = sim.L(idx.x, idx.y, iDepth,iTime)
+rates = getRates(u, s.L);
 panelGains(sim.p,rates)
 %
 % Losses:
 %
 nexttile
 panelLosses(sim.p, rates);
+
+s.rates = rates;
