@@ -134,7 +134,6 @@ module diatoms
   
       do i = 1, this%n
          ix = i+this%ixOffset
-
          !
          ! Uptakes
          !
@@ -181,7 +180,7 @@ module diatoms
          !rates%JLreal(ix)= rates%JL(ix)-max(0.d0, &
          !min((rates%JCtot(ix)-rates%Jtot(ix)), rates%JL(ix))) 
          rates%JLreal(ix)= rates%JL(ix)-&
-         min((rates%JCtot(ix)-rates%Jtot(ix)), rates%JL(ix)) 
+               min((rates%JCtot(ix)-rates%Jtot(ix)), rates%JL(ix)) 
          !write(*,*) 'JLrealD=' rates%JLreal(ix)/ this%m(i)
          ! Actual uptakes:
          rates%JCtot(ix) = &
