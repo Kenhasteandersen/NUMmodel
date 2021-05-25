@@ -23,4 +23,4 @@ toc
 %
 % Plot
 %
-%plotChemostat(sim)
+plotChemostat(sim)

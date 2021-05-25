@@ -99,9 +99,9 @@ module diatoms
       allocate(JlossPassive(n))
       allocate(nu(n))
       allocate(mort(n))
-      allocate(JsN(n)) !! YOU FORGOT TO ALLOCATE THIS VARIABLE
-      allocate(JsSi(n)) !! YOU FORGOT TO ALLOCATE THIS VARIABLE
-      allocate(JsC(n)) !! YOU FORGOT TO ALLOCATE THIS VARIABLE
+      allocate(JsN(n+3)) !! YOU FORGOT TO ALLOCATE THIS VARIABLE
+      allocate(JsSi(n+3)) !! YOU FORGOT TO ALLOCATE THIS VARIABLE
+      allocate(JsC(n+3)) !! YOU FORGOT TO ALLOCATE THIS VARIABLE
       
       ! Radius:
       !
