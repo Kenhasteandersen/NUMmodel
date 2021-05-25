@@ -88,6 +88,8 @@ module diatoms
          deallocate(nu)
          deallocate(mort)
          deallocate(JsN)
+         deallocate(JsSi)
+         deallocate(Jsc)
       end if
       
       allocate(AN(n)) 
@@ -179,7 +181,7 @@ module diatoms
          rates%Jtot(ix)= f*Jmax(i)
          !rates%JLreal(ix)= rates%JL(ix)-max(0.d0, &
          !min((rates%JCtot(ix)-rates%Jtot(ix)), rates%JL(ix))) 
-         rates%JLreal(ix)= rates%JL(ix)-&
+         rates%JLreal(ix)= rates%JL(ix)- &
                min((rates%JCtot(ix)-rates%Jtot(ix)), rates%JL(ix)) 
          !write(*,*) 'JLrealD=' rates%JLreal(ix)/ this%m(i)
          ! Actual uptakes:

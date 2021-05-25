@@ -3,13 +3,13 @@
 #
 # iFortran:
 #
-#FORT=ifort
-#FLAGS=-O2
+FORT=ifort
+FLAGS=-O2
 #LINK=
 #
 # gfortran:
 #
-FORT=gfortran
+#FORT=gfortran
 #FLAGS=-g3
 #FLAGS=-O2
 # Link needed on Macos:
@@ -21,8 +21,8 @@ OBJ = globals.o debug.o spectrum.o generalists.o generalists_csp.o diatoms.o cop
 
 all: NUMmodel libMatlab libR
 
-debugging: FLAGS = -g3 -fbounds-check
-#debugging: FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
+#debugging: FLAGS = -g3 -fbounds-check
+debugging: FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
 
 debugging: clean all
 
