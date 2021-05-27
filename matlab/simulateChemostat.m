@@ -1,7 +1,8 @@
 %
 % Simulate the chemostat.
 % In:
-%  p - parameter object obtained by calling a "setup" function.
+%  p - parameter object obtained by calling a "setup" function followed
+%      by a call to parametersChemostat; see e.g. the default value below.
 %  L - Light
 % Out:
 %  sim - simulation object

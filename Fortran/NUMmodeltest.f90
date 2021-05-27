@@ -3,7 +3,7 @@ program NUMmodeltest
   implicit none
 
   real(dp), allocatable:: u0(:), u00(:)
-  real(dp):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+  !real(dp):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
   integer:: i
 
 
@@ -34,7 +34,7 @@ write(*,*) rates%JN
 
   call setupDiatomsOnly(10)
   call calcDerivatives(u00, 150.d0, 0.1d0)
-  !call printRates(m,rates)
+  call printRates(m,rates)
  
   call setupDiatomsOnly(10)
   call calcDerivatives(u00, 150.d0, 0.1d0)

@@ -21,16 +21,20 @@ subroutine openDebug
   subroutine printRates(m, rates)
     type(typeRates), intent(in):: rates
     real(dp):: m(:)
-    integer, parameter:: idxB=2
+    integer:: idxB=4
 
+    idxB = 1
+    do while (m(idxB)==0)
+      idxB = idxB+1
+    enddo
     !call openDebug
     write(unitDebug, *) 'm: ', m
 !1 format(10E1.4)
     !write(unitDebug, *) 'N: ', N
     !write(unitDebug, *) 'DOC: ', DOC
     !write(unitDebug, *) 'B: ', B
-    write(unitDebug,*) idxB, nGrid
-    write(unitDebug, *) 'JN/m(idxB:nGrid): ', rates%JN(idxB:nGrid)!/m(idxB:nGrid)
+
+    write(unitDebug, *) 'JN/m(idxB:nGrid): ', rates%JN(idxB:nGrid)/m(idxB:nGrid)
     write(unitDebug, *) 'JL/m(idxB:nGrid): ', rates%JL(idxB:nGrid)/m(idxB:nGrid)
     write(unitDebug, *) 'JDOC/m(idxB:nGrid): ', rates%JDOC(idxB:nGrid)/m(idxB:nGrid)
     
