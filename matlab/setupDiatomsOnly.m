@@ -13,8 +13,10 @@ if bParallel
     parfor i=1:poolsize
         calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly',int32(n));
     end
+    p.bParallel = true;
 else
     calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly', int32(n) );
+    p.bParallel = false;
 end
 
 p.idxN = 1;
@@ -28,5 +30,5 @@ p = parametersAddgroup(3,p,n);
 
 p = getMass(p); % Get masses
 
-p.u0(1:3) = [150, 0, 15]; % Initial conditions (and deep layer concentrations)
+p.u0(1:3) = [150, 0, 7]; % Initial conditions (and deep layer concentrations)
 p.u0(p.ixStart:p.ixEnd) = 1;

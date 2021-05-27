@@ -23,6 +23,12 @@ end
 
 ixN = p.idxN;
 ixDOC = p.idxDOC;
+
+bSilicate = false;
+if isfield(p,'idxSi')
+    ixSi = p.idxSi;
+    bSilicate = true;
+end
 ixB = p.idxB:p.n;
 
 %Tbc = [];
@@ -93,6 +99,9 @@ else
         u(:, ixN) = 150*ones(nb,1);
     end
     u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
+    if bSilicate
+        u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+    end
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
 end
 %
@@ -117,6 +126,9 @@ iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
 sim = load(p.pathGrid,'x','y','z','dznom');
 sim.N = single(zeros(length(sim.x), length(sim.y), length(sim.z),nSave));
+if bSilicate
+    sim.Si = sim.N;
+end
 sim.DOC = sim.N;
 sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.n-p.idxB+1, nSave));
 sim.L = sim.N;
@@ -199,6 +211,9 @@ for i=1:simtime
         iSave = iSave + 1;
         sim.N(:,:,:,iSave) = single(matrixToGrid(u(:,ixN), [], p.pathBoxes, p.pathGrid));
         sim.DOC(:,:,:,iSave) = single(matrixToGrid(u(:,ixDOC), [], p.pathBoxes, p.pathGrid));
+        if bSilicate
+            sim.Si(:,:,:,iSave) = single(matrixToGrid(u(:,ixSi), [], p.pathBoxes, p.pathGrid));
+        end
         for j = 1:p.n-p.idxB+1
             sim.B(:,:,:,j,iSave) = single(matrixToGrid(u(:,ixB(j)), [], p.pathBoxes, p.pathGrid));
         end

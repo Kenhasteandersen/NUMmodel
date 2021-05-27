@@ -26,23 +26,30 @@ end
 clf
 set(gcf,'color','w');
 
+bSilicate = isfield(sim.p,'idxSi');
+nPanels = 4 + bSilicate;
 % DOC
 %text(0, 1, labels(i),'Units','normalized')
-subplot(4,1,1)
+subplot(nPanels,1,1)
 panelGlobal(sim.x,sim.y,sim.DOC(:,:,1,iTime),'DOC',sProjection);
 
 % Nitrogen
-subplot(4,1,2)
+subplot(nPanels,1,2)
 c = panelGlobal(sim.x,sim.y,sim.N(:,:,1,iTime),'N',sProjection);
 c.Label.String  = 'Concentration [\mug N l^{-1}]';
 
+% Silicate
+subplot(nPanels,1,3)
+c = panelGlobal(sim.x,sim.y,sim.Si(:,:,1,iTime),'Si',sProjection);
+c.Label.String  = 'Concentration [\mug Si l^{-1}]';
+
 % Unicellular plankton
-subplot(4,1,3)
+subplot(nPanels,1,nPanels-1)
 panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,findIxUnicellular(sim.p),iTime),4)),'Unicellular plankton (log10)',sProjection);
 caxis([1 3])
 
 % Multicellular plankton
-subplot(4,1,4)
+subplot(nPanels,1,nPanels)
 panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,findIxMulticellular(sim.p),iTime),4)),'Multicellular plankton (log10)',sProjection);
 caxis([1 3])
 
