@@ -12,7 +12,7 @@ end
 loglog(m, rates.mortHTL(ix), 'm-','linewidth',2)
 
 hold off
-xlim([min(p.m), max(p.m)])
+xlim(calcXlim(p))
 
 ylabel('Losses (day^{-1})')
 xlabel('Mass ({\mu}gC)')

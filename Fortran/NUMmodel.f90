@@ -22,6 +22,7 @@ module NUMmodel
   type(typeSpectrum), dimension(:), allocatable:: group ! Structure for each group
 
   real(dp), dimension(:,:), allocatable:: theta ! Interaction matrix
+  real(dp), dimension(:), allocatable:: palatability ! Palatability of each size group
   real(dp), dimension(:), allocatable:: upositive ! State variable constrained to be positive
   !
   ! Variables for HTL mortalities:
@@ -160,6 +161,7 @@ contains
     !
     if (allocated(m)) then
        deallocate(m)
+       deallocate(palatability)
        deallocate(z)
        deallocate(beta)
        deallocate(sigma)
@@ -210,6 +212,9 @@ contains
     end if
 
     allocate(m(nGrid))
+    m = 0.d0
+    allocate(palatability(nGrid))
+    palatability = 1.d0 ! Default
     allocate(z(nGrid))
     allocate(beta(nGrid))
     allocate(sigma(nGrid))
@@ -295,6 +300,7 @@ contains
       group(iGroup) = initGeneralists_csp(n, group(iGroup)%ixStart-1, mMax)
     case (typeDiatom)
       group(iGroup) = initDiatoms(n, group(iGroup)%ixStart-1, mMax)
+      palatability(group(iGroup)%ixStart:group(iGroup)%ixEnd) = 0.5d0 ! Lower palatability for diatoms
     case(typeCopepod)
        group(iGroup) = initCopepod(n, group(iGroup)%ixStart-1, mMax)
     end select
@@ -327,7 +333,7 @@ contains
     do i = idxB, nGrid
        do j = idxB, nGrid
           !theta(i,j) = exp( -(log(m(i)/m(j)/beta(i)))**2/(2*sigma(i)**2))
-          theta(i,j) = calcPhi(m(i)/m(j), beta(i), sigma(i), z(i))
+          theta(i,j) = palatability(j) * calcPhi(m(i)/m(j), beta(i), sigma(i), z(i))
        end do
     end do
     !

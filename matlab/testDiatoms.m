@@ -1,11 +1,11 @@
 function sim = testDiatoms()
 
-%
+%%
 % Set parameters:
 %
 p = setupDiatomsOnly;
 p = parametersChemostat(p);
-p.tEnd = 10;
+
 %
 % Calc derivatives:
 %
@@ -24,3 +24,10 @@ toc
 % Plot
 %
 plotChemostat(sim)
+
+%%
+% Global test:
+%
+p = parametersGlobal(setupDiatomsOnly(10,false));
+p.tEnd = 10;
+sim = simulateGlobal(p);

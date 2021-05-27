@@ -15,7 +15,7 @@ program NUMmodeltest
   !call setupGeneralistsOnly_csp()
   !call setupGeneralistsOnly()
 
-  call setupDiatomsOnly(10)
+  call setupGeneralistsDiatoms(10)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -27,25 +27,10 @@ program NUMmodeltest
   end do
 
   call calcDerivatives(u00, 150.d0, 0.1d0)
-write(*,*) rates%JN
- 
   !call printRates(m,rates)
  
-
-  call setupDiatomsOnly(10)
-  call calcDerivatives(u00, 150.d0, 0.1d0)
-  call printRates(m,rates)
- 
-  call setupDiatomsOnly(10)
-  call calcDerivatives(u00, 150.d0, 0.1d0)
-  !call printRates(m,rates)
- 
-  call setupDiatomsOnly(10)
-  call calcDerivatives(u00, 150.d0, 0.1d0)
-  !call printRates(m,rates)
- 
-  call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
-  write(*,*) u00
+  !call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
+  !write(*,*) u00
 !!$  u0=u00
 !!$  call simulateChemostatEuler(u0, 100.d0, 150.d0, 0.05d0, 300.d0, 0.01d0)
 !!$  call printU(u0)

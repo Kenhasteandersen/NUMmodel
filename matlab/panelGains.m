@@ -23,7 +23,7 @@ end
 
 hold off
 ylim([0 2])
-xlim([min(p.m), max(p.m)])
+xlim(calcXlim(p))
 ylabel('Gains (day^{-1})')
 
 legend({'Feeding','N','Light','DOC','Max. growth rate','Growth rate'}, ...

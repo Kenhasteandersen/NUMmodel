@@ -20,11 +20,14 @@ u = calllib(loadNUMmodelLibrary(), 'f_simulatechemostateuler', ...
 % Assemble result:
 %
 sim.t = p.tEnd;
-sim.N = u(1);
-sim.DOC = u(2);
+sim.N = u(p.idxN);
+sim.DOC = u(p.idxDOC);
+if isfield(p, 'idxSi')
+    sim.Si = u(p.idxSi);
+end
 sim.B = u(3:end);
 sim.p = p;
-sim.rates = getRates(u(end,:), L);
+sim.rates = getRates(sim.p, u(end,:), L);
 for iGroup = 1:p.nGroups
     sim.Bgroup(:,iGroup) = sum( u(p.ixStart(iGroup):p.ixEnd(iGroup)));
 end

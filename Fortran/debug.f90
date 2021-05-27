@@ -23,10 +23,12 @@ subroutine openDebug
     real(dp):: m(:)
     integer:: idxB=4
 
+    ! Find idxB as the first index with non-zero mass
     idxB = 1
     do while (m(idxB)==0)
       idxB = idxB+1
     enddo
+    
     !call openDebug
     write(unitDebug, *) 'm: ', m
 !1 format(10E1.4)
