@@ -18,6 +18,7 @@ dudt
 % Simulate
 %
 tic
+p.tEnd = 100;
 sim = simulateChemostat(p, 60);
 toc
 %
@@ -28,6 +29,6 @@ plotChemostat(sim)
 %%
 % Global test:
 %
-p = parametersGlobal(setupDiatomsOnly(10,false));
-p.tEnd = 10;
-sim = simulateGlobal(p);
+%p = parametersGlobal(setupDiatomsOnly(10,false));
+%p.tEnd = 10;
+%sim = simulateGlobal(p);

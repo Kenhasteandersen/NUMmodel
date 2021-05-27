@@ -9,8 +9,10 @@ for iGroup = 1:p.nGroups
     if (p.typeGroups(iGroup)<10)
        semilogx(m, rates.jN(ix), 'b-','linewidth',2)
        semilogx(m, rates.jLreal(ix), 'g-','linewidth',2)
+       semilogx(m, rates.jSi(ix), 'color',[181 180 0]/256,'linewidth',2)
        semilogx(m, rates.jDOC(ix), 'color',[181 100 30]/256,'linewidth',2)
        semilogx(m, rates.jMax(ix), 'k:')
+       
     end
     
     % Total:
@@ -26,5 +28,5 @@ ylim([0 2])
 xlim(calcXlim(p))
 ylabel('Gains (day^{-1})')
 
-legend({'Feeding','N','Light','DOC','Max. growth rate','Growth rate'}, ...
+legend({'Feeding','N','Light','Si','DOC','Max. growth rate','Growth rate'}, ...
     'location','northwest','box','off')

@@ -64,6 +64,7 @@ void f_getrates(
 		double *jN,
 		double *jDOC,
 		double *jL,
+		double *jSi,
 		double *jF,
 		double *jFreal,
 		double *jTot,

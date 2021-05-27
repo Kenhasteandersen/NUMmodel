@@ -13,7 +13,7 @@ module diatoms
      ! Stoichiometry:
      !
      real(dp), parameter:: rhoCN = 5.68
-     real(dp), parameter:: rhoCSi =3.4 ! TO BE FIXED!!!
+     real(dp), parameter:: rhoCSi = 3.4 
       !cell properties
       real(dp), parameter:: cm = 6d-7 ! rhoCmem 6*d.-7 ! Carbon content in cell membrane mugC(mum^-3)
       real(dp), parameter:: cb = 1.25d-7 ! rhoCcyt 1.25*d.-7 ! Carbon content in cell cytoplasm mugC(mum^-3)  
@@ -175,6 +175,10 @@ module diatoms
           ! Jtot saturation
           rates%Jtot(ix)=Jmax(i)*Jlieb/( Jlieb + Jmax(i) )
           !
+          ! Fix units of JN and JSi:
+          !
+          rates%JN(ix) = rates%JN(ix)*rhoCN
+          rates%JSi(ix) = rates%Jsi(ix)*rhoCSi
        end do
  
      end subroutine calcRatesDiatoms

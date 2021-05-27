@@ -577,6 +577,9 @@ contains
        call calcDerivatives(u, L, dt)
        rates%dudt(idxN) = rates%dudt(idxN) + diff*(Ndeep-u(idxN))
        rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - u(idxDOC))
+       if (idxB .gt. idxSi) then
+         rates%dudt(idxSi) = rates%dudt(idxSi) + diff*(0.d0 - u(idxSi))
+       end if  
        !
        ! Note: should not be done for copepods:
        !
@@ -694,12 +697,13 @@ contains
   ! ---------------------------------------------------
   ! Returns the rates calculated from last call to calcDerivatives
   ! ---------------------------------------------------
-  subroutine getRates(jN, jDOC, jL, jF, jFreal,&
+  subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmaxx, jR, jLossPassive, &
     jNloss,jLreal, &
     mortpred, mortHTL, mort2, mort)
     use globals
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
+    real(dp), intent(out):: jSi(nGrid-nNutrients)
     real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmaxx(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients)
@@ -710,6 +714,7 @@ contains
     jN = rates%JN(idxB:nGrid) / m(idxB:nGrid)
     jDOC = rates%JDOC(idxB:nGrid) / m(idxB:nGrid)
     jL = rates%JL(idxB:nGrid) / m(idxB:nGrid)
+    jSi = rates%JSi(idxB:nGrid) / m(idxB:nGrid)
     jF = rates%flvl(idxB:nGrid) * JFmax(idxB:nGrid)/ m(idxB:nGrid)
     jFreal = rates%JF(idxB:nGrid) / m(idxB:nGrid)
     jTot = rates%Jtot(idxB:nGrid) / m(idxB:nGrid)
