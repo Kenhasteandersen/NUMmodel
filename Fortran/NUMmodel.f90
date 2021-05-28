@@ -99,7 +99,16 @@ contains
       bQuadraticHTL = .false. ! Use standard "linear" mortality
       call parametersFinalize()
    end subroutine setupGeneralistsDiatoms
-   
+ 
+   subroutine setupGeneralistsDiatoms_simple(n)
+      integer, intent(in):: n
+      call parametersInit(2, 2*n, 3)
+      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
+      bQuadraticHTL = .false. ! Use standard "linear" mortality
+      call parametersFinalize()
+   end subroutine setupGeneralistsDiatoms_simple
+ 
   ! -----------------------------------------------
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------

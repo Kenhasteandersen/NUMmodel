@@ -144,6 +144,8 @@ module diatoms_simple
          
          ! Jtot saturation
          rates%Jtot(ix)=Jmax(i)*rates%Jtot(ix) / ( rates%Jtot(ix) + Jmax(i) )
+
+         rates%JLreal = rates%JL
       end do
     end subroutine calcRatesDiatoms_simple
   

@@ -15,7 +15,7 @@ switch p.typeGroups(p.nGroups)
     case 3
         p.nameGroup{p.nGroups} = 'Diatoms';
     case 4
-        p.nameGroup{p.nGroups} = 'Diatoms_simple';
+        p.nameGroup{p.nGroups} = 'Diatoms simple';
     case 10
         p.nameGroup{p.nGroups} = 'Copepod';
 end
@@ -30,6 +30,6 @@ else
 end
 p.ixStart(p.nGroups) = iStart;
 p.ixEnd(p.nGroups) = p.ixStart(p.nGroups)+n-1;
-ix = p.ixStart(p.nGroups):p.ixEnd(p.nGroups);
+%ix = p.ixStart(p.nGroups):p.ixEnd(p.nGroups);
 
 p.n = p.n + n;

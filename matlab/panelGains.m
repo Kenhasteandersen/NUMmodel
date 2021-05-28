@@ -9,10 +9,12 @@ for iGroup = 1:p.nGroups
     if (p.typeGroups(iGroup)<10)
        semilogx(m, rates.jN(ix), 'b-','linewidth',2)
        semilogx(m, rates.jLreal(ix), 'g-','linewidth',2)
-       semilogx(m, rates.jSi(ix), 'color',[181 180 0]/256,'linewidth',2)
        semilogx(m, rates.jDOC(ix), 'color',[181 100 30]/256,'linewidth',2)
-       semilogx(m, rates.jMax(ix), 'k:')
-       
+       semilogx(m, rates.jMax(ix), 'k:')       
+    end
+    
+    if ((p.typeGroups(iGroup)==3) || (p.typeGroups(iGroup)==4))
+        semilogx(m, rates.jSi(ix), 'color',[181 180 0]/256,'linewidth',2)
     end
     
     % Total:

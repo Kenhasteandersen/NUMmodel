@@ -8,6 +8,8 @@ void f_setupdiatoms_simpleonly(const int n);
 
 void f_setupgeneralistsdiatoms(const int n);
 
+void f_setupgeneralistsdiatoms_simple(const int n);
+
 void f_setupgeneralistscopepod();
 
 void f_setupgeneric(const int nCopepods, const double mAdult[]);

@@ -2,8 +2,9 @@ module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int
   use NUMmodel, only:  setupGeneralistsOnly, setupGeneralistsOnly_csp, &
        setupDiatomsOnly, setupDiatoms_simpleOnly, &
+       setupGeneralistsDiatoms, setupGeneralistsDiatoms_simple, &
        setupGeneralistsCopepod, &
-       setupGeneric, setupGeneric_csp, setupGeneralistsDiatoms, &
+       setupGeneric, setupGeneric_csp, &
        calcderivatives, rates, m, &
        simulateChemostatEuler, simulateEuler, getFunctions
   use globals
@@ -35,6 +36,11 @@ contains
     integer(c_int), intent(in), value:: n
     call setupGeneralistsDiatoms(n)
   end subroutine f_setupGeneralistsDiatoms
+
+  subroutine f_setupGeneralistsDiatoms_simple(n) bind(c)
+    integer(c_int), intent(in), value:: n
+    call setupGeneralistsDiatoms_simple(n)
+  end subroutine f_setupGeneralistsDiatoms_simple
 
   subroutine f_setupGeneralistsCopepod() bind(c)
     call setupGeneralistsCopepod()
