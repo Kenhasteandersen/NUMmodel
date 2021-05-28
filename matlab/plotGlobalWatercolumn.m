@@ -11,7 +11,7 @@ arguments
 end
 
 idx = calcGlobalWatercolumn(lat,lon,sim);
-m = [sim.p.mLower(3:end), sim.p.mLower(end)+sim.p.mDelta(end)];
+m = [sim.p.mLower(sim.p.idxB:end), sim.p.mLower(end)+sim.p.mDelta(end)];
 z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
 [~, iTime] = min(abs(sim.t-time));
 

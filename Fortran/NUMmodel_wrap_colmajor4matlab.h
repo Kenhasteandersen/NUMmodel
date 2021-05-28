@@ -4,6 +4,8 @@ void f_setupgeneralistsonly_csp();
 
 void f_setupdiatomsonly(const int n);
 
+void f_setupdiatoms_simpleonly(const int n);
+
 void f_setupgeneralistsdiatoms(const int n);
 
 void f_setupgeneralistscopepod();

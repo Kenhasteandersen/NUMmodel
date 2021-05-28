@@ -1,6 +1,7 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int
-  use NUMmodel, only:  setupGeneralistsOnly, setupGeneralistsOnly_csp, setupDiatomsOnly, &
+  use NUMmodel, only:  setupGeneralistsOnly, setupGeneralistsOnly_csp, &
+       setupDiatomsOnly, setupDiatoms_simpleOnly, &
        setupGeneralistsCopepod, &
        setupGeneric, setupGeneric_csp, setupGeneralistsDiatoms, &
        calcderivatives, rates, m, &
@@ -24,6 +25,11 @@ contains
     integer(c_int), intent(in), value:: n
     call setupDiatomsOnly(n)
   end subroutine f_setupDiatomsOnly
+
+  subroutine f_setupDiatoms_simpleOnly(n) bind(c)
+    integer(c_int), intent(in), value:: n
+    call setupDiatoms_simpleOnly(n)
+  end subroutine f_setupDiatoms_simpleOnly
 
   subroutine f_setupGeneralistsDiatoms(n) bind(c)
     integer(c_int), intent(in), value:: n

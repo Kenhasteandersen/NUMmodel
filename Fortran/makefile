@@ -5,7 +5,7 @@
 #
 FORT=ifort
 FLAGS=-O2
-#LINK=
+#LINK=-l
 #
 # gfortran:
 #
@@ -13,11 +13,11 @@ FLAGS=-O2
 #FLAGS=-g3
 #FLAGS=-O2
 # Link needed on Macos:
-LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/lib
+LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 #LINK=
 
 
-OBJ = globals.o debug.o spectrum.o generalists.o generalists_csp.o diatoms.o copepods.o NUMmodel.o
+OBJ = globals.o debug.o spectrum.o generalists.o generalists_csp.o diatoms.o diatoms_simple.o copepods.o NUMmodel.o
 
 all: NUMmodel libMatlab libR
 

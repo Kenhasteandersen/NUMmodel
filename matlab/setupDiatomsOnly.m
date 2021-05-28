@@ -30,5 +30,5 @@ p = parametersAddgroup(3,p,n);
 
 p = getMass(p); % Get masses
 
-p.u0(1:3) = [150, 0, 7]; % Initial conditions (and deep layer concentrations)
+p.u0(1:3) = [150, 0, 200]; % Initial conditions (and deep layer concentrations)
 p.u0(p.ixStart:p.ixEnd) = 1;

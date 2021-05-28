@@ -14,6 +14,8 @@ switch p.typeGroups(p.nGroups)
         p.nameGroup{p.nGroups} = 'Generalists CSP';
     case 3
         p.nameGroup{p.nGroups} = 'Diatoms';
+    case 4
+        p.nameGroup{p.nGroups} = 'Diatoms_simple';
     case 10
         p.nameGroup{p.nGroups} = 'Copepod';
 end

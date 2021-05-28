@@ -28,7 +28,7 @@ subroutine openDebug
     do while (m(idxB)==0)
       idxB = idxB+1
     enddo
-    
+
     !call openDebug
     write(unitDebug, *) 'm: ', m
 !1 format(10E1.4)
@@ -37,6 +37,7 @@ subroutine openDebug
     !write(unitDebug, *) 'B: ', B
 
     write(unitDebug, *) 'JN/m(idxB:nGrid): ', rates%JN(idxB:nGrid)/m(idxB:nGrid)
+    write(unitDebug, *) 'JSi/m(idxB:nGrid): ', rates%JSi(idxB:nGrid)/m(idxB:nGrid)
     write(unitDebug, *) 'JL/m(idxB:nGrid): ', rates%JL(idxB:nGrid)/m(idxB:nGrid)
     write(unitDebug, *) 'JDOC/m(idxB:nGrid): ', rates%JDOC(idxB:nGrid)/m(idxB:nGrid)
     

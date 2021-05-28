@@ -8,6 +8,7 @@ module NUMmodel
   use generalists
   use generalists_csp
   use diatoms
+  use diatoms_simple
   use copepods
   use debug
   implicit none
@@ -76,6 +77,17 @@ contains
    call parametersFinalize()
  end subroutine setupDiatomsOnly
 
+ ! -----------------------------------------------
+  ! A basic setup with only simple diatoms:
+  ! -----------------------------------------------
+ subroutine setupDiatoms_simpleOnly(n)
+   integer, intent(in):: n
+   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
+   call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
+   bQuadraticHTL = .false. ! Use standard "linear" mortality
+   call parametersFinalize()
+ end subroutine setupDiatoms_simpleOnly
+ 
   ! -----------------------------------------------
   ! Generalists and diatoms:
   ! -----------------------------------------------
@@ -301,6 +313,9 @@ contains
     case (typeDiatom)
       group(iGroup) = initDiatoms(n, group(iGroup)%ixStart-1, mMax)
       palatability(group(iGroup)%ixStart:group(iGroup)%ixEnd) = 0.5d0 ! Lower palatability for diatoms
+    case (typeDiatom_simple)
+      group(iGroup) = initDiatoms_simple(n, group(iGroup)%ixStart-1, mMax)
+      palatability(group(iGroup)%ixStart:group(iGroup)%ixEnd) = 0.5d0 ! Lower palatability for diatoms
     case(typeCopepod)
        group(iGroup) = initCopepod(n, group(iGroup)%ixStart-1, mMax)
     end select
@@ -420,10 +435,14 @@ contains
        case(typeGeneralist_csp)
           call calcRatesGeneralists_csp(group(iGroup), &
                rates, L, upositive(idxN),  gammaN)
-       case(typeDiatom)
-          call calcRatesDiatoms(group(iGroup), &
-          rates, L, upositive(idxN), upositive(idxDOC) , upositive(idxSi), &
-          gammaN, gammaDOC, gammaSi)
+            case(typeDiatom)
+               call calcRatesDiatoms(group(iGroup), &
+               rates, L, upositive(idxN), upositive(idxDOC) , upositive(idxSi), &
+               gammaN, gammaDOC, gammaSi)
+            case(typeDiatom_simple)
+               call calcRatesDiatoms_simple(group(iGroup), &
+               rates, L, upositive(idxN), upositive(idxDOC) , upositive(idxSi), &
+               gammaN, gammaDOC, gammaSi) 
        end select
     end do
     !
@@ -453,10 +472,15 @@ contains
           call calcDerivativesGeneralists_csp(group(iGroup),&
                upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
                rates)
-       case (typeDiatom)
-            call calcDerivativesDiatoms(group(iGroup),&
-            upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
-            rates)
+          case (typeDiatom)
+               call calcDerivativesDiatoms(group(iGroup),&
+               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+               rates)
+         case (typeDiatom_simple)
+               call calcDerivativesDiatoms_simple(group(iGroup),&
+               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+               rates)
+                  
        end select
     end do
   end subroutine calcDerivativesUnicellulars
@@ -566,6 +590,7 @@ contains
     real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
     real(dp), intent(in):: L      ! Light level
     real(dp), intent(in):: Ndeep ! Nutrient in the deep layer
+  !  real(dp), intent(in):: SIdeep ! Silicate in the deep layer
     real(dp), intent(in):: diff      ! Diffusivity
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
@@ -577,9 +602,9 @@ contains
        call calcDerivatives(u, L, dt)
        rates%dudt(idxN) = rates%dudt(idxN) + diff*(Ndeep-u(idxN))
        rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - u(idxDOC))
-       if (idxB .gt. idxSi) then
-         rates%dudt(idxSi) = rates%dudt(idxSi) + diff*(0.d0 - u(idxSi))
-       end if  
+       !if (idxB .gt. idxSi) then
+       !  rates%dudt(idxSi) = rates%dudt(idxSi) + diff*(SIdeep - u(idxSi))
+       !end if  
        !
        ! Note: should not be done for copepods:
        !

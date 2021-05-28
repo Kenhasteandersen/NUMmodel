@@ -14,6 +14,7 @@ module globals
   integer, parameter :: typeGeneralist = 1
   integer, parameter :: typeGeneralist_csp = 2
   integer, parameter :: typeDiatom = 3
+  integer, parameter :: typeDiatom_simple = 4  
   integer, parameter :: typeCopepod = 10
 
   ! Useful mathematical constants:

@@ -1,7 +1,7 @@
 !
 ! Module to handle diatoms
 ! AMALIA, diatomsAa with Andys Jtot assuming co-limitation
-! with Down-regulation and it works!
+! with Down-regulation Andy's structure
 !
 module diatoms
      use globals
@@ -105,7 +105,8 @@ module diatoms
        !
        AN = alphaN*r**(-2.) / (1.+(r/rNstar)**(-2.)) * this%m
         !AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
-       AL = cL*r**2.*( 1.-exp(-kappa*fl*r*(1-v)) ) *this%m
+       AL = cL*r**2.*( 1.-exp(-kappa*fl*r*(1-v)) )! *this%m
+       !AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
        this%beta = 0.d0 ! No feeding
  
        JlossPassive = cLeakage/r * this%m ! in units of C
@@ -140,40 +141,63 @@ module diatoms
           !
           ! calculate Jtot Ecotip eqs(4.31) for three different cases of resourse limitation
           !
-          dL=1 ! for all three cases
+       
+          !
           ! N-limited case 
-          dN1=1
-          dSi1= max(0., min(1., rates%JN(ix)*rhoCN/ rates%JSi(ix)*rhoCSi ) )
-          ! 
-          ! Si-limited case
-          dSi2=1
-          dN2= max(0.,min(1.,rates%JSi(ix)*rhoCSi / rates%JN(ix)*rhoCN))
           !
-          ! C-limited case
-          dN3=max(0.,min(1.,(rhoCSi * (rates%JL(ix)*(1-bL)-Jresp(i) ) ) / &
-          ( rates%JN(ix)*(rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ) )))
-          dSi3= max(0.,min(1.,( rhoCN *(rates%JL(ix)*(1-bL)-Jresp(i) ) ) / &
-          ( rates%JSi(ix)* (rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ))))
+          dL = 1. 
+          !dL=-1.
+          !dN = max(0.,min(1.,(rhoCSi * (rates%JL(ix)*(1-bL)-Jresp(i) ) ) / &
+          !( rates%JN(ix)*(rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ) )))
+          !dSi = max(0.,min(1.,( rhoCN *(rates%JL(ix)*(1-bL)-Jresp(i) ) ) / &
+          !( rates%JSi(ix)* (rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ))))
+
+          !if ((dN .gt. 1.) .or. (dSi .gt. 1.)) then
+               ! 
+               ! Si-limited case
+               !
+               
+           !    dL = max(0.,(Jresp(i)*rhoCN + rates%JSi(ix)*rhoCSi*rhoCN + rates%JSi(ix)*bSi*rhoCN + rates%JSi(ix)*bN*rhoCSi) &
+           !    /(rhoCN*(rates%JL(ix)*(1 -bL))))
+           !    dN = max(0.,min(1.,rates%JSi(ix)*rhoCSi / rates%JN(ix)*rhoCN))
+           !    dSi = 1.
+
+            !   if ((dL .gt. 1.) .or. (dN .gt. 1.)) then
+                    !
+                    ! C limited
+                    !
+                    !dL = ... stuff ... ! Only needed for DOC dynamics
+             !       dN = max(0.,min(1.,(rhoCSi * (rates%JL(ix)*(1-bL)-Jresp(i) ) ) / &
+             !            ( rates%JN(ix)*(rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ) )))
+             !  end if
+          !end if
           !
-          ! Checking if it is C-,N- or Si-limited
-          if ( (dN3 .lt. 1) .and. (dSi3 .lt. 1) ) then !C-limited
-           dN=dN3
-           dSi=dSi3
-          else if (dSi1 .lt. 1) then !N-limited
-           dSi=dSi1
-           dN=dN1
-          else if (dN2 .lt. 1) then ! Si-limited
-           dN=dN2
-           dSi=dSi2
-          end if  
+          !if ((dL .gt. 1) .or. (dN .gt. 1) .or. (dSi .gt. 1) )then
+          !     write(*,*) rates%JN(ix)
+          !     write(*,*) rates%JL(ix)
+          !     write(*,*) rates%JSi(ix)
+          !     write(*,*) '-----'
+          ! end if  
+
+          !
+          ! Estimate the limiting growth rate:
+          !
+          Jlieb= min( rates%JN(ix)*rhoCN, rates%JL(ix)-Jresp(i), rates%JSi(ix)*rhoCSi )
+          !    
+          ! Account for possible carbon limitation
+          !
+          Jlieb = min( Jlieb, rates%JL(ix)-Jresp(i) - bN*Jlieb/rhoCN - bSi*Jlieb/rhoCSi)
+          !
+          !
           ! Liebig's Law
-          Jlieb = max(0., min( rates%JL(ix)*(1-bL)-Jresp(i) - dN*bN*rates%JN(ix) - dSi*bSi*rates%JSi(ix), &
-          dN*rates%JN(ix)*rhoCN, dSi*rates%JSi(ix)*rhoCSi ) )
+          !
+          !Jlieb = max(0., min( rates%JL(ix)*(1-bL)-Jresp(i) - dN*bN*rates%JN(ix) - dSi*bSi*rates%JSi(ix), &
+          !     dN*rates%JN(ix)*rhoCN, dSi*rates%JSi(ix)*rhoCSi ) )
           !
           !BEFORE THIS I need to find JCtot 
           !      
           ! Jtot saturation
-          rates%Jtot(ix)=Jmax(i)*Jlieb/( Jlieb + Jmax(i) )
+          rates%Jtot(ix)=Jmax(i)*Jlieb / ( Jlieb + Jmax(i) )
           !
           ! Fix units of JN and JSi:
           !
@@ -198,7 +222,7 @@ module diatoms
          ! Update nitrogen:
          !
          rates%dudt(idxN) = rates%dudt(idxN)  &
-         + ((rates%Jtot(ix))*u(i)/this%m(i) &
+         - ((rates%Jtot(ix))*u(i)/this%m(i) &
          !+ rates%JNloss(ix))*u(i)/this%m(i) &
          + mortloss)/rhoCN
  

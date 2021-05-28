@@ -1,4 +1,4 @@
-function p = setupGeneralistsDiatoms(n, bParallel)
+function p = setupDiatoms_simpleOnly(n, bParallel)
 
 arguments
    n int32 {mustBeInteger, mustBePositive} = 10; % Number of grid points
@@ -11,10 +11,12 @@ if bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
     parfor i=1:poolsize
-        calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsdiatoms',int32(n));
+        calllib(loadNUMmodelLibrary(), 'f_setupdiatoms_simpleonly',int32(n));
     end
+    p.bParallel = true;
 else
-    calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsdiatoms', int32(n) );
+    calllib(loadNUMmodelLibrary(), 'f_setupdiatoms_simpleonly', int32(n) );
+    p.bParallel = false;
 end
 
 p.idxN = 1;
@@ -23,12 +25,10 @@ p.idxSi = 3;
 p.idxB = 4; % We have three nutrient groups so biomass groups starts at index 4.
 
 p.n = 3;
-% Generalists
-p = parametersAddgroup(1,p,n);
 % Diatoms:
-p = parametersAddgroup(3,p,n);
+p = parametersAddgroup(4,p,n);
 
 p = getMass(p); % Get masses
 
 p.u0(1:3) = [150, 0, 200]; % Initial conditions (and deep layer concentrations)
-p.u0(p.ixStart(1):p.ixEnd(end)) = 1;
+p.u0(p.ixStart:p.ixEnd) = 1;

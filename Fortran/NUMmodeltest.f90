@@ -15,21 +15,24 @@ program NUMmodeltest
   !call setupGeneralistsOnly_csp()
   !call setupGeneralistsOnly()
 
-  call setupGeneralistsDiatoms(10)
+  !call setupGeneralistsDiatoms(10)
+  call setupDiatoms_simpleOnly(10)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
   u00(idxN) = 150.d0
   u00(idxDOC) = 1.d0
-  u00(idxSi) = 1.d0
+  u00(idxSi) = 7.d0
   do i = idxB, nGrid
      u00(i) = 1.0d0*(i-2)
   end do
 
-  call calcDerivatives(u00, 150.d0, 0.1d0)
-  !call printRates(m,rates)
+  call calcDerivatives(u00, 60.d0, 0.1d0)
+  call printRates(m,rates)
  
-  call simulateEuler(u00, 60.d0, 1000.d0, 0.1d0)
+  call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
+  !call simulateChemostatEuler(u00, 60.d0, 150.d0, 15.d0, 0.1d0, 100.d0, 0.1d0)
+  
   write(*,*) u00
 !!$  u0=u00
 !!$  call simulateChemostatEuler(u0, 100.d0, 150.d0, 0.05d0, 300.d0, 0.01d0)
