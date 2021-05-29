@@ -88,6 +88,9 @@ if (nargin==2)
     disp('Starting from previous simulation.');
     u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
     u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
+    if bSilicate
+        u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
+    end
     for i = 1:p.n -p.idxB+1
         u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],sim.p.pathBoxes, sim.p.pathGrid);
     end
