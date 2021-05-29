@@ -104,8 +104,8 @@ module diatoms_simple
       JlossPassive = cLeakage/r * this%m ! in units of C
   
       !nu = c * this%m**(-onethird)
-      nu = min(1.d0, 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
-        (v**twothirds + (1.+v)**twothirds))
+      nu = 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
+        (v**twothirds + (1.+v)**twothirds)
 
       Jmax = alphaJ * this%m * (1.d0-nu) ! mugC/day
       Jresp = cR*alphaJ*this%m
@@ -135,7 +135,7 @@ module diatoms_simple
               !
          ! Estimate the limiting growth rate:
          !
-         rates%Jtot(ix) = min( rates%JN(ix), rates%JL(ix)-Jresp(i), rates%JSi(ix) )
+         rates%Jtot(ix) = min( Jmax(i), rates%JN(ix), rates%JL(ix)-Jresp(i), rates%JSi(ix) )
          !    
          ! Account for possible carbon limitation
          !
@@ -143,9 +143,11 @@ module diatoms_simple
             rates%JL(ix)-Jresp(i) - (bN/rhoCN + bSi/rhoCSi)*rates%Jtot(ix) )
          
          ! Jtot saturation
-         rates%Jtot(ix)=Jmax(i)*rates%Jtot(ix) / ( rates%Jtot(ix) + Jmax(i) )
+        if (rates%Jtot(ix) .gt. 0.) then
+              rates%Jtot(ix)=Jmax(i)*rates%Jtot(ix) / ( rates%Jtot(ix) + Jmax(i) )
+        end if
 
-         rates%JLreal = rates%JL
+        rates%JLreal = rates%JL
       end do
     end subroutine calcRatesDiatoms_simple
   
@@ -168,7 +170,7 @@ module diatoms_simple
         !
         ! Update DOC:
         !
-        rates%dudt(idxDOC) = 0.d0 !rates%dudt(idxDOC) &
+        !rates%dudt(idxDOC) = 0.d0 !rates%dudt(idxDOC) &
              !+ (-rates%JDOC(ix) &
              !+ rates%JCloss(ix))*u(i)/this%m(i) &
              !+ mortloss
