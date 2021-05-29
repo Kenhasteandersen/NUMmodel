@@ -13,7 +13,9 @@ if bParallel
     parfor i=1:poolsize
         calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsdiatoms_simple',int32(n));
     end
+    p.bParallel = true;
 else
+    p.bParallel = false;
     calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsdiatoms_simple', int32(n) );
 end
 

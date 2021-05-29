@@ -98,15 +98,15 @@ module diatoms_simple
       !
       r = (threequarters/pi * this%m/rho/(1-v))**onethird  ! Andy's approximation
 
-      write(*,*) r
-
       AN = alphaN * r**(-2.) / (1.+(r/rNstar)**(-2.)) * this%m
       AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
 
       JlossPassive = cLeakage/r * this%m ! in units of C
   
       !nu = c * this%m**(-onethird)
-      nu = 3*delta/r
+      nu = min(1.d0, 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
+        (v**twothirds + (1.+v)**twothirds))
+
       Jmax = alphaJ * this%m * (1.d0-nu) ! mugC/day
       Jresp = cR*alphaJ*this%m
       mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);

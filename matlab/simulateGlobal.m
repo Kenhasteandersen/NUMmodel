@@ -184,7 +184,8 @@ for i=1:simtime
         end
     else
         for k = 1:nb
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', int32(p.n), u(k,:), L(k), 0.5, dt);
+            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
+                int32(p.n), u(k,:), L(k), 0.5, dt);
             % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
             %u(k,:) = utmp(end,:);

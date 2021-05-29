@@ -92,7 +92,7 @@ contains
 
     r = (3./(4.*pi)*this%m/rho)**onethird
     
-    AN = alphaN*r**(-2.) / (1.+(r/rNstar)**(-2.)) * this%m
+    AN = alphaN * r**3/  r**(-2.) / (1.+(r/rNstar)**(-2.)) * this%m
     AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
     this%AF = alphaF*this%m
     this%JFmax = cF/r * this%m
@@ -100,7 +100,7 @@ contains
     JlossPassive = cLeakage/r * this%m ! in units of C
 
     !nu = c * this%m**(-onethird)
-    nu = 3*delta/r
+    nu = min(1.d0, 3*delta/r)
     Jmax = alphaJ * this%m * (1.d0-nu) ! mugC/day
     Jresp = cR*alphaJ*this%m
     mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);

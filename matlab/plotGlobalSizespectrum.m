@@ -18,6 +18,16 @@ s.p = sim.p;
 s.B = squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))';
 s.t = sim.t;
 
+if isfield(sim,'Si')
+u = [sim.N(idx.x, idx.y,iDepth,iTime), ...
+    sim.DOC(idx.x, idx.y,iDepth,iTime), ...
+    sim.Si(idx.x, idx.y,iDepth,iTime), ...
+    squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))'];
+else
+    u = [sim.N(idx.x, idx.y,iDepth,iTime), ...
+        sim.DOC(idx.x, idx.y,iDepth,iTime), ...
+        squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))'];
+end
 
 clf
 tiledlayout(3,1,'tilespacing','compact','padding','compact')
@@ -26,16 +36,13 @@ tiledlayout(3,1,'tilespacing','compact','padding','compact')
 %
 nexttile
 panelSpectrum(s,1)
-
 %
 % Gains:
 %
 nexttile
-u = [sim.N(idx.x, idx.y,iDepth,iTime), ...
-    sim.DOC(idx.x, idx.y,iDepth,iTime), ...
-    squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))'];
+
 s.L = sim.L(idx.x, idx.y, iDepth,iTime)
-rates = getRates(u, s.L);
+rates = getRates(sim.p, u, s.L);
 panelGains(sim.p,rates)
 %
 % Losses:
