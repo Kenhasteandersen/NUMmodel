@@ -14,12 +14,6 @@ arguments
     sProjection string = 'fast';
 end
 
-%if (nargin()==1)
-%    iTime = length(sim.t); % Choose the last timestep if none is given
-%end
-%if (nargin()<3)
-%    sProjection = 'fast'; % Use fast plotting as default
-%end
 %
 % Do the plots:
 %
@@ -27,31 +21,37 @@ clf
 set(gcf,'color','w');
 
 bSilicate = isfield(sim.p,'idxSi');
-nPanels = 4 + bSilicate;
+
+tiledlayout(2+bSilicate+sim.p.nGroups,1)
 % DOC
 %text(0, 1, labels(i),'Units','normalized')
-subplot(nPanels,1,1)
+nexttile
 panelGlobal(sim.x,sim.y,sim.DOC(:,:,1,iTime),'DOC',sProjection);
 
 % Nitrogen
-subplot(nPanels,1,2)
+nexttile
 c = panelGlobal(sim.x,sim.y,sim.N(:,:,1,iTime),'N',sProjection);
 c.Label.String  = 'Concentration [\mug N l^{-1}]';
 
 % Silicate
-subplot(nPanels,1,3)
-c = panelGlobal(sim.x,sim.y,sim.Si(:,:,1,iTime),'Si',sProjection);
-c.Label.String  = 'Concentration [\mug Si l^{-1}]';
+if bSilicate
+    nexttile
+    c = panelGlobal(sim.x,sim.y,sim.Si(:,:,1,iTime),'Si',sProjection);
+    c.Label.String  = 'Concentration [\mug Si l^{-1}]';
+end
 
 % Unicellular plankton
-subplot(nPanels,1,nPanels-1)
-panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,findIxUnicellular(sim.p),iTime),4)),'Unicellular plankton (log10)',sProjection);
+for i = 1:sim.p.nGroups
+nexttile
+panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,(sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1,iTime),4)),...
+    sim.p.nameGroup(i),sProjection);
 caxis([1 3])
 
 % Multicellular plankton
-subplot(nPanels,1,nPanels)
-panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,findIxMulticellular(sim.p),iTime),4)),'Multicellular plankton (log10)',sProjection);
-caxis([1 3])
+%subplot(nPanels,1,nPanels)
+%panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,findIxMulticellular(sim.p),iTime),4)),'Multicellular plankton (log10)',sProjection);
+%caxis([1 3])
+end
 
 if isfield(sim,'CnetPerArea')
     subplot(4,1,4)

@@ -29,6 +29,8 @@ B(B<0) = 0;
 panelField(m, -z, (B)');
 
 set(gca,'xscale','log','colorscale','log')
+
+
 set(gca,'xtick',10.^(-9:2))
 caxis([0.1 100])
 
@@ -43,9 +45,16 @@ ylim([-200 0])
 %
 nexttile
 for i = 1:length(idx.z)
-    rates = getRates([sim.N(idx.x, idx.y, idx.z(i), iTime), ...
+    if isfield(sim,'Si')
+            rates = getRates(sim.p,[sim.N(idx.x, idx.y, idx.z(i), iTime), ...
+            sim.Si(idx.x, idx.y, idx.z(i), iTime), ...
         sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)],...
         sim.L(idx.x, idx.y, idx.z(i), iTime));
+    else
+    rates = getRates(sim.p, [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
+        sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)],...
+        sim.L(idx.x, idx.y, idx.z(i), iTime));
+    end
  %   [~, col] = calcTrophicStrategy(rates);
     for j=1:length(m)-1
         colStrategy(j,i,:) = ...
