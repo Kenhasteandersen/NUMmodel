@@ -598,7 +598,7 @@ contains
   subroutine simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
     real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
     real(dp), intent(in):: L      ! Light level
-    real(dp), intent(in):: Ndeep ! Nutrient in the deep layer
+    real(dp), intent(in):: Ndeep(nNutrients) ! Nutrients in the deep layer
   !  real(dp), intent(in):: SIdeep ! Silicate in the deep layer
     real(dp), intent(in):: diff      ! Diffusivity
     real(dp), intent(in):: tEnd ! Time to simulate
@@ -609,15 +609,15 @@ contains
    
     do i=1, iEnd
        call calcDerivatives(u, L, dt)
-       rates%dudt(idxN) = rates%dudt(idxN) + diff*(Ndeep-u(idxN))
-       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - u(idxDOC))
-       !if (idxB .gt. idxSi) then
-       !  rates%dudt(idxSi) = rates%dudt(idxSi) + diff*(SIdeep - u(idxSi))
-       !end if  
+       rates%dudt(idxN) = rates%dudt(idxN) + diff*(Ndeep(idxN)-u(idxN))
+       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(Ndeep(idxDOC) - u(idxDOC))
+       if (idxB .gt. idxSi) then
+         rates%dudt(idxSi) = rates%dudt(idxSi) + diff*(Ndeep(idxSi) - u(idxSi))
+       end if  
        !
        ! Note: should not be done for copepods:
        !
-       rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
+       !rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
        u = u + rates%dudt*dt
        !write(6,*) calcN(u)
     end do

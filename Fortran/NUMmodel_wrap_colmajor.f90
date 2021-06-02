@@ -96,10 +96,12 @@ contains
     g(idxB:nGrid) = rates%g(idxB:nGrid)
   end subroutine f_calcRates
 
-  subroutine f_simulateChemostatEuler(nGrid, u, L, Ndeep, diff, tEnd, dt) bind(c)
-    integer(c_int), intent(in), value:: nGrid
+  subroutine f_simulateChemostatEuler(u, L, nNutrients, Ndeep, diff, tEnd, dt) bind(c)
+    !integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(inout):: u(nGrid)
-    real(c_double), intent(in), value:: L, Ndeep, diff, tEnd, dt
+    integer(c_int), intent(in), value:: nNutrients
+    real(c_double), intent(in):: Ndeep(nNutrients)
+    real(c_double), intent(in), value:: L, diff, tEnd, dt
 
     call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
   end subroutine f_simulateChemostatEuler

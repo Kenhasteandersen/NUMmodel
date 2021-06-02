@@ -42,6 +42,7 @@ module generalists
   !
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
   real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
+  real(dp), parameter:: reminF = 0.5d0
   real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
 
   real(dp),  dimension(:), allocatable:: AN(:), AL(:), Jmax(:),  JlossPassive(:)
@@ -204,7 +205,9 @@ contains
 !!$           + remin*mortloss
       rates%dudt(idxDOC) = rates%dudt(idxDOC) &
            + (-rates%JDOC(ix) &
-           + rates%JCloss(ix))*u(i)/this%m(i) &
+           + rates%JCloss(ix) &
+           + reminF*(1.-epsilonF)*rates%JF(ix) &
+              )*u(i)/this%m(i) &
            + mortloss
       !
       ! Update the generalists:

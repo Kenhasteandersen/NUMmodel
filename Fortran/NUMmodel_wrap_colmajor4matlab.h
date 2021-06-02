@@ -36,10 +36,10 @@ void f_calcrates(
 		       double g[]);
 
 void f_simulatechemostateuler(
-			      const int nGrid,
 			      double u[],
 			      const double L,
-			      const double Ndeep,
+				  const int nNutrients,
+			      const double Ndeep[],
 			      const double diff,
 			      const double tEnd,
 			      const double dt);

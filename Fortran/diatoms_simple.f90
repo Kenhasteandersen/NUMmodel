@@ -147,7 +147,7 @@ module diatoms_simple
               rates%Jtot(ix)=Jmax(i)*rates%Jtot(ix) / ( rates%Jtot(ix) + Jmax(i) )
         end if
 
-        rates%JLreal = rates%JL
+        rates%JLreal(ix) = rates%JL(ix)
       end do
     end subroutine calcRatesDiatoms_simple
   
@@ -178,8 +178,9 @@ module diatoms_simple
         ! Update Si:
         !
         rates%dudt(idxSi) = rates%dudt(idxSi) &
-             + ((-rates%Jtot(ix))*u(i)/this%m(i) &
-             + mortloss)/rhoCSi
+             + ((-rates%Jtot(ix))*u(i)/this%m(i) & ! Uptakes of silicate
+             + mortloss  & ! all mortality due to remineralisation, HTL and virulysis is returned
+             + rates%mortpred(ix) )/rhoCSi ! Predation by generalists is assumed to return immidiately
         !
         ! Update the diatoms:
         !

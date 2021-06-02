@@ -65,14 +65,17 @@ end subroutine f_setupGeneralistsOnly
     call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
   end subroutine f_getFunctions
   
-!!$
-!!$  subroutine f_simulateChemostatEuler(nGrid, u, L, Ndeep, diff, tEnd, dt)
-!!$    integer, intent(in):: nGrid
-!!$    real(dp), intent(inout):: u(nGrid)
-!!$    real(dp), intent(in):: L, Ndeep, diff, tEnd, dt
-!!$
-!!$    call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
-!!$  end subroutine f_simulateChemostatEuler
+
+   subroutine f_simulateChemostatEuler(u, L, nNutrients, Ndeep, diff, tEnd, dt)
+    use globals
+    use NUMmodel, only: simulateChemostatEuler
+
+    integer, intent(in):: nNutrients
+    real(dp), intent(inout):: u(nGrid)
+    real(dp), intent(in):: L, Ndeep(nNutrients), diff, tEnd, dt
+
+    call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
+  end subroutine f_simulateChemostatEuler
 !!$
 !!$  subroutine f_simulateEuler(nGrid, u, L, tEnd, dt)
 !!$    integer, intent(in):: nGrid

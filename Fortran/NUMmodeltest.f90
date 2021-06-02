@@ -30,8 +30,8 @@ program NUMmodeltest
   call calcDerivatives(u00, 60.d0, 0.1d0)
   call printRates(m,rates)
  
-  call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
-  !call simulateChemostatEuler(u00, 60.d0, 150.d0, 15.d0, 0.1d0, 100.d0, 0.1d0)
+  !call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
+  call simulateChemostatEuler(u00, 60.d0, u00(1:3), 0.1d0, 100.d0, 0.1d0)
   
   write(*,*) u00
 !!$  u0=u00
