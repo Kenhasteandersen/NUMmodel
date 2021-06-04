@@ -130,14 +130,15 @@ contains
        rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-Jresp(i)-JlossPassive(i)
        ! Liebig + synthesis limitation:
        rates%Jtot(ix) = min( rates%JNtot(ix), rates%JCtot(ix) )
-       f = rates%Jtot(ix)/(rates%Jtot(ix) + Jmax(i))
        ! If synthesis-limited then down-regulate feeding:
        if (rates%Jtot(ix) .gt. 0) then
-          JFreal(i) = max(0.d0, rates%JF(ix) - (rates%Jtot(ix)-f*Jmax(i)))
+          f = rates%Jtot(ix)/(rates%Jtot(ix) + max(0.,Jmax(i)))
+          JFreal(i) = max(0.d0, min(Jmax(i), rates%JF(ix) - (rates%Jtot(ix)-f*Jmax(i))))
+          rates%Jtot(ix) = f * Jmax(i)
        else
           JFreal(i) = max(0.d0, rates%JF(ix))
        end if
-       rates%Jtot(ix) = f * Jmax(i)
+
        rates%JLreal(ix) = rates%JL(ix) - max( 0.d0, &
             min((rates%JCtot(ix) - (rates%JF(ix)-JFreal(i))-rates%Jtot(ix)), rates%JL(ix)))
 
@@ -196,11 +197,6 @@ contains
       !
       ! Update DOC:
       !
-!!$      rates%dudt(idxDOC) = rates%dudt(idxDOC) &
-!!$           + (-rates%JDOC(ix) &
-!!$           + rates%JCloss(ix))*u(i)/this%m(i) &
-!!$           + remin2*mort2*u(i)*u(i) &
-!!$           + remin*mortloss
       rates%dudt(idxDOC) = rates%dudt(idxDOC) &
            + (-rates%JDOC(ix) &
            + JlossPassive(i) &
