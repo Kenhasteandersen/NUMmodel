@@ -12,7 +12,7 @@ module generalists
   !
   ! Light uptake:
   !
-  real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
+  real(dp), parameter:: epsilonL = 0.95 ! Light uptake efficiency
   real(dp), parameter:: alphaL = 0.206
   real(dp), parameter:: rLstar = 8.25
   !
@@ -41,8 +41,8 @@ module generalists
   ! Biogeo:
   !
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-  real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
-  real(dp), parameter:: reminF = 0.5d0
+  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
+  real(dp), parameter:: reminF = 0.1d0
   real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
 
   real(dp),  dimension(:), allocatable:: AN(:), AL(:), Jmax(:),  JlossPassive(:)
@@ -182,7 +182,7 @@ contains
 
     do i = 1, this%n
       ix = i+this%ixOffset
-      mortloss = u(i)*(remin2*mort2*u(i) +reminHTL* rates%mortHTL(ix))
+      mortloss = u(i)*(remin2*mort2*u(i) + reminHTL*rates%mortHTL(ix))
       !
       ! Update nitrogen:
       !
@@ -193,8 +193,11 @@ contains
 !!$           + remin*mortloss)/rhoCN
       rates%dudt(idxN) = rates%dudt(idxN)  &
            + ((-rates%JN(ix) &
-           + rates%JNloss(ix))*u(i)/this%m(i) &
-           + mortloss)/rhoCN
+           + JlossPassive(i) &
+           + rates%JNlossLiebig(ix)&
+           + reminF*rates%JCloss_feeding(ix))*u(i)/this%m(i) &
+           + remin2*mort2*u(i) &
+           + reminHTL*rates%mortHTL(ix))/rhoCN
       !
       ! Update DOC:
       !

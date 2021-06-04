@@ -594,12 +594,13 @@ contains
 
   ! -----------------------------------------------
   ! Simulate a chemostat with Euler integration
+  ! Ndeep is a vector with the concentrations of
+  ! nutrients in the deep layer.
   ! -----------------------------------------------
   subroutine simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
     real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
     real(dp), intent(in):: L      ! Light level
     real(dp), intent(in):: Ndeep(nNutrients) ! Nutrients in the deep layer
-  !  real(dp), intent(in):: SIdeep ! Silicate in the deep layer
     real(dp), intent(in):: diff      ! Diffusivity
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
