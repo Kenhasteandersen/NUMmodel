@@ -177,20 +177,15 @@ contains
     type(typeSpectrum), intent(in):: this
     type(typeRates), intent(inout):: rates
     real(dp), intent(in):: u(this%n)
-    real(dp):: mortloss
+    !real(dp):: mortloss
     integer:: i, ix
 
     do i = 1, this%n
       ix = i+this%ixOffset
-      mortloss = u(i)*(remin2*mort2*u(i) + reminHTL*rates%mortHTL(ix))
+     ! mortloss = u(i)*(remin2*mort2*u(i) + reminHTL*rates%mortHTL(ix))
       !
       ! Update nitrogen:
       !
-!!$      rates%dudt(idxN) = rates%dudt(idxN)  &
-!!$           + (-rates%JN(ix) &
-!!$           + rates%JNloss(ix))*u(i)/this%m(i) &
-!!$           + (remin2*mort2*u(i)*u(i) &
-!!$           + remin*mortloss)/rhoCN
       rates%dudt(idxN) = rates%dudt(idxN)  &
            + ((-rates%JN(ix) &
            + JlossPassive(i) &
@@ -208,10 +203,12 @@ contains
 !!$           + remin*mortloss
       rates%dudt(idxDOC) = rates%dudt(idxDOC) &
            + (-rates%JDOC(ix) &
-           + rates%JCloss(ix) &
-           + reminF*(1.-epsilonF)*rates%JF(ix) &
-              )*u(i)/this%m(i) &
-           + mortloss
+           + JlossPassive(i) &
+           + rates%JNlossLiebig(ix) &
+           + rates%JCloss_photouptake(ix) &
+           + reminF*rates%JCloss_feeding(ix))*u(i)/this%m(i) &
+           + remin2*mort2*u(i) &
+           + reminHTL*rates%mortHTL(ix)
       !
       ! Update the generalists:
       !
