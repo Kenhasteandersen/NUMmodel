@@ -620,7 +620,6 @@ contains
        !
        !rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
        u = u + rates%dudt*dt
-       !write(6,*) calcN(u)
     end do
   end subroutine simulateChemostatEuler
 

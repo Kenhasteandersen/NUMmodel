@@ -86,13 +86,13 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 if (nargin==2)
     disp('Starting from previous simulation.');
-    u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
-    u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
+    u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
+    u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
     if bSilicate
-        u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
+        u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
     end
     for i = 1:p.n -p.idxB+1
-        u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],sim.p.pathBoxes, sim.p.pathGrid);
+        u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],p.pathBoxes, p.pathGrid);
     end
 else
     if exist(strcat(p.pathN0,'.mat'),'file')
@@ -180,15 +180,17 @@ for i=1:simtime
     %
     L = L0(:,mod(i,365*2)+1);
     dt = p.dt;
+    n = p.n;
     if p.bParallel
         parfor k = 1:nb
             u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-                int32(p.n-p.idxB+1), u(k,:), L(k), 0.5, dt);
+                int32(n), u(k,:), L(k), 0.5, dt);
         end
     else
         for k = 1:nb
             u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-                int32(p.n), u(k,:), L(k), 0.5, dt);
+                int32(n), u(k,:),L(k), 0.5, dt);
+            %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
             % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
             %u(k,:) = utmp(end,:);
