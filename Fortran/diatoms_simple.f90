@@ -57,7 +57,7 @@ module diatoms_simple
     !
     real(dp), dimension(:), allocatable:: AN(:), AL(:), Jmax(:), JlossPassive(:)
     real(dp), dimension(:), allocatable:: nu(:), mort(:)
-    real(dp), dimension(:), allocatable:: JN(:), JL(:), Jresp(:)
+    real(dp), dimension(:), allocatable:: Jresp(:)
 
     real(dp):: mort2
 
@@ -70,9 +70,7 @@ module diatoms_simple
       integer, intent(in):: n, ixOffset
       real(dp), parameter:: mMin = 3.1623d-9
       real(dp):: r(n)
-      real(dp):: hs(n) ! Shell thickness mum ! TO BE FIXED!!
       real(dp), parameter:: rho = 0.57*1d6*1d-12
-      real(dp) :: fl !investment in photosynthesis
   
       this = initSpectrum(typeDiatom_simple, n, ixOffset, mMin, mMax)
   
