@@ -1,9 +1,9 @@
-function sim = testGeneralistsDiatoms()
+function sim = testDiatoms()
 
 %%
 % Set parameters:
 %
-p = setupGeneralistsDiatoms_simple;
+p = setupDiatomsOnly;
 p = parametersChemostat(p);
 
 %
@@ -18,23 +18,17 @@ dudt
 % Simulate
 %
 tic
-p.tEnd = 200;
+p.tEnd = 100;
 sim = simulateChemostat(p, 60);
 toc
 %
 % Plot
 %
-figure(1)
 plotChemostat(sim)
 
 %%
 % Global test:
 %
-p = parametersGlobal(setupGeneralistsDiatoms_simple(10,true));
-sim = simulateGlobal(p);
-
-figure(2)
-plotGlobal(sim)
-
-figure(3)
-plotGlobalWatercolumn(sim, 60, -10, 180)
+%p = parametersGlobal(setupDiatomsOnly(10,false));
+%p.tEnd = 10;
+%sim = simulateGlobal(p);
