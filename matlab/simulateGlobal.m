@@ -181,7 +181,7 @@ for i=1:simtime
     L = L0(:,mod(i,365*2)+1);
     dt = p.dt;
     n = p.n;
-    if p.bParallel
+    if ~isempty(gcp('nocreate'))
         parfor k = 1:nb
             u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
                 int32(n), u(k,:), L(k), 0.5, dt);
