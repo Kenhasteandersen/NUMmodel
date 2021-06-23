@@ -7,7 +7,7 @@ modelling framework.  The model is described in: Serra-Pompei et al (2020): [A g
 The core library is written in fortran90 and is interfaced from matlab or R. Most of the modules are also written in matlab so compilation of the fortran code is not needed - but it speeds up most calculations by a factor 10.
 
 ### Compiling
-Use the makefile in the Fortran directory. Edit the compiler and flags to suit your operating system and compile by writing: `make`.
+Use the makefile in the Fortran directory. Edit the compiler and flags in the makefile to suit your operating system and compile by writing: `make`.
 
 ### Basic structure
 There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.  See `exampleGeneralists` for some basic runs of the chemostat model.
@@ -20,10 +20,10 @@ There are three levels of routines: top-level, medium-level and low-level.  Ther
 #### Medium-level matlab routines
 The routines operates with two basic structures: a *parameter* structure and a *simulation* structure. The parameter structure contains all parameters needed for a simulation. The simulation structure contains all the output, which can be used for analysis or for plotting.
 
-*Parameters* are set first with a call to `parameters(mAdult)` where `mAdult` again is vector of copepod adult masses.  Additional parameters are subsequently set with a call to `parametersChemostat`or `parametersGlobal`. For example: `p = parametersChemostat( parameters ([]) );`.
+*Parameters* are set with two calls: one to setup the size spectra to simulate and one to add the parameters for the simulation (chemostat or global). The size spectra are setup with a call to `setupXX` where XX represent the setup, e.g., `setupGeneralistsOnly` or `setupGeneric(mAdult)` (the latter includes copepods where `mAdult` is vector of copepod adult masses).  Parameters for the simulation are subsequently set with a call to `parametersChemostat`or `parametersGlobal`. For example: `p = parametersChemostat( setupGeneralistsOnly() );`.
 
 *Simulations* are performed with calls to a simulation routine: `sim = simulationChemostat(p)` or `sim = simulationGlobal(p)`, where `p` is a parameter structure.
 
-*Plots* are made with calls to the plot routines, e.g. `plotChemostat(sim)` for a chemostat run.
+*Plots* are made with calls to the plot routines, e.g. `plotChemostat(sim)` for a chemostat run or `plotGlobal(sim)` for a global run.
 
 
