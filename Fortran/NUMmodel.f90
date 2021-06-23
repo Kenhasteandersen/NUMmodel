@@ -17,7 +17,6 @@ module NUMmodel
   ! Variables that contain the size spectrum groups
   !
   integer:: nGroups ! Number of groups
-  integer:: iGroup ! Current number to be added (only used in addGroup)
   integer:: nNutrients ! Number of nutrient state variables
   integer:: idxB ! First index into non-nutrient groups (=nNutrients+1)
   type(typeSpectrum), dimension(:), allocatable:: group ! Structure for each group
@@ -44,7 +43,6 @@ contains
   ! ======================================
   !  Various model setups
   ! ======================================
-
 
   ! -----------------------------------------------
   ! A basic setup with only generalists
@@ -176,7 +174,6 @@ contains
     nNutrients = nnNutrients
     nGrid = nnGrid+nnNutrients
     idxB = nNutrients + 1
-    iGroup = 0
     !
     ! Allocate variables:
     !
@@ -295,6 +292,7 @@ contains
   subroutine parametersAddGroup(typeGroup, n, mMax)
     integer, intent(in):: typeGroup, n
     real(dp), intent(in):: mMax
+    integer, save:: iGroup = 0
     !
     ! Find the group number and grid location:
     !
@@ -431,7 +429,7 @@ contains
   !   This correction procedure is needed for correct Euler integration.
   subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
     real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC, gammaSi
-    integer:: i,j
+    integer:: i,j, iGroup
     !
     ! Calc uptakes of all unicellular groups:
     !
