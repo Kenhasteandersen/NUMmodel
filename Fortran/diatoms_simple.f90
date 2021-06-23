@@ -5,6 +5,7 @@
 !  - lack of ability to do phagotrophy
 !  - reliance on silicate
 !  - lower predation risk due to silicate shell
+!  - inability to take up DOC
 !
 module diatoms_simple
     use globals
