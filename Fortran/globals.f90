@@ -35,4 +35,16 @@ module globals
   end type typeRates
 
   integer:: nGrid ! Total number of grid points incl.  points for nutrients
+
+  contains
+  ! -----------------------------------------------
+  ! Temperature Q10 function
+  ! -----------------------------------------------
+  function fTemp(Q10, T) result(f)
+    real(dp), intent(in), value:: Q10, T
+    real(dp):: f
+
+    f = Q10**(T/10.-1.)
+  end function fTemp
+
 end module globals

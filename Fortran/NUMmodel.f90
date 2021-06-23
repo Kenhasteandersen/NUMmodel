@@ -431,7 +431,6 @@ contains
   !   This correction procedure is needed for correct Euler integration.
   subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
     real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC, gammaSi
-    !type(typeRates), intent(inout):: rates
     integer:: i,j
     !
     ! Calc uptakes of all unicellular groups:
@@ -623,18 +622,6 @@ contains
     end do
   end subroutine simulateChemostatEuler
 
-  function calcN(u) result(N)
-    real(dp), intent(in):: u(:)
-    integer:: i
-    real(dp):: N
-
-    N = 0
-    N = u(idxN)
-    do i = 1, nGrid
-       N = N + u(nNutrients+i)/5.68
-    end do
-  end function calcN
-
   ! -----------------------------------------------
   ! Simulate with Euler integration
   ! -----------------------------------------------
@@ -652,21 +639,27 @@ contains
        u = u + rates%dudt*dt
     end do
   end subroutine simulateEuler
-  ! -----------------------------------------------
-  ! Temperature Q10 function
-  ! -----------------------------------------------
-  function fTemp(Q10, T) result(f)
-    real(dp), intent(in), value:: Q10, T
-    real(dp):: f
 
-    f = Q10**(T/10.-1.)
-  end function fTemp
 
   !=========================================
   ! Diagnostic functions
   !=========================================
 
-  subroutine getMass(m_, mDelta)
+  
+  function calcN(u) result(N)
+   real(dp), intent(in):: u(:)
+   integer:: i
+   real(dp):: N
+
+   N = 0
+   N = u(idxN)
+   do i = 1, nGrid
+      N = N + u(nNutrients+i)/5.68
+   end do
+ end function calcN
+ 
+ 
+ subroutine getMass(m_, mDelta)
    real(dp), intent(inout):: m_(nGrid), mDelta(nGrid)
    integer:: i
 
