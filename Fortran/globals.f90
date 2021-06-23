@@ -36,15 +36,33 @@ module globals
 
   integer:: nGrid ! Total number of grid points incl.  points for nutrients
 
+  ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
+  real(dp) :: T, fTemp2, fTemp15
+
   contains
+
   ! -----------------------------------------------
   ! Temperature Q10 function
   ! -----------------------------------------------
   function fTemp(Q10, T) result(f)
-    real(dp), intent(in), value:: Q10, T
+    real(dp), intent(in):: Q10, T
     real(dp):: f
 
     f = Q10**(T/10.-1.)
   end function fTemp
+
+  ! -----------------------------------------------
+  ! Update the temperature corrections if T has changed
+  ! -----------------------------------------------
+  subroutine updateTemperature(T)
+    real(dp), intent(in) :: T
+    real(dp), save :: Told = -1000.
+
+    if (T .ne. Told) then
+      Told = T
+      fTemp2 = fTemp(2.d0, T)
+      fTemp15 = fTemp(1.5d0, T)
+    end if
+  end subroutine updateTemperature
 
 end module globals
