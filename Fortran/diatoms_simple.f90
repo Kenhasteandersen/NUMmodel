@@ -2,8 +2,8 @@
 ! Module to handle diatoms
 ! Maximal simplicity; based on generalists with the only difference:
 !  - a fixed-sized vacuole which increases radius
-!  - lack of ability of phagotrophy
-!  - rely on silicate
+!  - lack of ability to do phagotrophy
+!  - reliance on silicate
 !  - lower predation risk due to silicate shell
 !
 module diatoms_simple
@@ -17,9 +17,9 @@ module diatoms_simple
     !
     real(dp), parameter:: rhoCN = 5.68
     real(dp), parameter:: rhoCSi = 3.4 
-     !cell properties
-    ! real(dp), parameter:: cm = 6d-7 ! rhoCmem 6*d.-7 ! Carbon content in cell membrane mugC(mum^-3)
-    ! real(dp), parameter:: cb = 1.25d-7 ! rhoCcyt 1.25*d.-7 ! Carbon content in cell cytoplasm mugC(mum^-3)  
+    !
+    ! Cell properties
+    !
      real(dp), parameter:: v=0.6 ! Vacuole fraction
     !
     ! Light uptake:
@@ -27,12 +27,12 @@ module diatoms_simple
     real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
     real(dp), parameter:: alphaL = 0.206
     real(dp), parameter:: rLstar = 8.25
-  !
+    !
     ! Costs
     !
     real(dp), parameter :: bL = 0 !0.08 ! cost of light harvesting mugC(mugC)^-1
-    real(dp), parameter :: bN = 0 !0.45 ! cost of N uptake mugC(mugN)^-1
-    real(dp), parameter :: bSi = 0 !0.45 ! cost of Si uptake mugC(mugSi)^-1
+    real(dp), parameter :: bN = 0.45 ! cost of N uptake mugC(mugN)^-1
+    real(dp), parameter :: bSi = 0.45 ! cost of Si uptake mugC(mugSi)^-1
     !
     ! Dissolved nutrient uptake:
     !
