@@ -113,7 +113,7 @@ contains
     real(dp), intent(in):: gammaN, gammaDOC
     type(typeRates), intent(inout):: rates
     real(dp), intent(in):: L, N, DOC
-    real(dp):: f
+    real(dp):: f, JmaxT
     integer:: ix, i
 
     do i = 1, this%n
@@ -121,21 +121,22 @@ contains
        !
        ! Uptakes
        !
-       rates%JN(ix) =   gammaN * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-       rates%JDOC(ix) = gammaDOC * AN(i)*DOC ! Diffusive DOC uptake, units of C/time
+       rates%JN(ix) =   gammaN * fTemp15 * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
+       rates%JDOC(ix) = gammaDOC * fTemp15 * AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
        rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix)-Jlosspassive(i) ! In units of C
        ! Total carbon uptake
-       rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-Jresp(i)-JlossPassive(i)
+       rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-fTemp2*Jresp(i)-JlossPassive(i)
        ! Liebig + synthesis limitation:
+       JmaxT = fTemp2*Jmax(i)
        rates%Jtot(ix) = min( rates%JNtot(ix), rates%JCtot(ix) )
-       f = rates%Jtot(ix)/(rates%Jtot(ix) + Jmax(i))
+       f = rates%Jtot(ix)/(rates%Jtot(ix) + JmaxT)
        ! If synthesis-limited then down-regulate feeding:
        if (rates%Jtot(ix) .gt. 0) then
-        f = rates%Jtot(ix)/(rates%Jtot(ix) + max(0.,Jmax(i)))
-        JFreal(i) = max(0.d0, min(Jmax(i), rates%JF(ix) - (rates%Jtot(ix)-f*Jmax(i))))
-        rates%Jtot(ix) = f * Jmax(i)
+        f = rates%Jtot(ix)/(rates%Jtot(ix) + max(0.,JmaxT))
+        JFreal(i) = max(0.d0, min(JmaxT, rates%JF(ix) - (rates%Jtot(ix)-f*JmaxT)))
+        rates%Jtot(ix) = f * JmaxT
       else
         JFreal(i) = max(0.d0, rates%JF(ix))
       end if
@@ -149,7 +150,7 @@ contains
             + rates%JLreal(ix)  &
             + rates%JDOC(ix)  &
             + JFreal(i)  &
-            - Jresp(i)  &
+            - fTemp2*Jresp(i)  &
             - JlossPassive(i)
        rates%JNtot(ix) = &
             rates%JN(ix) + &

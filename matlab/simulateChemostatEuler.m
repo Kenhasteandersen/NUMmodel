@@ -7,7 +7,14 @@
 % Out:
 %  sim - simulation object
 %
-function sim = simulateChemostatEuler(p, L)
+function sim = simulateChemostatEuler(p, L, T)
+
+arguments
+    p struct = parametersChemostat(setupGeneralistsOnly);
+    L double = 100;
+    T double = 10;
+end
+
 %
 % Simulate:
 %
@@ -15,7 +22,7 @@ u = p.u0;
 dudt = 0*u;
 
 u = calllib(loadNUMmodelLibrary(), 'f_simulatechemostateuler', u, ...
-    L, ...
+    L, T, ...
     int32(p.idxB-1), ...
     p.u0(1:(p.idxB-1)), p.d, p.tEnd, 0.01);
 %

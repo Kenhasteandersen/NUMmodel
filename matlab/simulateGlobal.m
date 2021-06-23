@@ -184,12 +184,12 @@ for i=1:simtime
     if ~isempty(gcp('nocreate'))
         parfor k = 1:nb
             u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-                int32(n), u(k,:), L(k), 0.5, dt);
+                int32(n), u(k,:), L(k), T(k), 0.5, dt);
         end
     else
         for k = 1:nb
             u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-                int32(n), u(k,:),L(k), 0.5, dt);
+                int32(n), u(k,:),L(k), T(k), 0.5, dt);
             %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
             % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
