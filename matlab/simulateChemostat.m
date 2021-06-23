@@ -4,14 +4,16 @@
 %  p - parameter object obtained by calling a "setup" function followed
 %      by a call to parametersChemostat; see e.g. the default value below.
 %  L - Light
+%  T - Temperature
 % Out:
 %  sim - simulation object
 %
-function sim = simulateChemostat(p, L)
+function sim = simulateChemostat(p, L, T)
 
 arguments
     p struct = parametersChemostat(setupGeneralistsOnly);
     L double = 100;
+    T double = 10;
 end
 
 %
@@ -53,7 +55,7 @@ end
     function dudt = fDeriv(t,u)
         dudt = 0*u';
         [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
-            length(u), u, L, 0.0, dudt);
+            length(u), u, L, T, 0.0, dudt);
         %
         % Chemostat dynamics for nutrients and unicellulars:
         %

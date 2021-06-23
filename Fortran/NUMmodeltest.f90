@@ -17,6 +17,7 @@ program NUMmodeltest
 
   !call setupGeneralistsDiatoms(10)
   call setupDiatoms_simpleOnly(10)
+  call setupDiatoms_simpleOnly(10)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -27,11 +28,11 @@ program NUMmodeltest
      u00(i) = 1.0d0*(i-2)
   end do
 
-  call calcDerivatives(u00, 60.d0, 0.1d0)
+  call calcDerivatives(u00, 60.d0, 10.d0, 10.d0)
   call printRates(m,rates)
  
   !call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
-  call simulateChemostatEuler(u00, 60.d0, u00(1:3), 0.1d0, 100.d0, 0.1d0)
+  call simulateChemostatEuler(u00, 60.d0, 20.d0, u00(1:3), 0.1d0, 100.d0, 0.1d0)
   
   write(*,*) u00
 !!$  u0=u00

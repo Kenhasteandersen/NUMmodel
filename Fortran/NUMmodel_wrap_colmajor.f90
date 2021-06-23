@@ -68,25 +68,25 @@ contains
     write(6,*) x
   end subroutine test
 
-  subroutine f_calcDerivatives(nGrid, u, L, dt, dudt) bind(c)
+  subroutine f_calcDerivatives(nGrid, u, L, T, dt, dudt) bind(c)
     integer(c_int), intent(in), value:: nGrid
-    real(c_double), intent(in), value:: L, dt
+    real(c_double), intent(in), value:: L, T, dt
     real(c_double), intent(in):: u(nGrid)
     real(c_double), intent(out):: dudt(nGrid)
 
-    call calcDerivatives(u, L, dt)
+    call calcDerivatives(u, L, T, dt)
     dudt = rates%dudt
   end subroutine f_calcDerivatives
 
-  subroutine f_calcRates(nGrid, u, L, jN, jL, jF, jTot, mortHTL, mortpred, g) bind(c)
+  subroutine f_calcRates(nGrid, u, L, T, jN, jL, jF, jTot, mortHTL, mortpred, g) bind(c)
     use NUMmodel, only: idxB
     integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(in):: u(nGrid)
-    real(c_double), intent(in), value:: L
+    real(c_double), intent(in), value:: L, T
     real(c_double), intent(out):: jN(nGrid), jL(nGrid), jF(nGrid)
     real(c_double), intent(out):: jTot(nGrid), mortHTL(nGrid), mortpred(nGrid), g(nGrid)
 
-    call calcDerivatives(u, L, 0.d0)
+    call calcDerivatives(u, L, T, 0.d0)
     jN(idxB:nGrid) = rates%JN(idxB:nGrid) / m(idxB:nGrid)
     jL(idxB:nGrid) = rates%JL(idxB:nGrid) / m(idxB:nGrid)
     jF(idxB:nGrid) = rates%JF(idxB:nGrid) / m(idxB:nGrid)
@@ -96,22 +96,22 @@ contains
     g(idxB:nGrid) = rates%g(idxB:nGrid)
   end subroutine f_calcRates
 
-  subroutine f_simulateChemostatEuler(u, L, nNutrients, Ndeep, diff, tEnd, dt) bind(c)
+  subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt) bind(c)
     !integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(inout):: u(nGrid)
     integer(c_int), intent(in), value:: nNutrients
     real(c_double), intent(in):: Ndeep(nNutrients)
-    real(c_double), intent(in), value:: L, diff, tEnd, dt
+    real(c_double), intent(in), value:: L, T, diff, tEnd, dt
 
-    call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
+    call simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt)
   end subroutine f_simulateChemostatEuler
 
-  subroutine f_simulateEuler(nGrid, u, L, tEnd, dt) bind(c)
+  subroutine f_simulateEuler(nGrid, u, L, T, tEnd, dt) bind(c)
     integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(inout):: u(nGrid)
-    real(c_double), intent(in), value:: L, tEnd, dt
+    real(c_double), intent(in), value:: L, T, tEnd, dt
 
-    call simulateEuler(u, L, tEnd, dt)
+    call simulateEuler(u, L, T, tEnd, dt)
   end subroutine f_simulateEuler
 
   subroutine f_getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro) bind(c)

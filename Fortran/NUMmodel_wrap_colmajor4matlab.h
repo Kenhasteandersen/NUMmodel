@@ -20,6 +20,7 @@ void f_calcderivatives(
 		       const int nGrid,
 		       const double u[],
 		       const double L,
+			   const double T,
 		       const double dt,
 		       double dudt[]);
 
@@ -27,6 +28,7 @@ void f_calcrates(
 		       const int nGrid,
 		       const double u[],
 		       const double L,
+			   const double T,
 		       double jN[],
 		       double jL[],
 		       double jF[],
@@ -38,6 +40,7 @@ void f_calcrates(
 void f_simulatechemostateuler(
 			      double u[],
 			      const double L,
+				  const double T,
 				  const int nNutrients,
 			      const double Ndeep[],
 			      const double diff,
@@ -48,6 +51,7 @@ void f_simulateeuler(
 			      const int nGrid,
 			      double u[],
 			      const double L,
+				  const double T, 
 			      const double tEnd,
 			      const double dt);
 

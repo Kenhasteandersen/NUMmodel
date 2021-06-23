@@ -2,13 +2,19 @@
 % Returns all rates from the unicellulars for a given state (u) and light
 % level.
 %
-function rates = getRates(p, u, L)
+function rates = getRates(p, u, L, T)
+arguments
+    p struct;
+    u double;
+    L double;
+    T double = 10;
+end
 %
 % First make a call to calc a derivative:
 %
 dudt = 0*u';
 calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
-            length(u), u, L, 0.0, dudt);
+            length(u), u, L, T, 0.0, dudt);
 %
 % Then extract the rates:
 %

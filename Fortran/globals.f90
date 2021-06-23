@@ -37,7 +37,7 @@ module globals
   integer:: nGrid ! Total number of grid points incl.  points for nutrients
 
   ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
-  real(dp) :: T, fTemp2, fTemp15
+  real(dp) :: fTemp2, fTemp15
 
   contains
 

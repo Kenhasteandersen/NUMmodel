@@ -23,15 +23,15 @@ end subroutine f_setupGeneralistsOnly
 !!$    write(6,*) x
 !!$  end subroutine test
 
-  subroutine f_calcDerivatives(nn, u, L, dt, dudt)
+  subroutine f_calcDerivatives(nn, u, L, T, dt, dudt)
     use globals
     use NUMmodel, only: calcDerivatives, rates
     integer, intent(in):: nn
-    real(dp), intent(in):: L, dt
+    real(dp), intent(in):: L, T, dt
     real(dp), intent(in):: u(nn)
     real(dp), intent(out):: dudt(nn)
 
-    call calcDerivatives(u, L, dt)
+    call calcDerivatives(u, L, T, dt)
     dudt = rates%dudt
   end subroutine f_calcDerivatives
 
@@ -66,15 +66,15 @@ end subroutine f_setupGeneralistsOnly
   end subroutine f_getFunctions
   
 
-   subroutine f_simulateChemostatEuler(u, L, nNutrients, Ndeep, diff, tEnd, dt)
+   subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt)
     use globals
     use NUMmodel, only: simulateChemostatEuler
 
     integer, intent(in):: nNutrients
     real(dp), intent(inout):: u(nGrid)
-    real(dp), intent(in):: L, Ndeep(nNutrients), diff, tEnd, dt
+    real(dp), intent(in):: L, T, Ndeep(nNutrients), diff, tEnd, dt
 
-    call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
+    call simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt)
   end subroutine f_simulateChemostatEuler
 !!$
 !!$  subroutine f_simulateEuler(nGrid, u, L, tEnd, dt)
