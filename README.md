@@ -4,7 +4,7 @@ modelling framework.  The model is described in: Serra-Pompei et al (2020): [A g
 
 :fire: **This is alpha-software in development. Things may be broken and results may not be correct** :fire:
 
-The core library is written in fortran90 and is interfaced from matlab or R. Most of the modules are also written in matlab so compilation of the fortran code is not needed - but it speeds up most calculations by a factor 10.
+The core library is written in fortran90 and is interfaced from matlab or R. Requires a fairly recent version of matlab to run.
 
 ### Compiling
 Use the makefile in the Fortran directory. Edit the compiler and flags in the makefile to suit your operating system and compile by writing: `make`.
