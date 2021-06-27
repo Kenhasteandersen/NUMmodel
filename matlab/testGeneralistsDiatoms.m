@@ -12,7 +12,7 @@ p = parametersChemostat(p);
 dudt = 0*ones(1,p.n);
 u = p.u0;
 [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
-    length(u), u, 60, 0.0, dudt);
+    length(u), u, 60, 10., 0.0, dudt);
 dudt
 %
 % Simulate

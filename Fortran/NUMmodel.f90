@@ -463,8 +463,8 @@ contains
        end do
     end do
 
-    rates%flvl(idxB:nGrid) = AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid) + JFmax(idxB:nGrid))
-    rates%JF(idxB:nGrid) = rates%flvl(idxB:nGrid) * JFmax(idxB:nGrid)
+    rates%flvl(idxB:nGrid) = AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid) + fTemp2*JFmax(idxB:nGrid))
+    rates%JF(idxB:nGrid) = rates%flvl(idxB:nGrid) * fTemp2*JFmax(idxB:nGrid)
     !
     ! Calc HTL mortality:
     !
