@@ -9,7 +9,7 @@ arguments
 end
 
 p = setupGeneralistsOnly(25);
-p = parametersWatersolumn(p);
+p = parametersWatercolumn(p);
 
 sim = simulateWatercolumn(p, lat,lon);
 

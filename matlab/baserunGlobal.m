@@ -51,7 +51,11 @@ figure(3)
 plotGlobalWatercolumn(sim,150,60,-10,true);
 
 figure(4)
+plotGlobalSizespectrumTime(sim,1,60,-10);
+
+figure(5)
 plotGlobalSizespectrum(sim,150,1,60,-10);
+
 %
 % CPU-heavy plots:
 %
