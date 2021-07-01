@@ -209,6 +209,11 @@ for i=1:simtime
         end
     end
     %
+    % Enforce minimum B concentration
+    %
+    u(u<p.umin) = p.umin; 
+    
+    %
     % Save timeseries in grid format
     %
     if ((mod(i/2,p.tSave) < mod((i-1)/2,p.tSave)) || (i==simtime))

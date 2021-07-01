@@ -42,8 +42,8 @@ end
 p.tEnd = 365; % In days
 p.tSave = 365/12; % How often to save results (monthly)
 p.dt = 0.1; % For Euler time stepping
-%p.bParallel = true;
 p.bTransport = true;
+p.umin = 1e-5*p.mDelta(3)/p.m(3); % Minimum B concentration
 %
 % Light environment (??):
 %

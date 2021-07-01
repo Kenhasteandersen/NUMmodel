@@ -196,8 +196,10 @@ for i=1:simtime
             u(:,k) = u(:,k) ./(Aimp * (Aexp * ones(nGrid,1)));
         end
     end
-    
-    u(u<1e-5) = 1e-5;
+    %
+    % Enforce minimum concentraion
+    %
+    u(u<p.umin) = p.umin;
     %
     % Save timeseries in grid format
     %
