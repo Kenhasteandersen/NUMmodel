@@ -1,5 +1,6 @@
 %
 % Make a basic run of the global transport-matrix model.
+%
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
 % (choose MITgcm_2.8deg), and be put into the location '../TMs'
 %
@@ -44,7 +45,13 @@ plotGlobal(sim);
 
 figure(2)
 clf
-plotGlobalWatercolumnTime(60,-10,sim);
+plotGlobalWatercolumnTime(sim,60,-10);
+
+figure(3)
+plotGlobalWatercolumn(sim,150,60,-10,true);
+
+figure(4)
+plotGlobalSizespectrum(sim,150,1,60,-10);
 %
 % CPU-heavy plots:
 %

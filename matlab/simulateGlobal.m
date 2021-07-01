@@ -1,6 +1,5 @@
 %
-% Global run of size based unicelluar plankton model. Requires the fortran
-% library.
+% Global run using transport matrices
 % 
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
 % (choose MITgcm_2.8deg), and be put into the location 'NUMmodel/TMs'
@@ -127,7 +126,7 @@ end
 %
 iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
-sim = load(p.pathGrid,'x','y','z','dznom');
+sim = load(p.pathGrid,'x','y','z','dznom','bathy');
 sim.N = single(zeros(length(sim.x), length(sim.y), length(sim.z),nSave));
 if bSilicate
     sim.Si = sim.N;

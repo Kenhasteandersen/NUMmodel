@@ -9,8 +9,7 @@ arguments
 end
 
 p = setupGeneralistsOnly(25);
-p = parametersGlobal(p,2);
-p.tSave = 1;
+p = parametersWatersolumn(p);
 
 sim = simulateWatercolumn(p, lat,lon);
 

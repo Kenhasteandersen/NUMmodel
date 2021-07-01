@@ -18,5 +18,5 @@ ix = find(dist==shortest);
 ix = ix(1);
 idx.y = floor(ix/length(sim.x));
 idx.x = mod(ix, length(sim.x));
-idx.z = find( ~isnan([squeeze(sim.N(idx.x, idx.y,:,2))]) );
+idx.z = find(sim.bathy(idx.x, idx.y,:)==1);
 

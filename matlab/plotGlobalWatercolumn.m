@@ -2,18 +2,42 @@
 % Plot a water column at latitude `lat`
 % and longitude `lon` at time (days)
 %
-function plotGlobalWatercolumn(sim, lat,lon, time, bNewplot)
+function plotGlobalWatercolumn(sim, time, lat,lon, bNewplot)
 
 arguments
     sim struct;
-    lat, lon, time double;
+    time double;
+    lat double = [];
+    lon double = [];
     bNewplot = true;
 end
 
-idx = calcGlobalWatercolumn(lat,lon,sim);
-m = [sim.p.mLower(sim.p.idxB:end), sim.p.mLower(end)+sim.p.mDelta(end)];
-z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
 [~, iTime] = min(abs(sim.t-time));
+
+if ~isempty(lat)
+    % Extract water column from global simulation:
+    idx = calcGlobalWatercolumn(lat,lon,sim);
+    z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
+    B = squeeze(double(sim.B(idx.x, idx.y, idx.z, :, iTime)));
+    for i = 1:length(idx.z)
+        u(i,:) = [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
+            sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)];
+        L(i) = sim.L(idx.x, idx.y, idx.z(i), iTime);
+        T(i) = sim.T(idx.x, idx.y, idx.z(i), iTime);
+    end
+    
+else
+    % Extract data from water column simulation:
+    z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
+    B = squeeze(double(sim.B(:, :, iTime)));
+    for i = 1:length(sim.z)
+        u(i,:) = [sim.N(i, iTime), sim.DOC(i, iTime), B(i,:)];
+        L(i) = sim.L(i,iTime);
+        T(i) = sim.T(i,iTime);
+    end
+end
+    
+m = [sim.p.mLower(sim.p.idxB:end), sim.p.mLower(end)+sim.p.mDelta(end)];
 
 if bNewplot
     clf
@@ -24,12 +48,10 @@ end
 % Biomass spectrum:
 %
 nexttile
-B = squeeze(double(sim.B(idx.x, idx.y, idx.z, :, iTime)));
 B(B<0) = 0;
 panelField(m, -z, (B)');
 
 set(gca,'xscale','log','colorscale','log')
-
 
 set(gca,'xtick',10.^(-9:2))
 caxis([0.1 100])
@@ -44,16 +66,14 @@ ylim([-200 0])
 % Trophic strategy:
 %
 nexttile
-for i = 1:length(idx.z)
+for i = 1:length(z)-1
     if isfield(sim,'Si')
            rates = getRates(sim.p,[sim.N(idx.x, idx.y, idx.z(i), iTime), ...
             sim.Si(idx.x, idx.y, idx.z(i), iTime), ...
         sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)],...
         sim.L(idx.x, idx.y, idx.z(i), iTime));
     else
-    rates = getRates(sim.p, [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
-        sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)],...
-        sim.L(idx.x, idx.y, idx.z(i), iTime));
+        rates = getRates(sim.p, u(i,:), L(i), T(i));
     end
  %   [~, col] = calcTrophicStrategy(rates);
     for j=1:length(m)-1
