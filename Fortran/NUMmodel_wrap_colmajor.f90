@@ -6,7 +6,9 @@ module NUMmodel_wrap
        setupGeneralistsCopepod, &
        setupGeneric, setupGeneric_csp, &
        calcderivatives, rates, m, &
-       simulateChemostatEuler, simulateEuler, getFunctions
+       simulateChemostatEuler, simulateEuler, getFunctions, &
+       parametersHTL
+
   use globals
 
   implicit none
@@ -46,8 +48,6 @@ contains
     call setupGeneralistsCopepod()
   end subroutine f_setupGeneralistsCopepod
 
-
-
   subroutine f_setupGeneric(nCopepods, mAdult) bind(c)
     integer(c_int), intent(in), value:: nCopepods
     real(c_double), intent(in):: mAdult(nCopepods)
@@ -61,6 +61,13 @@ contains
 
     call setupGeneric_csp(mAdult)
   end subroutine f_setupGeneric_csp
+
+  subroutine f_parametersHTL(mortHTL, bQuadraticHTL) bind(c)
+    real(c_double), intent(in), value:: mortHTL
+    logical, intent(in), value:: bQuadraticHTL
+
+    call parametersHTL(mortHTL, bQuadraticHTL)
+  end subroutine f_parametersHTL 
 
   subroutine test(x) bind(c)
     integer(c_int), intent(in), value:: x

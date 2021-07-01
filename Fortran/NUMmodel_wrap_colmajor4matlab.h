@@ -16,6 +16,8 @@ void f_setupgeneric(const int nCopepods, const double mAdult[]);
 
 void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
 
+void f_parametershtl(const double mortHTL, const bool bQuadraticHTL);
+
 void f_calcderivatives(
 		       const int nGrid,
 		       const double u[],

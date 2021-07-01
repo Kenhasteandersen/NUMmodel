@@ -52,8 +52,7 @@ contains
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
     call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
-    bQuadraticHTL = .false. ! Use standard "linear" mortality
-    call parametersFinalize()
+    call parametersFinalize(0.2d0, .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
@@ -62,7 +61,7 @@ contains
   subroutine setupGeneralistsOnly_csp()
     call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
     call parametersAddGroup(typeGeneralist_csp, 10, 0.1d0) ! generalists with 10 size classes
-    call parametersFinalize()
+    call parametersFinalize(0.003d0, .true.) ! Serra-Pompei (2020))
   end subroutine setupGeneralistsOnly_csp
 
   ! -----------------------------------------------
@@ -72,8 +71,7 @@ contains
    integer, intent(in):: n
    call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
    call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
-   bQuadraticHTL = .false. ! Use standard "linear" mortality
-   call parametersFinalize()
+   call parametersFinalize(0.2d0, .false.)
  end subroutine setupDiatomsOnly
 
  ! -----------------------------------------------
@@ -83,8 +81,7 @@ contains
    integer, intent(in):: n
    call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
    call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
-   bQuadraticHTL = .false. ! Use standard "linear" mortality
-   call parametersFinalize()
+   call parametersFinalize(0.2d0, .false.)
  end subroutine setupDiatoms_simpleOnly
  
   ! -----------------------------------------------
@@ -95,8 +92,7 @@ contains
       call parametersInit(2, 2*n, 3)
       call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
-      bQuadraticHTL = .false. ! Use standard "linear" mortality
-      call parametersFinalize()
+      call parametersFinalize(.2d0, .false.)
    end subroutine setupGeneralistsDiatoms
  
    subroutine setupGeneralistsDiatoms_simple(n)
@@ -104,8 +100,7 @@ contains
       call parametersInit(2, 2*n, 3)
       call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
-      bQuadraticHTL = .false. ! Use standard "linear" mortality
-      call parametersFinalize()
+      call parametersFinalize(0.2d0, .false.)
    end subroutine setupGeneralistsDiatoms_simple
  
   ! -----------------------------------------------
@@ -115,7 +110,7 @@ contains
     call parametersInit(2, 20, 2)
     call parametersAddGroup(typeGeneralist, 10, 0.1d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
-    call parametersFinalize()
+    call parametersFinalize(0.003d0, .true.) ! Use quadratic mortality
   end subroutine setupGeneralistsCopepod
 
   ! -----------------------------------------------
@@ -135,7 +130,7 @@ contains
           call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
        end do
     end if
-    call parametersFinalize()
+    call parametersFinalize(0.003d0, .true.)
   end subroutine setupGeneric
 
   ! -----------------------------------------------
@@ -151,7 +146,7 @@ contains
     do iCopepod = 1, size(mAdult)
        call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
     end do
-    call parametersFinalize()
+    call parametersFinalize(0.003d0, .true.)
   end subroutine setupGeneric_csp
 
 
@@ -282,7 +277,6 @@ contains
     allocate(rates%mortStarve(nGrid))
     allocate(rates%mort(nGrid))
 
-    bQuadraticHTL = .true. ! Default to quadratic mortality
   end subroutine parametersInit
   ! -----------------------------------------------
   !  Add a size spectrum group
@@ -348,7 +342,9 @@ contains
   !  Finalize the setting of parameters. Must be called when
   !  all groups have been added.
   ! -----------------------------------------------
-  subroutine parametersFinalize()
+  subroutine parametersFinalize(mortHTL, bQuadraticHTL)
+    real(dp), intent(in):: mortHTL
+    logical, intent(in):: bQuadraticHTL
     integer:: i,j
     real(dp):: betaHTL, mHTL, mMax
     !
@@ -361,34 +357,9 @@ contains
        end do
     end do
     !
-    ! Calc htl mortality
+    ! Set HTL mortality
     !
-    betaHTL = 500.
-    if (.not. bQuadraticHTL) then
-       !
-       ! Standard HTL mortality. In this case "pHTL" represent the selectivity of HTL mortality
-       !
-       mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
-       mortHTL = 0.2
-       pHTL(idxB:nGrid) = (1/(1+(m(idxB:nGrid)/mHTL)**(-2)))
-    else
-       !
-       ! Linear HTL mortality (commonly referred to as "quadratic")
-       ! In this case "pHTL" represents p_HTL*m^-1/4 from eq (16) in Serra-Pompei (2020)
-       !
-       mortHTL = 0.003 ! Serra-Pompei (2020)
-       gammaHTL = 0.2 ! ibid
-       mMax = maxval(m(idxB:nGrid))
-       do i=idxB, nGrid
-          if (m(i) .lt. (mMax/betaHTL)) then
-             pHTL(i) = exp( -(log(m(i)*betaHTL/mMax))**2/4.)
-          else
-             pHTL(i) = 1.
-          end if
-       end do
-       pHTL(idxB:nGrid) = pHTL(idxB:nGrid) * m(idxB:nGrid)**(-0.25)
-    end if
-    !write(6,*) m,pHTL
+    call parametersHTL(mortHTL, bQuadraticHTL)
 
   contains
     !
@@ -418,6 +389,48 @@ contains
     end function calcPhi
 
   end subroutine parametersFinalize
+
+  !
+  ! Sets the HTL mortality. 
+  ! In:
+  !  mortHTL - the level of mortality
+  !  bQuadraticHTL - whether to use a "quadratic" mortality
+  !
+  subroutine parametersHTL(mortalityHTL, boolQuadraticHTL)
+   real(dp), intent(in):: mortalityHTL
+   logical, intent(in):: boolQuadraticHTL
+   real(dp):: betaHTL, mMax, mHTL
+   integer:: i
+
+   mortHTL = mortalityHTL
+   bQuadraticHTL = boolQuadraticHTL
+   !     
+   ! Calc htl mortality
+   !
+   betaHTL = 500.
+   if (.not. bQuadraticHTL) then
+     !
+     ! Standard HTL mortality. In this case "pHTL" represent the selectivity of HTL mortality
+     !
+     mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
+     pHTL(idxB:nGrid) = (1/(1+(m(idxB:nGrid)/mHTL)**(-2)))
+   else
+     !
+     ! Linear HTL mortality (commonly referred to as "quadratic")
+     ! In this case "pHTL" represents p_HTL*m^-1/4 from eq (16) in Serra-Pompei (2020)
+     !
+     gammaHTL = 0.2 ! ibid
+     mMax = maxval(m(idxB:nGrid))
+     do i=idxB, nGrid
+        if (m(i) .lt. (mMax/betaHTL)) then
+           pHTL(i) = exp( -(log(m(i)*betaHTL/mMax))**2/4.)
+        else
+           pHTL(i) = 1.
+        end if
+     end do
+     pHTL(idxB:nGrid) = pHTL(idxB:nGrid) * m(idxB:nGrid)**(-0.25)
+   end if
+   end subroutine parametersHTL
 
   ! ======================================
   !  Calculate rates and derivatives:

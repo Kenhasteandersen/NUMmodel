@@ -23,6 +23,15 @@ end subroutine f_setupGeneralistsOnly
 !!$    write(6,*) x
 !!$  end subroutine test
 
+  subroutine f_parametersHTL(mortHTL, bQuadraticHTL)
+    use globals
+    use NUMmodel, only: parametersHTL
+    real(dp), intent(in):: mortHTL
+    logical, intent(in):: bQuadraticHTL
+
+    call parametersHTL(mortHTL, bQuadraticHTL)
+  end subroutine f_parametersHTL
+
   subroutine f_calcDerivatives(nn, u, L, T, dt, dudt)
     use globals
     use NUMmodel, only: calcDerivatives, rates

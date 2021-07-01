@@ -13,11 +13,11 @@ program NUMmodeltest
   !call setupGeneralistsOnly_csp()
  ! call setupGeneralistsOnly_csp()
   !call setupGeneralistsOnly_csp()
-  !call setupGeneralistsOnly()
+  call setupGeneralistsOnly(10)
 
   !call setupGeneralistsDiatoms(10)
-  call setupDiatoms_simpleOnly(10)
-  call setupDiatoms_simpleOnly(10)
+  !call setupDiatoms_simpleOnly(10)
+  !call setupDiatoms_simpleOnly(10)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
