@@ -1,5 +1,5 @@
 %
-% Calculates the Chl from a global simulation in units of g Chl/m2
+% Calculates the annual mean Chl from a global simulation.
 % See calcChl for algorithm
 %
 % In:
@@ -7,7 +7,7 @@
 %
 % Out:
 %   ChlArea - ChlA (g/m2)
-%   ChlVolume - ChlA (g/volume)
+%   ChlVolume - ChlA (g/m3)
 %
 function [ChlArea ChlVolume] = calcGlobalChl(sim)
 
