@@ -238,7 +238,7 @@ for i=1:simtime
     if bCalcAnnualAverages
         for k = 1:nb
             [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
-                            getFunctions(u(k,:), L(k));
+                            getFunctions(u(k,:), L(k), T(k));
             sim.ProdGrossAnnual(k) = sim.ProdGrossAnnual(k) + ProdGross1/(p.tEnd*2);            
             sim.ProdNetAnnual(k) = sim.ProdNetAnnual(k) + ProdNet1/(p.tEnd*2);
             sim.ProdHTLAnnual(k) = sim.ProdHTLAnnual(k) + ProdHTL1/(p.tEnd*2);

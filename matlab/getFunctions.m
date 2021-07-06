@@ -1,11 +1,11 @@
-function [ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro] = getFunctions(u, L)
+function [ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro] = getFunctions(u, L, T)
 %
 % First make a call to calc a derivative:
 %
 u = double(u);
 dudt = 0*u';
 [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
-            length(u), u, L, 0.0, dudt);
+            length(u), u, L, T, 0.0, dudt);
 %
 % Then extract the functions:
 %
