@@ -43,6 +43,8 @@ sim.rates = getRates(p, u(end,:), L);
 for iGroup = 1:p.nGroups
     sim.Bgroup(:,iGroup) = sum( u(:, p.ixStart(iGroup):p.ixEnd(iGroup)),2);
 end
+sim.L = L;
+sim.T = T;
 %Bpnm = calcPicoNanoMicro(sim.B(end,:), sim.p.pGeneralists);
 %sim.Bpico = Bpnm(1);
 %sim.Bnano = Bpnm(2);
