@@ -13,7 +13,7 @@ Use the makefile in the Fortran directory. Edit the compiler and flags in the ma
 There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.  See `exampleGeneralists` for some basic runs of the chemostat model.
 
 #### Top-level matlab routines
-These routines run a simulation and returns the results in a `sim` structure. All units are in micro gC/l (or micro gN/l):
+These routines run a simulation and returns the results in a `sim` structure. All units are in micro gC/l (or micro gN/l). Units of light are micro mol photons per m2 per second:
 
 * `baserunChemostat(mAdult, false)`.  Runs a chemostat version of the model and plots the output. The first argument is the adult body masses of copepods (in micro gram carbon) - send in an empty list to run only with unicellular plankton. Change the second argument to `true`to use the Fortran library.
 * `baserunChemostatEuler(mAdult)`. Uses the Fortran library and simple Euler time-stepping.
