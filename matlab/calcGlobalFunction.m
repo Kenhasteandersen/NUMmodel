@@ -36,7 +36,7 @@ if ~isfield(sim,'ProdGross')
                             squeeze(sim.DOC(i,j,k,iTime)), ...
                             squeeze(sim.B(i,j,k,:,iTime))'];
                         [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
-                            getFunctions(u, sim.L(i,j,k,iTime));
+                            getFunctions(u, sim.L(i,j,k,iTime), sim.T(i,j,k,iTime));
                         conv = squeeze(dz(i,j,k));
                         ProdGross = ProdGross + ProdGross1*conv;
                         ProdNet = ProdNet + ProdNet1*conv;
@@ -69,7 +69,7 @@ for i = 1:length(sim.t)
     sim.Ntotal(i) = calcTotal(sim.N(:,:,:,i));
     sim.DOCtotal(i) = calcTotal(sim.DOC(:,:,:,i)); % mugC
     sim.Btotal(i) = 0;
-    for j = 1:sim.p.nGrid
+    for j = 1:(sim.p.n-sim.p.idxB+1)
         sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(:,:,:,j,i)); % mugC
     end
     sim.ProdNetTotal(i) = calcTotal(sim.ProdNet(:,:,i)); % mugC/day
