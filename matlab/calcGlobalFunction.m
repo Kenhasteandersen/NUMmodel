@@ -1,7 +1,7 @@
 function sim = calcGlobalFunction(sim)
 
-%loadNUMmodelLibrary();
-%calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(sim.p.mAdult)), sim.p.mAdult)
+% loadNUMmodelLibrary();
+% calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(sim.p.mAdult)), sim.p.mAdult)
 % Get grid volumes:
 load(sim.p.pathGrid,'dv','dz');
 ix = ~isnan(sim.N(:,:,1,1)); % Find all relevant grid cells
