@@ -1,3 +1,24 @@
+%
+% Calculate the functions from a global simulation.
+%
+% In:
+%   sim - global simulation structure
+% Out:
+%   sim - same as input but with fields of global function added:
+%         sim.ProdGross - gross primary production (gC/m2/yr)
+%         sim.ProdNet   - net primary production (gC/m2/yr)
+%         sim.ProdHTL   - amount of carbon extracted from the HTL mortality
+%         sim.Bpico, sim.Bnano, sim.Bmicro - pico, micro, and nano plankton
+%                         biomasses (gC/m2/yr)
+%
+%         sim.Ntotal    - total dissolved N as a function of time (mugN)
+%         sim.DOCtotal  - total dissolved DOC (mugC)
+%         sim.Btotal    - total biomass (mugC)
+%         sim.ProdNetTotal - total NPP (gC/yr)
+%
+%         sim.ProdNetAnnual - annual average NPP (gC/m2/yr)
+%         sim.ProdHTLAnnual - annual avearge HTL production (gc/m2/yr)
+%
 function sim = calcGlobalFunction(sim)
 
 % loadNUMmodelLibrary();
@@ -72,7 +93,7 @@ for i = 1:length(sim.t)
     for j = 1:(sim.p.n-sim.p.idxB+1)
         sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(:,:,:,j,i)); % mugC
     end
-    sim.ProdNetTotal(i) = calcTotal(sim.ProdNet(:,:,i)); % mugC/day
+    sim.ProdNetTotal(i) = calcTotal(sim.ProdNet(:,:,i)); % gC/yr
 end
 %
 % Watercolumn totals:
