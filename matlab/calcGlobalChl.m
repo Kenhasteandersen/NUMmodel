@@ -16,10 +16,11 @@ ChlVolume = zeros(length(sim.x), length(sim.y), length(sim.z));
 
 for i = 1:length(sim.x)
     for j = 1:length(sim.y)
-        for k = 1:length(sim.t)    
-            for l = 1:length(sim.z)
+        for l = 1:length(sim.z)
+            for k = 1:length(sim.t)
                 B = squeeze(sim.B(i,j,l,:,k))';
-                if ~isnan(sum(B))
+                B(isnan(B)) = 0; % get rid of NaN
+                if ~isnan(sim.N(i,j,l,k))
                     u = [squeeze(sim.N(i,j,l,k)), ...
                         squeeze(sim.DOC(i,j,l,k)), ...
                         B];
@@ -36,4 +37,5 @@ for i = 1:length(sim.x)
 end
 
 ChlArea = ChlArea/length(sim.t);
+ChlVolume = ChlVolume/length(sim.t);
 
