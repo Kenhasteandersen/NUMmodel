@@ -3,7 +3,7 @@
 % Conservation is enforced rather crudely.
 % 
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
-% (choose MITgcm_2.8deg), and be put into the location 'NUMmodel/TMs'
+% (choose MITgcm_ECCO_v4), and be put into the location 'NUMmodel/TMs'
 %
 % Input:
 %  p: parameter structure from parametersGlobal
