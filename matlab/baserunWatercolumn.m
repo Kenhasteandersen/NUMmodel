@@ -13,14 +13,17 @@ p = parametersWatercolumn(p);
 
 sim = simulateWatercolumn(p, lat,lon);
 %%
+
+day = 170;
+
 figure(1)
 plotGlobalWatercolumnTime(sim);
 
 figure(2)
-plotGlobalWatercolumn(sim,150);
+plotGlobalWatercolumn(sim,day);
 
 figure(3)
-plotGlobalSizespectrum(sim,150,1);
+plotGlobalSizespectrum(sim,day,1);
 
 figure(4)
 plotGlobalSizespectrumTime(sim,1);
