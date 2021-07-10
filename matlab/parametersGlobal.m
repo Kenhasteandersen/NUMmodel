@@ -20,6 +20,7 @@ path = fileparts(mfilename('fullpath'));
 % Set load paths for tranport matrices:
 %
 if (nargin==1 || nargin==0 || nTMmodel == 1)
+    p.TMname = 'MITgmc_2.8';
     p.pathMatrix   = strcat(path,'/../TMs/MITgcm_2.8deg/Matrix5/TMs/matrix_nocorrection_');
     p.pathBoxes     = strcat(path,'/../TMs/MITgcm_2.8deg/Matrix5/Data/boxes.mat');
     p.pathGrid      = strcat(path,'/../TMs/MITgcm_2.8deg/grid.mat');
@@ -28,6 +29,7 @@ if (nargin==1 || nargin==0 || nTMmodel == 1)
     p.pathN0        = strcat(path,'/../TMs/MITgcm_N0');
     p.pathInit      = strcat(sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0)));
 elseif nTMmodel == 2
+    p.TMname = 'MITgcm_ECCO';
     p.pathMatrix = strcat(path,'/../TMs/MITgcm_ECCO/Matrix1/TMs/matrix_nocorrection_');
     p.pathBoxes = strcat(path,'/../TMs/MITgcm_ECCO/Matrix1/Data/boxes.mat');
     p.pathGrid = strcat(path,'/../TMs/MITgcm_ECCO/grid.mat');

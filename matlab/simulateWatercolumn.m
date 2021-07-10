@@ -1,7 +1,7 @@
 %
 % Simulate a single water column from the global transport matrix.
 % Conservation is enforced rather crudely.
-% 
+%
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
 % (choose MITgcm_ECCO_v4), and be put into the location 'NUMmodel/TMs'
 %
@@ -36,16 +36,7 @@ ixB = p.idxB:p.n;
 %Tbc = [];
 
 disp('Preparing simulation')
-%
-% Check that files exist:
-%
-path = fileparts(mfilename('fullpath'));
-addpath(strcat(path,'/Transport matrix'));
 
-if ~exist(p.pathBoxes,'file')
-    error( sprintf('Error: Cannot find transport matrix file: %s',...
-        p.pathBoxes));
-end
 % ---------------------------------------
 % Find the indices that corresponds to the selected water column:
 % ---------------------------------------
@@ -55,6 +46,58 @@ idx = calcGlobalWatercolumn(lat, lon, sim); % Find the indices into matrix
 xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid); % Find the indices into the grid
 idxGrid = squeeze(xx(idx.x, idx.y, idx.z));
 nGrid = length(idxGrid);
+%
+% Check if a file with the water column exists; if not extract from TM and
+% save:
+%
+Ix = speye(nb,nb);
+sFile = sprintf('Watercolumn_%s_lat%03i_lon%02i.mat',p.TMname,lat,lon);
+if exist(sFile,'file')
+    load(sFile);
+else
+    fprintf('-> Extracting water column from transport matrix')
+    %
+    % Check that transport matrix files exist:
+    %
+    path = fileparts(mfilename('fullpath'));
+    addpath(strcat(path,'/Transport matrix'));
+    
+    if ~exist(p.pathBoxes,'file')
+        error( sprintf('Error: Cannot find transport matrix file: %s',...
+            p.pathBoxes));
+    end
+    % Load TMs
+    for month=1:12
+        load(strcat(p.pathMatrix, sprintf('%02i.mat',month)));
+        %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
+        
+        AexpM(month,:,:) = full(function_convert_TM_positive(Aexp(idxGrid,idxGrid)));
+        AimpM(month,:,:) = full(function_convert_TM_positive(Aimp(idxGrid,idxGrid)));
+        
+        % Preparing for timestepping. 43200s.
+        AexpM(month,:,:) = Ix(idxGrid,idxGrid) + squeeze((12*60*60)*AexpM(month,:,:));
+        AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(36);
+        fprintf('.');
+    end
+    %
+    % Load temperature:
+    %
+    load(p.pathTemp, 'Tbc');
+    Tmat = zeros(nb,12);
+    for i = 1:12
+        Tmat(:,i) = gridToMatrix(Tbc(:,:,:,i), [], p.pathBoxes, p.pathGrid);
+    end
+    Tmat = Tmat(idxGrid,:); % Use only the specific water column
+    %
+    % Load Light:
+    %
+    L0 = zeros(nGrid,730);
+    for i = 1:730
+        L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*Zbox(idxGrid));
+    end
+    fprintf('\n');
+    save(sFile,'AexpM','AimpM','Tmat','L0');
+end
 
 % ---------------------------------------
 % Initialize run:
@@ -62,7 +105,7 @@ nGrid = length(idxGrid);
 simtime = p.tEnd*2; %simulation time in half days
 
 % Preparing timestepping
-Ix = speye(nb,nb);
+
 month = 0;
 mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
@@ -92,22 +135,6 @@ else
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
 end
 u = u(idxGrid,:); % Use only the specific water column
-%
-% Load temperature:
-%
-load(p.pathTemp, 'Tbc');
-Tmat = zeros(nb,12);
-for i = 1:12
-    Tmat(:,i) = gridToMatrix(Tbc(:,:,:,i), [], p.pathBoxes, p.pathGrid);
-end
-Tmat = Tmat(idxGrid,:); % Use only the specific water column
-%
-% Load Light:
-%
-L0 = zeros(nGrid,730);
-for i = 1:730
-    L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*Zbox(idxGrid));
-end
 %
 % Matrices for saving the solution:
 %
@@ -142,26 +169,12 @@ disp('Starting simulation')
 tic
 for i=1:simtime
     %
-    % Test for time to change monthly transport matrix
+    % Test for time to change monthly temperature
     %
     if ismember(mod(i,730), 1+2*cumsum(mon))
         fprintf('t = %u days\n',floor(i/2))
-        % Load TM
-        load(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
-        %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
-        
-        Aexp=function_convert_TM_positive(Aexp(idxGrid,idxGrid));
-        Aimp=function_convert_TM_positive(Aimp(idxGrid,idxGrid));
-        
-        % Preparing for timestepping. 43200s.
-        Aexp = Ix(idxGrid,idxGrid) + (12*60*60)*Aexp;
-        Aimp = Aimp^(36);
-        
-        % Make periodic boundary conditions such that all losses 
-        
         % Set monthly mean temperature
         T = Tmat(:,month+1);
-        
         month = mod(month + 1, 12);
     end
     %
@@ -191,9 +204,9 @@ for i=1:simtime
     %
     if p.bTransport
         for k = 1:p.n
-            u(:,k) =  Aimp * (Aexp * u(:,k));
+            u(:,k) =  squeeze(AimpM(month+1,:,:)) * (squeeze(AexpM(month+1,:,:)) * u(:,k));
             % Enforce conservation crudely:
-            u(:,k) = u(:,k) ./(Aimp * (Aexp * ones(nGrid,1)));
+            u(:,k) = u(:,k) ./(squeeze(AimpM(month+1,:,:)) * (squeeze(AexpM(month+1,:,:)) * ones(nGrid,1)));
         end
     end
     %
@@ -215,23 +228,23 @@ for i=1:simtime
         end
         sim.L(:,iSave) = L;
         sim.T(:,iSave) = T;
-        tSave = [tSave, i*0.5];   
+        tSave = [tSave, i*0.5];
     end
     %
     % Update annual averages:
     %
-%     if bCalcAnnualAverages
-%         for k = 1:nb
-%             [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
-%                             getFunctions(u(k,:), L(k));
-%             sim.ProdGrossAnnual(k) = sim.ProdGrossAnnual(k) + ProdGross1/(p.tEnd*2);            
-%             sim.ProdNetAnnual(k) = sim.ProdNetAnnual(k) + ProdNet1/(p.tEnd*2);
-%             sim.ProdHTLAnnual(k) = sim.ProdHTLAnnual(k) + ProdHTL1/(p.tEnd*2);
-%             sim.BpicoAnnualMean(k) = sim.BpicoAnnualMean(k) + Bpico1/(p.tEnd*2*365);
-%             sim.BnanoAnnualMean(k) = sim.BnanoAnnualMean(k) + Bnano1/(p.tEnd*2*365);
-%             sim.BmicroAnnualMean(k) = sim.BmicroAnnualMean(k) + Bmicro1/(p.tEnd*2*365);
-%         end
-%     end
+    %     if bCalcAnnualAverages
+    %         for k = 1:nb
+    %             [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
+    %                             getFunctions(u(k,:), L(k));
+    %             sim.ProdGrossAnnual(k) = sim.ProdGrossAnnual(k) + ProdGross1/(p.tEnd*2);
+    %             sim.ProdNetAnnual(k) = sim.ProdNetAnnual(k) + ProdNet1/(p.tEnd*2);
+    %             sim.ProdHTLAnnual(k) = sim.ProdHTLAnnual(k) + ProdHTL1/(p.tEnd*2);
+    %             sim.BpicoAnnualMean(k) = sim.BpicoAnnualMean(k) + Bpico1/(p.tEnd*2*365);
+    %             sim.BnanoAnnualMean(k) = sim.BnanoAnnualMean(k) + Bnano1/(p.tEnd*2*365);
+    %             sim.BmicroAnnualMean(k) = sim.BmicroAnnualMean(k) + Bmicro1/(p.tEnd*2*365);
+    %         end
+    %     end
     
 end
 time = toc;
