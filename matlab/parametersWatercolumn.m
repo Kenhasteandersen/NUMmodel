@@ -6,4 +6,6 @@ arguments
 end
 
 p = parametersGlobal(p,nTMmodel);
+p.nameModel = 'watercolumn';
+
 p.tSave = 1;

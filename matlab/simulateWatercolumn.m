@@ -36,6 +36,11 @@ ixB = p.idxB:p.n;
 %Tbc = [];
 
 disp('Preparing simulation')
+%
+% Set path:
+%
+path = fileparts(mfilename('fullpath'));
+addpath(strcat(path,'/Transport matrix'));
 
 % ---------------------------------------
 % Find the indices that corresponds to the selected water column:

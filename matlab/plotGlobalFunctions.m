@@ -6,7 +6,7 @@ end
 %
 % Get the functions:
 %
-sim = calcGlobalFunction(sim);
+sim = calcFunctions(sim);
 
 %%
 clf

@@ -27,6 +27,7 @@ clf
 surface(m, sim.t, log10(s.B)')
 shading flat
 axis tight
+caxis([-5,2])
 set(gca,'xscale','log')
 colorbar
 xlabel('mass')

@@ -14,6 +14,8 @@ arguments
     nTMmodel {mustBeInteger} = 1;
 end
 
+p.nameModel = 'global';
+
 path = fileparts(mfilename('fullpath'));
 
 %
