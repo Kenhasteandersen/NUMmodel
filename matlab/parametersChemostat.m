@@ -1,3 +1,12 @@
+%
+% Set the parameters for a chemostat simulation.
+%
+% In:
+%  p - parameter structure from a call to a setupXX function
+%
+% Out:
+%  p - parameter structure with chemostat fields added.
+%
 function p = parametersChemostat(p)
 
 p.nameModel = 'chemostat';

@@ -1,5 +1,12 @@
 %
-% Returns the idx of the watercolumn closes to lat and lon
+% Returns the indices of the watercolumn in a global simulation.
+%
+% In:
+%  lat, lat - latitude and longitude
+%
+% Out:
+%  structure with fields 'x" and "y" and closest to lat and lon. Also includes the
+%  depths in field "z".
 %
 function idx = calcGlobalWatercolumn(lat, lon, sim)
 

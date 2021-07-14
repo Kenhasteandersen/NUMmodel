@@ -1,6 +1,12 @@
 %
 % Run a watercolumn with only generalists
 %
+% In:
+%  lat, lon - latitude and longitude
+%
+% Out:
+%  As simulation structure
+%
 function sim = baserunWatercolumn(lat,lon)
 
 arguments

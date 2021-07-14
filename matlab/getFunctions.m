@@ -1,3 +1,18 @@
+%
+% Get the ecosystem functions.
+%
+% In:
+%  u - state variable vector (nutrients and biomasses of all groups).
+%  L - light
+%  T - temperature
+%
+% Out
+%  ProdGross, ProdNet,ProdHTL - Gross, net, and HTL productions in units of
+%                               gC per m^3.
+%  eHTL - not implemented
+%  Bpico, Bnano, Bmicro - biomasses in pico, nano, and micro size groups
+%                         (gC/m3).
+%
 function [ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro] = getFunctions(u, L, T)
 %
 % First make a call to calc a derivative:

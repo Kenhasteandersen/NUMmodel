@@ -30,7 +30,7 @@ switch sim.p.nameModel
             Si = squeeze(double(sim.Si(idx.x, idx.y, idx.z,:)));
         end
         for i = 1:sim.p.nGroups
-            B = squeeze((sum(double(sim.B(idx.x, idx.y, idx.z,...
+            B(i,:,:) = squeeze((sum(double(sim.B(idx.x, idx.y, idx.z,...
                 (sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1,:)),4)));
         end
         z = sim.z(idx.z);

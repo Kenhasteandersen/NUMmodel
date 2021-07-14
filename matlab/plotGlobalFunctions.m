@@ -1,3 +1,14 @@
+%
+% Plot the ecosystem functions from a global simulation. Calls
+% "calcFunctions" to add the functions to the simulation structure.
+%
+% In:
+%  sim - simulation from a call to "simulateGlobal"
+%
+% Out:
+%  tiles - the tiles with the plots
+%  sim - updated simulation strucure
+%
 function [tiles,sim] = plotGlobalFunctions(sim, sProjection)
 arguments
     sim struct;

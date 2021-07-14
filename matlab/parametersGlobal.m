@@ -1,11 +1,14 @@
 %
 % Sets the parameters for the global model simlations
 %
-% Input:
+% In:
 %  n - number of size groups (default 10)
 %  nTMmodel - Which transport matrices to use:
 %       1 = MITgcm_2.8 (default)
 %       2 = MITgcm_ECCO
+%
+% Out:
+%  simulation structure
 %
 function p = parametersGlobal(p, nTMmodel)
 

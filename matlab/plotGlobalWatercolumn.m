@@ -1,15 +1,20 @@
 %
-% Plot a water column at latitude `lat`
-% and longitude `lon` at time (days)
+% Plot a water column from either a global or a water column simulation.
 %
-function plotGlobalWatercolumn(sim, time, lat,lon, bNewplot)
+% In:
+%  time - time (in days)
+%  lat, lon - latitude and longitude (only for global simulation)
+%  Optional:
+%  options.bNewplot - whether to clear the figure.
+%
+function plotGlobalWatercolumn(sim, time, lat,lon, options)
 
 arguments
     sim struct;
     time double;
     lat double = [];
     lon double = [];
-    bNewplot = true;
+    options.bNewplot  = true;
 end
 
 [~, iTime] = min(abs(sim.t-time));
@@ -39,7 +44,7 @@ end
     
 m = [sim.p.mLower(sim.p.idxB:end), sim.p.mLower(end)+sim.p.mDelta(end)];
 
-if bNewplot
+if options.bNewplot
     clf
     tiledlayout(2,1,'tilespacing','compact','padding','compact')
 end
