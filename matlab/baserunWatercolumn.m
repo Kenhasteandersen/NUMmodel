@@ -32,4 +32,4 @@ figure(3)
 plotGlobalSizespectrum(sim,day,1);
 
 figure(4)
-plotGlobalSizespectrumTime(sim,1);
+plotSizespectrumTime(sim,1);
