@@ -2,6 +2,7 @@ function p = parametersAddgroup(typeGroup, p, n)
 
 if ~isfield(p,'nGroups')
     p.nGroups = 1;
+    p.idxB = p.n+1;
 else
     p.nGroups = p.nGroups+1;
 end

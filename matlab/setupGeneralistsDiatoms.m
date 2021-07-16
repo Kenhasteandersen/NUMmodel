@@ -17,12 +17,9 @@ else
     calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsdiatoms', int32(n) );
 end
 
-p.idxN = 1;
-p.idxDOC = 2;
-p.idxSi = 3;
-p.idxB = 4; % We have three nutrient groups so biomass groups starts at index 4.
+% Nutrients:
+p = setupNutrients_N_DOC_Si;
 
-p.n = 3;
 % Generalists
 p = parametersAddgroup(1,p,n);
 % Diatoms:

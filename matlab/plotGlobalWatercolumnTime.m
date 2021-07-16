@@ -40,7 +40,6 @@ switch sim.p.nameModel
         if isfield(sim,'Si')
             Si = sim.Si;
         end
-        DOC(DOC<=0) = 1e-8;
         for i = 1:sim.p.nGroups
             B(i,:,:) = squeeze(sum(sim.B(:,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:),2));
         end
@@ -48,6 +47,8 @@ switch sim.p.nameModel
     otherwise
         fprintf('Model type %s not supported.\n', sim.p.nameModel) 
 end
+N(N<=0) = 1e-8;
+DOC(DOC<=0) = 1e-8;
 
 t = sim.t;
 
@@ -71,7 +72,7 @@ set(gca,'ColorScale','log')
 shading interp
 axis tight
 colorbar('ticks',10.^(-2:3))
-caxis([0.1 100])
+%caxis([-1 2])
 ylim(ylimit)
 
 if isfield(sim,'Si')
