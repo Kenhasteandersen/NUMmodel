@@ -45,10 +45,10 @@ plotGlobal(sim);
 
 figure(2)
 clf
-plotGlobalWatercolumnTime(sim,60,-10);
+plotWatercolumnTime(sim,60,-10);
 
 figure(3)
-plotGlobalWatercolumn(sim,150,60,-10,true);
+plotWatercolumn(sim,150,60,-10,true);
 
 figure(4)
 plotGlobalSizespectrumTime(sim,1,60,-10);

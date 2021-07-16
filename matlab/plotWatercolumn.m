@@ -7,7 +7,7 @@
 %  Optional:
 %  options.bNewplot - whether to clear the figure.
 %
-function plotGlobalWatercolumn(sim, time, lat,lon, options)
+function plotWatercolumn(sim, time, lat,lon, options)
 
 arguments
     sim struct;

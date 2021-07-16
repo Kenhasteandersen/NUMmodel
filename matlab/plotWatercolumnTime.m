@@ -10,7 +10,7 @@
 %  bNewplot - boolean that decides whether to setup the plot
 %  depthMax - mx depth for ylimit.
 %
-function plotGlobalWatercolumnTime(sim, lat, lon, options)
+function plotWatercolumnTime(sim, lat, lon, options)
 
 arguments
     sim struct;

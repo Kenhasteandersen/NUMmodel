@@ -23,10 +23,10 @@ sim = simulateWatercolumn(p, lat,lon);
 day = 170;
 
 figure(1)
-plotGlobalWatercolumnTime(sim);
+plotWatercolumnTime(sim,'depthMax',200);
 
 figure(2)
-plotGlobalWatercolumn(sim,day);
+plotWatercolumn(sim,day);
 
 figure(3)
 plotGlobalSizespectrum(sim,day,1);

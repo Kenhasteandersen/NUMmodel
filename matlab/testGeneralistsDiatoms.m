@@ -37,4 +37,4 @@ figure(2)
 plotGlobal(sim)
 
 figure(3)
-plotGlobalWatercolumn(sim, 60, -10, 180)
+plotWatercolumn(sim, 60, -10, 180)
