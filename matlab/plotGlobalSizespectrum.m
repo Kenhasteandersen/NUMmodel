@@ -34,7 +34,11 @@ else
     % Extract from a single water column:
     z = sim.z;
     s.B = squeeze(sim.B(iDepth,:,iTime));
-    u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), s.B];
+    if isfield(sim,'Si')
+        u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iDepth,iTime), s.B];
+    else
+        u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), s.B];
+    end
     s.L = sim.L(iDepth,iTime);
 end
     
