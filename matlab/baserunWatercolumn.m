@@ -26,7 +26,7 @@ figure(1)
 plotWatercolumnTime(sim,'depthMax',200);
 
 figure(2)
-plotWatercolumn(sim,day);
+plotWatercolumn(sim,day,'depthMax',200);
 
 figure(3)
 plotGlobalSizespectrum(sim,day,1);

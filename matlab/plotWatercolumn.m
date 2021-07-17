@@ -6,6 +6,7 @@
 %  lat, lon - latitude and longitude (only for global simulation)
 %  Optional:
 %  options.bNewplot - whether to clear the figure.
+%  options.depthMax - mx depth for ylimit.
 %
 function plotWatercolumn(sim, time, lat,lon, options)
 
@@ -15,6 +16,7 @@ arguments
     lat double = [];
     lon double = [];
     options.bNewplot  = true;
+    options.depthMax {mustBePositive} = [];
 end
 
 [~, iTime] = min(abs(sim.t-time));
@@ -36,64 +38,86 @@ else
     z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
     B = squeeze(double(sim.B(:, :, iTime)));
     for i = 1:length(sim.z)
-        u(i,:) = [sim.N(i, iTime), sim.DOC(i, iTime), B(i,:)];
+        if isfield(sim,'Si')
+            u(i,:) = [sim.N(i, iTime), sim.DOC(i, iTime), ...
+                sim.Si(i,iTime), B(i,:)];
+        else
+            u(i,:) = [sim.N(i, iTime), sim.DOC(i, iTime), B(i,:)];
+        end
         L(i) = sim.L(i,iTime);
         T(i) = sim.T(i,iTime);
     end
 end
-    
-m = [sim.p.mLower(sim.p.idxB:end), sim.p.mLower(end)+sim.p.mDelta(end)];
 
-if options.bNewplot
-    clf
-    tiledlayout(2,1,'tilespacing','compact','padding','compact')
-end
-
-%
-% Biomass spectrum:
-%
-nexttile
 B(B<0) = 0;
-panelField(m, -z, (B)');
-
-set(gca,'xscale','log','colorscale','log')
-
-set(gca,'xtick',10.^(-9:2))
-caxis([0.1 100])
-
-title(['Spectrum at lat ', num2str(lat),', lon ', num2str(lon)])
-ylabel('Depth (m)')
-
-cbar = colorbar;
-cbar.Label.String  = 'biomass (\mug C l^{-1})';
-ylim([-200 0])
 %
-% Trophic strategy:
+% Calclulate trophic strategy:
 %
-nexttile
+colStrategy = zeros(length(u)-sim.p.idxB+1, length(z)-1, 3);
 for i = 1:length(z)-1
-    if isfield(sim,'Si')
-           rates = getRates(sim.p,[sim.N(idx.x, idx.y, idx.z(i), iTime), ...
-            sim.Si(idx.x, idx.y, idx.z(i), iTime), ...
-        sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)],...
-        sim.L(idx.x, idx.y, idx.z(i), iTime));
-    else
-        rates = getRates(sim.p, u(i,:), L(i), T(i));
-    end
- %   [~, col] = calcTrophicStrategy(rates);
-    for j=1:length(m)-1
+    rates = getRates(sim.p, u(i,:), L(i), T(i));
+    for j=1:length(u)-sim.p.idxB+1
         colStrategy(j,i,:) = ...
             [min(1, max(0, 6*(rates.jFreal(j)))), ...
-            min(1, max(0, 3*(rates.jLreal(j)))), ...
-            min(1, max(0, 3*(rates.jDOC(j))))];
-  %      colStrategy(j,i,:) = col(j,:) * ;
+             min(1, max(0, 3*(rates.jLreal(j)))), ...
+             min(1, max(0, 3*(rates.jDOC(j))))];
     end
 end
+%
+% Setup tiles:
+%
+if options.bNewplot
+    clf
+    tiles = tiledlayout(2,sim.p.nGroups,'tilespacing','compact','padding','compact');
+    tiles.TileIndexing = 'columnmajor';
+end
 
-panelField(m,-z,colStrategy);
-set(gca,'xscale','log')
-set(gca,'xtick',10.^(-9:2))
-xlabel('Cell mass (\mugC)')
-ylabel('Depth (m)')
-ylim([-200 0])
+if isempty(options.depthMax)
+    options.depthMax = max(z);
+end
+ylimit = [-options.depthMax, 0];
+%
+% Run over all groups.
+%
+for iGroup = 1:sim.p.nGroups
+    ix = sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup);
+    m = [sim.p.mLower(ix), sim.p.mLower(ix(end))+sim.p.mDelta(ix(end))];
+    %
+    % Biomass spectrum:
+    %
+    nexttile
+    panelField(m, -z, (B(:,ix-sim.p.idxB+1))');
     
+    set(gca,'xscale','log','colorscale','log')    
+    set(gca,'xtick',10.^(-9:2), 'XTickLabel',[])
+    caxis([0.1 100])
+    
+    title(sim.p.nameGroup(iGroup))
+    if (iGroup==1)
+        ylabel('Depth (m)')
+    else
+        set(gca,'yticklabel',[])
+    end
+    ylim(ylimit)
+    
+    if (iGroup == sim.p.nGroups)
+        cbar = colorbar;
+        cbar.Label.String  = 'biomass (\mug C l^{-1})';
+    end
+    %
+    % Trophic strategy:
+    %
+    nexttile
+    
+    panelField(m,-z,colStrategy(ix-sim.p.idxB+1,:,:));
+    set(gca,'xscale','log')
+    set(gca,'xtick',10.^(-9:2))
+    xlabel('Cell mass (\mugC)')
+    if (iGroup==1)
+        ylabel('Depth (m)')
+    else
+        set(gca,'yticklabel',[])
+    end
+    ylim(ylimit)
+    
+end
