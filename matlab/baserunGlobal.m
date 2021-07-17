@@ -39,22 +39,7 @@ sim.B(sim.B<0)=0; % Get rid of negative biomasses
 % Plots:
 %
 disp('Plotting')
-figure(1)
-clf
-plotGlobal(sim);
-
-figure(2)
-clf
-plotWatercolumnTime(sim,60,-10);
-
-figure(3)
-plotWatercolumn(sim,150,60,-10,true);
-
-figure(4)
-plotSizespectrumTime(sim,1,60,-10);
-
-figure(5)
-plotGlobalSizespectrum(sim,150,1,60,-10);
+plotSimulation(sim)
 
 %
 % CPU-heavy plots:

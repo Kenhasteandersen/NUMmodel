@@ -24,7 +24,7 @@ end
 
 dim = size(z);
 if ~isequal(dim(1:2), [length(x)-1, length(y)-1])
-    error('Wrong dimension of z(%i,%i,:). Should be (%i,%i,:)\n',...
+    error('Wrong dimension of z: (%i,%i,:). Should be (%i,%i,:)\n',...
         size(z,1),size(z,2),length(x)-1, length(y)-1);
 end
 %

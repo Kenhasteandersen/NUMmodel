@@ -27,6 +27,6 @@ The routines operates with two basic structures: a *parameter* structure and a *
 
 *Simulations* are performed with calls to a simulation routine: `sim = simulationChemostat(p)` or `sim = simulationGlobal(p)`, where `p` is a parameter structure.
 
-*Plots* are made with calls to the plot routines, e.g. `plotChemostat(sim)` for a chemostat run or `plotGlobal(sim)` for a global run.
+*Plots* are made with calls to the plot routines. A series of basic plots are made by a call to `plotSimulation(sim)`.
 
 
