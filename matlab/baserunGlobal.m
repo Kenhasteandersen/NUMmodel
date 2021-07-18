@@ -6,7 +6,7 @@
 %
 % In:
 %  With no arguments it runs the simple generalist model
-%  With a parameter argument in runs the model specified in the parameters.
+%  With a parameter argument in runs the setup specified in the parameters.
 % Out:
 %  A simulation structure
 %

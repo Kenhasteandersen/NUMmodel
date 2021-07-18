@@ -17,11 +17,6 @@ end
 %
 % Check size of z:
 %
-
-%if isequal(size(z), [length(y)-1, length(x)-1])
-%    z = z';
-%end
-
 dim = size(z);
 if ~isequal(dim(1:2), [length(x)-1, length(y)-1])
     error('Wrong dimension of z: (%i,%i,:). Should be (%i,%i,:)\n',...

@@ -5,25 +5,31 @@
 %      by a call to parametersChemostat; see e.g. the default value below.
 %  L - Light
 %  T - Temperature
+% Options:
+%  bUnicellularloss - determines whether unicellular groups are subject to
+%      mixing losses
+%
 % Out:
 %  sim - simulation object
 %
-function sim = simulateChemostat(p, L, T)
+function sim = simulateChemostat(p, L, T, options)
 
 arguments
     p struct = parametersChemostat(setupGeneralistsOnly);
     L double = 100;
     T double = 10;
+    options.bUnicellularloss logical = false;
 end
-
-%
-% Find ix for nutrients and unicellulars:
-%
-ix = 1:(p.idxB-1); % Nutrients
 %
 % Concentrations in the deep layer:
 %
-uDeep = p.u0(ix);
+if options.bUnicellularloss
+    ix = 1:length(p.u0); % All fields are lost to the deep layer
+else
+    ix = 1:(p.idxB-1); % Nutrients
+end
+uDeep = p.u0;
+uDeep(p.idxB:end) = 0;
 %
 % Simulate:
 %
@@ -61,7 +67,7 @@ sim.T = T;
         %
         % Chemostat dynamics for nutrients and unicellulars:
         %
-        dudt(ix) = dudt(ix) + p.d*(uDeep-u(ix)');
+        dudt(ix) = dudt(ix) + p.d*(uDeep(ix)-u(ix)');
         dudt = dudt';
     end
 end
