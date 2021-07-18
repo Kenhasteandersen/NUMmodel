@@ -28,4 +28,4 @@ hold off
 xlabel('Mass ({\mu}gC)')
 ylabel('Sheldon biomass ({\mu}gC/L)')
 
-legend(sLegend, 'location','southeast','box','off')
+legend(sLegend, 'location','northeast','box','off')

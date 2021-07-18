@@ -69,6 +69,8 @@ tiledlayout(3,1,'tilespacing','compact','padding','compact')
 %
 nexttile
 panelSpectrum(s,1)
+xlabel('')
+set(gca,'XTickLabel','');
 %
 % Gains:
 %
@@ -76,6 +78,7 @@ nexttile
 
 rates = getRates(sim.p, u, s.L);
 panelGains(sim.p,rates)
+set(gca,'XTickLabel','');
 %
 % Losses:
 %
