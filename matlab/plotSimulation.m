@@ -34,7 +34,7 @@ switch sim.p.nameModel
         plotWatercolumnTime(sim,60,-10);
         
         figure(3)
-        plotWatercolumn(sim,150,60,-10,true);
+        plotWatercolumn(sim,150,60,-10, bNewplot=true, depthMax=200);
         
         figure(4)
         plotSizespectrumTime(sim,1,60,-10);
