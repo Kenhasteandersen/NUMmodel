@@ -40,5 +40,7 @@ sim.rates = getRates(sim.p, u(end,:), L);
 for iGroup = 1:p.nGroups
     sim.Bgroup(:,iGroup) = sum( u(p.ixStart(iGroup):p.ixEnd(iGroup)));
 end
+sim.L = L;
+sim.T = T;
 
 end
