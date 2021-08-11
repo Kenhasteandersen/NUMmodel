@@ -152,6 +152,8 @@ end
 % Run transport matrix simulation
 % ---------------------------------------
 disp('Starting simulation')
+sLibname = loadNUMmodelLibrary();
+
 tic
 for i=1:simtime
     %
@@ -182,12 +184,12 @@ for i=1:simtime
     n = p.n;
     if ~isempty(gcp('nocreate'))
         parfor k = 1:nb
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
+            u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
                 int32(n), u(k,:), L(k), T(k), 0.5, dt);
         end
     else
         for k = 1:nb
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
+            u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
                 int32(n), u(k,:),L(k), T(k), 0.5, dt);
             %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
             % If we use ode23:
