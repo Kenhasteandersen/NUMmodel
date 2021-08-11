@@ -33,6 +33,7 @@ uDeep(p.idxB:end) = 0;
 %
 % Simulate:
 %
+sLibname = loadNUMmodelLibrary();
 [t,u] = ode23(@fDeriv, [0 p.tEnd], p.u0);
 %
 % Assemble result:
@@ -62,7 +63,7 @@ sim.T = T;
     %
     function dudt = fDeriv(t,u)
         dudt = 0*u';
-        [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
+        [u, dudt] = calllib(sLibName, 'f_calcderivatives', ...
             length(u), u, L, T, 0.0, dudt);
         %
         % Chemostat dynamics for nutrients and unicellulars:
