@@ -78,7 +78,7 @@ nexttile
 
 rates = getRates(sim.p, u, s.L);
 %panelGains(sim.p,rates)
-panelGains_dashed(sim.p,rates);
+panelGains(sim.p,rates);
 set(gca,'XTickLabel','');
 %
 % Losses:
