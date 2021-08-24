@@ -21,7 +21,7 @@ end
 
 [~, iTime] = min(abs(sim.t-time));
 
-if ~isempty(lat)
+if strcmp(sim.p.nameModel, 'global')
     % Extract water column from global simulation:
     idx = calcGlobalWatercolumn(lat,lon,sim);
     z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
