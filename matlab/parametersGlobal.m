@@ -52,8 +52,8 @@ p.dt = 0.1; % For Euler time stepping
 p.bTransport = true;
 p.umin = 1e-5*p.mDelta(3)/p.m(3); % Minimum B concentration
 %
-% Light environment (??):
+% Light environment:
 %
 p.EinConv = 4.57; % conversion factor from W m^-2 to \mu mol s^-1 m^-2 (Thimijan & Heins 1983)
-p.PARfrac = 0.4; % ??
-p.kw = 0.1; % 0.4 Camila ??
+p.PARfrac = 0.4; % Fraction of light available as PAR. Source unknown
+p.kw = 0.05; % m^-1
