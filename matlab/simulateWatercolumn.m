@@ -118,7 +118,7 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 % Initial conditions:
 %
-if ~isempty(sim)
+if isfield(sim,'B')
     disp('Starting from previous simulation.');
     u(:,ixN) = sim.N(:,end);
     u(:, ixDOC) = sim.DOC(:,end);
