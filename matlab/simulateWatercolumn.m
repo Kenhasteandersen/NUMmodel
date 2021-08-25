@@ -45,7 +45,9 @@ addpath(strcat(path,'/Transport matrix'));
 % ---------------------------------------
 % Find the indices that corresponds to the selected water column:
 % ---------------------------------------
-sim = load(p.pathGrid,'x','y','z','dznom','bathy'); % Load grid
+if isempty(sim)
+    sim = load(p.pathGrid,'x','y','z','dznom','bathy'); % Load grid
+end
 load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
 idx = calcGlobalWatercolumn(lat, lon, sim); % Find the indices into matrix
 xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid); % Find the indices into the grid
@@ -116,15 +118,15 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 % Initial conditions:
 %
-if (nargin==2)
+if ~isempty(sim)
     disp('Starting from previous simulation.');
-    u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
-    u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
+    u(:,ixN) = sim.N(:,end);
+    u(:, ixDOC) = sim.DOC(:,end);
     if bSilicate
-        u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
+        u(:, ixSi) = sim.Si(:,end);
     end
     for i = 1:p.n -p.idxB+1
-        u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],p.pathBoxes, p.pathGrid);
+        u(:, ixB(i)) = sim.B(:,i,end);
     end
 else
     if exist(strcat(p.pathN0,'.mat'),'file')
@@ -138,8 +140,8 @@ else
         u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
     end
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
+    u = u(idxGrid,:); % Use only the specific water column
 end
-u = u(idxGrid,:); % Use only the specific water column
 %
 % Matrices for saving the solution:
 %
