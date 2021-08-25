@@ -53,6 +53,10 @@ idx = calcGlobalWatercolumn(lat, lon, sim); % Find the indices into matrix
 xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid); % Find the indices into the grid
 idxGrid = squeeze(xx(idx.x, idx.y, idx.z));
 nGrid = length(idxGrid);
+
+if nGrid==0
+    error('Selected latitude and longitude is on land.')
+end
 %
 % Check if a file with the water column exists; if not extract from TM and
 % save:
