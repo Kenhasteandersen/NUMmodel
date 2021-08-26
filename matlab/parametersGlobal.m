@@ -33,6 +33,8 @@ if (nargin==1 || nargin==0 || nTMmodel == 1)
     p.pathTemp      = strcat(path,'/../TMs/MITgcm_2.8deg/BiogeochemData/Theta_bc.mat'); 
     p.pathN0        = strcat(path,'/../TMs/MITgcm_N0');
     p.pathInit      = strcat(sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0)));
+    
+    p.dt = 0.1; % For Euler time stepping
 elseif nTMmodel == 2
     p.TMname = 'MITgcm_ECCO';
     p.pathMatrix = strcat(path,'/../TMs/MITgcm_ECCO/Matrix1/TMs/matrix_nocorrection_');
@@ -42,13 +44,14 @@ elseif nTMmodel == 2
     p.pathTemp = strcat(path,'/../TMs/MITgcm_ECCO/BiogeochemData/Theta_bc.mat'); 
     p.pathN0    = strcat(path,'/../TMs/MITgcm_ECCO_N0');
     p.pathInit = strcat(sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0)));
+    
+    p.dt = 0.05; % For Euler time stepping
 end
 %
 % Numerical parameters:
 %
 p.tEnd = 365; % In days
 p.tSave = 365/12; % How often to save results (monthly)
-p.dt = 0.1; % For Euler time stepping
 p.bTransport = true;
 p.umin = 1e-5*p.mDelta(3)/p.m(3); % Minimum B concentration
 %
