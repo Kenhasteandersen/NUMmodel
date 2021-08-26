@@ -16,6 +16,7 @@ end
 
 p = setupGeneralistsOnly(25);
 p = parametersWatercolumn(p);
+p.tEnd = 2*365;
 
 sim = simulateWatercolumn(p, lat,lon);
 

@@ -24,6 +24,9 @@ end
 if strcmp(sim.p.nameModel, 'global')
     % Extract water column from global simulation:
     idx = calcGlobalWatercolumn(lat,lon,sim);
+    if isempty(idx.z)
+        error('Not on land')
+    end
     z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
     B = squeeze(double(sim.B(idx.x, idx.y, idx.z, :, iTime)));
     for i = 1:length(idx.z)
@@ -56,7 +59,7 @@ B(B<0) = 0;
 colStrategy = zeros(length(u)-sim.p.idxB+1, length(z)-1, 3);
 for i = 1:length(z)-1
     rates = getRates(sim.p, u(i,:), L(i), T(i));
-    for j=1:length(u)-sim.p.idxB+1
+    for j=1:size(u,2)-sim.p.idxB+1
         colStrategy(j,i,:) = ...
             [min(1, max(0, 6*(rates.jFreal(j)))), ...
              min(1, max(0, 3*(rates.jLreal(j)))), ...
@@ -90,7 +93,7 @@ for iGroup = 1:sim.p.nGroups
     
     set(gca,'xscale','log','colorscale','log')    
     set(gca,'xtick',10.^(-9:2), 'XTickLabel',[])
-    caxis([0.1 100])
+    caxis([0.01 100])
     
     title(sim.p.nameGroup(iGroup))
     if (iGroup==1)
