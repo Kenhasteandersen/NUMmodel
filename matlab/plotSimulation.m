@@ -31,7 +31,7 @@ switch sim.p.nameModel
         
         figure(2)
         clf
-        plotWatercolumnTime(sim,60,-10);
+        plotWatercolumnTime(sim,60,-10, depthMax=200);
         
         figure(3)
         plotWatercolumn(sim,150,60,-10, bNewplot=true, depthMax=200);
