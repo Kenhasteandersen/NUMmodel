@@ -168,8 +168,9 @@ for i=1:simtime
         Aimp=function_convert_TM_positive(Aimp);
         
         % Preparing for timestepping. 43200s.
+        load(p.pathGrid,'deltaT')
         Aexp = Ix + (12*60*60)*Aexp;
-        Aimp = Aimp^(36);
+        Aimp = Aimp^(12*60*60/deltaT);
         
         % Set monthly mean temperature
         T = Tmat(:,month+1);

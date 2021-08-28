@@ -10,17 +10,20 @@
 %  lat, lon: latitude and longitude
 %  sim: (optional) simulation to use for initial conditions
 %  bCalcAnnualAverages: increases the simulation time by a factor 2-3
+%  bExtractcolumn: (logical) forces the extraction of a water column from
+%  the transport matrix. Only used when the core code is changed.
 %
 % Output:
 %  sim: structure with simulation results
 %
-function sim = simulateWatercolumn(p, lat, lon, sim)
+function sim = simulateWatercolumn(p, lat, lon, sim, options)
 
 arguments
     p struct;
     lat = 0;
     lon = 0;
     sim struct = [];
+    options.bExtractcolumn logical = false;
 end
 
 ixN = p.idxN;
@@ -61,11 +64,17 @@ end
 % Check if a file with the water column exists; if not extract from TM and
 % save:
 %
-Ix = speye(nb,nb);
 sFile = sprintf('Watercolumn_%s_lat%03i_lon%02i.mat',p.TMname,lat,lon);
-if exist(sFile,'file')
+if exist(sFile,'file') && ~options.bExtractcolumn
     load(sFile);
-else
+end
+
+if ~exist('versionTMcolumn')
+    versionTMcolumn=0;
+end
+versionTMcolumnCurrent = 1; % Current version of the water column
+if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extract water column if the loaded one is too old
+    versionTMcolumn = versionTMcolumnCurrent;
     fprintf('-> Extracting water column from transport matrix')
     %
     % Check that transport matrix files exist:
@@ -74,20 +83,20 @@ else
     addpath(strcat(path,'/Transport matrix'));
     
     if ~exist(p.pathBoxes,'file')
-        error( sprintf('Error: Cannot find transport matrix file: %s',...
-            p.pathBoxes));
+        error( 'Error: Cannot find transport matrix file: %s', p.pathBoxes);
     end
     % Load TMs
     for month=1:12
         load(strcat(p.pathMatrix, sprintf('%02i.mat',month)));
         %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
         
-        AexpM(month,:,:) = full(function_convert_TM_positive(Aexp(idxGrid,idxGrid)));
+        %AexpM(month,:,:) = full(function_convert_TM_positive(Aexp(idxGrid,idxGrid)));
         AimpM(month,:,:) = full(function_convert_TM_positive(Aimp(idxGrid,idxGrid)));
         
         % Preparing for timestepping. 43200s.
-        AexpM(month,:,:) = Ix(idxGrid,idxGrid) + squeeze((12*60*60)*AexpM(month,:,:));
-        AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(36);
+        load(p.pathGrid,'deltaT');
+        %AexpM(month,:,:) = Ix(idxGrid,idxGrid) + squeeze((12*60*60)*AexpM(month,:,:));
+        AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(12*60*60/deltaT);
         fprintf('.');
     end
     %
@@ -107,7 +116,7 @@ else
         L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*Zbox(idxGrid));
     end
     fprintf('\n');
-    save(sFile,'AexpM','AimpM','Tmat','L0');
+    save(sFile,'AimpM','Tmat','L0','versionTMcolumn');
 end
 
 % ---------------------------------------
@@ -215,9 +224,10 @@ for i=1:simtime
     %
     if p.bTransport
         for k = 1:p.n
-            u(:,k) =  squeeze(AimpM(month+1,:,:)) * (squeeze(AexpM(month+1,:,:)) * u(:,k));
+            u(:,k) =  squeeze(AimpM(month+1,:,:)) * u(:,k);
+            %u(:,k) =  squeeze(AimpM(month+1,:,:)) * (squeeze(AexpM(month+1,:,:)) * u(:,k));
             % Enforce conservation crudely:
-            u(:,k) = u(:,k) ./(squeeze(AimpM(month+1,:,:)) * (squeeze(AexpM(month+1,:,:)) * ones(nGrid,1)));
+            %u(:,k) = u(:,k) ./(squeeze(AimpM(month+1,:,:)) * (squeeze(AexpM(month+1,:,:)) * ones(nGrid,1)));
         end
     end
     %
