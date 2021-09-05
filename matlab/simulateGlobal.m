@@ -117,9 +117,11 @@ end
 %
 % Load Light:
 %
+% load 'parday' % If using Camila's light
 L0 = zeros(nb,730);
 for i = 1:730
     L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox,i/2,1).*exp(-p.kw*Zbox);
+    %L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox); % If using Calima's light
 end
 %
 % Matrices for saving the solution:

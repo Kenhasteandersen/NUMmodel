@@ -56,7 +56,7 @@ contains
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
-  ! A basic setup with only generalists -- Camila
+  ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
   ! -----------------------------------------------
   subroutine setupGeneralistsOnly_csp()
     call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
@@ -649,7 +649,7 @@ contains
        !
        ! Note: should not be done for copepods:
        !
-       !rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
+       rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
        u = u + rates%dudt*dt
     end do
   end subroutine simulateChemostatEuler

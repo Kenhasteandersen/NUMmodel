@@ -15,7 +15,9 @@ FLAGS=-O2
 # Link needed on Macos:
 #LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 #LINK=
-
+#
+# lfortran
+#
 
 OBJ = globals.o debug.o spectrum.o generalists.o generalists_csp.o diatoms.o diatoms_simple.o copepods.o NUMmodel.o
 
