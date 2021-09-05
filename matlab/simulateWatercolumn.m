@@ -203,17 +203,17 @@ for i=1:simtime
     L = L0(:,mod(i,365*2)+1);
     dt = p.dt;
     n = p.n;
-    if ~isempty(gcp('nocreate'))
-        parfor k = 1:nGrid
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-                int32(n), u(k,:), L(k), T(k), 0.5, dt);
-        end
-    else
+    %if ~isempty(gcp('nocreate'))
+    %    parfor k = 1:nGrid
+    %        u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
+    %            int32(n), u(k,:), L(k), T(k), 0.5, dt);
+    %    end
+    %else
         for k = 1:nGrid
             u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
                 int32(n), u(k,:),L(k), T(k), 0.5, dt);
         end
-    end
+    %end
     
     if any(isnan(u))
         warning('NaNs after running current time step');
