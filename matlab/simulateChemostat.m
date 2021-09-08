@@ -2,7 +2,7 @@
 % Simulate the chemostat.
 % In:
 %  p - parameter object (including chemostat parameters from
-%      parametersChemostat). Not used if running from the fortran library. 
+%      parametersChemostat). Not used if running from the fortran library.
 %  L - Light
 % Out:
 %  sim - simulation object
@@ -26,9 +26,9 @@ end
 %
 ix = [1,2]; % Nutrients and DOC
 %for i = 1:p.nGroups
-    %if (p.typeGroups(i)==1)
-    %    ix = [ix, p.ixStart(i):p.ixEnd(i)];
-    %end
+%if (p.typeGroups(i)==1)
+%    ix = [ix, p.ixStart(i):p.ixEnd(i)];
+%end
 %end
 %
 % Concentrations in the deep layer:
@@ -56,10 +56,9 @@ sim.Bpico = Bpnm(1);
 sim.Bnano = Bpnm(2);
 sim.Bmicro = Bpnm(3);
 
-
-    %
-    % Function to assemble derivative for chemostat:
-    %
+%
+% Function to assemble derivative for chemostat:
+%
     function dudt = fDerivMatlab(t,u)
         rates = calcDerivatives(p,u',L);
         dudt = rates.dudt;
@@ -67,16 +66,22 @@ sim.Bmicro = Bpnm(3);
         % Chemostat dynamics for nutrients and unicellulars:
         %
         dudt(ix) = dudt(ix) + p.d*(uDeep-u(ix)');
+        if isfield(p,'bLosses')
+            if p.bLosses
+                dudt(3:end) = dudt(3:end)-p.d*u(3:end)';
+            end
+        end
+        
         %iix = dudt<0 & u'<0.0001;
         %iix(1:2) = false;
         %dudt(iix) = 0;
-
+        
         dudt = dudt';
     end
-    
-    %
-    % Function to assemble derivative for chemostat:
-    %
+
+%
+% Function to assemble derivative for chemostat:
+%
     function dudt = fDerivLibrary(t,u)
         dudt = 0*u';
         [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
@@ -84,6 +89,7 @@ sim.Bmicro = Bpnm(3);
         %
         % Chemostat dynamics for nutrients and unicellulars:
         %
+        
         dudt(ix) = dudt(ix) + p.d*(uDeep-u(ix)');
         dudt = dudt';
     end
