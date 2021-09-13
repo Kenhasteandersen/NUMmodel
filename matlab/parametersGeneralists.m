@@ -9,7 +9,7 @@ end
 p.n = n;
 [p.m, p.mLower, p.mDelta] = parametersCalcGrid(10^-8.5, mMax, p.n);
 
-p.rhoCN = 5.68; % C:N mass ratio
+p.rhoCN = 85; % C:P mass ratio
 p.epsilonL = 0.9; % Light uptake efficiency
 p.epsilonF = 0.8; % Assimilation efficiency
 p.cLeakage = 0.00015; % passive leakage of C and N
