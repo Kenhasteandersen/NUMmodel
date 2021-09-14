@@ -23,7 +23,8 @@ arguments
     lat = 0;
     lon = 0;
     sim struct = [];
-    options.bExtractcolumn logical = false;
+    options.bExtractcolumn logical = false; % Extract the watercolumn even though a saved one exists
+    options.bRecalcLight logical = false; % Recalc the light (different from the extracted watercolumn)
 end
 
 ixN = p.idxN;
@@ -72,7 +73,7 @@ end
 if ~exist('versionTMcolumn')
     versionTMcolumn=0;
 end
-versionTMcolumnCurrent = 1; % Current version of the water column
+versionTMcolumnCurrent = 2; % Current version of the water column
 if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extract water column if the loaded one is too old
     versionTMcolumn = versionTMcolumnCurrent;
     fprintf('-> Extracting water column from transport matrix')
@@ -109,14 +110,34 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
     end
     Tmat = Tmat(idxGrid,:); % Use only the specific water column
     %
-    % Load Light:
+    % Calc Light:
     %
     L0 = zeros(nGrid,730);
     for i = 1:730
-        L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*Zbox(idxGrid));
+        zup = sim.z - 0.5*sim.dznom; % Top of a box
+        zup = zup(1:length(idxGrid));
+        dz = sim.dznom(1:length(idxGrid));
+        Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*zup);
+        L0(:,i) = Lup.*(1-exp(-p.kw*dz))./(p.kw*dz);
     end
+    
     fprintf('\n');
     save(sFile,'AimpM','Tmat','L0','versionTMcolumn');
+end
+
+if options.bRecalcLight
+    %
+    % Calc Light:
+    %
+    L0 = zeros(nGrid,730);
+    for i = 1:730
+        zup = sim.z - 0.5*sim.dznom; % Top of a box
+        zup = zup(1:length(idxGrid));
+        dz = sim.dznom(1:length(idxGrid));
+        Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*zup);
+        L0(:,i) = Lup.*(1-exp(-p.kw*dz))./(p.kw*dz);
+        %Lold = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*Zbox(idxGrid));
+    end
 end
 
 % ---------------------------------------
@@ -209,10 +230,10 @@ for i=1:simtime
     %            int32(n), u(k,:), L(k), T(k), 0.5, dt);
     %    end
     %else
-        for k = 1:nGrid
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-                int32(n), u(k,:),L(k), T(k), 0.5, dt);
-        end
+    for k = 1:nGrid
+        u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
+            int32(n), u(k,:),L(k), T(k), 0.5, dt);
+    end
     %end
     
     if any(isnan(u))
