@@ -192,7 +192,7 @@ for i=1:simtime
     % Test for time to change monthly temperature
     %
     if ismember(mod(i,730), 1+2*cumsum(mon))
-        fprintf('t = %u days\n',floor(i/2))
+        %fprintf('t = %u days\n',floor(i/2))
         % Set monthly mean temperature
         T = Tmat(:,month+1);
         month = mod(month + 1, 12);
