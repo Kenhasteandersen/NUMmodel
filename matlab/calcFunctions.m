@@ -30,6 +30,7 @@ switch sim.p.nameModel
         [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.eHTL,...
             sim.Bpico, sim.Bnano, sim.Bmicro] = ...
             getFunctions(u, sim.L, sim.T);
+        % Multiply by the assumed depth of the productive layer:
         sim.ProdGross = sim.ProdGross * sim.p.depthProductiveLayer;
         sim.ProdNet = sim.ProdNet * sim.p.depthProductiveLayer;
         sim.ProdHTL = sim.ProdHTL * sim.p.depthProductiveLayer;
