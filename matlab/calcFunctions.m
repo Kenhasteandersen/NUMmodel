@@ -47,21 +47,24 @@ switch sim.p.nameModel
             Bpico = 0;
             Bnano = 0;
             Bmicro = 0;
+            % Integrate over depth:
             for k = 1:nZ
                 if ~isnan(sim.N(k,iTime))
+                    % Get the functions per volume at each depth and time:
                     u = [squeeze(sim.N(k,iTime)), ...
                         squeeze(sim.DOC(k,iTime)), ...
                         squeeze(sim.B(k,:,iTime))];
                     [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
                         getFunctions(u, sim.L(k,iTime), sim.T(k,iTime));
+                    % Multiply by the thickness of each layer:
                     conv = sim.dznom(k);
                     ProdGross = ProdGross + ProdGross1*conv;
                     ProdNet = ProdNet + ProdNet1*conv;
                     ProdHTL = ProdHTL +ProdHTL1*conv;
                     %eHTL = eHTL + eHTL1/length(sim.z);
-                    Bpico = Bpico + Bpico1*sim.dznom(k); % gC/m2
-                    Bnano = Bnano + Bnano1*sim.dznom(k);
-                    Bmicro = Bmicro + Bmicro1*sim.dznom(k);
+                    Bpico = Bpico + Bpico1*conv; % gC/m2
+                    Bnano = Bnano + Bnano1*conv;
+                    Bmicro = Bmicro + Bmicro1*conv;
                 end
             end
             sim.ProdGross(iTime) = ProdGross;
