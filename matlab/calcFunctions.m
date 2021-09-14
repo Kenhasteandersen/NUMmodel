@@ -30,7 +30,12 @@ switch sim.p.nameModel
         [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.eHTL,...
             sim.Bpico, sim.Bnano, sim.Bmicro] = ...
             getFunctions(u, sim.L, sim.T);
-        
+        sim.ProdGross = sim.ProdGross * sim.p.depthProductiveLayer;
+        sim.ProdNet = sim.ProdNet * sim.p.depthProductiveLayer;
+        sim.ProdHTL = sim.ProdHTL * sim.p.depthProductiveLayer;
+        sim.Bpico = sim.Bpico * sim.p.depthProductiveLayer;
+        sim.Bnano = sim.Bnano * sim.p.depthProductiveLayer;
+        sim.Bmicro = sim.Bmicro * sim.p.depthProductiveLayer;
         
     case 'watercolumn'
         nTime = length(sim.t);
@@ -170,4 +175,6 @@ switch sim.p.nameModel
         
     otherwise
         disp('Model unknown; functions not calculated');
+        
+    sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro;
 end
