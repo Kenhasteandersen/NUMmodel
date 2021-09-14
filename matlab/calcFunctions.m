@@ -176,5 +176,5 @@ switch sim.p.nameModel
     otherwise
         disp('Model unknown; functions not calculated');
         
-    sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro;
 end
+sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro;
