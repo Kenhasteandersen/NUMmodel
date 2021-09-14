@@ -19,8 +19,8 @@ module generalists_csp
   real(dp), parameter:: alphaL = 0.000914 ! if using Andys shading formula for non-diatoms
   real(dp), parameter:: cL = 21 ! if using Andys shading formula for non-diatoms
   real(dp), parameter:: alphaF = 0.0024 !  Fits to TK data for protists
-  real(dp), parameter:: cF = 0.0016 ! Just a guess
-  real(dp), parameter:: cmaxN = 3.98
+  real(dp), parameter:: cF = 0.1514! From paper (0.0016)
+  real(dp), parameter:: cmaxN = 2.3757 ! From paper (or use 3.98?)
   real(dp), parameter:: cmaxN2 = 1.18
   real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
   real(dp), parameter:: cR = 0.1
@@ -43,7 +43,8 @@ module generalists_csp
   real(dp), parameter:: mu_infp1 = 4.7
   real(dp), parameter:: mu_infp2 = -0.26
 
-  real(dp),  dimension(:), allocatable:: AN(:), AL(:), JNmax(:), JLmax(:), Jmax(:), volu(:), JlossPassive(:)
+
+ real(dp),  dimension(:), allocatable:: AN(:), AL(:), JNmax(:), JLmax(:), Jmax(:), volu(:), JlossPassive(:)
   real(dp),  dimension(:), allocatable:: nu(:), mort(:), mort2(:)
   real(dp),  dimension(:), allocatable:: JN(:), JL(:), Jresp(:), JFreal(:)
   real(dp),  dimension(:), allocatable:: Vol2(:), rhomu(:),Qmu(:),mu_inf(:),mu_max(:)
@@ -113,8 +114,8 @@ contains
     JNmax = cmaxN*this%m**cmaxN2
     volu=(this%m/pvol)**pvol2
     JLmax = min(pl11*volu**pl12 , pl21*volu**pl22)*this%m
-    nu = c * this%m**(-onethird)
-    Jmax = 0.d0*this%m! alphaJ * this%m * (1.d0-nu) ! mugC/day
+    !nu = c * this%m**(-onethird)
+    !Jmax = 0.d0*this%m! alphaJ * this%m * (1.d0-nu) ! mugC/day
 
     Vol2=pvol3*this%m**pvol2
     rhomu=rhomup1*Vol2**rhomup2
@@ -142,7 +143,8 @@ contains
        ! Uptakes
        !
        !rates%JN(ix) =   gammaN * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-       rates%JN(ix) =   gammaN *JNmax(i) * AN(i) * N * rhoCN /(JNmax(i) +gammaN * AN(i) * N * rhoCN)
+       rates%JN(ix) =   gammaN *JNmax(i) * ftemp15*AN(i) * N * rhoCN / &
+        (JNmax(i) +gammaN * ftemp15*AN(i) * N * rhoCN)  
 
        if (N .lt. 0.d0) then
          write(*,*) "negative N"
@@ -152,7 +154,7 @@ contains
        rates%JL(ix) =  JLmax(i) * AL(i) * L /(JLmax(i) + AL(i) * L)
        !rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
-       rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix)-Jlosspassive(i) ! In units of C
+       rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix) ! In units of C
        ! Total carbon uptake
        rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-Jresp(i)-JlossPassive(i)
        ! Liebig + synthesis limitation:
@@ -210,7 +212,7 @@ contains
 
     do i = 1, this%n
       ix = i+this%ixOffset
-      mortloss = u(i)*(remin2*mort2(i)*u(i) +reminHTL* rates%mortHTL(ix))
+      mortloss = u(i)*(remin2*ftemp2*mort2(i)*u(i) +reminHTL* ftemp2*rates%mortHTL(ix))
       !
       ! Update nitrogen:
       !
@@ -242,7 +244,7 @@ contains
            - mort(i) &
            - rates%mortpred(ix) &
            - mort2(i)*u(i) &
-           - rates%mortHTL(ix))*u(i)
+           - ftemp2*rates%mortHTL(ix))*u(i)
    end do
  end subroutine calcDerivativesGeneralists_csp
 
