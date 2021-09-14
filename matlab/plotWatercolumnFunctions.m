@@ -25,11 +25,16 @@ end
 
 z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
 dt = sim.t(2)-sim.t(1);
-t = [sim.t-0.5*dt sim.t(end)+0.5*dt];
-panelField(t, -z, func.ProdNet);
+%t = [sim.t-0.5*dt sim.t(end)+0.5*dt];
+%panelField(t, -z, func.ProdNet);
+surface(sim.t,-z(1:end-1),func.ProdNet')
+shading flat
 
-ylim([-options.depthMax, 0]);
 xlabel('Time (days)')
 ylabel('Depth (m)')
 title('Net primary production (g_C/m^3/yr)')
+axis tight
+ylim([-options.depthMax, 0]);
+caxis([0 10])
 colorbar;
+
