@@ -35,6 +35,6 @@ ylabel('Depth (m)')
 title('Net primary production (g_C/m^3/yr)')
 axis tight
 ylim([-options.depthMax, 0]);
-caxis([0 10])
+caxis([0 20])
 colorbar;
 
