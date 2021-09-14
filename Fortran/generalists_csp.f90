@@ -123,11 +123,12 @@ contains
     mu_inf=mu_infp1*Vol2**(mu_infp2)
     mu_max=mu_inf*rhomu/(mu_inf*Qmu + rhomu)
     mu_max=mu_max + mu_max*0.17
-
+    
     Jresp = 0.2*mu_max*this%m !cR*alphaJ*this%m
 
     mort = 0.d0 !0*0.005*(Jmax/this%m) * this%m**(-0.25);
     mort2 = mu_max*0.03/(this%z) !0.0002*n
+    write(*,*) mort2
   end function initGeneralists_csp
 
   subroutine calcRatesGeneralists_csp(this, rates, L, N, gammaN)
