@@ -30,5 +30,10 @@ ylim([0 2])
 xlim(calcXlim(p))
 ylabel('Gains (day^{-1})')
 
-legend({'Feeding','N','Light','Si','DOC','Max. growth rate','Growth rate'}, ...
-    'location','northwest','box','off')
+if isfield(p, 'ixSi')
+    legend({'Feeding','N','Light','Si','DOC','Max. growth rate','Growth rate'}, ...
+        'location','northwest','box','off')
+else
+    legend({'Feeding','N','Light','DOC','Max. growth rate','Growth rate'}, ...
+        'location','northwest','box','off')
+end    
