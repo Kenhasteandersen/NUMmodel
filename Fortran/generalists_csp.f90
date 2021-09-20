@@ -57,7 +57,7 @@ contains
     type(typeSpectrum):: this
     real(dp), intent(in):: mMax
     integer, intent(in):: n, ixOffset
-    real(dp), parameter:: mMin = 3.1623d-9
+    real(dp), parameter:: mMin = 1d-7 ! 3.1623d-9
 
     this = initSpectrum(typeGeneralist_csp, n, ixOffset, mMin, mMax)
 
