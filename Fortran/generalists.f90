@@ -174,6 +174,12 @@ contains
             rates%JClossLiebig(ix) +&
             JlossPassive(i)
        rates%JF(ix) = JFreal(i)
+
+       write(*,*) 'N budget', i,':',(rates%JN(ix)+JFreal(i)-JlossPassive(i) &
+          - rates%JNlossLiebig(ix) -rates%JCloss_feeding(ix) + rates%Jtot(ix))/this%m(i)
+          write(*,*) 'C budget', i,':',(rates%JLreal(ix) + rates%JDOC(ix)+JFreal(i) &
+          -JlossPassive(i)-rates%JCloss_photouptake(ix)-fTemp2*Jresp(i) &
+          - rates%JClossLiebig(ix) -rates%JCloss_feeding(ix) + rates%Jtot(ix))/this%m(i)
     end do
   end subroutine calcRatesGeneralists
 

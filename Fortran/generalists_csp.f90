@@ -57,7 +57,7 @@ contains
     type(typeSpectrum):: this
     real(dp), intent(in):: mMax
     integer, intent(in):: n, ixOffset
-    real(dp), parameter:: mMin = 1d-7 ! 3.1623d-9
+    real(dp), parameter:: mMin = 1.6379e-07 ! 3.1623d-9
 
     this = initSpectrum(typeGeneralist_csp, n, ixOffset, mMin, mMax)
 
@@ -145,14 +145,18 @@ contains
        !
        !rates%JN(ix) =   gammaN * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
        rates%JN(ix) =   gammaN *JNmax(i) * ftemp15*AN(i) * N * rhoCN / &
-        (JNmax(i) +gammaN * ftemp15*AN(i) * N * rhoCN)  
+        (ftemp2*JNmax(i) +gammaN * ftemp15*AN(i) * N * rhoCN)  
 
        if (N .lt. 0.d0) then
          write(*,*) "negative N"
        end if
 
        rates%JDOC(ix) = 0.d0 ! Diffusive DOC uptake, units of C/time
-       rates%JL(ix) =  JLmax(i) * AL(i) * L /(JLmax(i) + AL(i) * L)
+       rates%JL(ix) =  JLmax(i) * AL(i) * L /(ftemp2*JLmax(i) + AL(i) * L)
+       ! Recalc feeding because we use a different Q10:
+       rates%flvl(ix) = ftemp15*this%AF(i)*rates%F(ix) / (ftemp15*this%AF(i)*rates%F(ix)+fTemp2*this%JFmax(i))
+       rates%JF(ix) = rates%flvl(ix) * fTemp2*this%JFmax(i)
+
        !rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
        rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix) ! In units of C

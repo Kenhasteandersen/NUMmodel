@@ -60,7 +60,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsOnly_csp()
     call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist_csp, 10, 0.1d0) ! generalists with 10 size classes
+    call parametersAddGroup(typeGeneralist_csp, 10, 0.0611d0) ! generalists with 10 size classes
     call parametersFinalize(0.003d0, .true.) ! Serra-Pompei (2020))
   end subroutine setupGeneralistsOnly_csp
 

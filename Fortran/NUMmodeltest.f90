@@ -13,7 +13,7 @@ program NUMmodeltest
   !call setupGeneralistsOnly_csp()
  ! call setupGeneralistsOnly_csp()
   call setupGeneralistsOnly_csp()
-  !call setupGeneralistsOnly(25)
+  !call setupGeneralistsOnly(10)
 
   !call setupGeneralistsDiatoms(10)
   !call setupDiatoms_simpleOnly(10)
