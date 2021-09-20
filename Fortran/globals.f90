@@ -10,7 +10,7 @@ module globals
   integer, parameter :: idxDOC = 2
   integer, parameter :: idxSi = 3
 
-  ! Type of spectra:
+  ! Types of spectra:
   integer, parameter :: typeGeneralist = 1
   integer, parameter :: typeGeneralist_csp = 2
   integer, parameter :: typeDiatom = 3
@@ -38,6 +38,7 @@ module globals
 
   ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
   real(dp) :: fTemp2, fTemp15
+  real(dp), parameter:: Tref = 10 ! Reference temperature
 
   contains
 
@@ -48,7 +49,7 @@ module globals
     real(dp), intent(in):: Q10, T
     real(dp):: f
 
-    f = Q10**(T/10.-1.)
+    f = Q10**((T-Tref)/10.)
   end function fTemp
 
   ! -----------------------------------------------
