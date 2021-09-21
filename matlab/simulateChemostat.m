@@ -72,6 +72,8 @@ sim.Bmicro = Bpnm(3);
             end
         end
         
+        %dudt(dudt'<0 & u<1e-4) = 0;  % Set a lower limit of u
+        
         %iix = dudt<0 & u'<0.0001;
         %iix(1:2) = false;
         %dudt(iix) = 0;
