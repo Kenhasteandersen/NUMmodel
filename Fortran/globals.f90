@@ -38,7 +38,7 @@ module globals
 
   ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
   real(dp) :: fTemp2, fTemp15
-  real(dp), parameter:: Tref = 10 ! Reference temperature
+  real(dp), parameter:: Tref = 10. ! Reference temperature
 
   contains
 
@@ -53,7 +53,7 @@ module globals
   end function fTemp
 
   ! -----------------------------------------------
-  ! Update the temperature corrections if T has changed
+  ! Update the temperature corrections only if T has changed
   ! -----------------------------------------------
   subroutine updateTemperature(T)
     real(dp), intent(in) :: T

@@ -8,20 +8,24 @@ module generalists_csp
   implicit none
 
   private
+
+  real(dp), parameter:: Q15corr = 1.5**(-0.5) ! Corrections because parameters are given at Tref = 15
+  real(dp), parameter:: Q20corr = 2.5**(-0.5) ! wheras NUM uses Tref = 10
+
   real(dp), parameter:: rhoCN = 5.68
   real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
   real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
   real(dp), parameter:: cLeakage = 0.00015 ! passive leakage of C and N
   real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
             !The constant is increased a bit to limit the lower cell size
-  real(dp), parameter:: alphaN = 3.75E-5 !0.00004 % 0.000162 % Mathilde.  (2.5e-3 l/d/cm) * (1e6 mug/g)^(-1/3) / 1.5 (g/cm); Andersen et al 2015
+  real(dp), parameter:: alphaN = 3.75E-5 *Q15corr !0.00004 % 0.000162 % Mathilde.  (2.5e-3 l/d/cm) * (1e6 mug/g)^(-1/3) / 1.5 (g/cm); Andersen et al 2015
   real(dp), parameter:: cN = 0.1
   real(dp), parameter:: alphaL = 0.000914 ! if using Andys shading formula for non-diatoms
   real(dp), parameter:: cL = 21 ! if using Andys shading formula for non-diatoms
-  real(dp), parameter:: alphaF = 0.0024 !  Fits to TK data for protists
+  real(dp), parameter:: alphaF = 0.0024 *Q15corr !  Fits to TK data for protists
   real(dp), parameter:: cF = 0.1514! From paper (0.0016)
-  real(dp), parameter:: cmaxN = 2.3757 ! From paper (or use 3.98?)
-  real(dp), parameter:: cmaxN2 = 1.18
+  real(dp), parameter:: cmaxN = 2.3757 *Q20corr ! From paper (or use 3.98?)
+  real(dp), parameter:: cmaxN2 = 1.18 *Q20corr
   real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
   real(dp), parameter:: cR = 0.1
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
@@ -42,7 +46,6 @@ module generalists_csp
   real(dp), parameter:: Qmup2 = 0.76
   real(dp), parameter:: mu_infp1 = 4.7
   real(dp), parameter:: mu_infp2 = -0.26
-
 
  real(dp),  dimension(:), allocatable:: AN(:), AL(:), JNmax(:), JLmax(:), Jmax(:), volu(:), JlossPassive(:)
   real(dp),  dimension(:), allocatable:: nu(:), mort(:), mort2(:)
@@ -110,10 +113,10 @@ contains
     AL = alphaL*this%m**twothirds * (1-exp(-cL*this%m**onethird ))  ! shading formula
     this%AF = alphaF*this%m**threequarters
     JlossPassive =0.d0! cLeakage * this%m**twothirds ! in units of C
-    this%JFmax = cF*this%m**twothirds
-    JNmax = cmaxN*this%m**cmaxN2
+    this%JFmax = cF*this%m**twothirds * Q20corr
+    JNmax = cmaxN*this%m**cmaxN2 * Q20corr
     volu=(this%m/pvol)**pvol2
-    JLmax = min(pl11*volu**pl12 , pl21*volu**pl22)*this%m
+    JLmax = min(pl11*volu**pl12 , pl21*volu**pl22)*this%m * Q20corr
     !nu = c * this%m**(-onethird)
     !Jmax = 0.d0*this%m! alphaJ * this%m * (1.d0-nu) ! mugC/day
 
@@ -122,9 +125,9 @@ contains
     Qmu=Qmup1*Vol2**Qmup2
     mu_inf=mu_infp1*Vol2**(mu_infp2)
     mu_max=mu_inf*rhomu/(mu_inf*Qmu + rhomu)
-    mu_max=mu_max + mu_max*0.17
+    mu_max=(mu_max + mu_max*0.17) * Q20corr
     
-    Jresp = 0.2*mu_max*this%m !cR*alphaJ*this%m
+    Jresp = 0.2*mu_max*this%m *Q20corr !cR*alphaJ*this%m
 
     mort = 0.d0 !0*0.005*(Jmax/this%m) * this%m**(-0.25);
     mort2 = mu_max*0.03/(this%z) !0.0002*n
