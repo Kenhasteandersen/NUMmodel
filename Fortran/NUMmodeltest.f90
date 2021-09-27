@@ -21,14 +21,14 @@ program NUMmodeltest
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
-  u00(idxN) = 150.d0
-  u00(idxDOC) = 1.d0
+  u00(idxN) = 5.d0
+  u00(idxDOC) = 0.d0
   u00(idxSi) = 7.d0
   do i = idxB, nGrid
-     u00(i) = 1.0d0*(i-2)
+     u00(i) = 5.0d0 !*(i-2)
   end do
 
-  call calcDerivatives(u00, 60.d0, 10.d0, 10.d0)
+  call calcDerivatives(u00, 100.d0, 15.d0, 10.d0)
   !call printRates(m,rates)
  
   !call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)

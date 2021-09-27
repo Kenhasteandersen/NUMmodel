@@ -60,7 +60,7 @@ contains
     type(typeSpectrum):: this
     real(dp), intent(in):: mMax
     integer, intent(in):: n, ixOffset
-    real(dp), parameter:: mMin = 1.6379e-07 ! 3.1623d-9
+    real(dp), parameter:: mMin = 10**(-6.7) ! 3.1623d-9
 
     this = initSpectrum(typeGeneralist_csp, n, ixOffset, mMin, mMax)
 
@@ -209,6 +209,16 @@ contains
             !JlossPassive(i)
        rates%JF(ix) = JFreal(i)
     end do
+
+    write(*,*) '----'
+    write(*,*) 'log10(m):',log10(this%m)
+    write(*,*) 'aN:',ftemp15*AN/this%m
+    write(*,*) 'aL:',AL/this%m
+    write(*,*) 'aF:',ftemp15*this%AF/this%m
+    write(*,*) 'jN:', rates%JN(3:12)/this%m
+    write(*,*) 'jL:', rates%JL(3:12)/this%m
+    write(*,*) 'jF:', rates%JF(3:12)/this%m
+
   end subroutine calcRatesGeneralists_csp
 
   subroutine calcDerivativesGeneralists_csp(this, u, rates)
