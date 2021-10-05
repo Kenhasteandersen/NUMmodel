@@ -20,7 +20,7 @@ sweep(p,d) % without phagotrophy
 %
 function sweep(pp, d)
 
-N0 = logspace(-2,3,10);
+N0 = logspace(-1,3,10); % nutrient conditions to sweep over
 
 for j = 1:length(d)
     p = pp;
@@ -39,10 +39,10 @@ for j = 1:length(d)
             p.tEnd = 365;
         end
         
-        sim = simulateChemostat( p );
+        sim(i) = simulateChemostat( p );
         
-        B(i,:) = mean(sim.B(floor(3*length(sim.t)/4):end,:),1);
-        tmp = sim.rates.JLreal./sim.rates.JFreal;
+        B(i,:) = mean(sim(i).B(floor(3*length(sim(i).t)/4):end,:),1);
+        tmp = sim(i).rates.JLreal./sim(i).rates.JFreal;
         Light_vs_feeding(i,:) = tmp(3:end);
         
         %plotChemostat(sim)
@@ -54,11 +54,14 @@ for j = 1:length(d)
     Light_vs_feeding(Light_vs_feeding~=1) = 0;
     
     %%
+    % Make the sweep plots:
+    %
     surface(p.m(3:end), N0, log10(B));
     shading flat
     axis tight
     set(gca,'xscale','log','yscale','log','XTick',10.^(-8:2))
     cbar = colorbar('SouthOutside');
+    cbar.Limits=[-4,2];
     title('log_{10} biomass');
     caxis([-5, 3])
     
@@ -67,6 +70,11 @@ for j = 1:length(d)
     
     xlabel('Cell mass ({\mu}g_C)')
     ylabel('Deep nutrient concentration ({\mu}g_P/l)')
+    %%
+    %  Make selected spectra:
+    %
+    figure(2)
+    
 end
 
 end
