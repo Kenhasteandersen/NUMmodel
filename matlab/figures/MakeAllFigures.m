@@ -8,9 +8,14 @@ addpath('..')
 %
 figure(1)
 figureNutrientSweep
+%
+% Make spectra for the nutrient sweep figure:
+%
+figure(2)
+figureSpectra;
 
 %
 % Sweep across mixing rates
 %
-figure(2)
+figure(3)
 figureMixingRateSweep
