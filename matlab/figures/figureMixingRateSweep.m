@@ -10,6 +10,8 @@
 p = parametersGeneralistsOnly( 25, 10.);
 p = parametersChemostat( p );
 
+p.u0(1) = 10;
+
 %p.mortHTLm = p.mortHTLm / 4; % Lowering the background mortality (not needed, actually).
 
 M = [20 30 40]; % The thickness of the mixing layer
@@ -46,7 +48,7 @@ p.u0(3:end) = 0.0001; % for faster convergence
 for i = 1:length(d)
     p.d = d(i);
     
-    sim = simulateChemostat( p, 60 );
+    sim = simulateChemostat( p, 30 );
     
     jL = sim.rates.JLreal./p.m;
     prodGross(i) = M*365*1e-3 * sum(jL(3:end).*sim.B(end,:))/p.pGeneralists.epsilonL;

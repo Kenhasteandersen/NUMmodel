@@ -40,7 +40,7 @@ p.mortHTLm = p.mortHTL*(1./(1+(p.m./p.mHTL).^(-2)));
 %  Initial conditions (also used for deep conditions of chemostat
 % ================================================================
 p.u0 = 10*p.m./p.m; % Biomasses
-p.u0(1) = 150; % Nutrients
+p.u0(1) = 20; % Nutrients
 p.u0(2) = 0; % DOC
 
 p.nGrid = length(p.u0)-2;

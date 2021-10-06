@@ -7,7 +7,7 @@ p = parametersChemostat( p );
 
 p.mortHTLm = p.mortHTLm / 4; % Lowering the background mortality (not needed, actually).
 
-d = [0.005 0.5]; % The mixing rates to run over
+d = [0.01 0.1]; % The mixing rates to run over
 clf
 tiledlayout(length(d),2)
 sweep(p,d) % With phagotrophy
@@ -20,7 +20,7 @@ sweep(p,d) % without phagotrophy
 %
 function sweep(pp, d)
 
-N0 = logspace(-1,3,10); % nutrient conditions to sweep over
+N0 = logspace(-1,2,10); % nutrient conditions to sweep over
 
 for j = 1:length(d)
     p = pp;
@@ -70,10 +70,7 @@ for j = 1:length(d)
     
     xlabel('Cell mass ({\mu}g_C)')
     ylabel('Deep nutrient concentration ({\mu}g_P/l)')
-    %%
-    %  Make selected spectra:
-    %
-    figure(2)
+
     
 end
 
