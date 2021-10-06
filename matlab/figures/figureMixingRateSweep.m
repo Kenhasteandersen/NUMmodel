@@ -10,9 +10,7 @@
 p = parametersGeneralistsOnly( 25, 10.);
 p = parametersChemostat( p );
 
-p.u0(1) = 10;
-
-%p.mortHTLm = p.mortHTLm / 4; % Lowering the background mortality (not needed, actually).
+p.mortHTLm = 0*p.mortHTLm; % Lowering the background mortality (not needed, actually).
 
 M = [20 30 40]; % The thickness of the mixing layer
 d = logspace(-3,log10(0.5),10);
@@ -40,7 +38,6 @@ ylabel('Gross PP (gC/m^2/yr)')
 % Sweep over mixing coeffs:
 %
 function prodGross = sweep(pp,d,M)
-
 
 p = pp;
 

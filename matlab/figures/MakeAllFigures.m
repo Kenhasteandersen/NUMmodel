@@ -10,15 +10,8 @@ figure(1)
 clf
 figureNutrientSweep
 %
-% Make spectra for the nutrient sweep figure:
+% Sweep across mixing rates and plot productivity:
 %
 figure(2)
-clf
-figureSpectra;
-
-%
-% Sweep across mixing rates
-%
-figure(3)
 clf
 figureMixingRateSweep
