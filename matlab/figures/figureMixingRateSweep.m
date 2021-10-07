@@ -12,7 +12,9 @@ p = parametersChemostat( p );
 
 p.u0(1) = 2;
 
-p.mortHTLm = 0*p.mortHTLm; % Lowering the background mortality (not needed, actually).
+p.mortHTLm = p.mortHTLm/4; % Lowering the background mortality (not needed, actually).
+
+p.tEnd = 500;
 
 d = logspace(-3,log10(0.5),10);
 
@@ -20,19 +22,38 @@ clf
 %tiledlayout(length(d),2)
 
 % Without losses to the deep
-prodGross = sweep(p,d,20) % With phagotrophy
-semilogx(d, prodGross)
-
+prodGross1 = sweep(p,d,20) % With phagotrophy
 % With losses:
 p.bLosses = true;
-prodGross = sweep(p,d,20) % With phagotrophy
-
+prodGross2 = sweep(p,d,20) % With phagotrophy
+%%
+semilogx(d, prodGross1)
 hold on
-semilogx(d, prodGross)
+semilogx(d, prodGross2)
 
-legend({'Without losses','With losses of B to the deep'})
-xlabel('d (day^{-1}')
+patch([d d(end:-1:1)], [prodGross1 prodGross2(end:-1:1)],[0.8 0.8 1]);
+semilogx(d, prodGross1,'b-','linewidth',2)
+semilogx(d, prodGross2,'r-','linewidth',2)
+ylim([0 1100])
+set(gca,'xtick',10.^(-3:1))
+
+legend({'Without losses','With losses of B to the deep'},...
+    'Location','NorthWest')
+legend('boxoff')
+xlabel('Mixing rate (day^{-1})')
 ylabel('Gross PP (gC/m^2/yr)')
+xlim([min(d) max(d)])
+set(gca,'fontsize',10)
+
+% Make fig single column:
+set(gcf,'paperunits','centimeters')
+set(gcf,'units','centimeters')
+pos = get(gcf,'paperposition');
+pos(3) = 8;
+set(gcf,'paperposition',pos);
+ppos = get(gcf,'position');
+  ppos([3 4]) = pos([3 4]);
+  set(gcf,'position',ppos)
 %p.AF = 0*p.AF; % Setting the affinity for feeding to zero
 %prodGross0 = sweep(p,d,20) % without phagotrophy
 
