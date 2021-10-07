@@ -1,4 +1,4 @@
-% addpath ~/Documents/Source/NUMmodel/matlab
+addpath '..'
 
 nBins = 25; % Use 10 bins for a faster simulation
 
@@ -30,7 +30,7 @@ panelSpectra(p, false);
 % Case three: no phagotrophy and no phototrophy for large cells
 %
 p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
-sweep(p,d, true)
+sudo sweep(p,d, true)
 panelSpectra(p, true);
 
 %
@@ -38,7 +38,7 @@ panelSpectra(p, true);
 %
 function sweep(pp, d, bLastrow)
 
-N0 = logspace(-1,log10(20),10); % nutrient conditions to sweep over
+N0 = logspace(log10(0.01),log10(20),10); % nutrient conditions to sweep over
 
 for j = 1:length(d)
     p = pp;
@@ -51,11 +51,11 @@ for j = 1:length(d)
     for i = 1:length(N0)
         p.u0(1) = N0(i);
         
-        if (N0(i) < 0.1)
-            p.tEnd = 5000; % Need to run long for low concentrations
-        else
-            p.tEnd = 365;
-        end
+        %if (N0(i) < 0.1)
+        %    p.tEnd = 5000; % Need to run long for low concentrations
+        %else
+            p.tEnd = 1000;
+        %end
         
         sim(i) = simulateChemostat( p );
         
@@ -109,7 +109,7 @@ end
 function panelSpectra(p, bLastrow)
 nexttile
 
-N0 = [0.2 2 20];
+N0 = [0.0669 0.4472 2]; %[0.2 2 20];
 
 for i = 1:length(N0)
     p.u0(1) = N0(i);
@@ -120,6 +120,7 @@ for i = 1:length(N0)
 end
 set(gca,'xscale','log','yscale','log','XTick',10.^(-8:2))
 ylim([1 1000])
+xlim([min(p.m) max(p.m)])
 
 if bLastrow
     xlabel('Cell mass ({\mu}g_C)')

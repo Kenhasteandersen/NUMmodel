@@ -10,9 +10,10 @@
 p = parametersGeneralistsOnly( 25, 10.);
 p = parametersChemostat( p );
 
+p.u0(1) = 2;
+
 p.mortHTLm = 0*p.mortHTLm; % Lowering the background mortality (not needed, actually).
 
-M = [20 30 40]; % The thickness of the mixing layer
 d = logspace(-3,log10(0.5),10);
 
 clf
@@ -25,6 +26,7 @@ semilogx(d, prodGross)
 % With losses:
 p.bLosses = true;
 prodGross = sweep(p,d,20) % With phagotrophy
+
 hold on
 semilogx(d, prodGross)
 
