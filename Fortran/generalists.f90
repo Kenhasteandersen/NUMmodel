@@ -131,55 +131,57 @@ contains
        ! Liebig + synthesis limitation:
        JmaxT = fTemp2*Jmax(i)
        rates%Jtot(ix) = min( rates%JNtot(ix), rates%JCtot(ix) )
-       f = rates%Jtot(ix)/(rates%Jtot(ix) + JmaxT)
+       !f = rates%Jtot(ix)/(rates%Jtot(ix) + JmaxT)
        ! If synthesis-limited then down-regulate feeding:
+       f = rates%Jtot(ix)/(rates%Jtot(ix) + max(0.,JmaxT))
        if (rates%Jtot(ix) .gt. 0) then
-        f = rates%Jtot(ix)/(rates%Jtot(ix) + max(0.,JmaxT))
         JFreal(i) = max(0.d0, min(JmaxT, rates%JF(ix) - (rates%Jtot(ix)-f*JmaxT)))
-        rates%Jtot(ix) = f * JmaxT
+        !rates%Jtot(ix) = f * JmaxT
       else
         JFreal(i) = max(0.d0, rates%JF(ix))
       end if
+      rates%Jtot(ix) = f * JmaxT ! Apply limitation
       
-      rates%Jtot(ix) = f * Jmax(i)
-       rates%JLreal(ix) = rates%JL(ix) - max( 0.d0, &
+      rates%JLreal(ix) = rates%JL(ix) - max( 0.d0, &
             min((rates%JCtot(ix) - (rates%JF(ix)-JFreal(i))-rates%Jtot(ix)), rates%JL(ix)))
 
-       ! Actual uptakes:
-       rates%JCtot(ix) = &
+      ! Actual uptakes:
+      rates%JCtot(ix) = &
             + rates%JLreal(ix)  &
             + rates%JDOC(ix)  &
             + JFreal(i)  &
             - fTemp2*Jresp(i)  &
             - JlossPassive(i)
-       rates%JNtot(ix) = &
+      rates%JNtot(ix) = &
             rates%JN(ix) + &
             JFreal(i) - &
             JlossPassive(i)
-       !
-       ! Losses:
-       !
-       rates%JCloss_feeding(ix) = (1.-epsilonF)/epsilonF*JFreal(i) ! Incomplete feeding (units of carbon per time)
-       rates%JCloss_photouptake(ix) = (1.-epsilonL)/epsilonL * rates%JLreal(ix)
-       rates%JNlossLiebig(ix) = max( 0.d0, rates%JNtot(ix)-rates%Jtot(ix))  ! In units of C
-       rates%JClossLiebig(ix) = max( 0.d0, rates%JCtot(ix)-rates%Jtot(ix)) ! C losses from Liebig, not counting losses from photoharvesting
+      !
+      ! Losses:
+      !
+      rates%JCloss_feeding(ix) = (1.-epsilonF)/epsilonF*JFreal(i) ! Incomplete feeding (units of carbon per time)
+      rates%JCloss_photouptake(ix) = (1.-epsilonL)/epsilonL * rates%JLreal(ix)
+      rates%JNlossLiebig(ix) = max( 0.d0, rates%JNtot(ix)-rates%Jtot(ix))  ! In units of C
+      rates%JClossLiebig(ix) = max( 0.d0, rates%JCtot(ix)-rates%Jtot(ix)) ! C losses from Liebig, not counting losses from photoharvesting
 
-       rates%JNloss(ix) = &
+      rates%JNloss(ix) = &
             rates%JCloss_feeding(ix) + &
             rates%JNlossLiebig(ix) +&
             JlossPassive(i) ! In units of C
-       rates%JCloss(ix) = &
+      rates%JCloss(ix) = &
             rates%JCloss_feeding(ix) + &
             rates%JCloss_photouptake(ix) + &
             rates%JClossLiebig(ix) +&
             JlossPassive(i)
-       rates%JF(ix) = JFreal(i)
-
-       write(*,*) 'N budget', i,':',(rates%JN(ix)+JFreal(i)-JlossPassive(i) &
-          - rates%JNlossLiebig(ix) -rates%JCloss_feeding(ix) + rates%Jtot(ix))/this%m(i)
-          write(*,*) 'C budget', i,':',(rates%JLreal(ix) + rates%JDOC(ix)+JFreal(i) &
-          -JlossPassive(i)-rates%JCloss_photouptake(ix)-fTemp2*Jresp(i) &
-          - rates%JClossLiebig(ix) -rates%JCloss_feeding(ix) + rates%Jtot(ix))/this%m(i)
+      rates%JF(ix) = JFreal(i)
+      !
+      ! Test for conservation budget. Should be close to zero:
+      !
+      !write(*,*) 'N budget', i,':',(rates%JN(ix)+JFreal(i)-JlossPassive(i) &
+      !    - rates%JNlossLiebig(ix) -rates%JCloss_feeding(ix) - rates%Jtot(ix))/this%m(i)
+      !write(*,*) 'C budget', i,':',(rates%JLreal(ix) + rates%JDOC(ix)+JFreal(i) &
+      !    -JlossPassive(i)-fTemp2*Jresp(i) &
+      !    - rates%JClossLiebig(ix) -rates%JCloss_feeding(ix) - rates%Jtot(ix))/this%m(i)
     end do
   end subroutine calcRatesGeneralists
 
