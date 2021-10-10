@@ -14,5 +14,6 @@ end
 L = squeeze(sim.L(:,:,1,iTime));
 L = L*exp(sim.p.kw*sim.z(1)); % Correct from the first cell to the surface
 
-c = panelGlobal(sim.x,sim.y,L,'Daily average surface light',sProjection);
+c = panelGlobal(sim.x,sim.y,L,...
+    sTitle='Daily average surface light', sProjection=sProjection);
 c.Label.String  = '{\mu}E/m^2/s';
