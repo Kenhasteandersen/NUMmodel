@@ -30,7 +30,7 @@ panelSpectra(p, false);
 % Case three: no phagotrophy and no phototrophy for large cells
 %
 p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
-sudo sweep(p,d, true)
+sweep(p,d, true)
 panelSpectra(p, true);
 
 %
