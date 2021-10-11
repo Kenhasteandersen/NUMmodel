@@ -31,6 +31,7 @@ panelSpectra(p, false);
 %
 p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
 sweep(p,d, true)
+
 panelSpectra(p, true);
 
 %
