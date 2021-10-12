@@ -5,6 +5,7 @@ nBins = 25; % Use 10 bins for a faster simulation
 % The first parameters is the number of size bins. The last parameter is
 % the upper size:
 p = parametersGeneralistsOnly( nBins, 10.);
+pp = p;
 p = parametersChemostat( p );
 
 p.mortHTLm = 0*p.mortHTLm; % No HTL mortality
@@ -27,9 +28,11 @@ p.AF = 0*p.AF; % Setting the affinity for feeding to zero
 sweep(p,d, false)
 panelSpectra(p, false);
 %
-% Case three: no phagotrophy and no phototrophy for large cells
+% Case three: no phagotrophy or phototrophy for large cells
 %
 p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
+p.AF = pp.AF;
+p.AF( p.m>1e-6 ) = 0; % No phagotrophy for larger cells
 sweep(p,d, true)
 
 panelSpectra(p, true);
