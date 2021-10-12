@@ -20,23 +20,27 @@ tiledlayout(3,3)
 % Case one: phagotrophy included
 %
 sweep(p,d, false)
-panelSpectra(p, false);
+drawnow
+panelSpectra(p, d, false);
+drawnow
 %
 % Case two: no phagotrophy
 %
 p.AF = 0*p.AF; % Setting the affinity for feeding to zero
 sweep(p,d, false)
-panelSpectra(p, false);
+drawnow
+panelSpectra(p, d, false);
+drawnow
 %
 % Case three: no phagotrophy or phototrophy for large cells
 %
 p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
 p.AF = pp.AF;
-p.AF( p.m>1e-6 ) = 0; % No phagotrophy for larger cells
+%p.AF( p.m>1e-6 ) = 0; % No phagotrophy for larger cells
 sweep(p,d, true)
-
-panelSpectra(p, true);
-
+drawnow
+panelSpectra(p, d, true);
+drawnow
 %
 % Sweep over deep nutrient concentrations:
 %
@@ -58,7 +62,7 @@ for j = 1:length(d)
         %if (N0(i) < 0.1)
         %    p.tEnd = 5000; % Need to run long for low concentrations
         %else
-            p.tEnd = 1000;
+        p.tEnd = 1000;
         %end
         
         sim(i) = simulateChemostat( p );
@@ -108,20 +112,25 @@ end
 
 end
 %
-% Make a plot of three spectra:
+% Make a plot of spectra at three nutrient levels and two mixing rates:
 %
-function panelSpectra(p, bLastrow)
+function panelSpectra(p, d, bLastrow)
 nexttile
 
-N0 = [0.0669 0.4472 2]; %[0.2 2 20];
+N0 = [0.0669 0.4472 2]; %Three selected deep nutrient levels
 
-for i = 1:length(N0)
-    p.u0(1) = N0(i);
-    sim = simulateChemostat(p);
-    B(i,:) = sim.B(end,:);
-    loglog(p.m(3:end), B(i,:), 'b-','linewidth',i);
-    hold on
+sLines = {'k-','b-'}; % Colour of the lines for low and high mixing
+for j = 1:length(d)
+    p.d = d(j);
+    for i = 1:length(N0)
+        p.u0(1) = N0(i);
+        sim = simulateChemostat(p);
+        B(i,:) = mean(sim.B(floor(length(sim.t)/2):end,:),1);
+        loglog(p.m(3:end), B(i,:), sLines{j},'linewidth',i);
+        hold on
+    end
 end
+
 set(gca,'xscale','log','yscale','log','XTick',10.^(-8:2))
 ylim([1 1000])
 xlim([min(p.m) max(p.m)])
