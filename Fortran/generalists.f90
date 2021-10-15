@@ -129,17 +129,17 @@ contains
        ! Total carbon uptake
        rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-fTemp2*Jresp(i)-JlossPassive(i)
        ! Liebig + synthesis limitation:
-       JmaxT = fTemp2*Jmax(i)
        rates%Jtot(ix) = min( rates%JNtot(ix), rates%JCtot(ix) )
        !f = rates%Jtot(ix)/(rates%Jtot(ix) + JmaxT)
        ! If synthesis-limited then down-regulate feeding:
+       JmaxT = fTemp2*Jmax(i)
        f = rates%Jtot(ix)/(rates%Jtot(ix) + max(0.,JmaxT))
        if (rates%Jtot(ix) .gt. 0) then
         JFreal(i) = max(0.d0, min(JmaxT, rates%JF(ix) - (rates%Jtot(ix)-f*JmaxT)))
         !rates%Jtot(ix) = f * JmaxT
-      else
+       else
         JFreal(i) = max(0.d0, rates%JF(ix))
-      end if
+       end if
       rates%Jtot(ix) = f * JmaxT ! Apply limitation
       
       rates%JLreal(ix) = rates%JL(ix) - max( 0.d0, &
@@ -178,10 +178,10 @@ contains
       ! Test for conservation budget. Should be close to zero:
       !
       !write(*,*) 'N budget', i,':',(rates%JN(ix)+JFreal(i)-JlossPassive(i) &
-      !    - rates%JNlossLiebig(ix) -rates%JCloss_feeding(ix) - rates%Jtot(ix))/this%m(i)
+      !    - rates%JNlossLiebig(ix)  - rates%Jtot(ix))/this%m(i)
       !write(*,*) 'C budget', i,':',(rates%JLreal(ix) + rates%JDOC(ix)+JFreal(i) &
       !    -JlossPassive(i)-fTemp2*Jresp(i) &
-      !    - rates%JClossLiebig(ix) -rates%JCloss_feeding(ix) - rates%Jtot(ix))/this%m(i)
+      !    - rates%JClossLiebig(ix)  - rates%Jtot(ix))/this%m(i)
     end do
   end subroutine calcRatesGeneralists
 
@@ -191,6 +191,10 @@ contains
     real(dp), intent(in):: u(this%n)
     real(dp):: mortloss
     integer:: i, ix
+    !
+    ! To make mass balance check:
+    !
+    !rates%dudt = 0*rates%dudt
 
     do i = 1, this%n
       ix = i+this%ixOffset
@@ -225,6 +229,15 @@ contains
            - mort2*u(i) &
            - rates%mortHTL(ix))*u(i)
    end do
+   !
+   ! Mass balance check:
+   !
+   write(*,*) 'Total N balance: ', &
+          (rates%dudt(idxN) &
+          + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
+          + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1+this%ixOffset:this%ixOffset+this%n) &
+          + (1-remin2)*mort2*u(1+this%ixOffset:this%ixOffset+this%n)**2)/rhoCN) &
+          / u(idxN) , '1/day'
 
  end subroutine calcDerivativesGeneralists
 

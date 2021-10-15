@@ -14,7 +14,8 @@ program NUMmodeltest
  ! call setupGeneralistsOnly_csp()
   !call setupGeneralistsOnly_csp()
   call setupGeneralistsOnly(5)
-
+  call parametersFinalize(0.d0, .false.)
+  
   !call setupGeneralistsDiatoms(10)
   !call setupDiatoms_simpleOnly(10)
   !call setupDiatoms_simpleOnly(10)
