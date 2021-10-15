@@ -4,15 +4,14 @@
 % Sweep over mixing rates and calculate gross PP
 %
 
-
 % The first parameters is the number of size bins. The last parameter is
 % the upper size:
 p = parametersGeneralistsOnly( 25, 10.);
 p = parametersChemostat( p );
 
-p.u0(1) = 2;
-
 p.mortHTLm = p.mortHTLm/4; % Lowering the background mortality (not needed, actually).
+
+p.u0(1) = 2;
 
 p.tEnd = 500;
 
@@ -27,6 +26,7 @@ prodGross1 = sweep(p,d,20) % With phagotrophy
 p.bLosses = true;
 prodGross2 = sweep(p,d,20) % With phagotrophy
 %%
+clf
 semilogx(d, prodGross1)
 hold on
 semilogx(d, prodGross2)
@@ -74,9 +74,12 @@ for i = 1:length(d)
     %
     % Calc PP over the last half of the simulation:
     %
+    %jL = sim.rates.JLreal./p.m;
+    %prodGross(i) = M*365*1e-3 * sum(jL(3:end).*sim.B(end,:))/p.pGeneralists.epsilonL; 
     prodGross(i) = 0;
     dt = gradient(sim.t);
-    for j = floor(length(sim.t)/2:length(sim.t))
+    ixStart = find(sim.t>(sim.t(end)/2),1);
+    for j = ixStart:length(sim.t)
         u = [sim.N(j) sim.DOC(j) sim.B(j,:)];
         rates = calcDerivatives(p,u,L);
         jL = rates.JLreal./p.m;
@@ -86,6 +89,6 @@ for i = 1:length(d)
     %plotChemostat(sim)
     %drawnow
 end
-prodGross = prodGross / (sim.t(end)/2);
+prodGross = prodGross / (sim.t(end)-sim.t(ixStart));
 
 end
