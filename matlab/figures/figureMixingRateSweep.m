@@ -16,7 +16,7 @@ p.mortHTLm = p.mortHTLm/4; % Lowering the background mortality (not needed, actu
 
 p.tEnd = 500;
 
-d = logspace(-3,log10(0.5),10);
+d = logspace(-3,log10(0.5),25);
 
 clf
 %tiledlayout(length(d),2)
@@ -62,19 +62,30 @@ ppos = get(gcf,'position');
 %
 function prodGross = sweep(pp,d,M)
 
+L = 30; % The light level to use
+
 p = pp;
 
 p.u0(3:end) = 0.0001; % for faster convergence
 for i = 1:length(d)
     p.d = d(i);
     
-    sim = simulateChemostat( p, 30 );
-    
-    jL = sim.rates.JLreal./p.m;
-    prodGross(i) = M*365*1e-3 * sum(jL(3:end).*sim.B(end,:))/p.pGeneralists.epsilonL;
-    
+    sim = simulateChemostat( p, L );
+    %
+    % Calc PP over the last half of the simulation:
+    %
+    prodGross(i) = 0;
+    dt = gradient(sim.t);
+    for j = floor(length(sim.t)/2:length(sim.t))
+        u = [sim.N(j) sim.DOC(j) sim.B(j,:)];
+        rates = calcDerivatives(p,u,L);
+        jL = rates.JLreal./p.m;
+        prodGross(i) = prodGross(i) + ...
+            M*365*1e-3 * sum(jL(3:end).*sim.B(j,:))/p.pGeneralists.epsilonL * dt(j);
+    end
     %plotChemostat(sim)
     %drawnow
 end
+prodGross = prodGross / (sim.t(end)/2);
 
 end
