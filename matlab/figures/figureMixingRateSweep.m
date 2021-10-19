@@ -11,7 +11,7 @@ p = parametersChemostat( p );
 
 p.mortHTLm = p.mortHTLm/4; % Lowering the background mortality (not needed, actually).
 
-p.u0(1) = 2;
+p.u0(1) = 1;
 
 p.tEnd = 500;
 
