@@ -21,11 +21,12 @@ clf
 %tiledlayout(length(d),2)
 
 % Without losses to the deep
-prodGross1 = sweep(p,d,20) % With phagotrophy
+[prodGross1 Bpico1 Bnano1 Bmicro1] = sweep(p,d,20); % With phagotrophy
 % With losses:
 p.bLosses = true;
-prodGross2 = sweep(p,d,20) % With phagotrophy
+[prodGross2 Bpico2 Bnano2 Bmicro2] = sweep(p,d,20); % With phagotrophy
 %%
+figure(2)
 clf
 semilogx(d, prodGross1)
 hold on
@@ -52,15 +53,32 @@ pos = get(gcf,'paperposition');
 pos(3) = 8;
 set(gcf,'paperposition',pos);
 ppos = get(gcf,'position');
-  ppos([3 4]) = pos([3 4]);
-  set(gcf,'position',ppos)
+ppos([3 4]) = pos([3 4]);
+set(gcf,'position',ppos)
+%%
+% Plot biomasses:
+%
+figure(3)
+clf
+loglog(d, Bpico1,'b:',d,Bnano1,'b--',d,Bmicro1,'b-','linewidth',2)
+hold on
+loglog(d, Bpico2,'r:',d,Bnano2,'r--',d,Bmicro2,'r-','linewidth',2)
+legend({'Pico without losses','Nano without losses','Micro without losses',...
+    'With losses of B to the deep'},...
+    'Location','NorthWest')
+%legend('boxoff')
+xlabel('Mixing rate (day^{-1})')
+ylabel('Biomasses (gC/m^2)')
+xlim([min(d) max(d)])
+ylim([0.01 20])
+
 %p.AF = 0*p.AF; % Setting the affinity for feeding to zero
 %prodGross0 = sweep(p,d,20) % without phagotrophy
 
 %
 % Sweep over mixing coeffs:
 %
-function prodGross = sweep(pp,d,M)
+function [prodGross Bpico Bnano Bmicro] = sweep(pp,d,M)
 
 L = 30; % The light level to use
 
@@ -75,20 +93,32 @@ for i = 1:length(d)
     % Calc PP over the last half of the simulation:
     %
     %jL = sim.rates.JLreal./p.m;
-    %prodGross(i) = M*365*1e-3 * sum(jL(3:end).*sim.B(end,:))/p.pGeneralists.epsilonL; 
+    %prodGross(i) = M*365*1e-3 * sum(jL(3:end).*sim.B(end,:))/p.pGeneralists.epsilonL;
     prodGross(i) = 0;
+    Bpico(i) = 0;
+    Bnano(i) = 0;
+    Bmicro(i) = 0;
     dt = gradient(sim.t);
     ixStart = find(sim.t>(sim.t(end)/2),1);
     for j = ixStart:length(sim.t)
+        % Calc gross productivity:
         u = [sim.N(j) sim.DOC(j) sim.B(j,:)];
         rates = calcDerivatives(p,u,L);
         jL = rates.JLreal./p.m;
         prodGross(i) = prodGross(i) + ...
             M*365*1e-3 * sum(jL(3:end).*sim.B(j,:))/p.pGeneralists.epsilonL * dt(j);
+        % Calc biomass:
+        Bpnm = calcPicoNanoMicro(sim.B(j,:), p.m(3:end));
+        Bpico(i) = Bpico(i) + M*Bpnm(1)*dt(j)/1000; % Convert to g/m2
+        Bnano(i) = Bnano(i) + M*Bpnm(2)*dt(j)/1000;
+        Bmicro(i) = Bmicro(i) + M*Bpnm(3)*dt(j)/1000;
     end
     %plotChemostat(sim)
     %drawnow
 end
 prodGross = prodGross / (sim.t(end)-sim.t(ixStart));
+Bpico = Bpico /(sim.t(end)-sim.t(ixStart));
+Bnano = Bnano /(sim.t(end)-sim.t(ixStart));
+Bmicro = Bmicro /(sim.t(end)-sim.t(ixStart));
 
 end
