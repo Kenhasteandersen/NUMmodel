@@ -10,7 +10,7 @@ p = parametersChemostat( p );
 
 p.mortHTLm = 0*p.mortHTLm; % No HTL mortality
 
-d = [0.01 0.1]; % The mixing rates to run over
+d = [0.03 0.3]; % The mixing rates to run over
 %
 % Set up figure:
 %
@@ -46,29 +46,33 @@ drawnow
 %
 function sweep(pp, d, bLastrow)
 
+ug_to_uM = 1/30.97; % conversion from ugP/l to Molar
+
 N0 = logspace(log10(0.01),log10(20),10); % nutrient conditions to sweep over
 
 for j = 1:length(d)
     p = pp;
     p.d = d(j);
+    p.tEnd = 1000;
     nexttile
     B = zeros(length(N0), length(p.m)-2);
     Light_vs_feeding = B;
     
     p.u0(3:end) = 0.0001; % for faster convergence
-    for i = 1:length(N0)
-        p.u0(1) = N0(i);
+    parfor i = 1:length(N0)
+        ptmp = p;
+        ptmp.u0(1) = N0(i);
         
         %if (N0(i) < 0.1)
         %    p.tEnd = 5000; % Need to run long for low concentrations
         %else
-        p.tEnd = 1000;
+        
         %end
         
-        sim(i) = simulateChemostat( p );
+        sim = simulateChemostat( ptmp );
         
-        B(i,:) = mean(sim(i).B(floor(3*length(sim(i).t)/4):end,:),1);
-        tmp = sim(i).rates.JLreal./sim(i).rates.JFreal;
+        B(i,:) = mean(sim.B(floor(3*length(sim.t)/4):end,:),1);
+        tmp = sim.rates.JLreal./sim.rates.JFreal;
         Light_vs_feeding(i,:) = tmp(3:end);
         
         %plotChemostat(sim)
@@ -82,7 +86,7 @@ for j = 1:length(d)
     %%
     % Make the sweep plots:
     %
-    surface(p.m(3:end), N0, log10(B));
+    surface(p.m(3:end), N0 * ug_to_uM, log10(B));
     shading flat
     axis tight
     set(gca,'xscale','log','yscale','log','XTick',10.^(-8:2))
@@ -102,7 +106,7 @@ for j = 1:length(d)
     %contour3(p.m(3:end), N0, 1000*Light_vs_feeding, [500 500],'w','linewidth',3)
     
     if (j==1)
-        ylabel('Deep nutrient concentration ({\mu}g_P/l)')
+        ylabel('Deep nutrient concentration ({\mu}M)')
     end
     
     
