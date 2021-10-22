@@ -11,20 +11,22 @@ p = parametersChemostat( p );
 
 p.mortHTLm = p.mortHTLm/4; % Lowering the background mortality (not needed, actually).
 
-p.u0(1) = 1;
+p.u0(1) = 3; % Correponds to 0.1 uM
 
 p.tEnd = 500;
 
 d = logspace(-3,log10(0.5),25);
 
+M = 50; % depth of productive zone
+
 clf
 %tiledlayout(length(d),2)
 
 % Without losses to the deep
-[prodGross1 Bpico1 Bnano1 Bmicro1] = sweep(p,d,20); % With phagotrophy
+[prodGross1 Bpico1 Bnano1 Bmicro1] = sweep(p,d,M); % With phagotrophy
 % With losses:
 p.bLosses = true;
-[prodGross2 Bpico2 Bnano2 Bmicro2] = sweep(p,d,20); % With phagotrophy
+[prodGross2 Bpico2 Bnano2 Bmicro2] = sweep(p,d,M); % With phagotrophy
 %%
 figure(2)
 clf
@@ -35,7 +37,7 @@ semilogx(d, prodGross2)
 patch([d d(end:-1:1)], [prodGross1 prodGross2(end:-1:1)],[0.8 0.8 1]);
 semilogx(d, prodGross1,'b-','linewidth',2)
 semilogx(d, prodGross2,'r-','linewidth',2)
-ylim([0 1100])
+ylim([0 2500])
 set(gca,'xtick',10.^(-3:1))
 
 legend({'Without losses','With losses of B to the deep'},...
@@ -70,7 +72,7 @@ legend({'Pico without losses','Nano without losses','Micro without losses',...
 xlabel('Mixing rate (day^{-1})')
 ylabel('Biomasses (gC/m^2)')
 xlim([min(d) max(d)])
-ylim([0.01 20])
+ylim([0.01 30])
 
 %p.AF = 0*p.AF; % Setting the affinity for feeding to zero
 %prodGross0 = sweep(p,d,20) % without phagotrophy
@@ -82,10 +84,10 @@ function [prodGross Bpico Bnano Bmicro] = sweep(pp,d,M)
 
 L = 30; % The light level to use
 
-p = pp;
+parfor i = 1:length(d)
+    p = pp;
 
-p.u0(3:end) = 0.0001; % for faster convergence
-for i = 1:length(d)
+    p.u0(3:end) = 0.0001; % for faster convergence
     p.d = d(i);
     
     sim = simulateChemostat( p, L );
@@ -116,9 +118,11 @@ for i = 1:length(d)
     %plotChemostat(sim)
     %drawnow
 end
-prodGross = prodGross / (sim.t(end)-sim.t(ixStart));
-Bpico = Bpico /(sim.t(end)-sim.t(ixStart));
-Bnano = Bnano /(sim.t(end)-sim.t(ixStart));
-Bmicro = Bmicro /(sim.t(end)-sim.t(ixStart));
+
+deltaT = pp.tEnd/2;
+prodGross = prodGross / deltaT;
+Bpico = Bpico / deltaT;
+Bnano = Bnano / deltaT;
+Bmicro = Bmicro / deltaT;
 
 end
