@@ -41,7 +41,7 @@ module generalists
   ! Biogeo:
   !
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
+  real(dp), parameter:: remin2 = 1.0!0.5d0 ! fraction of virulysis remineralized to N and DOC
   real(dp), parameter:: reminF = 0.1d0
   real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
 
@@ -233,10 +233,11 @@ contains
    ! Mass balance check:
    !
    write(*,*) 'Total N balance: ', &
-          (rates%dudt(idxN) &
-          + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
-          + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1+this%ixOffset:this%ixOffset+this%n) &
-          + (1-remin2)*mort2*u(1+this%ixOffset:this%ixOffset+this%n)**2)/rhoCN) &
+          (rates%dudt(idxN) &    ! Change in N
+          + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &  ! Uptake by plankton
+          + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1+this%ixOffset:this%ixOffset+this%n) & ! Lost to HTLs
+          + (1-remin2)*mort2*u(1+this%ixOffset:this%ixOffset+this%n)**2 & ! Lost in viral lysis
+          + (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n) )/rhoCN) &  ! Lost in feeding
           / u(idxN) , '1/day'
 
  end subroutine calcDerivativesGeneralists
