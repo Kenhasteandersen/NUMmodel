@@ -2,7 +2,8 @@
 % Make all figures for the manuscript
 %
 addpath('..')
-
+clear
+close all
 %
 % Sweeping across nutrient levels
 %
@@ -15,3 +16,9 @@ figureNutrientSweep
 figure(2)
 clf
 figureMixingRateSweep
+%
+% Table with biomasses
+%
+figure(4)
+tableBiomasses
+

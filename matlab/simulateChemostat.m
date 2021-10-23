@@ -11,7 +11,7 @@ function sim = simulateChemostat(p, L)
 
 arguments
     p struct = parameters([]);
-    L double = 100;
+    L double = 50;
 end
 
 if (p.bUseLibrary)
@@ -55,6 +55,7 @@ Bpnm = calcPicoNanoMicro(sim.B(end,:), sim.p.pGeneralists.m);
 sim.Bpico = Bpnm(1);
 sim.Bnano = Bpnm(2);
 sim.Bmicro = Bpnm(3);
+sim.L = L;
 
 %
 % Function to assemble derivative for chemostat:

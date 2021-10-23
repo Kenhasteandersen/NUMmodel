@@ -82,15 +82,13 @@ ylim([0.01 30])
 %
 function [prodGross Bpico Bnano Bmicro] = sweep(pp,d,M)
 
-L = 30; % The light level to use
-
 parfor i = 1:length(d)
     p = pp;
 
     p.u0(3:end) = 0.0001; % for faster convergence
     p.d = d(i);
     
-    sim = simulateChemostat( p, L );
+    sim = simulateChemostat( p );
     %
     % Calc PP over the last half of the simulation:
     %
@@ -105,7 +103,7 @@ parfor i = 1:length(d)
     for j = ixStart:length(sim.t)
         % Calc gross productivity:
         u = [sim.N(j) sim.DOC(j) sim.B(j,:)];
-        rates = calcDerivatives(p,u,L);
+        rates = calcDerivatives(p,u,sim.L);
         jL = rates.JLreal./p.m;
         prodGross(i) = prodGross(i) + ...
             M*365*1e-3 * sum(jL(3:end).*sim.B(j,:))/p.pGeneralists.epsilonL * dt(j);

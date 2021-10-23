@@ -3,7 +3,7 @@
 %
 uM_to_ug = 30.97; % conversion from Molar to ugP/l.
 
-d = [0.03 0.3]; % Mixing rates
+d = [0.01 0.1]; % Mixing rates
 P0 = [0.01 0.1 1] * uM_to_ug;
 
 p = parametersGeneralistsOnly( nBins, 10.);

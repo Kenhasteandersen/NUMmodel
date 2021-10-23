@@ -1,6 +1,6 @@
 addpath '..'
 
-nBins = 10; % Use 10 bins for a faster simulation
+nBins = 25; % Use 10 bins for a faster simulation
 
 % The first parameters is the number of size bins. The last parameter is
 % the upper size:
@@ -12,7 +12,7 @@ p.bLosses = true; % Allow mixing losses
 
 p.mortHTLm = 0*p.mortHTLm; % No HTL mortality
 
-d = [0.03 0.3]; % The mixing rates to run over
+d = [0.01 0.1]; % The mixing rates to run over
 %
 % Set up figure:
 %
@@ -48,9 +48,11 @@ drawnow
 %
 function sweep(pp, d, bLastrow)
 
+L = 30; % Light level to use
+
 ug_to_uM = 1/30.97; % conversion from ugP/l to Molar
 
-N0 = logspace(log10(0.01),log10(20),10); % nutrient conditions to sweep over
+N0 = logspace(log10(0.01),log10(40),10); % nutrient conditions to sweep over
 
 for j = 1:length(d)
     p = pp;
@@ -71,7 +73,7 @@ for j = 1:length(d)
         
         %end
         
-        sim = simulateChemostat( ptmp );
+        sim = simulateChemostat( ptmp, L );
         
         B(i,:) = mean(sim.B(floor(3*length(sim.t)/4):end,:),1);
         tmp = sim.rates.JLreal./sim.rates.JFreal;
@@ -88,6 +90,7 @@ for j = 1:length(d)
     %%
     % Make the sweep plots:
     %
+    B( B<1e-5 ) = 1e-5;
     surface(p.m(3:end), N0 * ug_to_uM, log10(B));
     shading flat
     axis tight
@@ -138,7 +141,7 @@ for j = 1:length(d)
 end
 
 set(gca,'xscale','log','yscale','log','XTick',10.^(-8:2))
-ylim([1 1000])
+ylim([.1 100])
 xlim([min(p.m) max(p.m)])
 
 if bLastrow
