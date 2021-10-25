@@ -23,7 +23,7 @@ module generalists
   !
   ! Phagotrophy:
   !
-  real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
+  real(dp), parameter:: epsilonF = 1.0 !0.8 ! Assimilation efficiency
   real(dp), parameter:: alphaF = 0.018 
   real(dp), parameter:: cF = 30.
   real(dp), parameter:: beta = 500.d0
