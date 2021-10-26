@@ -5,12 +5,13 @@ nBins = 25; % Use 10 bins for a faster simulation
 % The first parameters is the number of size bins. The last parameter is
 % the upper size:
 p = parametersGeneralistsOnly( nBins, 10.);
-pp = p;
 p = parametersChemostat( p );
 
 p.bLosses = true; % Allow mixing losses
 
 p.mortHTLm = 0*p.mortHTLm; % No HTL mortality
+
+pp = p;
 
 d = [0.01 0.1]; % The mixing rates to run over
 %
@@ -19,14 +20,7 @@ d = [0.01 0.1]; % The mixing rates to run over
 clf
 tiledlayout(3,3)
 %
-% Case one: phagotrophy included
-%
-sweep(p,d, false)
-drawnow
-panelSpectra(p, d, false);
-drawnow
-%
-% Case two: no phagotrophy
+% Case one: no phagotrophy
 %
 p.AF = 0*p.AF; % Setting the affinity for feeding to zero
 sweep(p,d, false)
@@ -34,15 +28,24 @@ drawnow
 panelSpectra(p, d, false);
 drawnow
 %
-% Case three: no phototrophy for large cells
+% Case two: no phototrophy for large cells
 %
+p = pp;
 p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
-p.AF = pp.AF;
-%p.AF( p.m>1e-6 ) = 0; % No phagotrophy for larger cells
 sweep(p,d, true)
 drawnow
 panelSpectra(p, d, true);
 drawnow
+%
+% Case one: phagotrophy included
+%
+p = pp;
+sweep(p,d, false)
+drawnow
+panelSpectra(p, d, false);
+drawnow
+
+
 %
 % Sweep over deep nutrient concentrations:
 %
