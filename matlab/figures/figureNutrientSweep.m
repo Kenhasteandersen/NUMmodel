@@ -32,7 +32,7 @@ drawnow
 %
 p = pp;
 p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
-sweep(p,d, true)
+sweep(p,d, false)
 drawnow
 panelSpectra(p, d, false);
 drawnow
@@ -40,7 +40,7 @@ drawnow
 % Case one: phagotrophy included
 %
 p = pp;
-sweep(p,d, false)
+sweep(p,d, true)
 drawnow
 panelSpectra(p, d, true);
 drawnow
