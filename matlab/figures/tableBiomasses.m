@@ -1,10 +1,11 @@
 %
 % Make the numbers for table one
 %
+nBins = 25;
 uM_to_ug = 30.97; % conversion from Molar to ugP/l.
 
 d = [0.01 0.1]; % Mixing rates
-P0 = [0.01 0.1 1] * uM_to_ug;
+P0 = [0.006 0.06 0.6] * uM_to_ug;
 
 p = parametersGeneralistsOnly( nBins, 10.);
 p = parametersChemostat( p );

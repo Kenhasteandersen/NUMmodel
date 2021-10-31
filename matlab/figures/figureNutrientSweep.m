@@ -128,24 +128,26 @@ end
 %
 function panelSpectra(p, d, bLastrow)
 nexttile
+uM_to_ug = 30.97; % conversion from Molar to ugP/l.
+P0 = [0.006 0.06 0.6] * uM_to_ug; %Three selected deep nutrient levels
+%N0 = [0.0669 0.4472 2]; 
 
-N0 = [0.0669 0.4472 2]; %Three selected deep nutrient levels
-
-sLines = {'k-','b-'}; % Colour of the lines for low and high mixing
+sLines = {'b-','r-'}; % Colour of the lines for low and high mixing
 for j = 1:length(d)
     p.d = d(j);
-    for i = 1:length(N0)
-        p.u0(1) = N0(i);
+    for i = 1:length(P0)
+        p.u0(1) = P0(i);
         sim = simulateChemostat(p);
         B(i,:) = mean(sim.B(floor(length(sim.t)/2):end,:),1);
-        loglog(p.m(3:end), B(i,:), sLines{j},'linewidth',i);
+        semilogx(p.m(3:end), B(i,:), sLines{j},'linewidth',i);
         hold on
     end
 end
 
-set(gca,'xscale','log','yscale','log','XTick',10.^(-8:2))
-ylim([.1 100])
+set(gca,'xscale','log','XTick',10.^(-8:2))
+ylim([0 100])
 xlim([min(p.m) max(p.m)])
+ylabel('Biomass ({\mu}g_C/l)')
 
 if bLastrow
     xlabel('Cell mass ({\mu}g_C)')
