@@ -19,6 +19,16 @@ d = [0.01 0.1]; % The mixing rates to run over
 %
 clf
 tiledlayout(3,3)
+% Make fig double column:
+set(gcf,'paperunits','centimeters')
+set(gcf,'units','centimeters')
+pos = get(gcf,'paperposition');
+pos(3) = 18;
+set(gcf,'paperposition',pos);
+ppos = get(gcf,'position');
+ppos([3 4]) = pos([3 4]);
+set(gcf,'position',ppos)
+
 %
 % Case one: no phagotrophy
 %
@@ -135,13 +145,16 @@ uM_to_ug = 30.97; % conversion from Molar to ugP/l.
 P0 = [0.006 0.06 0.6] * uM_to_ug; %Three selected deep nutrient levels
 %N0 = [0.0669 0.4472 2]; 
 
+p.tEnd = 1000;
 sLines = {'b-','r-'}; % Colour of the lines for low and high mixing
 for j = 1:length(d)
     p.d = d(j);
     for i = 1:length(P0)
         p.u0(1) = P0(i);
         sim = simulateChemostat(p);
-        B(i,:) = mean(sim.B(floor(length(sim.t)/2):end,:),1);
+        
+        ix = sim.t>(0.75*sim.t(end));
+        B(i,:) = mean(sim.B(ix,:),1);
         semilogx(p.m(3:end), B(i,:), sLines{j},'linewidth',i);
         
         hold on

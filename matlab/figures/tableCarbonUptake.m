@@ -59,18 +59,31 @@ function sweep(p,d,P0)
             %
             % Average the rates over the last half of the simulation:
             %
-            JpnmIntegral = [0 0 0];
+            JLpnmIntegral = [0 0 0];
+            JDOCpnmIntegral = [0 0 0];
+            JFpnmIntegral = [0 0 0];
             for k = floor(length(sim.t)/2) : length(sim.t)
                 u = [sim.N(k), sim.DOC(k), sim.B(k,:)];
                 rates = calcDerivatives(p,u,sim.L);
-                jC = rates.Jtot(3:end) ./ m;
-                j_pnm = calcPicoNanoMicroRate(m, jC);
+                
+                jL = rates.JLreal(3:end) ./m;
+                jDOC = rates.JDOC(3:end) ./m;
+                jF = rates.JFreal(3:end) ./m;
+                %jC = rates.Jtot(3:end) ./ m;
+                jLpnm = calcPicoNanoMicroRate(m, jL);
+                jDOCpnm = calcPicoNanoMicroRate(m, jDOC);
+                jFpnm = calcPicoNanoMicroRate(m, jF);
                 Bpnm = calcPicoNanoMicro(mean(sim.B(k,:),1), m);
-                JpnmIntegral = JpnmIntegral + j_pnm.*Bpnm*(sim.t(k)-sim.t(k-1));
+                JLpnmIntegral = JLpnmIntegral + jLpnm.*Bpnm*(sim.t(k)-sim.t(k-1));
+                JDOCpnmIntegral = JDOCpnmIntegral + jLpnm.*Bpnm*(sim.t(k)-sim.t(k-1));
+                JFpnmIntegral = JFpnmIntegral + jLpnm.*Bpnm*(sim.t(k)-sim.t(k-1));
             end
-            Jpnm = JpnmIntegral / (sim.t(end) - sim.t(floor(length(sim.t)/2)));
-            Jpnm(Jpnm<0) = 0;
-            percentages = Jpnm/sum(Jpnm)*100;
+            JLpnm = JLpnmIntegral / (sim.t(end) - sim.t(floor(length(sim.t)/2)));
+            JDOCpnm = JDOCpnmIntegral / (sim.t(end) - sim.t(floor(length(sim.t)/2)));
+            JFpnm = JFpnmIntegral / (sim.t(end) - sim.t(floor(length(sim.t)/2)));
+            %Jpnm(Jpnm<0) = 0;
+            %percentages = Jpnm/sum(Jpnm)*100;
+            JLpercent = JLpnm ./ sum(
             
             fprintf(' %3.1f%%  |  %3.1f%%  |  %3.1f%%   |\n', percentages);
         end

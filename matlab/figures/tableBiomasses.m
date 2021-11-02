@@ -25,7 +25,7 @@ p.AF = 0*p.AF; % Setting the affinity for feeding to zero
 sweep(p,d,P0)
 fprintf('-----------------------------------\n');
 %
-% Case two: pico phototrophy
+% Case two: only pico phototrophy
 %
 p = pp;
 p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
@@ -43,13 +43,14 @@ function sweep(p,d,P0)
         for j = 1:length(P0)
             p.d = d(i);
             p.u0(1) = P0(j);
-            p.tEnd = 500;
+            p.tEnd = 1000;
             
             sim = simulateChemostat(p);
             plotChemostat(sim)
             drawnow
             
-            Bpnm = calcPicoNanoMicro(mean(sim.B(floor(end/2):end,:),1), p.m(3:end));
+            ix = sim.t>(0.75*sim.t(end));
+            Bpnm = calcPicoNanoMicro(mean(sim.B(ix,:),1), p.m(3:end));
             fprintf(' %3.1f  |  %3.1f  |  %3.1f   |\n', Bpnm);
         end
     end
