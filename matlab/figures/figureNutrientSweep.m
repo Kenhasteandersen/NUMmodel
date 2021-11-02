@@ -98,6 +98,8 @@ for j = 1:length(d)
     shading flat
     axis tight
     set(gca,'xscale','log','yscale','log','XTick',10.^(-8:2))
+    set(gca, 'TickDir', 'out')
+    set(gca,'YTick',10.^(-3:0))
     
     if bLastrow
         cbar = colorbar('SouthOutside');
@@ -106,6 +108,7 @@ for j = 1:length(d)
     else
         set(gca,'xticklabel','')
     end
+    
     
     %title('log_{10} biomass');
     caxis([-5, 3])
@@ -140,11 +143,13 @@ for j = 1:length(d)
         sim = simulateChemostat(p);
         B(i,:) = mean(sim.B(floor(length(sim.t)/2):end,:),1);
         semilogx(p.m(3:end), B(i,:), sLines{j},'linewidth',i);
+        
         hold on
     end
 end
 
 set(gca,'xscale','log','XTick',10.^(-8:2))
+set(gca, 'TickDir', 'out')
 ylim([0 100])
 xlim([min(p.m) max(p.m)])
 ylabel('Biomass ({\mu}g_C/l)')
