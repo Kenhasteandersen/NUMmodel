@@ -21,4 +21,8 @@ figureMixingRateSweep
 %
 figure(4)
 tableBiomasses
+%
+% Table with carbon uptakes
+%
+tableCarbonUptake
 
