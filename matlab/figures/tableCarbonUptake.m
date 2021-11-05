@@ -20,8 +20,9 @@ pp = p;
 fprintf('\n');
 fprintf('Total uptake of carbon (light, DOC and feeding).\n');
 fprintf('\n');
-fprintf('  Pico  |  Nano   |  Micro   \n');
-fprintf('-----------------------------\n');
+fprintf('         Pico         |         Nano          |         Micro          \n');
+fprintf(' Light    DOC   Food  |  Light   DOC    Food  | Light   DOC    Food    \n');
+fprintf('-----------------------------------------------------------------------\n');
 %
 % Case one: no phagotrophy
 %
@@ -48,44 +49,50 @@ function sweep(p,d,P0)
         for j = 1:length(P0)
             p.d = d(i);
             p.u0(1) = P0(j);
-            p.tEnd = 500;
+            p.tEnd = 1000;
             
             sim = simulateChemostat(p);
             plotChemostat(sim)
             drawnow
             
             m = p.m(3:end);
-            Bpnm = calcPicoNanoMicro(mean(sim.B(floor(end/2):end,:),1), m);
             %
             % Average the rates over the last half of the simulation:
             %
             JLpnmIntegral = [0 0 0];
             JDOCpnmIntegral = [0 0 0];
             JFpnmIntegral = [0 0 0];
-            for k = floor(length(sim.t)/2) : length(sim.t)
+            for k = find(sim.t>0.75*sim.t(end),1):length(sim.t)
                 u = [sim.N(k), sim.DOC(k), sim.B(k,:)];
                 rates = calcDerivatives(p,u,sim.L);
-                
+                % Get the rates:
                 jL = rates.JLreal(3:end) ./m;
                 jDOC = rates.JDOC(3:end) ./m;
                 jF = rates.JFreal(3:end) ./m;
-                %jC = rates.Jtot(3:end) ./ m;
+                jC = jL + jDOC + jF;
+                % Sum them in pico-nano-micro:
                 jLpnm = calcPicoNanoMicroRate(m, jL);
                 jDOCpnm = calcPicoNanoMicroRate(m, jDOC);
                 jFpnm = calcPicoNanoMicroRate(m, jF);
-                Bpnm = calcPicoNanoMicro(mean(sim.B(k,:),1), m);
-                JLpnmIntegral = JLpnmIntegral + jLpnm.*Bpnm*(sim.t(k)-sim.t(k-1));
-                JDOCpnmIntegral = JDOCpnmIntegral + jLpnm.*Bpnm*(sim.t(k)-sim.t(k-1));
-                JFpnmIntegral = JFpnmIntegral + jLpnm.*Bpnm*(sim.t(k)-sim.t(k-1));
+                % Calc the percentages:
+                Bpnm = calcPicoNanoMicro(sim.B(k,:), m);
+                deltaT = 1;%(sim.t(k)-sim.t(k-1));
+                JLpnmIntegral = JLpnmIntegral + jLpnm.*Bpnm*deltaT;
+                JDOCpnmIntegral = JDOCpnmIntegral + jDOCpnm.*Bpnm*deltaT;
+                JFpnmIntegral = JFpnmIntegral + jFpnm.*Bpnm*deltaT;
+                %jCpnmIntegration = JCpnmIntegration + jC.*Bpnm*deltaT;
             end
-            JLpnm = JLpnmIntegral / (sim.t(end) - sim.t(floor(length(sim.t)/2)));
-            JDOCpnm = JDOCpnmIntegral / (sim.t(end) - sim.t(floor(length(sim.t)/2)));
-            JFpnm = JFpnmIntegral / (sim.t(end) - sim.t(floor(length(sim.t)/2)));
-            %Jpnm(Jpnm<0) = 0;
-            %percentages = Jpnm/sum(Jpnm)*100;
-            JLpercent = JLpnm ./ sum(
-            
-            fprintf(' %3.1f%%  |  %3.1f%%  |  %3.1f%%   |\n', percentages);
+            deltaT = 1;%sim.t(end) - sim.t(floor(length(sim.t)/2));
+            JC = sum(JLpnmIntegral + JDOCpnmIntegral + JFpnmIntegral);
+            JLpnm = 100*JLpnmIntegral/JC / deltaT;
+            JDOCpnm = 100*JDOCpnmIntegral/JC / deltaT;
+            JFpnm = 100*JFpnmIntegral/JC / deltaT;
+                        
+            fprintf(' % 3.1f%% % 3.1f%% % 3.1f%%  |  % 3.1f%% % 3.1f%% % 3.1f%% |  % 3.1f%% % 3.1f%% % 3.1f%%  | %3.1f%%\n', ...
+                [JLpnm(1), JDOCpnm(1), JFpnm(1), ...
+                JLpnm(2), JDOCpnm(2), JFpnm(2), ...
+                JLpnm(3), JDOCpnm(3), JFpnm(3), ...
+                sum(JLpnm+JDOCpnm+JFpnm)]);
         end
     end
 end
