@@ -76,23 +76,26 @@ function sweep(p,d,P0)
                 jFpnm = calcPicoNanoMicroRate(m, jF);
                 % Calc the percentages:
                 Bpnm = calcPicoNanoMicro(sim.B(k,:), m);
-                deltaT = 1;%(sim.t(k)-sim.t(k-1));
-                JLpnmIntegral = JLpnmIntegral + jLpnm.*Bpnm*deltaT;
-                JDOCpnmIntegral = JDOCpnmIntegral + jDOCpnm.*Bpnm*deltaT;
-                JFpnmIntegral = JFpnmIntegral + jFpnm.*Bpnm*deltaT;
+                JLpnmIntegral = JLpnmIntegral + jLpnm.*Bpnm;
+                JDOCpnmIntegral = JDOCpnmIntegral + jDOCpnm.*Bpnm;
+                JFpnmIntegral = JFpnmIntegral + jFpnm.*Bpnm;
                 %jCpnmIntegration = JCpnmIntegration + jC.*Bpnm*deltaT;
             end
-            deltaT = 1;%sim.t(end) - sim.t(floor(length(sim.t)/2));
+            %deltaT = 1;%sim.t(end) - sim.t(floor(length(sim.t)/2));
             JC = sum(JLpnmIntegral + JDOCpnmIntegral + JFpnmIntegral);
-            JLpnm = 100*JLpnmIntegral/JC / deltaT;
-            JDOCpnm = 100*JDOCpnmIntegral/JC / deltaT;
-            JFpnm = 100*JFpnmIntegral/JC / deltaT;
+            JLpnm = 100*JLpnmIntegral/JC;
+            JDOCpnm = 100*JDOCpnmIntegral/JC;
+            JFpnm = 100*JFpnmIntegral/JC;
                         
-            fprintf(' % 3.1f%% % 3.1f%% % 3.1f%%  |  % 3.1f%% % 3.1f%% % 3.1f%% |  % 3.1f%% % 3.1f%% % 3.1f%%  | %3.1f%%\n', ...
+            fprintf(' % 3.1f%% % 3.1f%% % 3.1f%%  |  % 3.1f%% % 3.1f%% % 3.1f%% |  % 3.2f%% % 3.2f%% % 3.2f%%  | %3.1f%%\n', ...
                 [JLpnm(1), JDOCpnm(1), JFpnm(1), ...
                 JLpnm(2), JDOCpnm(2), JFpnm(2), ...
                 JLpnm(3), JDOCpnm(3), JFpnm(3), ...
                 sum(JLpnm+JDOCpnm+JFpnm)]);
+            
+            %ix = sim.t>(0.75*sim.t(end));
+            %Bpnm = calcPicoNanoMicro(trapz(sim.t(ix),sim.B(ix,:),1), p.m(3:end)) / (0.25*sim.t(end));
+            %fprintf(' %3.1f  |  %3.1f  |  %3.1f   |\n', Bpnm);
         end
     end
 end

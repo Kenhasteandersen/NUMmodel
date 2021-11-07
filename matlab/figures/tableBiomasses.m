@@ -50,7 +50,7 @@ function sweep(p,d,P0)
             drawnow
             
             ix = sim.t>(0.75*sim.t(end));
-            Bpnm = calcPicoNanoMicro(mean(sim.B(ix,:),1), p.m(3:end));
+            Bpnm = calcPicoNanoMicro(trapz(sim.t(ix),sim.B(ix,:),1), p.m(3:end)) / (0.25*sim.t(end));
             fprintf(' %3.1f  |  %3.1f  |  %3.1f   |\n', Bpnm);
         end
     end
