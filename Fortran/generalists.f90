@@ -217,7 +217,6 @@ contains
            + ((-rates%JDOC(ix) &
            +   JlossPassive(i) &
            +   rates%JClossLiebig(ix) &
-           +   rates%JCloss_photouptake(ix) &
            +   reminF*rates%JCloss_feeding(ix))/this%m(i) &
            +  remin2*mort2*u(i) &
            +  reminHTL*rates%mortHTL(ix)) * u(i)
