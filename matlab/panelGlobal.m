@@ -45,7 +45,7 @@ else
     ax.YColor = 'white';
     axis tight manual
     %plabel('PlabelLocation',20, 'PLabelMeridian', 91)
-    contourfm(y,x ,squeeze(z)', vContourLevels,'linestyle','none');
+    contourfm(y,x ,squeeze(double(z))', vContourLevels,'linestyle','none');
     %shading interp
     geoshow('landareas.shp', 'FaceColor', [0.8 0.8 0.8], 'EdgeColor', 'black');
 end
