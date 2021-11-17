@@ -23,7 +23,7 @@ module generalists
   !
   ! Phagotrophy:
   !
-  real(dp), parameter:: epsilonF = 1.0 !0.8 ! Assimilation efficiency
+  real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
   real(dp), parameter:: alphaF = 0.018 
   real(dp), parameter:: cF = 30.
   real(dp), parameter:: beta = 500.d0
@@ -41,7 +41,7 @@ module generalists
   ! Biogeo:
   !
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-  real(dp), parameter:: remin2 = 1.0!0.5d0 ! fraction of virulysis remineralized to N and DOC
+  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
   real(dp), parameter:: reminF = 0.1d0
   real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
 
@@ -50,7 +50,8 @@ module generalists
   real(dp),  dimension(:), allocatable:: JN(:), JL(:), Jresp(:), JFreal(:)
   real(dp):: mort2
 
-  public initGeneralists, calcRatesGeneralists, calcDerivativesGeneralists, getProdNetGeneralists
+  public initGeneralists, calcRatesGeneralists, calcDerivativesGeneralists, getProdNetGeneralists,&
+  getNbalanceGeneralists,   getCbalanceGeneralists
 contains
 
   function initGeneralists(n, ixOffset, mMax) result(this)
@@ -232,14 +233,21 @@ contains
    !
    ! Mass balance check:
    !
-   write(*,*) 'Total N balance: ', &
-          (rates%dudt(idxN) &    ! Change in N
-          + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &  ! Uptake by plankton
-          + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1+this%ixOffset:this%ixOffset+this%n) & ! Lost to HTLs
-          + (1-remin2)*mort2*u(1+this%ixOffset:this%ixOffset+this%n)**2 & ! Lost in viral lysis
-          + (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n) )/rhoCN) &  ! Lost in feeding
-          / u(idxN) , '1/day'
+   write(*,*) 'Total C balance u(i): ', &  !including Jloss_feeding - makes little difference
+   (rates%dudt(idxDOC) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
+   + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
+   + (1-remin2)*mort2*u(1:this%n)**2 &
+   - rates%JLreal(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n)/this%m(1:this%n) &
+   + fTemp2*Jresp(1:this%n)*u(1:this%n)/this%m(1:this%n) &
+   + (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
+   * u(1:this%n) ))/u(idxDOC), '1/day' 
 
+    write(*,*) 'Total N balance u(i): ', &  !including Jloss_feeding - makes little difference
+   (rates%dudt(idxN) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
+   + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
+   + (1-remin2)*mort2*u(1:this%n)**2 &
+   + (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
+      * u(1:this%n))/rhoCN)/u(idxN), '1/day' 
  end subroutine calcDerivativesGeneralists
 
  function getProdNetGeneralists(this, u, rates) result(ProdNet)
@@ -251,8 +259,36 @@ contains
 
    ProdNet = 0.d0
    do i = 1, this%n
-      ProdNet = ProdNet + max( 0.d0, (rates%JLreal(i+this%ixOffset)-Jresp(i))*u(i)/this%m(i) )
+      ProdNet = ProdNet + max( 0.d0, (rates%JLreal(i+this%ixOffset)-ftemp2*Jresp(i))*u(i)/this%m(i) )
     end do
   end function getProdNetGeneralists
  
+  function getNbalanceGeneralists(this, u, rates) result(Nbalance)
+    real(dp):: Nbalance
+    type(typeSpectrum), intent(in):: this
+    type(typeRates), intent(in):: rates
+    real(dp), intent(in):: u(this%n)
+
+    Nbalance = (rates%dudt(idxN) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
+    + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
+    + (1-remin2)*mort2*u(1:this%n)**2 &
+    + (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
+       * u(1:this%n))/rhoCN)/u(idxN)
+  end function getNbalanceGeneralists 
+
+  function getCbalanceGeneralists(this, u, rates) result(Cbalance)
+    real(dp):: Cbalance
+    type(typeSpectrum), intent(in):: this
+    type(typeRates), intent(in):: rates
+    real(dp), intent(in):: u(this%n)
+
+    Cbalance = (rates%dudt(idxDOC) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
+    + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
+    + (1-remin2)*mort2*u(1:this%n)**2 &
+    - rates%JLreal(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n)/this%m(1:this%n) &
+    + fTemp2*Jresp(1:this%n)*u(1:this%n)/this%m(1:this%n) &
+    + (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
+    * u(1:this%n) ))/u(idxDOC)
+  end function getCbalanceGeneralists 
+  
 end module generalists

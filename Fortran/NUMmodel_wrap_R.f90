@@ -74,6 +74,13 @@ end subroutine f_setupGeneralistsOnly
     call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
   end subroutine f_getFunctions
   
+  subroutine f_getBalance(Nbalance, Cbalance)
+    use globals
+    use NUMmodel, only: getBalance
+   real(dp), intent(out):: Nbalance, Cbalance
+
+    call getBalance(Nbalance, Cbalance)
+  end subroutine f_getBalance
 
    subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt)
     use globals

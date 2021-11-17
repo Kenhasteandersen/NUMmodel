@@ -7,7 +7,7 @@ module NUMmodel_wrap
        setupGeneric, setupGeneric_csp, &
        calcderivatives, rates, m, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
-       parametersHTL
+       parametersHTL, getBalance
 
   use globals
 
@@ -127,6 +127,12 @@ contains
     call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
   end subroutine f_getFunctions
 
+  subroutine f_getBalance(Nbalance, Cbalance) bind(c)
+    real(c_double), intent(out):: Nbalance, Cbalance
+
+    call getBalance(Nbalance, Cbalance)
+  end subroutine f_getBalance  
+  
   subroutine f_getMass(m, mDelta) bind(c)
     use globals
     use NUMmodel, only: getMass

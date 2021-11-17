@@ -70,6 +70,9 @@ void f_getfunctions(
 		    double *Bnano,
 		    double *Bmicro);
 
+void f_getbalance(double *Nbalance,
+				  double *Cbalance);
+				  
 void f_getrates(
 		double *jN,
 		double *jDOC,

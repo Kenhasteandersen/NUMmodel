@@ -476,7 +476,8 @@ contains
        end do
     end do
 
-    rates%flvl(idxB:nGrid) = AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid) + fTemp2*JFmax(idxB:nGrid))
+    rates%flvl(idxB:nGrid) = epsilonF(idxB:nGrid)*AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid)&
+                            + fTemp2*JFmax(idxB:nGrid))
     rates%JF(idxB:nGrid) = rates%flvl(idxB:nGrid) * fTemp2*JFmax(idxB:nGrid)
     !
     ! Calc HTL mortality:
@@ -754,6 +755,21 @@ contains
     end if
   end subroutine getFunctions
 
+  ! ---------------------------------------------------
+  ! Returns mass conservation calculated from last call to calcDerivatives
+  ! ---------------------------------------------------
+  subroutine getBalance(Nbalance,Cbalance)
+   real(dp), intent(out):: Nbalance, Cbalance
+   integer:: i
+   
+   i = 1 ! Do it only for the first group, whihc we assume are generalists
+      if (group(i)%type .eq. typeGeneralist) then
+         Nbalance = getNbalanceGeneralists(group(i),  upositive(group(i)%ixStart:group(i)%ixEnd), rates)  
+         Cbalance = getCbalanceGeneralists(group(i),  upositive(group(i)%ixStart:group(i)%ixEnd), rates)      
+    
+      end if   
+ 
+end subroutine getBalance
   ! ---------------------------------------------------
   ! Returns the rates calculated from last call to calcDerivatives
   ! ---------------------------------------------------
