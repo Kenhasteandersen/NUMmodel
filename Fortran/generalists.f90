@@ -217,7 +217,6 @@ contains
            + ((-rates%JDOC(ix) &
            +   JlossPassive(i) &
            +   rates%JClossLiebig(ix) &
-           +   rates%JCloss_photouptake(ix) &
            +   reminF*rates%JCloss_feeding(ix))/this%m(i) &
            +  remin2*mort2*u(i) &
            +  reminHTL*rates%mortHTL(ix)) * u(i)
@@ -230,24 +229,7 @@ contains
            - mort2*u(i) &
            - rates%mortHTL(ix))*u(i)
    end do
-   !
-   ! Mass balance check:
-   !
-   !write(*,*) 'Total C balance u(i): ', &  !including Jloss_feeding - makes little difference
-   !(rates%dudt(idxDOC) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
-   !+ (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
-   !+ (1-remin2)*mort2*u(1:this%n)**2 &
-   !- rates%JLreal(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n)/this%m(1:this%n) &
-   !+ fTemp2*Jresp(1:this%n)*u(1:this%n)/this%m(1:this%n) &
-   !+ (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
-   !* u(1:this%n) ))/u(idxDOC), '1/day' 
-
-   ! write(*,*) 'Total N balance u(i): ', &  !including Jloss_feeding - makes little difference
-   !(rates%dudt(idxN) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
-   !+ (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
-   !+ (1-remin2)*mort2*u(1:this%n)**2 &
-   !+ (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
-   !   * u(1:this%n))/rhoCN)/u(idxN), '1/day' 
+  
  end subroutine calcDerivativesGeneralists
 
  function getProdNetGeneralists(this, u, rates) result(ProdNet)
