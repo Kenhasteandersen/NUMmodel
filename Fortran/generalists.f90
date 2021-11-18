@@ -40,10 +40,10 @@ module generalists
   !
   ! Biogeo:
   !
-  real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
+  real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
+  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to DOC
   real(dp), parameter:: reminF = 0.1d0
-  real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
+  real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
 
   real(dp),  dimension(:), allocatable:: AN(:), AL(:), Jmax(:),  JlossPassive(:)
   real(dp),  dimension(:), allocatable:: nu(:), mort(:)
@@ -207,8 +207,8 @@ contains
            + ((-rates%JN(ix) &
            +  JlossPassive(i) &
            +  rates%JNlossLiebig(ix) &
-           +  reminF*rates%JCloss_feeding(ix))/this%m(i) &
-           + remin2*mort2*u(i) &
+           +  rates%JCloss_feeding(ix))/this%m(i) &
+           + mort2*u(i) &
            + reminHTL*rates%mortHTL(ix)) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -253,8 +253,8 @@ contains
 
     Nbalance = (rates%dudt(idxN) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
     + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
-    + (1-remin2)*mort2*u(1:this%n)**2 &
-    + (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
+    + (1-1)*mort2*u(1:this%n)**2 &
+    + (1-1)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
        * u(1:this%n))/rhoCN)/u(idxN)
   end function getNbalanceGeneralists 
 
