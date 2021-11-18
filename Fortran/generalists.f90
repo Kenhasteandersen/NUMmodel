@@ -253,9 +253,9 @@ contains
 
     Nbalance = (rates%dudt(idxN) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
     + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
-    + (1-1)*mort2*u(1:this%n)**2 &
+    + (1-1)*mort2*u(1:this%n)**2 & ! full N remineralization of viral mortality
     + (1-1)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
-       * u(1:this%n))/rhoCN)/u(idxN)
+       * u(1:this%n))/rhoCN)/u(idxN) ! full N remineralization of feeding losses
   end function getNbalanceGeneralists 
 
   function getCbalanceGeneralists(this, u, rates) result(Cbalance)
