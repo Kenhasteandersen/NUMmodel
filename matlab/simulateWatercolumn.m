@@ -303,6 +303,9 @@ sim.DOC(sim.DOC<0) = 0.;
 sim.z = sim.z(1:length(idx.z));
 sim.dznom = sim.dznom(1:length(idx.z));
 
+sim.Ntot = sum(sim.N.*(sim.dznom*ones(1,length(sim.t)))) + ... % N/m2 in dissolved phase
+    sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68; % N/m2 in biomass 
+
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
 %     sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
