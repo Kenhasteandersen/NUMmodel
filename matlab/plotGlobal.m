@@ -36,7 +36,7 @@ c.Label.String  = 'Concentration [\mug N l^{-1}]';
 % Silicate
 if bSilicate
     nexttile
-    c = panelGlobal(sim.x,sim.y,sim.Si(:,:,1,iTime),'Si',sProjection);
+    c = panelGlobal(sim.x,sim.y,sim.Si(:,:,1,iTime),sTitle='Si',sProjection=sProjection);
     c.Label.String  = 'Concentration [\mug Si l^{-1}]';
 end
 
