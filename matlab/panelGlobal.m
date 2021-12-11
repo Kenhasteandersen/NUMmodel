@@ -18,7 +18,7 @@ function cbar = panelGlobal(x,y,z, vContourLevels, options)
 arguments
     x,y (:,1);
     z (:,:);
-    vContourLevels = [min(z(:)), max(z(:))];
+    vContourLevels = double([min(z(:)), max(z(:))]);
     options.sTitle string = '';
     options.sProjection string = 'fast';
 end
@@ -33,8 +33,11 @@ if length(vContourLevels)==2
     vContourLevels = linspace(vContourLevels(1), vContourLevels(2),10);
 end
 
+z = double(squeeze( min(max(z,vContourLevels(1)),vContourLevels(end)))');
+
 if (strcmp(options.sProjection,'fast'))
-    contourf(x,y,squeeze(z)', vContourLevels, 'LineStyle','none');
+    contourf(x,y, z, vContourLevels, 'LineStyle','none');
+    %contourf(x,y,squeeze(z)', vContourLevels, 'LineStyle','none');
     shading flat
     axis tight
 else
@@ -45,9 +48,9 @@ else
     ax.YColor = 'white';
     axis tight manual
     %plabel('PlabelLocation',20, 'PLabelMeridian', 91)
-    contourfm(y,x ,squeeze(double(z))', vContourLevels,'linestyle','none');
+    contourfm(y,x,z, vContourLevels,'linestyle','none');
     %shading interp
-    geoshow('landareas.shp', 'FaceColor', [0.8 0.8 0.8], 'EdgeColor', 'black');
+    %geoshow('landareas.shp', 'FaceColor', [0.8 0.8 0.8], 'EdgeColor', 'black');
 end
 
 cbar = colorbar('eastoutside', 'FontSize',14);
