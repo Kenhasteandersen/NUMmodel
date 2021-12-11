@@ -30,8 +30,15 @@ if strcmp(sim.p.nameModel, 'global')
     z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
     B = squeeze(double(sim.B(idx.x, idx.y, idx.z, :, iTime)));
     for i = 1:length(idx.z)
-        u(i,:) = [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
-            sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)];
+        if isfield(sim,'Si')
+            u(i,:) = [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
+                sim.DOC(idx.x, idx.y, idx.z(i), iTime), ...
+                sim.Si(idx.x, idx.y, idx.z(i), iTime), ...
+                B(i,:)];
+        else
+            u(i,:) = [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
+                sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)];
+        end
         L(i) = sim.L(idx.x, idx.y, idx.z(i), iTime);
         T(i) = sim.T(idx.x, idx.y, idx.z(i), iTime);
     end
