@@ -50,7 +50,7 @@ else
     %plabel('PlabelLocation',20, 'PLabelMeridian', 91)
     contourfm(y,x,z, vContourLevels,'linestyle','none');
     %shading interp
-    %geoshow('landareas.shp', 'FaceColor', [0.8 0.8 0.8], 'EdgeColor', 'black');
+    geoshow('landareas.shp', 'FaceColor', [0.8 0.8 0.8], 'EdgeColor', 'black');
 end
 
 cbar = colorbar('eastoutside', 'FontSize',14);
