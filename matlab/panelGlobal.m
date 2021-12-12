@@ -50,7 +50,10 @@ else
     %plabel('PlabelLocation',20, 'PLabelMeridian', 91)
     contourfm(y,x,z, vContourLevels,'linestyle','none');
     %shading interp
-    geoshow('landareas.shp', 'FaceColor', [0.8 0.8 0.8], 'EdgeColor', 'black');
+    load coastlines
+    patchm(coastlat,coastlon,0.4*[1 1 1])
+    %geoshow('landareas.shp', 'FaceColor', [0.8 0.8 0.8], 'EdgeColor',
+    %'black'); % Slow
 end
 
 cbar = colorbar('eastoutside', 'FontSize',14);
