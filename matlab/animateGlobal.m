@@ -18,6 +18,8 @@ arguments
     options.sUnits char = ""; % e.g.: "Concentration (\mug C l^{-1})";
     options.sFilename char = "Global";
     options.sProjection char = "fast"; % or use e.g. "eckert4"
+    options.bSpin logical = false; % whether to spin the globe (works best
+                                   % with sProjection="ortho".
 end
 
 n = size(field,3);
@@ -26,9 +28,14 @@ F(n) = struct('cdata',[],'colormap',[]);
 figure(1)
 parfor iTime = 1:n
     clf
-    c = panelGlobal(x,y,field(:,:,iTime),options.sTitle,options.sProjection);
+    c = panelGlobal(x,y,field(:,:,iTime), ...
+        sTitle=options.sTitle, sProjection=options.sProjection);
     c.Label.String  = options.sUnits;
     caxis([0 options.limit]);
+    
+    if options.bSpin
+        setm(gca,'Origin',[20 iTime/n*360 0])
+    end
 
     drawnow
     F(iTime) = getframe(figure(1));

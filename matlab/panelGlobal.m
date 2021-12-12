@@ -51,7 +51,8 @@ else
     contourfm(y,x,z, vContourLevels,'linestyle','none');
     %shading interp
     load coastlines
-    patchm(coastlat,coastlon,0.4*[1 1 1])
+    h=patchm(coastlat,coastlon,0.4*[1 1 1]);
+    set(h,'linestyle','none')
     %geoshow('landareas.shp', 'FaceColor', [0.8 0.8 0.8], 'EdgeColor',
     %'black'); % Slow
 end
