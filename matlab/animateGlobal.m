@@ -13,13 +13,14 @@ function F = animateGlobal(x,y,field, options)
 arguments
     x,y (:,:) double;
     field (:,:,:) double;
-    options.limit double = max(field(:)); % max limit for the colorscale
+    %options.limit double = max(field(:)); % max limit for the colorscale
     options.sTitle char = "";
-    options.sUnits char = ""; % e.g.: "Concentration (\mug C l^{-1})";
+    options.sUnits char = ""; % e.g.: "Concentration (\mug_C/l)";
     options.sFilename char = "Global";
-    options.sProjection char = "fast"; % or use e.g. "eckert4"
+    options.sProjection char = "fast"; % or use e.g. "ortho"
     options.bSpin logical = false; % whether to spin the globe (works best
                                    % with sProjection="ortho".
+    options.vContourLevels = double([min(field(:)), max(field(:))]); % Passed to panelGlobal
 end
 
 n = size(field,3);
@@ -28,10 +29,10 @@ F(n) = struct('cdata',[],'colormap',[]);
 figure(1)
 parfor iTime = 1:n
     clf
-    c = panelGlobal(x,y,field(:,:,iTime), ...
+    c = panelGlobal(x,y,field(:,:,iTime), options.vContourLevels, ...
         sTitle=options.sTitle, sProjection=options.sProjection);
     c.Label.String  = options.sUnits;
-    caxis([0 options.limit]);
+    %caxis([0 options.limit]);
     
     if options.bSpin
         setm(gca,'Origin',[20 iTime/n*360 0])
