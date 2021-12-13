@@ -36,11 +36,11 @@ parfor iTime = 1:n
     c.Label.String  = options.sUnits;
     %caxis([0 options.limit]);
     % Set bckground color
-    set(gcf,'color',color);
-    set(gca,'color',color);
+    set(gcf,'color',options.color);
+    set(gca,'color',options.color);
     
     % Possible delete the colorbar:
-    if ~bColorbar
+    if ~options.bColorbar
         colorbar off
     end
     
