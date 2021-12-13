@@ -21,6 +21,8 @@ arguments
     options.bSpin logical = false; % whether to spin the globe (works best
                                    % with sProjection="ortho".
     options.vContourLevels = double([min(field(:)), max(field(:))]); % Passed to panelGlobal
+    options.color double = [1 1 1]; % background color
+    options.bColorbar logical = true; % Whether to mke the colorbar
 end
 
 n = size(field,3);
@@ -33,11 +35,21 @@ parfor iTime = 1:n
         sTitle=options.sTitle, sProjection=options.sProjection);
     c.Label.String  = options.sUnits;
     %caxis([0 options.limit]);
+    % Set bckground color
+    set(gcf,'color',color);
+    set(gca,'color',color);
     
+    % Possible delete the colorbar:
+    if ~bColorbar
+        colorbar off
+    end
+    
+    % Do spin:
     if options.bSpin
         setm(gca,'Origin',[20 iTime/n*360 0])
     end
 
+    % Get the frame.
     drawnow
     F(iTime) = getframe(figure(1));
     disp(iTime);
