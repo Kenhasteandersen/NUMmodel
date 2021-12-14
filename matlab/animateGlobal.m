@@ -46,7 +46,7 @@ parfor iTime = 1:n
     
     % Do spin:
     if options.bSpin
-        setm(gca,'Origin',[20 iTime/n*360 0])
+        setm(gca,'Origin',[20 -iTime/n*360 0])
     end
 
     % Get the frame.
