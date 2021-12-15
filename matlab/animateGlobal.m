@@ -20,6 +20,7 @@ arguments
     options.sProjection char = "fast"; % or use e.g. "ortho"
     options.bSpin logical = false; % whether to spin the globe (works best
                                    % with sProjection="ortho".
+    options.time double = 10; % The duration of the animations (in seconds)
     options.vContourLevels = double([min(field(:)), max(field(:))]); % Passed to panelGlobal
     options.color double = [1 1 1]; % background color
     options.bColorbar logical = true; % Whether to mke the colorbar
@@ -62,7 +63,7 @@ if (ismac || ispc)
 else
     v = VideoWriter(options.sFilename, 'Motion JPEG AVI');
 end
-v.FrameRate = n/5;
+v.FrameRate = options.time / n;
 
 open(v);
 for i = 1:n
