@@ -1,7 +1,5 @@
 %
 % Create an animation of a field from a global run. 
-% Currently plots the plankton biomass
-% and the nutrients.
 %
 % In: 
 %  x,y: ranges typically from sim.x and sim.y
