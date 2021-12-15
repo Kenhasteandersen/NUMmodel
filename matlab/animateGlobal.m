@@ -7,6 +7,14 @@
 %  x,y: ranges typically from sim.x and sim.y
 %  field: with three dimensions: x, y, and time
 %
+% Example:
+%  B = sim.B;
+%  B(isnan(B)) = 0;
+%  B = sum(B,4); % Total biomass in the group
+%  dz = sim.dznom;     % Integrate over depth:
+%  B = sum(B.*reshape(dz ,1,1,numel(dz)),3) / 1000; % g/m2 
+%  animateGlobal(sim.x, sim.y, log10(B),vContourLevels=[0 2],...
+%      sProjection='ortho',bSpin=true,color=[0 0 0],bColorbar=false,time=20);
 %
 function F = animateGlobal(x,y,field, options)
 
@@ -39,6 +47,8 @@ parfor iTime = 1:n
     % Set bckground color
     set(gcf,'color',options.color);
     set(gca,'color',options.color);
+    gridm('off'); % Remove grid lines
+    framem('off'); % Remove lines around map
     
     % Possible delete the colorbar:
     if ~options.bColorbar
