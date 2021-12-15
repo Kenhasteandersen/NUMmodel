@@ -63,7 +63,7 @@ if (ismac || ispc)
 else
     v = VideoWriter(options.sFilename, 'Motion JPEG AVI');
 end
-v.FrameRate = options.time / n;
+v.FrameRate = n / options.time;
 
 open(v);
 for i = 1:n
