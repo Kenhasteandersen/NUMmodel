@@ -68,6 +68,7 @@ else
     v = VideoWriter(options.sFilename, 'Motion JPEG AVI');
 end
 v.FrameRate = n / options.time;
+v.Quality=95;
 
 open(v);
 for i = 1:n
