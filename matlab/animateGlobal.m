@@ -6,11 +6,7 @@
 %  field: with three dimensions: x, y, and time
 %
 % Example:
-%  B = sim.B;
-%  B(isnan(B)) = 0;
-%  B = sum(B,4); % Total biomass in the group
-%  dz = sim.dznom;     % Integrate over depth:
-%  B = sum(B.*reshape(dz ,1,1,numel(dz)),3) / 1000; % g/m2 
+%  B = calcIntegrateGlobal(sim, B);
 %  animateGlobal(sim.x, sim.y, log10(B),vContourLevels=[0 2],...
 %      sProjection='ortho',bSpin=true,color=[0 0 0],bColorbar=false,time=20);
 %
