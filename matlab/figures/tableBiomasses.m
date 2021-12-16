@@ -25,6 +25,14 @@ p.AF = 0*p.AF; % Setting the affinity for feeding to zero
 sweep(p,d,P0)
 fprintf('-----------------------------------\n');
 %
+% Case 1.5: no phagotrophy and no predation
+%
+p = pp;
+p.AF = 0*p.AF; % Setting the affinity for feeding to zero
+p.pGeneralists.ALm ( p.m(3:end)>1e-6 ) = 0 % 
+sweep(p,d,P0)
+fprintf('-----------------------------------\n');%
+%
 % Case two: only pico phototrophy
 %
 p = pp;
