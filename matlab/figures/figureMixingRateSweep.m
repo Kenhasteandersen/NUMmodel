@@ -9,7 +9,7 @@
 p = parametersGeneralistsOnly( 25, 10.);
 p = parametersChemostat( p );
 
-p.mortHTLm = p.mortHTLm/4; % Lowering the background mortality (not needed, actually).
+p.mortHTLm = 0*p.mortHTLm; % Lowering the background mortality (not needed, actually).
 
 p.u0(1) = 3; % Correponds to 0.1 uM
 

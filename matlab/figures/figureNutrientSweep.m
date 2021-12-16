@@ -9,6 +9,7 @@ p = parametersChemostat( p );
 
 p.bLosses = true; % Allow mixing losses
 
+%p.mortHTLm = p.mortHTLm/4;
 p.mortHTLm = 0*p.mortHTLm; % No HTL mortality
 
 pp = p;
@@ -18,7 +19,7 @@ d = [0.01 0.1]; % The mixing rates to run over
 % Set up figure:
 %
 clf
-tiledlayout(3,3)
+tiledlayout(4,3)
 % Make fig double column:
 set(gcf,'paperunits','centimeters')
 set(gcf,'units','centimeters')
@@ -38,7 +39,16 @@ drawnow
 panelSpectra(p, d, false);
 drawnow
 %
-% Case two: no phototrophy for large cells
+% Case 1.5: no phagotrophy and only phototrophy for small cells:
+%
+p.AF = 0*p.AF; % Setting the affinity for feeding to zero
+p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
+sweep(p,d, false)
+drawnow
+panelSpectra(p, d, false);
+drawnow
+%
+% Case two: phagotrophy and only phototrophy for small cells:
 %
 p = pp;
 p.pGeneralists.ALm( p.m(3:end)>1e-6 ) = 0; % No phototrophy for larger cells
