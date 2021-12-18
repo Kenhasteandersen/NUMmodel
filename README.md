@@ -10,12 +10,11 @@ The core library is written in fortran90 and is interfaced from matlab or R. Req
 Use the makefile in the Fortran directory. Edit the compiler and flags in the makefile to suit your operating system and compile by writing: `make`.
 
 ### Basic structure
-There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.  See `exampleGeneralists` for some basic runs of the chemostat model.
-
+There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.
 #### Top-level matlab routines
 These routines run a simulation and returns the results in a `sim` structure. All units are in micro gC/l (or micro gN/l). Units of light are micro mol photons per m2 per second:
 
-* `baserunChemostat(mAdult, false)`.  Runs a chemostat version of the model and plots the output. The first argument is the adult body masses of copepods (in micro gram carbon) - send in an empty list to run only with unicellular plankton. Change the second argument to `true`to use the Fortran library.
+* `baserunChemostat(mAdult)`.  Runs a chemostat version of the model and plots the output. The argument is the adult body masses of copepods (in micro gram carbon) - send in an empty list to run only with unicellular plankton.
 * `baserunChemostatEuler(mAdult)`. Uses the Fortran library and simple Euler time-stepping.
 * `baserunGlobal()`. Runs a global simulation with only generalists. It uses transport matrices which must be downloaded separately and placed in the directory `TMs`. Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs (choose MITgcm_2.8deg).
 * `baserunWatercolumn`. Run a watercolumn extracted from a transport matrix.
