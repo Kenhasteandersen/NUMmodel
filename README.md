@@ -24,8 +24,6 @@ The routines operates with two basic structures: a *parameter* structure and a *
 
 *Parameters* are set with two calls: one to setup the size spectra to simulate and one to add the parameters for the simulation (chemostat or global). The size spectra are setup with a call to `setupXX` where XX represent the setup, e.g., `setupGeneralistsOnly` or `setupGeneric(mAdult)` (the latter includes copepods where `mAdult` is vector of copepod adult masses).  Parameters for the simulation are subsequently set with a call to `parametersChemostat`or `parametersGlobal`. For example: `p = parametersChemostat( setupGeneralistsOnly() );`.
 
-*Simulations* are performed with calls to a simulation routine: `sim = simulationChemostat(p)` or `sim = simulationGlobal(p)`, where `p` is a parameter structure.
+*Simulations* are performed with calls to a simulation routine: `sim = simulationChemostat(p)`, `sim = simulationWatercolumn(p, latitude, longitude)`, or `sim = simulationGlobal(p)`, where `p` is a parameter structure.
 
 *Plots* are made with calls to the plot routines. A series of basic plots are made by a call to `plotSimulation(sim)`.
-
-
