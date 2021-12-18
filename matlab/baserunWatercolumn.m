@@ -21,3 +21,5 @@ p.tEnd = 2*365;
 sim = simulateWatercolumn(p, lat,lon);
 
 plotSimulation(sim)
+
+checkConservation(sim);

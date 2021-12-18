@@ -29,3 +29,5 @@ toc
 % Plot
 %
 plotSimulation(sim)
+
+checkConservation(sim);

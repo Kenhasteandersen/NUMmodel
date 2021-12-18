@@ -33,6 +33,7 @@ uDeep(p.idxB:end) = 0;
 %
 % Simulate:
 %
+%p.u0(1) = 0;
 sLibname = loadNUMmodelLibrary();
 [t,u] = ode23(@fDeriv, [0 p.tEnd], p.u0);
 %

@@ -13,5 +13,6 @@ p.nameModel = 'chemostat';
 
 p.d = 0.5;  % Mixing rate
 p.tEnd = 365;  % Time to run in days
+p.tSave = 1;
 
 p.depthProductiveLayer = 30; % (meters) Only needed for calculation of functions

@@ -41,6 +41,7 @@ sim.B(sim.B<0)=0; % Get rid of negative biomasses
 disp('Plotting')
 plotSimulation(sim)
 
+checkConservation(sim);
 %
 % CPU-heavy plots:
 %

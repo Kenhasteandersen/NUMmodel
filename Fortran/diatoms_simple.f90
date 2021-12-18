@@ -1,11 +1,13 @@
 !
 ! Module to handle diatoms
 ! Maximal simplicity; based on generalists with the only difference:
-!  - a fixed-sized vacuole which increases radius
+!  - a fixed-sized vacuole
 !  - lack of ability to do phagotrophy
 !  - reliance on silicate
 !  - lower predation risk due to silicate shell
 !  - inability to take up DOC
+!
+! Does not scale rates with temperature
 !
 module diatoms_simple
     use globals
@@ -21,7 +23,7 @@ module diatoms_simple
     !
     ! Cell properties
     !
-     real(dp), parameter:: v=0.6 ! Vacuole fraction
+     real(dp), parameter:: v=0.6 ! Vacuole fraction. Could be estimated by comparing the density of flagellages and diatoms in Menden-Deuer (2000)
     !
     ! Light uptake:
     !
