@@ -7,8 +7,9 @@
 %  vContourLevels: levels of contours, or just min, max values
 % Optional:
 %  sTitle: title on panel
-%  sProjection: projection to use. Defaults to 'fast'. Good projection is
-%  'eckert4'
+%  sProjection: projection to use. Defaults to 'fast'. Other projections 
+%               requires that the mapping toolbox is installed. 
+%               Good projection is 'eckert4'.
 %
 % Out:
 %  cbar: the color bar object
@@ -41,6 +42,9 @@ if (strcmp(options.sProjection,'fast'))
     shading flat
     axis tight
 else
+    if exist('axesm') ~= 2
+        error('Using projections requires that the mapping toolbox is installed.')
+    end
     ax = axesm ( 'Origin',  [0 -90 0], 'MapProjection',options.sProjection, ...
         'Grid','on', 'Frame', 'on','ScaleFactor', 1, 'labelrotation',...
         'off', 'FLineWidth', 2);
