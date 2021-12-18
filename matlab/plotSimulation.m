@@ -7,7 +7,7 @@ switch sim.p.nameModel
     
     case 'chemostat'
         clf
-        plotSizespectrum(sim)
+        plotSizespectrum(sim);
         
     case 'watercolumn'
         day = 170;

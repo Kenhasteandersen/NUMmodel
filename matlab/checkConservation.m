@@ -1,5 +1,6 @@
 %
-% Calculates the nitrogen balance of the course of the simulation
+% Calculates the nitrogen balance of the course of the simulation.
+% Note: ONLY WORKS WITH CONSTANT HTL MORTALITY (NOT "QUADRATIC")
 %
 % In:
 %  sim: simulation structure
