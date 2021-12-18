@@ -18,7 +18,7 @@
 function parametersHTL(mortHTL, bQuadraticHTL)
 
 arguments
-    mortHTL double {mustBePositive} = 0.2;
+    mortHTL double {mustBeNonnegative} = 0.2;
     bQuadraticHTL logical = false;
 end
 
