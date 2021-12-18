@@ -1,8 +1,5 @@
-testFunction('testChemostatMatlab');
-
-
 testFunction('testLoadFortran');
-testFunction('testChemostatFortran');
+testFunction('testChemostat');
 testFunction('testChemostatEuler');
 testFunction('testGlobal');
 

@@ -41,6 +41,9 @@ contains
 
     allocate(this%AF(n))
     allocate(this%JFmax(n))
+    ! Set feeding to dummy values. Relevant for non-feeding groups (diatoms)
+    this%AF = 0.d0
+    this%JFmax = 1.d0
   end function initSpectrum
   !
   ! Set up a grid given minimum and maximum center masses

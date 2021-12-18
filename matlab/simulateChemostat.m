@@ -33,6 +33,10 @@ uDeep(p.idxB:end) = 0;
 %
 % Simulate:
 %
+<<<<<<< HEAD
+=======
+%p.u0(1) = 0;
+>>>>>>> Silicate
 sLibname = loadNUMmodelLibrary();
 [t,u] = ode23(@fDeriv, [0 p.tEnd], p.u0);
 %

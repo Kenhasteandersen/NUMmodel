@@ -23,26 +23,36 @@ end subroutine f_setupGeneralistsOnly
 !!$    write(6,*) x
 !!$  end subroutine test
 
-  subroutine f_calcDerivatives(nn, u, L, dt, dudt)
+  subroutine f_parametersHTL(mortHTL, bQuadraticHTL)
+    use globals
+    use NUMmodel, only: parametersHTL
+    real(dp), intent(in):: mortHTL
+    logical, intent(in):: bQuadraticHTL
+
+    call parametersHTL(mortHTL, bQuadraticHTL)
+  end subroutine f_parametersHTL
+
+  subroutine f_calcDerivatives(nn, u, L, T, dt, dudt)
     use globals
     use NUMmodel, only: calcDerivatives, rates
     integer, intent(in):: nn
-    real(dp), intent(in):: L, dt
+    real(dp), intent(in):: L, T, dt
     real(dp), intent(in):: u(nn)
     real(dp), intent(out):: dudt(nn)
 
-    call calcDerivatives(u, L, dt)
+    call calcDerivatives(u, L, T, dt)
     dudt = rates%dudt
   end subroutine f_calcDerivatives
 
 ! Returns the rates calculated from last call to calcDerivatives
-  subroutine f_getRates(jN, jDOC, jL, jF, jFreal,&
+  subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmaxx, jR, jLossPassive, &
     jNloss,jLreal, &
     mortpred, mortHTL, mort2, mort)
     use globals
     use NUMmodel, only: getRates, nNutrients
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
+    real(dp), intent(out):: jSi(nGrid-nNutrients)
     real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmaxx(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients)
@@ -50,7 +60,7 @@ end subroutine f_setupGeneralistsOnly
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
-    call getRates(jN, jDOC, jL, jF, jFreal,&
+    call getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmaxx, jR, jLossPassive, &
     jNloss,jLreal, &
     mortpred, mortHTL, mort2, mort)
@@ -74,14 +84,24 @@ end subroutine f_simulateChemostatEuler
     call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
   end subroutine f_getFunctions
   
-!!$
-!!$  subroutine f_simulateChemostatEuler(nGrid, u, L, Ndeep, diff, tEnd, dt)
-!!$    integer, intent(in):: nGrid
-!!$    real(dp), intent(inout):: u(nGrid)
-!!$    real(dp), intent(in):: L, Ndeep, diff, tEnd, dt
-!!$
-!!$    call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
-!!$  end subroutine f_simulateChemostatEuler
+  subroutine f_getBalance(Nbalance, Cbalance)
+    use globals
+    use NUMmodel, only: getBalance
+   real(dp), intent(out):: Nbalance, Cbalance
+
+    call getBalance(Nbalance, Cbalance)
+  end subroutine f_getBalance
+
+   subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt)
+    use globals
+    use NUMmodel, only: simulateChemostatEuler
+
+    integer, intent(in):: nNutrients
+    real(dp), intent(inout):: u(nGrid)
+    real(dp), intent(in):: L, T, Ndeep(nNutrients), diff, tEnd, dt
+
+    call simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt)
+  end subroutine f_simulateChemostatEuler
 !!$
 !!$  subroutine f_simulateEuler(nGrid, u, L, tEnd, dt)
 !!$    integer, intent(in):: nGrid

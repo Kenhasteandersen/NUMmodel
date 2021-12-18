@@ -1,5 +1,5 @@
 !
-! Module to handle generalists unicellulars
+! Module to handle generalist unicellulars
 !
 module generalists
   use globals
@@ -12,7 +12,7 @@ module generalists
   !
   ! Light uptake:
   !
-  real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
+  real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
   real(dp), parameter:: alphaL = 0.206
   real(dp), parameter:: rLstar = 8.25
   !
@@ -40,16 +40,18 @@ module generalists
   !
   ! Biogeo:
   !
-  real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-  real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
-  real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
+  real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
+  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to DOC
+  real(dp), parameter:: reminF = 0.1d0
+  real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
 
   real(dp),  dimension(:), allocatable:: AN(:), AL(:), Jmax(:),  JlossPassive(:)
   real(dp),  dimension(:), allocatable:: nu(:), mort(:)
   real(dp),  dimension(:), allocatable:: JN(:), JL(:), Jresp(:), JFreal(:)
   real(dp):: mort2
 
-  public initGeneralists, calcRatesGeneralists, calcDerivativesGeneralists, getProdNetGeneralists
+  public initGeneralists, calcRatesGeneralists, calcDerivativesGeneralists, getProdNetGeneralists,&
+  getNbalanceGeneralists,   getCbalanceGeneralists
 contains
 
   function initGeneralists(n, ixOffset, mMax) result(this)
@@ -92,7 +94,7 @@ contains
 
     r = (3./(4.*pi)*this%m/rho)**onethird
     
-    AN = alphaN*r**(-2.) / (1.+(r/rNstar)**(-2.)) * this%m
+    AN = alphaN * r**(-2.) / (1.+(r/rNstar)**(-2.)) * this%m
     AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
     this%AF = alphaF*this%m
     this%JFmax = cF/r * this%m
@@ -112,7 +114,7 @@ contains
     real(dp), intent(in):: gammaN, gammaDOC
     type(typeRates), intent(inout):: rates
     real(dp), intent(in):: L, N, DOC
-    real(dp):: f
+    real(dp):: f, JmaxT
     integer:: ix, i
 
     do i = 1, this%n
@@ -120,55 +122,67 @@ contains
        !
        ! Uptakes
        !
-       rates%JN(ix) =   gammaN * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-       rates%JDOC(ix) = gammaDOC * AN(i)*DOC ! Diffusive DOC uptake, units of C/time
+       rates%JN(ix) =   gammaN * fTemp15 * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
+       rates%JDOC(ix) = gammaDOC * fTemp15 * AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
        rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix)-Jlosspassive(i) ! In units of C
        ! Total carbon uptake
-       rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-Jresp(i)-JlossPassive(i)
+       rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-fTemp2*Jresp(i)-JlossPassive(i)
        ! Liebig + synthesis limitation:
        rates%Jtot(ix) = min( rates%JNtot(ix), rates%JCtot(ix) )
-       f = rates%Jtot(ix)/(rates%Jtot(ix) + Jmax(i))
+       !f = rates%Jtot(ix)/(rates%Jtot(ix) + JmaxT)
        ! If synthesis-limited then down-regulate feeding:
+       JmaxT = fTemp2*Jmax(i)
+       f = rates%Jtot(ix)/(rates%Jtot(ix) + max(0.,JmaxT))
        if (rates%Jtot(ix) .gt. 0) then
-          JFreal(i) = max(0.d0, rates%JF(ix) - (rates%Jtot(ix)-f*Jmax(i)))
+        JFreal(i) = max(0.d0, min(JmaxT, rates%JF(ix) - (rates%Jtot(ix)-f*JmaxT)))
+        !rates%Jtot(ix) = f * JmaxT
        else
-          JFreal(i) = max(0.d0, rates%JF(ix))
+        JFreal(i) = max(0.d0, rates%JF(ix))
        end if
-       rates%Jtot(ix) = f * Jmax(i)
-       rates%JLreal(ix) = rates%JL(ix) - max( 0.d0, &
+      rates%Jtot(ix) = f * JmaxT ! Apply limitation
+      
+      rates%JLreal(ix) = rates%JL(ix) - max( 0.d0, &
             min((rates%JCtot(ix) - (rates%JF(ix)-JFreal(i))-rates%Jtot(ix)), rates%JL(ix)))
 
-       ! Actual uptakes:
-       rates%JCtot(ix) = &
+      ! Actual uptakes:
+      rates%JCtot(ix) = &
             + rates%JLreal(ix)  &
             + rates%JDOC(ix)  &
             + JFreal(i)  &
-            - Jresp(i)  &
+            - fTemp2*Jresp(i)  &
             - JlossPassive(i)
-       rates%JNtot(ix) = &
+      rates%JNtot(ix) = &
             rates%JN(ix) + &
             JFreal(i) - &
             JlossPassive(i)
-       !
-       ! Losses:
-       !
-       rates%JCloss_feeding(ix) = (1.-epsilonF)/epsilonF*JFreal(i) ! Incomplete feeding (units of carbon per time)
-       rates%JCloss_photouptake(ix) = (1.-epsilonL)/epsilonL * rates%JLreal(ix)
-       rates%JNlossLiebig(ix) = max( 0.d0, rates%JNtot(ix)-rates%Jtot(ix))  ! In units of C
-       rates%JClossLiebig(ix) = max( 0.d0, rates%JCtot(ix)-rates%Jtot(ix)) ! C losses from Liebig, not counting losses from photoharvesting
+      !
+      ! Losses:
+      !
+      rates%JCloss_feeding(ix) = (1.-epsilonF)/epsilonF*JFreal(i) ! Incomplete feeding (units of carbon per time)
+      rates%JCloss_photouptake(ix) = (1.-epsilonL)/epsilonL * rates%JLreal(ix)
+      rates%JNlossLiebig(ix) = max( 0.d0, rates%JNtot(ix)-rates%Jtot(ix))  ! In units of C
+      rates%JClossLiebig(ix) = max( 0.d0, rates%JCtot(ix)-rates%Jtot(ix)) ! C losses from Liebig, not counting losses from photoharvesting
 
-       rates%JNloss(ix) = &
+      rates%JNloss(ix) = &
             rates%JCloss_feeding(ix) + &
             rates%JNlossLiebig(ix) +&
             JlossPassive(i) ! In units of C
-       rates%JCloss(ix) = &
+      rates%JCloss(ix) = &
             rates%JCloss_feeding(ix) + &
             rates%JCloss_photouptake(ix) + &
             rates%JClossLiebig(ix) +&
             JlossPassive(i)
-       rates%JF(ix) = JFreal(i)
+      rates%JF(ix) = JFreal(i)
+      !
+      ! Test for conservation budget. Should be close to zero:
+      !
+      !write(*,*) 'N budget', i,':',(rates%JN(ix)+JFreal(i)-JlossPassive(i) &
+      !    - rates%JNlossLiebig(ix)  - rates%Jtot(ix))/this%m(i)
+      !write(*,*) 'C budget', i,':',(rates%JLreal(ix) + rates%JDOC(ix)+JFreal(i) &
+      !    -JlossPassive(i)-fTemp2*Jresp(i) &
+      !    - rates%JClossLiebig(ix)  - rates%Jtot(ix))/this%m(i)
     end do
   end subroutine calcRatesGeneralists
 
@@ -178,34 +192,34 @@ contains
     real(dp), intent(in):: u(this%n)
     real(dp):: mortloss
     integer:: i, ix
+    !
+    ! To make mass balance check:
+    !
+    !rates%dudt = 0*rates%dudt
 
     do i = 1, this%n
       ix = i+this%ixOffset
-      mortloss = u(i)*(remin2*mort2*u(i) +reminHTL* rates%mortHTL(ix))
+      mortloss = u(i)*(remin2*mort2*u(i) + reminHTL*rates%mortHTL(ix))
       !
       ! Update nitrogen:
       !
-!!$      rates%dudt(idxN) = rates%dudt(idxN)  &
-!!$           + (-rates%JN(ix) &
-!!$           + rates%JNloss(ix))*u(i)/this%m(i) &
-!!$           + (remin2*mort2*u(i)*u(i) &
-!!$           + remin*mortloss)/rhoCN
       rates%dudt(idxN) = rates%dudt(idxN)  &
            + ((-rates%JN(ix) &
-           + rates%JNloss(ix))*u(i)/this%m(i) &
-           + mortloss)/rhoCN
+           +  JlossPassive(i) &
+           +  rates%JNlossLiebig(ix) &
+           +  rates%JCloss_feeding(ix))/this%m(i) &
+           + mort2*u(i) &
+           + reminHTL*rates%mortHTL(ix)) * u(i)/rhoCN
       !
       ! Update DOC:
       !
-!!$      rates%dudt(idxDOC) = rates%dudt(idxDOC) &
-!!$           + (-rates%JDOC(ix) &
-!!$           + rates%JCloss(ix))*u(i)/this%m(i) &
-!!$           + remin2*mort2*u(i)*u(i) &
-!!$           + remin*mortloss
       rates%dudt(idxDOC) = rates%dudt(idxDOC) &
-           + (-rates%JDOC(ix) &
-           + rates%JCloss(ix))*u(i)/this%m(i) &
-           + mortloss
+           + ((-rates%JDOC(ix) &
+           +   JlossPassive(i) &
+           +   rates%JClossLiebig(ix) &
+           +   reminF*rates%JCloss_feeding(ix))/this%m(i) &
+           +  remin2*mort2*u(i) &
+           +  reminHTL*rates%mortHTL(ix)) * u(i)
       !
       ! Update the generalists:
       !
@@ -215,7 +229,7 @@ contains
            - mort2*u(i) &
            - rates%mortHTL(ix))*u(i)
    end do
-
+  
  end subroutine calcDerivativesGeneralists
 
  function getProdNetGeneralists(this, u, rates) result(ProdNet)
@@ -227,8 +241,36 @@ contains
 
    ProdNet = 0.d0
    do i = 1, this%n
-      ProdNet = ProdNet + max( 0.d0, (rates%JLreal(i+this%ixOffset)-Jresp(i))*u(i)/this%m(i) )
+      ProdNet = ProdNet + max( 0.d0, (rates%JLreal(i+this%ixOffset)-ftemp2*Jresp(i))*u(i)/this%m(i) )
     end do
   end function getProdNetGeneralists
  
+  function getNbalanceGeneralists(this, u, rates) result(Nbalance)
+    real(dp):: Nbalance
+    type(typeSpectrum), intent(in):: this
+    type(typeRates), intent(in):: rates
+    real(dp), intent(in):: u(this%n)
+
+    Nbalance = (rates%dudt(idxN) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
+    + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
+    + (1-1)*mort2*u(1:this%n)**2 & ! full N remineralization of viral mortality
+    + (1-1)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
+       * u(1:this%n))/rhoCN)/u(idxN) ! full N remineralization of feeding losses
+  end function getNbalanceGeneralists 
+
+  function getCbalanceGeneralists(this, u, rates) result(Cbalance)
+    real(dp):: Cbalance
+    type(typeSpectrum), intent(in):: this
+    type(typeRates), intent(in):: rates
+    real(dp), intent(in):: u(this%n)
+
+    Cbalance = (rates%dudt(idxDOC) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
+    + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
+    + (1-remin2)*mort2*u(1:this%n)**2 &
+    - rates%JLreal(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n)/this%m(1:this%n) &
+    + fTemp2*Jresp(1:this%n)*u(1:this%n)/this%m(1:this%n) &
+    + (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
+    * u(1:this%n) ))/u(idxDOC)
+  end function getCbalanceGeneralists 
+  
 end module generalists

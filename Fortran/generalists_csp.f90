@@ -8,20 +8,24 @@ module generalists_csp
   implicit none
 
   private
+
+  real(dp), parameter:: Q15corr = 1.5**(-0.5) ! Corrections because parameters are given at Tref = 15
+  real(dp), parameter:: Q20corr = 2.5**(-0.5) ! wheras NUM uses Tref = 10
+
   real(dp), parameter:: rhoCN = 5.68
   real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
   real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
   real(dp), parameter:: cLeakage = 0.00015 ! passive leakage of C and N
   real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
             !The constant is increased a bit to limit the lower cell size
-  real(dp), parameter:: alphaN = 3.75E-5 !0.00004 % 0.000162 % Mathilde.  (2.5e-3 l/d/cm) * (1e6 mug/g)^(-1/3) / 1.5 (g/cm); Andersen et al 2015
+  real(dp), parameter:: alphaN = 3.75E-5 *Q15corr !0.00004 % 0.000162 % Mathilde.  (2.5e-3 l/d/cm) * (1e6 mug/g)^(-1/3) / 1.5 (g/cm); Andersen et al 2015
   real(dp), parameter:: cN = 0.1
   real(dp), parameter:: alphaL = 0.000914 ! if using Andys shading formula for non-diatoms
   real(dp), parameter:: cL = 21 ! if using Andys shading formula for non-diatoms
-  real(dp), parameter:: alphaF = 0.0024 !  Fits to TK data for protists
-  real(dp), parameter:: cF = 0.0016 ! Just a guess
-  real(dp), parameter:: cmaxN = 3.98
-  real(dp), parameter:: cmaxN2 = 1.18
+  real(dp), parameter:: alphaF = 0.0024 *Q15corr !  Fits to TK data for protists
+  real(dp), parameter:: cF = 0.1514! From paper (0.0016)
+  real(dp), parameter:: cmaxN = 2.3757 *Q20corr ! From paper (or use 3.98?)
+  real(dp), parameter:: cmaxN2 = 1.18 *Q20corr
   real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
   real(dp), parameter:: cR = 0.1
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
@@ -43,7 +47,7 @@ module generalists_csp
   real(dp), parameter:: mu_infp1 = 4.7
   real(dp), parameter:: mu_infp2 = -0.26
 
-  real(dp),  dimension(:), allocatable:: AN(:), AL(:), JNmax(:), JLmax(:), Jmax(:), volu(:), JlossPassive(:)
+ real(dp),  dimension(:), allocatable:: AN(:), AL(:), JNmax(:), JLmax(:), Jmax(:), volu(:), JlossPassive(:)
   real(dp),  dimension(:), allocatable:: nu(:), mort(:), mort2(:)
   real(dp),  dimension(:), allocatable:: JN(:), JL(:), Jresp(:), JFreal(:)
   real(dp),  dimension(:), allocatable:: Vol2(:), rhomu(:),Qmu(:),mu_inf(:),mu_max(:)
@@ -56,7 +60,7 @@ contains
     type(typeSpectrum):: this
     real(dp), intent(in):: mMax
     integer, intent(in):: n, ixOffset
-    real(dp), parameter:: mMin = 3.1623d-9
+    real(dp), parameter:: mMin = 10**(-6.7) ! 3.1623d-9
 
     this = initSpectrum(typeGeneralist_csp, n, ixOffset, mMin, mMax)
 
@@ -109,24 +113,25 @@ contains
     AL = alphaL*this%m**twothirds * (1-exp(-cL*this%m**onethird ))  ! shading formula
     this%AF = alphaF*this%m**threequarters
     JlossPassive =0.d0! cLeakage * this%m**twothirds ! in units of C
-    this%JFmax = cF*this%m**twothirds
-    JNmax = cmaxN*this%m**cmaxN2
+    this%JFmax = cF*this%m**twothirds * Q20corr
+    JNmax = cmaxN*this%m**cmaxN2 * Q20corr
     volu=(this%m/pvol)**pvol2
-    JLmax = min(pl11*volu**pl12 , pl21*volu**pl22)*this%m
-    nu = c * this%m**(-onethird)
-    Jmax = 0.d0*this%m! alphaJ * this%m * (1.d0-nu) ! mugC/day
+    JLmax = min(pl11*volu**pl12 , pl21*volu**pl22)*this%m * Q20corr
+    !nu = c * this%m**(-onethird)
+    !Jmax = 0.d0*this%m! alphaJ * this%m * (1.d0-nu) ! mugC/day
 
     Vol2=pvol3*this%m**pvol2
     rhomu=rhomup1*Vol2**rhomup2
     Qmu=Qmup1*Vol2**Qmup2
     mu_inf=mu_infp1*Vol2**(mu_infp2)
     mu_max=mu_inf*rhomu/(mu_inf*Qmu + rhomu)
-    mu_max=mu_max + mu_max*0.17
-
-    Jresp = 0.2*mu_max*this%m !cR*alphaJ*this%m
+    mu_max=(mu_max + mu_max*0.17) * Q20corr
+    
+    Jresp = 0.2*mu_max*this%m *Q20corr !cR*alphaJ*this%m
 
     mort = 0.d0 !0*0.005*(Jmax/this%m) * this%m**(-0.25);
     mort2 = mu_max*0.03/(this%z) !0.0002*n
+    write(*,*) mort2
   end function initGeneralists_csp
 
   subroutine calcRatesGeneralists_csp(this, rates, L, N, gammaN)
@@ -142,17 +147,22 @@ contains
        ! Uptakes
        !
        !rates%JN(ix) =   gammaN * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-       rates%JN(ix) =   gammaN *JNmax(i) * AN(i) * N * rhoCN /(JNmax(i) +gammaN * AN(i) * N * rhoCN)
+       rates%JN(ix) =   gammaN *JNmax(i) * ftemp15*AN(i) * N * rhoCN / &
+        (ftemp2*JNmax(i) +gammaN * ftemp15*AN(i) * N * rhoCN)  
 
        if (N .lt. 0.d0) then
          write(*,*) "negative N"
        end if
 
        rates%JDOC(ix) = 0.d0 ! Diffusive DOC uptake, units of C/time
-       rates%JL(ix) =  JLmax(i) * AL(i) * L /(JLmax(i) + AL(i) * L)
+       rates%JL(ix) =  JLmax(i) * AL(i) * L /(ftemp2*JLmax(i) + AL(i) * L)
+       ! Recalc feeding because we use a different Q10:
+       rates%flvl(ix) = ftemp15*this%AF(i)*rates%F(ix) / (ftemp15*this%AF(i)*rates%F(ix)+fTemp2*this%JFmax(i))
+       rates%JF(ix) = rates%flvl(ix) * fTemp2*this%JFmax(i)
+
        !rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
-       rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix)-Jlosspassive(i) ! In units of C
+       rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix) ! In units of C
        ! Total carbon uptake
        rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-Jresp(i)-JlossPassive(i)
        ! Liebig + synthesis limitation:
@@ -199,6 +209,16 @@ contains
             !JlossPassive(i)
        rates%JF(ix) = JFreal(i)
     end do
+
+    write(*,*) '----'
+    write(*,*) 'log10(m):',log10(this%m)
+    write(*,*) 'aN:',ftemp15*AN/this%m
+    write(*,*) 'aL:',AL/this%m
+    write(*,*) 'aF:',ftemp15*this%AF/this%m
+    write(*,*) 'jN:', rates%JN(3:12)/this%m
+    write(*,*) 'jL:', rates%JL(3:12)/this%m
+    write(*,*) 'jF:', rates%JF(3:12)/this%m
+
   end subroutine calcRatesGeneralists_csp
 
   subroutine calcDerivativesGeneralists_csp(this, u, rates)
@@ -210,7 +230,7 @@ contains
 
     do i = 1, this%n
       ix = i+this%ixOffset
-      mortloss = u(i)*(remin2*mort2(i)*u(i) +reminHTL* rates%mortHTL(ix))
+      mortloss = u(i)*(remin2*ftemp2*mort2(i)*u(i) +reminHTL* ftemp2*rates%mortHTL(ix))
       !
       ! Update nitrogen:
       !
@@ -242,7 +262,7 @@ contains
            - mort(i) &
            - rates%mortpred(ix) &
            - mort2(i)*u(i) &
-           - rates%mortHTL(ix))*u(i)
+           - ftemp2*rates%mortHTL(ix))*u(i)
    end do
  end subroutine calcDerivativesGeneralists_csp
 

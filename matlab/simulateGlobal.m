@@ -1,6 +1,5 @@
 %
-% Global run of size based unicelluar plankton model. Requires the fortran
-% library.
+% Global run using transport matrices
 % 
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
 % (choose MITgcm_2.8deg), and be put into the location 'NUMmodel/TMs'
@@ -21,10 +20,15 @@ arguments
     bCalcAnnualAverages = false; % Whether to calculate annual averages
 end
 
-ixN = 1;
-ixDOC = 2;
-ixB = 3:(2+p.nGrid);
-addpath("Transport matrix");
+ixN = p.idxN;
+ixDOC = p.idxDOC;
+
+bSilicate = false;
+if isfield(p,'idxSi')
+    ixSi = p.idxSi;
+    bSilicate = true;
+end
+ixB = p.idxB:p.n;
 
 %Tbc = [];
 
@@ -32,6 +36,9 @@ disp('Preparing simulation')
 %
 % Check that files exist:
 %
+path = fileparts(mfilename('fullpath'));
+addpath(strcat(path,'/Transport matrix'));
+
 if ~exist(p.pathBoxes,'file')
     error( sprintf('Error: Cannot find transport matrix file: %s',...
         p.pathBoxes));
@@ -39,27 +46,27 @@ end
 % ---------------------------------
 % Load library:
 % ---------------------------------
-if p.bParallel
-    if isempty(gcp('nocreate'))
-        parpool('AttachedFiles',...
-            {'../Fortran/NUMmodel_matlab.so',...
-             '../Fortran/NUMmodel_wrap_colmajor4matlab.h'});
-    end
-    %
-    % Set parameters:
-    %
-    h = gcp('nocreate');
-    poolsize = h.NumWorkers;
-    parfor i=1:poolsize
-        loadNUMmodelLibrary();
-        %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-        calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
-    end
-else
-    loadNUMmodelLibrary();
-    %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-    calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
-end
+% if p.bParallel
+%     if isempty(gcp('nocreate'))
+%         parpool('AttachedFiles',...
+%             {'../Fortran/NUMmodel_matlab.so',...
+%              '../Fortran/NUMmodel_wrap_colmajor4matlab.h'});
+%     end
+%     %
+%     % Set parameters:
+%     %
+%     h = gcp('nocreate');
+%     poolsize = h.NumWorkers;
+%     parfor i=1:poolsize
+%         loadNUMmodelLibrary();
+%         %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
+%         calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
+%     end
+% else
+%     loadNUMmodelLibrary();
+%     %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
+%     calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
+% end
 % ---------------------------------------
 % Initialize run:
 % ---------------------------------------
@@ -78,10 +85,13 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 if (nargin==2)
     disp('Starting from previous simulation.');
-    u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
-    u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],sim.p.pathBoxes, sim.p.pathGrid);
-    for i = 1:p.nGrid
-        u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],sim.p.pathBoxes, sim.p.pathGrid);
+    u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
+    u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
+    if bSilicate
+        u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
+    end
+    for i = 1:p.n -p.idxB+1
+        u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],p.pathBoxes, p.pathGrid);
     end
 else
     if exist(strcat(p.pathN0,'.mat'),'file')
@@ -91,6 +101,9 @@ else
         u(:, ixN) = 150*ones(nb,1);
     end
     u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
+    if bSilicate
+        u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+    end
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
 end
 %
@@ -104,19 +117,24 @@ end
 %
 % Load Light:
 %
+% load 'parday' % If using Camila's light
 L0 = zeros(nb,730);
 for i = 1:730
     L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox,i/2,1).*exp(-p.kw*Zbox);
+    %L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox); % If using Calima's light
 end
 %
 % Matrices for saving the solution:
 %
 iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
-sim = load(p.pathGrid,'x','y','z');
+sim = load(p.pathGrid,'x','y','z','dznom','bathy');
 sim.N = single(zeros(length(sim.x), length(sim.y), length(sim.z),nSave));
+if bSilicate
+    sim.Si = sim.N;
+end
 sim.DOC = sim.N;
-sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.nGrid, nSave));
+sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.n-p.idxB+1, nSave));
 sim.L = sim.N;
 sim.T = sim.N;
 tSave = [];
@@ -136,6 +154,8 @@ end
 % Run transport matrix simulation
 % ---------------------------------------
 disp('Starting simulation')
+sLibname = loadNUMmodelLibrary();
+
 tic
 for i=1:simtime
     %
@@ -150,8 +170,9 @@ for i=1:simtime
         Aimp=function_convert_TM_positive(Aimp);
         
         % Preparing for timestepping. 43200s.
+        load(p.pathGrid,'deltaT')
         Aexp = Ix + (12*60*60)*Aexp;
-        Aimp = Aimp^(36);
+        Aimp = Aimp^(12*60*60/deltaT);
         
         % Set monthly mean temperature
         T = Tmat(:,month+1);
@@ -163,14 +184,17 @@ for i=1:simtime
     %
     L = L0(:,mod(i,365*2)+1);
     dt = p.dt;
-    if p.bParallel
+    n = p.n;
+    if ~isempty(gcp('nocreate'))
         parfor k = 1:nb
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-                int32(p.nGrid+2), u(k,:), L(k), 0.5, dt);
+            u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
+                int32(n), u(k,:), L(k), T(k), 0.5, dt);
         end
     else
         for k = 1:nb
-            u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', int32(p.nGrid+2), u(k,:), L(k), 0.5, dt);
+            u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
+                int32(n), u(k,:),L(k), T(k), 0.5, dt);
+            %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
             % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
             %u(k,:) = utmp(end,:);
@@ -185,10 +209,15 @@ for i=1:simtime
     % Transport
     %
     if p.bTransport
-        for k = 1:p.nGrid+2
+        for k = 1:p.n
             u(:,k) =  Aimp * (Aexp * u(:,k));
         end
     end
+    %
+    % Enforce minimum B concentration
+    %
+    u(u<p.umin) = p.umin; 
+    
     %
     % Save timeseries in grid format
     %
@@ -197,7 +226,10 @@ for i=1:simtime
         iSave = iSave + 1;
         sim.N(:,:,:,iSave) = single(matrixToGrid(u(:,ixN), [], p.pathBoxes, p.pathGrid));
         sim.DOC(:,:,:,iSave) = single(matrixToGrid(u(:,ixDOC), [], p.pathBoxes, p.pathGrid));
-        for j = 1:p.nGrid
+        if bSilicate
+            sim.Si(:,:,:,iSave) = single(matrixToGrid(u(:,ixSi), [], p.pathBoxes, p.pathGrid));
+        end
+        for j = 1:p.n-p.idxB+1
             sim.B(:,:,:,j,iSave) = single(matrixToGrid(u(:,ixB(j)), [], p.pathBoxes, p.pathGrid));
         end
         sim.L(:,:,:,iSave) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
@@ -211,7 +243,7 @@ for i=1:simtime
     if bCalcAnnualAverages
         for k = 1:nb
             [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
-                            getFunctions(u(k,:), L(k));
+                            getFunctions(u(k,:), L(k), T(k));
             sim.ProdGrossAnnual(k) = sim.ProdGrossAnnual(k) + ProdGross1/(p.tEnd*2);            
             sim.ProdNetAnnual(k) = sim.ProdNetAnnual(k) + ProdNet1/(p.tEnd*2);
             sim.ProdHTLAnnual(k) = sim.ProdHTLAnnual(k) + ProdHTL1/(p.tEnd*2);
@@ -232,6 +264,7 @@ sim.t = tSave; % days where solution was saved
 sim.p = p;
 sim.Ntot = calcGlobalN(sim);
 sim.B(sim.B<0) = 0.;
+sim.DOC(sim.DOC<0) = 0.;
 
 if bCalcAnnualAverages
     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));

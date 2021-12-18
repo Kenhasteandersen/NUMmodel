@@ -1,3 +1,4 @@
+
 !
 ! Module to handle the NUM model framework
 !
@@ -6,6 +7,8 @@ module NUMmodel
   use spectrum
   use generalists
   use generalists_csp
+  use diatoms
+  use diatoms_simple
   use copepods
   use debug
   implicit none
@@ -14,13 +17,13 @@ module NUMmodel
   ! Variables that contain the size spectrum groups
   !
   integer:: nGroups ! Number of groups
-  integer:: iGroup ! Current number to be added (only used in addGroup)
+  integer:: iCurrentGroup ! The current group to be added
   integer:: nNutrients ! Number of nutrient state variables
   integer:: idxB ! First index into non-nutrient groups (=nNutrients+1)
   type(typeSpectrum), dimension(:), allocatable:: group ! Structure for each group
-  integer, dimension(:), allocatable:: ixStart, ixEnd ! Start and end indexes of the group in the state-variable vector "u"
 
   real(dp), dimension(:,:), allocatable:: theta ! Interaction matrix
+  real(dp), dimension(:), allocatable:: palatability ! Palatability of each size group
   real(dp), dimension(:), allocatable:: upositive ! State variable constrained to be positive
   !
   ! Variables for HTL mortalities:
@@ -42,28 +45,64 @@ contains
   !  Various model setups
   ! ======================================
 
-
   ! -----------------------------------------------
   ! A basic setup with only generalists
   ! -----------------------------------------------
   subroutine setupGeneralistsOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with 10 size classes
-    bQuadraticHTL = .false. ! Use standard "linear" mortality
-    call parametersFinalize()
-
+    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+    call parametersFinalize(0.2d0, .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
-  ! A basic setup with only generalists -- Camila
+  ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
   ! -----------------------------------------------
   subroutine setupGeneralistsOnly_csp()
     call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist_csp, 10, 0.1d0) ! generalists with 10 size classes
-    call parametersFinalize()
+    call parametersAddGroup(typeGeneralist_csp, 10, 10.d0**(-1.3d0)) ! generalists with 10 size classes
+    call parametersFinalize(0.003d0, .true.) ! Serra-Pompei (2020))
   end subroutine setupGeneralistsOnly_csp
 
+  ! -----------------------------------------------
+  ! A basic setup with only diatoms:
+  ! -----------------------------------------------
+  subroutine setupDiatomsOnly(n)
+   integer, intent(in):: n
+   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
+   call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
+   call parametersFinalize(0.2d0, .false.)
+ end subroutine setupDiatomsOnly
+
+ ! -----------------------------------------------
+  ! A basic setup with only simple diatoms:
+  ! -----------------------------------------------
+ subroutine setupDiatoms_simpleOnly(n)
+   integer, intent(in):: n
+   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
+   call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
+   call parametersFinalize(0.2d0, .false.)
+ end subroutine setupDiatoms_simpleOnly
+ 
+  ! -----------------------------------------------
+  ! Generalists and diatoms:
+  ! -----------------------------------------------
+   subroutine setupGeneralistsDiatoms(n)
+      integer, intent(in):: n
+      call parametersInit(2, 2*n, 3)
+      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
+      call parametersFinalize(.2d0, .false.)
+   end subroutine setupGeneralistsDiatoms
+ 
+   subroutine setupGeneralistsDiatoms_simple(n)
+      integer, intent(in):: n
+      call parametersInit(2, 2*n, 3)
+      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
+      call parametersFinalize(0.2d0, .false.)
+   end subroutine setupGeneralistsDiatoms_simple
+ 
   ! -----------------------------------------------
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------
@@ -71,7 +110,7 @@ contains
     call parametersInit(2, 20, 2)
     call parametersAddGroup(typeGeneralist, 10, 0.1d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
-    call parametersFinalize()
+    call parametersFinalize(0.003d0, .true.) ! Use quadratic mortality
   end subroutine setupGeneralistsCopepod
 
   ! -----------------------------------------------
@@ -91,7 +130,7 @@ contains
           call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
        end do
     end if
-    call parametersFinalize()
+    call parametersFinalize(0.003d0, .true.)
   end subroutine setupGeneric
 
   ! -----------------------------------------------
@@ -107,8 +146,10 @@ contains
     do iCopepod = 1, size(mAdult)
        call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
     end do
-    call parametersFinalize()
+    call parametersFinalize(0.003d0, .true.)
   end subroutine setupGeneric_csp
+
+
 
   ! ======================================
   !  Model initialization stuff:
@@ -126,15 +167,16 @@ contains
     ! Set groups:
     !
     nGroups = nnGroups
+    iCurrentGroup = 0
     nNutrients = nnNutrients
     nGrid = nnGrid+nnNutrients
     idxB = nNutrients + 1
-    iGroup = 0
     !
     ! Allocate variables:
     !
     if (allocated(m)) then
        deallocate(m)
+       deallocate(palatability)
        deallocate(z)
        deallocate(beta)
        deallocate(sigma)
@@ -143,8 +185,6 @@ contains
        deallocate(epsilonF)
 
        deallocate(group)
-       deallocate(ixStart)
-       deallocate(ixEnd)
 
        deallocate(upositive)
 
@@ -163,6 +203,7 @@ contains
        deallocate(rates%JN)
        deallocate(rates%JL)
        deallocate(rates%JDOC)
+       deallocate(rates%JSi)
        deallocate(rates%JNtot)
        deallocate(rates%JCtot)
        deallocate(rates%Jtot)
@@ -173,6 +214,7 @@ contains
        deallocate(rates%JClossLiebig)
        deallocate(rates%JNloss)
        deallocate(rates%JCloss)
+       deallocate(rates%JSiloss)
 
        deallocate(rates%mortpred)
        deallocate(rates%mortHTL)
@@ -185,6 +227,9 @@ contains
     end if
 
     allocate(m(nGrid))
+    m = 0.d0
+    allocate(palatability(nGrid))
+    palatability = 1.d0 ! Default
     allocate(z(nGrid))
     allocate(beta(nGrid))
     allocate(sigma(nGrid))
@@ -193,8 +238,6 @@ contains
     allocate(epsilonF(nGrid))
 
     allocate(group(nGroups))
-    allocate(ixStart(nGroups))
-    allocate(ixEnd(nGroups))
 
     allocate(upositive(nGrid))
 
@@ -213,6 +256,7 @@ contains
     allocate(rates%JN(nGrid))
     allocate(rates%JL(nGrid))
     allocate(rates%JDOC(nGrid))
+    allocate(rates%JSi(nGrid))
     allocate(rates%JNtot(nGrid))
     allocate(rates%JCtot(nGrid))
     allocate(rates%Jtot(nGrid))
@@ -223,6 +267,7 @@ contains
     allocate(rates%JClossLiebig(nGrid))
     allocate(rates%JNloss(nGrid))
     allocate(rates%JCloss(nGrid))
+    allocate(rates%JSiloss(nGrid))
 
     allocate(rates%mortpred(nGrid))
     allocate(rates%mortHTL(nGrid))
@@ -232,7 +277,6 @@ contains
     allocate(rates%mortStarve(nGrid))
     allocate(rates%mort(nGrid))
 
-    bQuadraticHTL = .true. ! Default to quadratic mortality
   end subroutine parametersInit
   ! -----------------------------------------------
   !  Add a size spectrum group
@@ -248,16 +292,17 @@ contains
     !
     ! Find the group number and grid location:
     !
-    iGroup = iGroup + 1
-    if (iGroup.eq.1) then
-       ixStart(iGroup) = idxB
+    iCurrentGroup = iCurrentGroup + 1
+    if (iCurrentGroup.eq.1) then
+       group(iCurrentGroup)%ixStart = idxB
     else
-       ixStart(iGroup) = ixEnd(iGroup-1)+1
+       group(iCurrentGroup)%ixStart = group(iCurrentGroup-1)%ixEnd+1
     end if
-    ixEnd(iGroup) = ixStart(iGroup)+n-1
+    group(iCurrentGroup)%ixEnd = group(iCurrentGroup)%ixStart+n-1
 
-    if (ixEnd(iGroup) .gt. nGrid) then
-       write(6,*) 'Attempting to add more grid points than allocated', ixEnd(igroup), nGrid
+    if (group(iCurrentGroup)%ixEnd .gt. nGrid) then
+       write(6,*) 'Attempting to add more grid points than allocated', &
+           group(iCurrentGroup)%ixEnd, nGrid
        stop 1
     end if
     !
@@ -265,33 +310,41 @@ contains
     !
     select case (typeGroup)
     case (typeGeneralist)
-      group(iGroup) = initGeneralists(n, ixStart(iGroup)-1, mMax)
+      group(iCurrentGroup) = initGeneralists(n, group(iCurrentGroup)%ixStart-1, mMax)
     case (typeGeneralist_csp)
-      group(iGroup) = initGeneralists_csp(n, ixStart(iGroup)-1, mMax)
+      group(iCurrentGroup) = initGeneralists_csp(n, group(iCurrentGroup)%ixStart-1, mMax)
+    case (typeDiatom)
+      group(iCurrentGroup) = initDiatoms(n, group(iCurrentGroup)%ixStart-1, mMax)
+      palatability(group(iCurrentGroup)%ixStart:group(iCurrentGroup)%ixEnd) = 0.5d0 ! Lower palatability for diatoms
+    case (typeDiatom_simple)
+      group(iCurrentGroup) = initDiatoms_simple(n, group(iCurrentGroup)%ixStart-1, mMax)
+      palatability(group(iCurrentGroup)%ixStart:group(iCurrentGroup)%ixEnd) = 0.5d0 ! Lower palatability for diatoms
     case(typeCopepod)
-       group(iGroup) = initCopepod(n, ixStart(iGroup)-1, mMax)
+       group(iCurrentGroup) = initCopepod(n, group(iCurrentGroup)%ixStart-1, mMax)
     end select
-    group(iGroup)%type = typeGroup
+    group(iCurrentGroup)%type = typeGroup
     !
     ! Import grid to globals:
     !
-    m(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%m
-    z(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%z
+    m(group(iCurrentGroup)%ixStart : group(iCurrentGroup)%ixEnd) = group(iCurrentGroup)%m
+    z(group(iCurrentGroup)%ixStart : group(iCurrentGroup)%ixEnd) = group(iCurrentGroup)%z
     !
     ! Import feeding parameters:
     !
-    beta(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%beta
-    sigma(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%sigma
-    AF(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%AF
-    JFmax(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%JFmax
-    epsilonF(ixStart(iGroup) : ixEnd(iGroup)) = group(iGroup)%epsilonF
+    beta(group(iCurrentGroup)%ixStart : group(iCurrentGroup)%ixEnd) = group(iCurrentGroup)%beta
+    sigma(group(iCurrentGroup)%ixStart : group(iCurrentGroup)%ixEnd) = group(iCurrentGroup)%sigma
+    AF(group(iCurrentGroup)%ixStart : group(iCurrentGroup)%ixEnd) = group(iCurrentGroup)%AF
+    JFmax(group(iCurrentGroup)%ixStart : group(iCurrentGroup)%ixEnd) = group(iCurrentGroup)%JFmax
+    epsilonF(group(iCurrentGroup)%ixStart : group(iCurrentGroup)%ixEnd) = group(iCurrentGroup)%epsilonF
 
   end subroutine parametersAddGroup
   ! -----------------------------------------------
   !  Finalize the setting of parameters. Must be called when
   !  all groups have been added.
   ! -----------------------------------------------
-  subroutine parametersFinalize()
+  subroutine parametersFinalize(mortHTL, bQuadraticHTL)
+    real(dp), intent(in):: mortHTL
+    logical, intent(in):: bQuadraticHTL
     integer:: i,j
     real(dp):: betaHTL, mHTL, mMax
     !
@@ -300,38 +353,13 @@ contains
     do i = idxB, nGrid
        do j = idxB, nGrid
           !theta(i,j) = exp( -(log(m(i)/m(j)/beta(i)))**2/(2*sigma(i)**2))
-          theta(i,j) = calcPhi(m(i)/m(j), beta(i), sigma(i), z(i))
+          theta(i,j) = palatability(j) * calcPhi(m(i)/m(j), beta(i), sigma(i), z(i))
        end do
     end do
     !
-    ! Calc htl mortality
+    ! Set HTL mortality
     !
-    betaHTL = 500.
-    if (.not. bQuadraticHTL) then
-       !
-       ! Standard HTL mortality. In this case "pHTL" represent the selectivity of HTL mortality
-       !
-       mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
-       mortHTL = 0.2
-       pHTL(idxB:nGrid) = (1/(1+(m(idxB:nGrid)/mHTL)**(-2)))
-    else
-       !
-       ! Linear HTL mortality (commonly referred to as "quadratic")
-       ! In this case "pHTL" represents p_HTL*m^-1/4 from eq (16) in Serra-Pompei (2020)
-       !
-       mortHTL = 0.003 ! Serra-Pompei (2020)
-       gammaHTL = 0.2 ! ibid
-       mMax = maxval(m(idxB:nGrid))
-       do i=idxB, nGrid
-          if (m(i) .lt. (mMax/betaHTL)) then
-             pHTL(i) = exp( -(log(m(i)*betaHTL/mMax))**2/4.)
-          else
-             pHTL(i) = 1.
-          end if
-       end do
-       pHTL(idxB:nGrid) = pHTL(idxB:nGrid) * m(idxB:nGrid)**(-0.25)
-    end if
-    !write(6,*) m,pHTL
+    call parametersHTL(mortHTL, bQuadraticHTL)
 
   contains
     !
@@ -346,91 +374,87 @@ contains
       real(dp), intent(in):: z,beta,sigma,Delta
       real(dp):: res, s
 
-      s = 2*sigma*sigma
-      res = max(0.d0, &
-!!$           (Sqrt(s)*((exp(-Log(beta/(Delta*z))**2/s) - 2/exp(Log(z/beta)**2/s) +  &
-!!$           exp(-Log(z/(beta*Delta))**2/s))*Sqrt(s) + &
-!!$           Sqrt(Pi)*(-2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
-!!$           Erf(Log(z/(beta*Delta))/Sqrt(s))*Log(z/(beta*Delta)) - &
-!!$           Erf(Log(beta/(Delta*z))/Sqrt(s))*Log((Delta*z)/beta))))/ &
-!!$           (2.*Log(Delta)**2))
-      (Sqrt(Delta)*(((exp(-Log((beta*Delta)/z)**2/s) - 2/exp(Log(z/beta)**2/s) + &
-      exp(-Log((Delta*z)/beta)**2/s))*s)/2. - &
-      (Sqrt(Pi)*Sqrt(s)*(Erf((-Log(beta*Delta) + Log(z))/Sqrt(s))*Log((beta*Delta)/z) + &
-      2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
-      Erf((Log(beta) - Log(Delta*z))/Sqrt(s))*Log((Delta*z)/beta)))/2.))/ &
-      ((-1 + Delta)*Log(Delta)) )
+      if (beta .eq. 0.d0) then
+         res = 0.d0 ! If beta = 0 it is interpreted as if the group is not feeding
+      else
+         s = 2*sigma*sigma
+         res = max(0.d0, &
+         (Sqrt(Delta)*(((exp(-Log((beta*Delta)/z)**2/s) - 2/exp(Log(z/beta)**2/s) + &
+         exp(-Log((Delta*z)/beta)**2/s))*s)/2. - &
+         (Sqrt(Pi)*Sqrt(s)*(Erf((-Log(beta*Delta) + Log(z))/Sqrt(s))*Log((beta*Delta)/z) + &
+         2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
+         Erf((Log(beta) - Log(Delta*z))/Sqrt(s))*Log((Delta*z)/beta)))/2.))/ &
+         ((-1 + Delta)*Log(Delta)) )
+      end if
     end function calcPhi
 
   end subroutine parametersFinalize
+
+  !
+  ! Sets the HTL mortality. 
+  ! In:
+  !  mortHTL - the level of mortality
+  !  bQuadraticHTL - whether to use a "quadratic" mortality
+  !
+  subroutine parametersHTL(mortalityHTL, boolQuadraticHTL)
+   real(dp), intent(in):: mortalityHTL
+   logical, intent(in):: boolQuadraticHTL
+   real(dp):: betaHTL, mMax, mHTL
+   integer:: i
+
+   mortHTL = mortalityHTL
+   bQuadraticHTL = boolQuadraticHTL
+   !     
+   ! Calc htl mortality
+   !
+   betaHTL = 500.
+   if (.not. bQuadraticHTL) then
+     !
+     ! Standard HTL mortality. In this case "pHTL" represent the selectivity of HTL mortality
+     !
+     mHTL = m(nGrid)/betaHTL**1.5  ! Bins affected by HTL mortality
+     pHTL(idxB:nGrid) = (1/(1+(m(idxB:nGrid)/mHTL)**(-2)))
+   else
+     !
+     ! Linear HTL mortality (commonly referred to as "quadratic")
+     ! In this case "pHTL" represents p_HTL*m^-1/4 from eq (16) in Serra-Pompei (2020)
+     !
+     gammaHTL = 0.2 ! ibid
+     mMax = maxval(m(idxB:nGrid))
+     do i=idxB, nGrid
+        if (m(i) .lt. (mMax/betaHTL)) then
+           pHTL(i) = exp( -(log(m(i)*betaHTL/mMax))**2/4.)
+        else
+           pHTL(i) = 1.
+        end if
+     end do
+     pHTL(idxB:nGrid) = pHTL(idxB:nGrid) * m(idxB:nGrid)**(-0.25)
+   end if
+   end subroutine parametersHTL
 
   ! ======================================
   !  Calculate rates and derivatives:
   ! ======================================
 
-  !
-  ! Calculate derivatives for unicellular groups
-  ! In:
-  !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
-  !   used for correction of Euler integration. If no correction is used, just set to 1.0
-  !   This correction procedure is needed for correct Euler integration.
-  subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
-    real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC
-    !type(typeRates), intent(inout):: rates
-    integer:: i,j
-    !
-    ! Calc uptakes of all unicellular groups:
-    !
-    do iGroup = 1, nGroups
-       select case (group(iGroup)%type)
-       case (typeGeneralist)
-          call calcRatesGeneralists(group(iGroup), &
-               rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
-       case(typeGeneralist_csp)
-          call calcRatesGeneralists_csp(group(iGroup), &
-               rates, L, upositive(idxN),  gammaN)
-       end select
-    end do
-    !
-    ! Calc predation mortality
-    !
-    do i=idxB, nGrid
-       rates%mortpred(i) = 0.d0
-       do j=idxB, nGrid
-          if (rates%F(j) .ne. 0.d0) then
-             rates%mortpred(i) = rates%mortpred(i)  &
-                  + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
-          end if
-       end do
-    end do
-    !
-    ! Assemble derivatives:
-    !
-    rates%dudt(idxN) = 0
-    rates%dudt(idxDOC) = 0
-    do iGroup = 1, nGroups
-       select case (group(iGroup)%type)
-       case (typeGeneralist)
-          call calcDerivativesGeneralists(group(iGroup),&
-               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
-               rates)
-       case (typeGeneralist_csp)
-          call calcDerivativesGeneralists_csp(group(iGroup),&
-               upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
-               rates)
-       end select
-    end do
-  end subroutine calcDerivativesUnicellulars
-
+ 
   ! -----------------------------------------------
   !  Calculate the derivatives for all groups:
   !  In:
+  !    u: the vector of state variables (nutrients and biomasses)
   !    L: light level
+  !    T: temperature
+  !    dt: time step for predictor-corrector
+  ! 
+  !  Uses a simple predictor-corrector scheme.
+  !  If one of the nutrients would become negative after an Euler 
+  !  time step
+  !  with length dt, then the uptake of said nutrient is reduced
+  !  by a factor gamma to avoid the nutrient becoming negative.
   ! -----------------------------------------------
-  subroutine calcDerivatives(u, L, dt)
-    real(dp), intent(in):: L, dt, u(:)
+  subroutine calcDerivatives(u, L, T, dt)
+    real(dp), intent(in):: L, T, dt, u(:)
     integer:: i, j, iGroup
-    real(dp):: gammaN, gammaDOC
+    real(dp):: gammaN, gammaDOC, gammaSi
 
     !
     ! Use only the positive part of biomasses for calculation of derivatives:
@@ -438,6 +462,10 @@ contains
     do i = 1, nGrid
        upositive(i) = max( 0.d0, u(i) )
     end do
+    !
+    ! Update temperature corrections (in global.f90):
+    !
+    call updateTemperature(T)
     !
     ! Calc uptakes of food
     !
@@ -447,8 +475,10 @@ contains
           rates%F(i) = rates%F(i) + theta(i,j)*upositive(j)
        end do
     end do
-    rates%flvl(idxB:nGrid) = AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid) + JFmax(idxB:nGrid))
-    rates%JF(idxB:nGrid) = rates%flvl(idxB:nGrid) * JFmax(idxB:nGrid)
+
+    rates%flvl(idxB:nGrid) = epsilonF(idxB:nGrid)*AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid)&
+                            + fTemp2*JFmax(idxB:nGrid))
+    rates%JF(idxB:nGrid) = rates%flvl(idxB:nGrid) * fTemp2*JFmax(idxB:nGrid)
     !
     ! Calc HTL mortality:
     !
@@ -460,11 +490,13 @@ contains
        rates%mortHTL(idxB:nGrid) = mortHTL*pHTL(idxB:nGrid)
     end if
     !
-    ! Calc derivatives of unicellular groups
+    ! Calc derivatives of unicellular groups (predictor step)
     !
     gammaN = 1.d0
     gammaDOC = 1.d0
-    call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
+    gammaSi = 1.d0
+
+    call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
     !
     ! Make a correction if nutrient fields will become less than zero:
     !
@@ -474,22 +506,99 @@ contains
     if ((u(idxDOC) + rates%dudt(idxDOC)*dt) .lt. 0) then
        gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(rates%dudt(idxDOC)*dt)))
     end if
-    if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0)) then
-       !write(6,*) u(idxN), u(idxDOC), rates%dudt(idxN), rates%dudt(idxDOC), gammaN, gammaDOC
-       call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC)
-       !write(6,*) '->', rates%dudt(idxN), rates%dudt(idxDOC)
+    if ((u(idxSi) + rates%dudt(idxSi)*dt) .lt. 0) then
+      gammaSi = max(0.d0, min(1.d0, -u(idxSi)/(rates%dudt(idxSi)*dt)))
+    end if
+    if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0) .or. (gammaSi .lt. 1.d0)) then
+       call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
     end if
     !
     ! Calc derivatives of multicellular groups:
     !
-    do iGroup = 2, nGroups
-       call calcDerivativesCopepod(group(iGroup), &
+    do iGroup = 1, nGroups
+      if (group(iGroup)%type .eq. typeCopepod) then
+         call calcDerivativesCopepod(group(iGroup), &
             upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
             rates)
+      end if
     end do
+
+    contains
+
+     !
+  ! Calculate derivatives for unicellular groups
+  ! In:
+  !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
+  !   used for correction of Euler integration. If no correction is used, just set to 1.0
+  !   This correction procedure is needed for correct Euler integration.
+  subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
+   real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC, gammaSi
+   integer:: i,j, iGroup
+   !
+   ! Calc uptakes of all unicellular groups:
+   !
+   do iGroup = 1, nGroups
+      select case (group(iGroup)%type)
+      case (typeGeneralist)
+         call calcRatesGeneralists(group(iGroup), &
+              rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
+      case(typeGeneralist_csp)
+         call calcRatesGeneralists_csp(group(iGroup), &
+              rates, L, upositive(idxN),  gammaN)
+           case(typeDiatom)
+              call calcRatesDiatoms(group(iGroup), &
+              rates, L, upositive(idxN), upositive(idxDOC) , upositive(idxSi), &
+              gammaN, gammaDOC, gammaSi)
+           case(typeDiatom_simple)
+              call calcRatesDiatoms_simple(group(iGroup), &
+              rates, L, upositive(idxN), upositive(idxDOC) , upositive(idxSi), &
+              gammaN, gammaDOC, gammaSi) 
+      end select
+   end do
+   !
+   ! Calc predation mortality
+   !
+   do i=idxB, nGrid
+      rates%mortpred(i) = 0.d0
+      do j=idxB, nGrid
+         if (rates%F(j) .ne. 0.d0) then
+            rates%mortpred(i) = rates%mortpred(i)  &
+                 + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
+         end if
+      end do
+   end do
+   !
+   ! Assemble derivatives:
+   !
+   rates%dudt(1:(idxB-1)) = 0.d0 ! Set derivatives of nutrients to zero
+   
+   do iGroup = 1, nGroups
+      select case (group(iGroup)%type)
+      case (typeGeneralist)
+         call calcDerivativesGeneralists(group(iGroup),&
+              upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+              rates)
+      case (typeGeneralist_csp)
+         call calcDerivativesGeneralists_csp(group(iGroup),&
+              upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+              rates)
+         case (typeDiatom)
+              call calcDerivativesDiatoms(group(iGroup),&
+              upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+              rates)
+        case (typeDiatom_simple)
+              call calcDerivativesDiatoms_simple(group(iGroup),&
+              upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
+              rates)
+                 
+      end select
+   end do
+ end subroutine calcDerivativesUnicellulars
+
+   
   end subroutine calcDerivatives
   !
-  ! Returns the htl mortlity divided by h for size bin i
+  ! Returns the htl mortality divided by h for size bin i
   !
   function calcHTL(u, i) result(mHTL)
     real(dp) :: mHTL, B
@@ -516,11 +625,14 @@ contains
 
   ! -----------------------------------------------
   ! Simulate a chemostat with Euler integration
+  ! Ndeep is a vector with the concentrations of
+  ! nutrients in the deep layer.
   ! -----------------------------------------------
-  subroutine simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
+  subroutine simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt)
     real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
     real(dp), intent(in):: L      ! Light level
-    real(dp), intent(in):: Ndeep ! Nutrient in the deep layer
+    real(dp), intent(in):: T ! Temperature
+    real(dp), intent(in):: Ndeep(nNutrients) ! Nutrients in the deep layer
     real(dp), intent(in):: diff      ! Diffusivity
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
@@ -529,36 +641,27 @@ contains
     iEnd = floor(tEnd/dt)
    
     do i=1, iEnd
-       call calcDerivatives(u, L, dt)
-       rates%dudt(idxN) = rates%dudt(idxN) + diff*(Ndeep-u(idxN))
-       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(0.d0 - u(idxDOC))
+       call calcDerivatives(u, L, T, dt)
+       rates%dudt(idxN) = rates%dudt(idxN) + diff*(Ndeep(idxN)-u(idxN))
+       rates%dudt(idxDOC) = rates%dudt(idxDOC) + diff*(Ndeep(idxDOC) - u(idxDOC))
+       if (idxB .gt. idxSi) then
+         rates%dudt(idxSi) = rates%dudt(idxSi) + diff*(Ndeep(idxSi) - u(idxSi))
+       end if  
        !
        ! Note: should not be done for copepods:
        !
        rates%dudt(idxB:nGrid) = rates%dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
        u = u + rates%dudt*dt
-       !write(6,*) calcN(u)
     end do
   end subroutine simulateChemostatEuler
-
-  function calcN(u) result(N)
-    real(dp), intent(in):: u(:)
-    integer:: i
-    real(dp):: N
-
-    N = 0
-    N = u(idxN)
-    do i = 1, nGrid
-       N = N + u(nNutrients+i)/5.68
-    end do
-  end function calcN
 
   ! -----------------------------------------------
   ! Simulate with Euler integration
   ! -----------------------------------------------
-  subroutine simulateEuler(u, L, tEnd, dt)
+  subroutine simulateEuler(u, L, T, tEnd, dt)
     real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
     real(dp), intent(in):: L      ! Light level
+    real(dp), intent(in):: T ! Temperature
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
     integer:: i, iEnd
@@ -566,24 +669,39 @@ contains
     iEnd = floor(tEnd/dt)
 
     do i=1, iEnd
-       call calcDerivatives(u, L, dt)
+       call calcDerivatives(u, L, T, dt)
        u = u + rates%dudt*dt
     end do
   end subroutine simulateEuler
-  ! -----------------------------------------------
-  ! Temperature Q10 function
-  ! -----------------------------------------------
-  function fTemp(Q10, T) result(f)
-    real(dp), intent(in), value:: Q10, T
-    real(dp):: f
 
-    f = Q10**(T/10.-1.)
-  end function fTemp
 
   !=========================================
   ! Diagnostic functions
   !=========================================
 
+  
+  function calcN(u) result(N)
+   real(dp), intent(in):: u(:)
+   integer:: i
+   real(dp):: N
+
+   N = 0
+   N = u(idxN)
+   do i = 1, nGrid
+      N = N + u(nNutrients+i)/5.68
+   end do
+ end function calcN
+ 
+ 
+ subroutine getMass(m_, mDelta)
+   real(dp), intent(inout):: m_(nGrid), mDelta(nGrid)
+   integer:: i
+
+   m_ = m;
+   do i = 1,nGroups
+      mDelta(group(i)%ixStart:group(i)%ixEnd) = group(i)%mDelta
+   end do
+   end subroutine getMass
   
   ! ---------------------------------------------------
   ! Get the ecosystem functions as calculated from the last call
@@ -638,14 +756,30 @@ contains
   end subroutine getFunctions
 
   ! ---------------------------------------------------
+  ! Returns mass conservation calculated from last call to calcDerivatives
+  ! ---------------------------------------------------
+  subroutine getBalance(Nbalance,Cbalance)
+   real(dp), intent(out):: Nbalance, Cbalance
+   integer:: i
+   
+   i = 1 ! Do it only for the first group, whihc we assume are generalists
+      if (group(i)%type .eq. typeGeneralist) then
+         Nbalance = getNbalanceGeneralists(group(i),  upositive(group(i)%ixStart:group(i)%ixEnd), rates)  
+         Cbalance = getCbalanceGeneralists(group(i),  upositive(group(i)%ixStart:group(i)%ixEnd), rates)      
+    
+      end if   
+ 
+end subroutine getBalance
+  ! ---------------------------------------------------
   ! Returns the rates calculated from last call to calcDerivatives
   ! ---------------------------------------------------
-  subroutine getRates(jN, jDOC, jL, jF, jFreal,&
+  subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmaxx, jR, jLossPassive, &
     jNloss,jLreal, &
     mortpred, mortHTL, mort2, mort)
     use globals
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
+    real(dp), intent(out):: jSi(nGrid-nNutrients)
     real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmaxx(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients)
@@ -656,6 +790,7 @@ contains
     jN = rates%JN(idxB:nGrid) / m(idxB:nGrid)
     jDOC = rates%JDOC(idxB:nGrid) / m(idxB:nGrid)
     jL = rates%JL(idxB:nGrid) / m(idxB:nGrid)
+    jSi = rates%JSi(idxB:nGrid) / m(idxB:nGrid)
     jF = rates%flvl(idxB:nGrid) * JFmax(idxB:nGrid)/ m(idxB:nGrid)
     jFreal = rates%JF(idxB:nGrid) / m(idxB:nGrid)
     jTot = rates%Jtot(idxB:nGrid) / m(idxB:nGrid)
@@ -671,5 +806,4 @@ contains
     mort = 0*m(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
   end subroutine getRates
 
-  
 end module NUMmodel

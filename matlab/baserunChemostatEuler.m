@@ -8,7 +8,7 @@ end
 %
 % Set parameters:
 %
-p = parameters(mAdult);
+p = setupGeneric(mAdult);
 p = parametersChemostat(p);
 p.tEnd = 365;
 %
@@ -28,4 +28,4 @@ toc
 %
 % Plot
 %
-plotChemostat(sim)
+plotSimulation(sim)
