@@ -110,7 +110,7 @@ contains
   end function initGeneralists
 
   subroutine calcRatesGeneralists(this, rates, L, N, DOC, gammaN, gammaDOC)
-    type(typeSpectrum), intent(in):: this
+    type(typeSpectrum), intent(inout):: this
     real(dp), intent(in):: gammaN, gammaDOC
     type(typeRates), intent(inout):: rates
     real(dp), intent(in):: L, N, DOC
@@ -126,9 +126,9 @@ contains
        rates%JDOC(ix) = gammaDOC * fTemp15 * AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
-       rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix)-Jlosspassive(i) ! In units of C
+       rates%JNtot(ix) = rates%JN(ix)+this%JF(i)-Jlosspassive(i) ! In units of C
        ! Total carbon uptake
-       rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-fTemp2*Jresp(i)-JlossPassive(i)
+       rates%JCtot(ix) = rates%JL(ix)+this%JF(i)+rates%JDOC(ix)-fTemp2*Jresp(i)-JlossPassive(i)
        ! Liebig + synthesis limitation:
        rates%Jtot(ix) = min( rates%JNtot(ix), rates%JCtot(ix) )
        !f = rates%Jtot(ix)/(rates%Jtot(ix) + JmaxT)
@@ -136,15 +136,15 @@ contains
        JmaxT = fTemp2*Jmax(i)
        f = rates%Jtot(ix)/(rates%Jtot(ix) + max(0.,JmaxT))
        if (rates%Jtot(ix) .gt. 0) then
-        JFreal(i) = max(0.d0, min(JmaxT, rates%JF(ix) - (rates%Jtot(ix)-f*JmaxT)))
+        JFreal(i) = max(0.d0, min(JmaxT, this%JF(i) - (rates%Jtot(ix)-f*JmaxT)))
         !rates%Jtot(ix) = f * JmaxT
        else
-        JFreal(i) = max(0.d0, rates%JF(ix))
+        JFreal(i) = max(0.d0, this%JF(i))
        end if
       rates%Jtot(ix) = f * JmaxT ! Apply limitation
       
       rates%JLreal(ix) = rates%JL(ix) - max( 0.d0, &
-            min((rates%JCtot(ix) - (rates%JF(ix)-JFreal(i))-rates%Jtot(ix)), rates%JL(ix)))
+            min((rates%JCtot(ix) - (this%JF(i)-JFreal(i))-rates%Jtot(ix)), rates%JL(ix)))
 
       ! Actual uptakes:
       rates%JCtot(ix) = &
@@ -174,7 +174,7 @@ contains
             rates%JCloss_photouptake(ix) + &
             rates%JClossLiebig(ix) +&
             JlossPassive(i)
-      rates%JF(ix) = JFreal(i)
+      this%JF(i) = JFreal(i)
       !
       ! Test for conservation budget. Should be close to zero:
       !

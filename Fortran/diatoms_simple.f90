@@ -114,7 +114,7 @@ module diatoms_simple
       mort2 = 0.0002*n
   
       this%beta = 0.d0 ! No feeding
-
+      this%palatability = 0.5d0
     end function initDiatoms_simple
  
     subroutine calcRatesDiatoms_simple(this, rates, L, N, DOC, Si, gammaN, gammaDOC, gammaSi)

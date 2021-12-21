@@ -108,6 +108,7 @@ module diatoms
        AL = cL*r**2.*( 1.-exp(-kappa*fl*r*(1-v)) )! *this%m
        !AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
        this%beta = 0.d0 ! No feeding
+       this%palatability = 0.5d0
  
        JlossPassive = cLeakage/r * this%m ! in units of C
    

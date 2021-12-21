@@ -345,18 +345,31 @@ contains
   subroutine parametersFinalize(mortHTL, bQuadraticHTL)
     real(dp), intent(in):: mortHTL
     logical, intent(in):: bQuadraticHTL
-    integer:: i,j
+    integer:: i,j, iGroup, jGroup
     real(dp):: betaHTL, mHTL, mMax
     !
     ! Calc theta:
     !
-    do i = idxB, nGrid
-       do j = idxB, nGrid
-          !theta(i,j) = exp( -(log(m(i)/m(j)/beta(i)))**2/(2*sigma(i)**2))
-          theta(i,j) = palatability(j) * calcPhi(m(i)/m(j), beta(i), sigma(i), z(i))
-       end do
-    end do
-    !
+   !  do i = idxB, nGrid
+   !    do j = idxB, nGrid
+   !       !theta(i,j) = exp( -(log(m(i)/m(j)/beta(i)))**2/(2*sigma(i)**2))
+   !       theta(i,j) = palatability(j) * calcPhi(m(i)/m(j), beta(i), sigma(i), z(i))
+   !    end do
+   !  end do
+    do iGroup = 1, nGroups
+      do i = 1, group(iGroup)%n !group(iGroup)%ixStart, group(iGroup)%ixEnd
+         do jGroup = 1, nGroups
+            do j = 1, group(jGroup)%n!group(jGroup)%ixStart, group(jGroup)%ixEnd
+               theta(i+group(iGroup)%ixStart-1, j+group(jGroup)%ixStart-1) = &
+                  group(jGroup)%palatability * &
+                  calcPhi(group(iGroup)%m(i)/group(jGroup)%m(j), &
+                     group(iGroup)%beta, group(iGroup)%sigma, &
+                     group(iGroup)%z(i))
+            end do
+         end do
+      end do
+   end do
+   !
     ! Set HTL mortality
     !
     call parametersHTL(mortHTL, bQuadraticHTL)
@@ -467,7 +480,7 @@ contains
     !
     call updateTemperature(T)
     !
-    ! Calc uptakes of food
+    ! Calc available food:
     !
     do i = idxB, nGrid
        rates%F(i) = 0.d0
@@ -475,10 +488,13 @@ contains
           rates%F(i) = rates%F(i) + theta(i,j)*upositive(j)
        end do
     end do
-
-    rates%flvl(idxB:nGrid) = epsilonF(idxB:nGrid)*AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid)&
-                            + fTemp2*JFmax(idxB:nGrid))
-    rates%JF(idxB:nGrid) = rates%flvl(idxB:nGrid) * fTemp2*JFmax(idxB:nGrid)
+    ! Calculate feeding for each group:
+    do iGroup = 1, nGroups
+      call calcFeeding(group(iGroup), rates%F(group(iGroup)%ixStart:group(iGroup)%ixEnd))
+    end do 
+ !     rates%flvl(idxB:nGrid) = epsilonF(idxB:nGrid)*AF(idxB:nGrid)*rates%F(idxB:nGrid) / (AF(idxB:nGrid)*rates%F(idxB:nGrid)&
+ !                           + fTemp2*JFmax(idxB:nGrid))
+ !   rates%JF(idxB:nGrid) = rates%flvl(idxB:nGrid) * fTemp2*JFmax(idxB:nGrid)
     !
     ! Calc HTL mortality:
     !
@@ -533,7 +549,7 @@ contains
   !   This correction procedure is needed for correct Euler integration.
   subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
    real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC, gammaSi
-   integer:: i,j, iGroup
+   integer:: i,j, iGroup, jGroup, ixj, ixi
    !
    ! Calc uptakes of all unicellular groups:
    !
@@ -558,15 +574,40 @@ contains
    !
    ! Calc predation mortality
    !
-   do i=idxB, nGrid
-      rates%mortpred(i) = 0.d0
-      do j=idxB, nGrid
-         if (rates%F(j) .ne. 0.d0) then
-            rates%mortpred(i) = rates%mortpred(i)  &
-                 + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
-         end if
+   ! do i=idxB, nGrid
+   !    rates%mortpred(i) = 0.d0
+   !    do j=idxB, nGrid
+   !       if (rates%F(j) .ne. 0.d0) then
+   !          rates%mortpred(i) = rates%mortpred(i)  &
+   !               + theta(j,i) * rates%JF(j)*upositive(j)/(epsilonF(j)*m(j)*rates%F(j))
+   !       end if
+   !    end do
+   ! end do
+   !write(*,*) rates%mortpred
+   !write(*,*) '==='
+
+   do iGroup = 1, nGroups
+      group(iGroup)%mortpred = 0.d0
+      do i = group(iGroup)%ixStart, group(iGroup)%ixEnd
+         ixi = i-group(iGroup)%ixStart+1
+         do jGroup = 1, nGroups
+            do j = group(jGroup)%ixStart, group(jGroup)%ixEnd
+               ixj = j-group(jGroup)%ixStart+1
+              !                   write(*,*) i,j, theta(j,i) * group(jGroup)%JF(ixj)*upositive(j) &
+              ! / (group(jGroup)%epsilonF*group(jGroup)%m(ixj)*rates%F(j))
+
+               if (rates%F(j) .gt. 0.d0) then
+                  
+                  group(iGroup)%mortpred(ixi) = group(iGroup)%mortpred(ixi) &
+                     + theta(j,i) * group(jGroup)%JF(ixj)*upositive(j) &
+                     / (group(jGroup)%epsilonF*group(jGroup)%m(ixj)*rates%F(j))
+               end if
+            end do
+         end do
       end do
-   end do
+      !write(*,*) group(iGroup)%JF/group(iGroup)%m
+      !write(*,*) group(iGroup)%mortpred
+   end do 
    !
    ! Assemble derivatives:
    !
