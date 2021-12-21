@@ -5,7 +5,7 @@
 % In:
 %  sim: simulation structure
 %  field: field to integrate, e.g., field = sim.B or field = sim.N
-%  bAverageTime: whether to average over time
+%  bAverageTime: whether to average over time (default false)
 %
 % Out:
 %  Three dimensional field in units of g/m2

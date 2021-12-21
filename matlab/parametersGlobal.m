@@ -57,6 +57,9 @@ p.umin = 1e-5*p.mDelta(3)/p.m(3); % Minimum B concentration
 %
 % Light environment:
 %
+p.bUse_parday_light = false; % Using the parday file includes changes in cloud cover
+                             % but only works with MITgcm_2.8
+% Parameters used to calculate light if not using parday:
 p.EinConv = 4.57; % conversion factor from W m^-2 to \mu mol s^-1 m^-2 (Thimijan & Heins 1983)
 p.PARfrac = 0.4; % Fraction of light available as PAR. Source unknown
 p.kw = 0.05; % m^-1

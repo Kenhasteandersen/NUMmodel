@@ -9,7 +9,7 @@
 %   ChlArea - ChlA (g/m2)
 %   ChlVolume - ChlA (g/m3)
 %
-function [ChlArea ChlVolume] = calcGlobalChl(sim)
+function [ChlArea, ChlVolume] = calcGlobalChl(sim)
 
 ChlArea = zeros(length(sim.x), length(sim.y));
 ChlVolume = zeros(length(sim.x), length(sim.y), length(sim.z));
@@ -28,7 +28,7 @@ for i = 1:length(sim.x)
                     tmp =  sum( calcChl( B, rates, sim.L(i,j,l,k))) /1000;
                     if ~isnan(tmp)
                         ChlArea(i,j) = ChlArea(i,j) + tmp * sim.dznom(l);
-                        ChlVolume(i,j,l) = tmp;
+                        ChlVolume(i,j,l) = ChlVolume(i,j,l) + tmp;
                     end
                 end
             end

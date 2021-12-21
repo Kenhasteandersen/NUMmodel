@@ -117,11 +117,17 @@ end
 %
 % Load Light:
 %
-% load 'parday' % If using Camila's light
+if p.bUse_parday_light
+  load 'Transport Matrix/parday';
+end
 L0 = zeros(nb,730);
 for i = 1:730
-    L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox,i/2,1).*exp(-p.kw*Zbox);
-    %L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox); % If using Calima's light
+    if p.bUse_parday_light
+        L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox);
+    else
+        % Calculate light:
+        L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox,i/2,1).*exp(-p.kw*Zbox);
+    end
 end
 %
 % Matrices for saving the solution:
