@@ -5,36 +5,68 @@ module spectrum
   use globals
   implicit none
 
-  type typeSpectrum
+  type, abstract :: typeSpectrum
      integer:: type
      integer:: n  ! Number of size classes
-     integer:: ixStart, ixEnd ! Start and end indices into u and rates
-     integer:: ixOffset ! ixStart-1
+     !integer:: ixStart, ixEnd ! Start and end indices into u and rates
+     !integer:: ixOffset ! ixStart-1
      ! Grid:
      real(dp), dimension(:), allocatable:: m(:)  ! Geometric center mass of size-bin
      real(dp), dimension(:), allocatable:: mLower(:)  ! Smallest size in the bin
      real(dp), dimension(:), allocatable:: mDelta(:)   ! Width of the bin
      real(dp), dimension(:), allocatable:: z(:) ! Ratio btw upper and lower size of bin
      ! Feeding:
-     real(dp):: palatability
-     real(dp):: beta, sigma, epsilonF
+     real(dp):: palatability ! [0:1] Reduction of risk of predation
+     real(dp):: beta, sigma ! Pred:prey mass ratio and width
+     real(dp):: epsilonF ! Assimilation efficiency
      real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:)
-     real(dp), dimension(:), allocatable:: mortpred
+     ! Growth:
+     real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
+     real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp
+     ! Mortality:
+     real(dp), dimension(:), allocatable:: mortpred, mortHTL
+     real(dp):: mort2
+
+     contains 
+
+     procedure, pass :: initSpectrum
+     procedure :: calcFeeding
+     procedure :: printRates => printRatesSpectrum
+     procedure :: printRatesSpectrum
   end type typeSpectrum
 
-  public initSpectrum, calcFeeding
+  type, abstract, extends(typeSpectrum) :: spectrumUnicellular
+    real(dp),  dimension(:), allocatable:: nu, r
+ 
+    real(dp),  dimension(:), allocatable:: JlossPassive
+    ! Resource uptake affinities
+    real(dp), dimension(:), allocatable:: AN, AL
+    ! Resource uptake fluxes
+    real(dp), dimension(:), allocatable:: JN, JDOC, JL
+    real(dp), dimension(:), allocatable:: JNtot, JLreal, JCtot 
+    real(dp), dimension(:), allocatable:: JCloss_photouptake, JClossLiebig
+
+    real(dp), dimension(:), allocatable:: Jmax
+
+    contains
+
+    procedure, pass :: initUnicellular
+    procedure :: printRatesUnicellular
+
+  end type spectrumUnicellular
+
+  type spectrumContainer 
+    class(typeSpectrum), allocatable :: spec
+  end type spectrumContainer
+
 contains
 
-  function initSpectrum(type, n, ixOffset, mMin, mMax) result(this)
-    type (typeSpectrum):: this
-    integer, intent(in):: type, n, ixOffset
+  subroutine initSpectrum(this, n, mMin, mMax)
+    class(typeSpectrum) :: this
+    integer, intent(in):: n
     real(dp), intent(in):: mMin, mMax
 
-    this%type = type
     this%n = n
-    this%ixOffset = ixOffset
-    this%ixStart = ixOffset+1
-    this%ixEnd = ixOffset+n
     allocate(this%m(n))
     allocate(this%mLower(n))
     allocate(this%mDelta(n))
@@ -46,19 +78,30 @@ contains
     allocate(this%flvl(n))
     allocate(this%JF(n))
 
+    allocate(this%Jtot(n))
+    allocate(this%Jresp(n))
+    allocate(this%JCloss_feeding(n))
+    allocate(this%JNlossLiebig(n))
+    allocate(this%JNloss(n))
+    allocate(this%JCloss(n))
+
     allocate(this%mortpred(n))
+    allocate(this%mortHTL(n))
     ! Set feeding to dummy values. Relevant for non-feeding groups (diatoms)
     this%AF = 0.d0
     this%JFmax = 1.d0
     this%flvl = 0.d0
     this%JF = 0.d0
     this%palatability = 1.d0 ! set to default
-  end function initSpectrum
-  !
+    this%mort2 = 0.d0
+
+    contains
+
+      !
   ! Set up a grid given minimum and maximum center masses
   !
   subroutine calcGrid(this, mMin, mMax)
-    type (typeSpectrum), intent(inout):: this
+    class (typeSpectrum), intent(inout):: this
     real(dp), intent(in):: mMin, mMax
     real(dp):: deltax, x
     integer:: i
@@ -73,13 +116,94 @@ contains
     end do
   end subroutine calcGrid
 
+  end subroutine initSpectrum
+
+  
+  subroutine initUnicellular(this, n, mMin, mMax)
+    class(spectrumUnicellular) :: this
+    integer, intent(in):: n
+    real(dp), intent(in):: mMin, mMax
+
+    call this%initspectrum(n, mMin, mMax)
+
+    allocate(this%nu(n))
+    allocate(this%r(n))
+
+    allocate(this%JlossPassive(n))
+
+    allocate(this%AN(n))
+    allocate(this%AL(n))
+
+    allocate(this%JN(n))
+    allocate(this%JDOC(n))
+    allocate(this%JL(n))
+    allocate(this%JNtot(n))
+    allocate(this%JLreal(n))
+
+
+    allocate(this%JCtot (n))
+    allocate(this%JCloss_photouptake(n))
+    allocate(this%JClossLiebig(n))
+
+    allocate(this%Jmax(n))
+  end subroutine initUnicellular
+
+
   subroutine calcFeeding(this, F)
-    type (typeSpectrum), intent(inout):: this
+    class (typeSpectrum), intent(inout):: this
     real(dp), intent(in):: F(this%n)
 
     this%flvl = this%epsilonF * this%AF*F / &
       (this%AF*F + fTemp2*this%JFmax)
     this%JF = this%flvl * fTemp2*this%JFmax
   end subroutine
+  
 
+  
+  ! function calcHTL(u, i) result(mHTL)
+  !   real(dp) :: mHTL, B
+  !   real(dp), intent(in):: u(:)
+  !   integer, intent(in):: i
+  !   integer:: j
+
+  !   !
+  !   ! First calc the biomass within a size range:
+  !   !
+  !   B = 0.d0
+  !   do j = 1, nGrid
+  !      if (m(j)>m(i)/3.16 .and. m(j)<m(i)*3.16) then
+  !         B = B + u(j)
+  !      end if
+  !   end do
+  !   ! FIX
+  !   mHTL = 0.d0! FIXpHTL(i)*mortHTL/z(i)*u(i)**gammaHTL*B**(1.-gammaHTL)
+  ! end function calcHTL
+
+
+  subroutine printRatesSpectrum(this)
+    class (typeSpectrum), intent(in):: this
+
+    99 format (a10, 20f10.6)
+    write(*,'(a10, 20d10.3)') "m: ", this%m
+    write(*,99) "jF:", this%JF / this%m
+    write(*,99) "jTot:", this%Jtot / this%m
+    write(*,99) "mortpred", this%mortpred
+    write(*,99) "mortHTL", this%mortHTL
+  end subroutine printRatesSpectrum
+
+  subroutine printRatesUnicellular(this)
+    class (spectrumUnicellular), intent(in):: this 
+    
+    99 format (a10, 20f10.6)
+ 
+    call this%printRatesSpectrum()
+
+    write(*,99) "jN:", this%JN / this%m
+    write(*,99) "jL:", this%JL / this%m
+    write(*,99) "jLreal:", this%JLreal / this%m
+    write(*,99) "jDOC:", this%JDOC / this%m
+    write(*,99) "jLossPass.", this%JlossPassive / this%m
+
+  end subroutine printRatesUnicellular
+  
  end module spectrum

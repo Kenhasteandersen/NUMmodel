@@ -31,10 +31,11 @@ program NUMmodeltest
 
   call calcDerivatives(u00, 100.d0, 15.d0, 10.d0)
 
-  write(*,*) group(1)%JF / group(1)%m
-  write(*,*) group(1)%mortpred
-  !call printRates(m,rates)
- 
+  write(*,*) group(1)%spec%JF / group(1)%spec%m
+  write(*,*) group(1)%spec%mortpred
+
+  call printRates()
+  
   !call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
   !call simulateChemostatEuler(u00, 60.d0, 20.d0, u00(1:3), 0.1d0, 0.2d0, 0.1d0)
   

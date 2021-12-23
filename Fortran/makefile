@@ -3,30 +3,30 @@
 #
 # iFortran:
 #
-#FORT=ifort
+FORT=ifort
 #FLAGS=-O2
 #LINK=-l
 #
 # gfortran:
 #
-FORT=gfortran
+#FORT=gfortran
 #FLAGS=-g3
-FLAGS=-O2
+#FLAGS=-O2
 # Link needed on Macos:
-#LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/
 #LINK=
 #
 # lfortran
 #
 
-OBJ = globals.o debug.o spectrum.o generalists.o generalists_csp.o diatoms.o diatoms_simple.o copepods.o NUMmodel.o
+OBJ = globals.o spectrum.o generalists.o NUMmodel.o #debug.o  generalists_csp.o diatoms.o diatoms_simple.o copepods.o NUMmodel.o
 
-all: NUMmodel libMatlab libR
+all: NUMmodel #libMatlab #libR
 
 #debugging: FLAGS = -g3 -fbounds-check
 debugging: FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
 
-debugging: clean all
+debugging:  all
 
 %.o: %.f90
 	$(FORT) -c -fPIC $(FLAGS) -o $@ $<
