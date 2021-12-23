@@ -20,11 +20,12 @@ module NUMmodel
   integer:: iCurrentGroup ! The current group to be added
   integer:: nNutrients ! Number of nutrient state variables
   integer:: idxB ! First index into non-nutrient groups (=nNutrients+1)
+  integer:: nGrid ! Total number of grid points incl.  points for nutrients
   type(spectrumContainer), allocatable :: group(:) ! Structure pointing to each group
   integer, dimension(:), allocatable :: ixStart, ixEnd ! Indices into u for each group
 
   real(dp), dimension(:,:), allocatable:: theta ! Interaction matrix
-  real(dp), dimension(:), allocatable:: dudt
+ ! real(dp), dimension(:), allocatable:: dudt
   real(dp), dimension(:), allocatable:: upositive ! State variable constrained to be positive
   real(dp), dimension(:), allocatable:: F ! Available food
   !
@@ -177,7 +178,7 @@ contains
        deallocate(ixStart)
        deallocate(ixEnd)
        deallocate(upositive)
-       deallocate(dudt)
+       !deallocate(dudt)
        deallocate(F)
        deallocate(theta)
     end if
@@ -186,7 +187,7 @@ contains
     allocate(ixStart(nGroups))
     allocate(ixEnd(nGroups))
     allocate(upositive(nGrid))
-    allocate(dudt(nGrid))
+    !allocate(dudt(nGrid))
     allocate(F(nGrid))
     allocate(theta(nGrid,nGrid))     ! Interaction matrix:
  
@@ -358,8 +359,9 @@ contains
   !  time step dt, then the uptake of said nutrient is reduced
   !  by a factor gamma to avoid the nutrient becoming negative.
   ! -----------------------------------------------
-  subroutine calcDerivatives(u, L, T, dt)
-    real(dp), intent(in):: L, T, dt, u(:)
+  subroutine calcDerivatives(u, L, T, dt, dudt)
+    real(dp), intent(in):: L, T, dt, u(nGrid)
+    real(dp), intent(inout) :: dudt(nGrid)
     integer:: i, j, iGroup
     real(dp):: gammaN, gammaDOC, gammaSi
 
@@ -532,12 +534,13 @@ contains
     real(dp), intent(in):: diff      ! Diffusivity
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
+    real(dp) :: dudt(nGrid)
     integer:: i, iEnd
 
     iEnd = floor(tEnd/dt)
    
     do i=1, iEnd
-       call calcDerivatives(u, L, T, dt)
+       call calcDerivatives(u, L, T, dt, dudt)
        dudt(idxN) = dudt(idxN) + diff*(Ndeep(idxN)-u(idxN))
        dudt(idxDOC) = dudt(idxDOC) + diff*(Ndeep(idxDOC) - u(idxDOC))
        if (idxB .gt. idxSi) then
@@ -560,12 +563,13 @@ contains
     real(dp), intent(in):: T ! Temperature
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
+    real(dp) :: dudt(nGrid)
     integer:: i, iEnd
 
     iEnd = floor(tEnd/dt)
 
     do i=1, iEnd
-       call calcDerivatives(u, L, T, dt)
+       call calcDerivatives(u, L, T, dt, dudt)
        u = u + dudt*dt
     end do
   end subroutine simulateEuler
@@ -582,7 +586,6 @@ contains
       do iGroup = 1, nGroups
          call group(iGroup)%spec%printRates()
       end do
-      write(*,99) "dudt", dudt
 
    end subroutine printRates
 
@@ -718,8 +721,11 @@ contains
         jMax( i1:i2 ) = spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
-
       end select
+
+      jSi = 0 ! Dummy
+      mort = 0
+
    end do
   end subroutine getRates
 

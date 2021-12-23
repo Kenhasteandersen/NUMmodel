@@ -14,7 +14,7 @@ end
 %
 dudt = 0*u';
 calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
-            length(u), u, L, T, 0.0, dudt);
+            u, L, T, 0.0, dudt);
 %
 % Then extract the rates:
 %
@@ -45,5 +45,6 @@ mort = zero;
     jTot, jMax, jFmaxx, jR, jLossPassive, ...
     jNloss,jLreal, ...
     mortpred, mortHTL, mort2, mort);
+rates.dudt = dudt;
 
 

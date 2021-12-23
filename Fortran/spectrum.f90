@@ -126,7 +126,7 @@ contains
     integer, intent(in):: n
     real(dp), intent(in):: mMin, mMax
 
-    call this%initspectrum(n, mMin, mMax)
+    call this%initSpectrum(n, mMin, mMax)
 
     allocate(this%nu(n))
     allocate(this%r(n))

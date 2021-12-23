@@ -19,7 +19,6 @@ void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
 void f_parametershtl(const double mortHTL, const bool bQuadraticHTL);
 
 void f_calcderivatives(
-		       const int nGrid,
 		       const double u[],
 		       const double L,
 			   const double T,
@@ -50,7 +49,6 @@ void f_simulatechemostateuler(
 			      const double dt);
 
 void f_simulateeuler(
-			      const int nGrid,
 			      double u[],
 			      const double L,
 				  const double T, 

@@ -66,7 +66,7 @@ sim.T = T;
     function dudt = fDeriv(t,u)
         dudt = 0*u';
         [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
-            length(u), u, L, T, 0.0, dudt);
+            u, L, T, 0.0, dudt);
         %
         % Chemostat dynamics for nutrients and unicellulars:
         %

@@ -34,8 +34,6 @@ module globals
   !    real(dp), dimension(:), allocatable:: dudt
   ! end type typeRates
 
-  integer:: nGrid ! Total number of grid points incl.  points for nutrients
-
   ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
   real(dp) :: fTemp2, fTemp15
   real(dp), parameter:: Tref = 10. ! Reference temperature
