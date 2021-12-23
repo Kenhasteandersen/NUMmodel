@@ -79,7 +79,7 @@ contains
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
     this%Jresp = cR*alphaJ*this%m
     !mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);
-    this%mort2 = 0.0002*this%n
+    !this%mort2constant = 0.0002*this%n
   end subroutine initGeneralists
 
   subroutine calcRatesGeneralists(this, L, N, DOC, gammaN, gammaDOC)
@@ -160,7 +160,7 @@ contains
   end subroutine calcRatesGeneralists
 
   subroutine calcDerivativesGeneralists(this, u, dNdt, dDOCdt, dudt)
-    class(spectrumGeneralists), intent(in):: this
+    class(spectrumGeneralists), intent(inout):: this
     real(dp), intent(in):: u(this%n)
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
     real(dp):: mortloss
@@ -169,9 +169,9 @@ contains
     ! To make mass balance check:
     !
     !rates%dudt = 0*rates%dudt
-
+    this%mort2 = this%mort2constant*u
     do i = 1, this%n
-      mortloss = u(i)*(remin2*this%mort2*u(i) + reminHTL*this%mortHTL(i))
+      mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
       !
       ! Update nitrogen:
       !
@@ -180,7 +180,7 @@ contains
            +  this%JlossPassive(i) &
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) &
-           + this%mort2*u(i) &
+           + this%mort2(i) &
            + reminHTL*this%mortHTL(i)) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -190,7 +190,7 @@ contains
            +   this%JlossPassive(i) &
            +   this%JClossLiebig(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
-           +  remin2*this%mort2*u(i) &
+           +  remin2*this%mort2(i) &
            +  reminHTL*this%mortHTL(i)) * u(i)
       !
       ! Update the generalists:
@@ -198,7 +198,7 @@ contains
       dudt(i) = (this%Jtot(i)/this%m(i)  &
            !- mort(i) &
            - this%mortpred(i) &
-           - this%mort2*u(i) &
+           - this%mort2(i) &
            - this%mortHTL(i))*u(i)
    end do
   

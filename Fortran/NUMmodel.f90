@@ -382,8 +382,6 @@ contains
           F(i) = F(i) + theta(i,j)*upositive(j)
        end do
     end do
-    write(*,*) theta(3:7, 3:7)
-    write(*,*) "F:", F
     ! Calculate feeding for each group:
     do iGroup = 1, nGroups
       call calcFeeding(group(iGroup)%spec, F( ixStart(iGroup):ixEnd(iGroup) ))
@@ -683,37 +681,46 @@ contains
 !   ! ---------------------------------------------------
 !   ! Returns the rates calculated from last call to calcDerivatives
 !   ! ---------------------------------------------------
-!   subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-!     jTot, jMax, jFmaxx, jR, jLossPassive, &
-!     jNloss,jLreal, &
-!     mortpred, mortHTL, mort2, mort)
-!     use globals
-!     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
-!     real(dp), intent(out):: jSi(nGrid-nNutrients)
-!     real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
-!     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmaxx(nGrid-nNutrients)
-!     real(dp), intent(out):: jR(nGrid-nNutrients)
-!     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
-!     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
-!     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
+  subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal,&
+    jTot, jMax, jFmax, jR, jLossPassive, &
+    jNloss,jLreal, &
+    mortpred, mortHTL, mort2, mort)
+    use globals
+    real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
+    real(dp), intent(out):: jSi(nGrid-nNutrients)
+    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
+    real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
+    real(dp), intent(out):: jR(nGrid-nNutrients)
+    real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
+    real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
+   integer :: iGroup, i1, i2
 
-!     jN = rates%JN(idxB:nGrid) / m(idxB:nGrid)
-!     jDOC = rates%JDOC(idxB:nGrid) / m(idxB:nGrid)
-!     jL = rates%JL(idxB:nGrid) / m(idxB:nGrid)
-!     jSi = rates%JSi(idxB:nGrid) / m(idxB:nGrid)
-!     !jF = rates%flvl(idxB:nGrid) * JFmax(idxB:nGrid)/ m(idxB:nGrid)
-!     jFreal = rates%JF(idxB:nGrid) / m(idxB:nGrid)
-!     jTot = rates%Jtot(idxB:nGrid) / m(idxB:nGrid)
-!     jMax = 1.5 + 0*m(idxB:nGrid) ! NOTE: HARDCODED. Should be taken from generalists
-!     !jFmaxx = JFmax(idxB:nGrid) / m(idxB:nGrid)
-!     jR = 1.5*0.1 + 0*m(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
-!     jLossPassive = 0* m(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
-!     jNloss = rates%JNloss(idxB:nGrid) / m(idxB:nGrid)
-!     jLreal = rates%JLreal(idxB:nGrid) / m(idxB:nGrid)
-!     mortpred = rates%mortpred(idxB:nGrid)
-!     mortHTL = rates%mortHTL(idxB:nGrid)
-!     mort2 = 0.0002*(nGrid-nNutrients)*upositive(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
-!     mort = 0*m(idxB:nGrid)  ! NOTE: HARDCODED. Should be taken from generalists
-!   end subroutine getRates
+   do iGroup = 1, nGroups
+      i1 = ixStart(iGroup)-nNutrients
+      i2 = ixEnd(iGroup)-nNutrients
+      ! Extract common fields:
+      jF( i1:i2 ) = group(iGroup)%spec%flvl * group(iGroup)%spec%JFmax / group(iGroup)%spec%m
+      jFreal( i1:i2 ) = group(iGroup)%spec%JF / group(iGroup)%spec%m
+      jFmax( i1:i2 ) = group(iGroup)%spec%JFmax / group(iGroup)%spec%m
+      Jtot( i1:i2 ) = group(iGroup)%spec%Jtot / group(iGroup)%spec%m
+      mortpred( i1:i2 ) = group(iGroup)%spec%mortpred
+      mortHTL( i1:i2 ) = group(iGroup)%spec%mortHTL
+      mort2( i1:i2 ) = group(iGroup)%spec%mort2
+      jNloss( i1:i2 ) = group(iGroup)%spec%JNloss / group(iGroup)%spec%m
+      jR( i1:i2 ) = group(iGroup)%spec%Jresp / group(iGroup)%spec%m
+
+      select type (spectrum => group(iGroup)%spec)
+      class is (spectrumUnicellular)
+        jN( i1:i2 ) = spectrum%JN / spectrum%m
+        jDOC( i1:i2 ) = spectrum%JDOC / spectrum%m
+        jL( i1:i2 ) = spectrum%JL / spectrum%m
+        jMax( i1:i2 ) = spectrum%Jmax / spectrum%m
+        jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
+        jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
+
+      end select
+   end do
+  end subroutine getRates
 
 end module NUMmodel

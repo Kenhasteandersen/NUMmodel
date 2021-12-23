@@ -21,7 +21,7 @@ LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/
 
 OBJ = globals.o spectrum.o generalists.o NUMmodel.o #debug.o  generalists_csp.o diatoms.o diatoms_simple.o copepods.o NUMmodel.o
 
-all: NUMmodel #libMatlab #libR
+all: NUMmodel libMatlab #libR
 
 #debugging: FLAGS = -g3 -fbounds-check
 debugging: FLAGS=-g -check all -fpe0 -warn -traceback -debug extended

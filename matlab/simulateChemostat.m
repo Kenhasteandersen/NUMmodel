@@ -58,7 +58,7 @@ sim.T = T;
 %sim.Bnano = Bpnm(2);
 %sim.Bmicro = Bpnm(3);
 
-[sim.Nbalance, sim.Cbalance] = getBalance(sim.u, sim.L, sim.T); % in units per day
+%[sim.Nbalance, sim.Cbalance] = getBalance(sim.u, sim.L, sim.T); % in units per day
 
     %
     % Function to assemble derivative for chemostat:

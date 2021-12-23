@@ -28,18 +28,11 @@ program NUMmodeltest
   do i = idxB, nGrid
      u00(i) = 5.0d0 !*(i-2)
   end do
-
-  call calcDerivatives(u00, 100.d0, 15.d0, 10.d0)
-
-  write(*,*) group(1)%spec%JF / group(1)%spec%m
-  write(*,*) group(1)%spec%mortpred
-
-  call printRates()
   
   !call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
-  !call simulateChemostatEuler(u00, 60.d0, 20.d0, u00(1:3), 0.1d0, 0.2d0, 0.1d0)
+  call simulateChemostatEuler(u00, 60.d0, 20.d0, u00(1:3), 0.1d0, 0.2d0, 0.1d0)
   
-  !write(*,*) u00
+  write(*,*) u00
 !!$  u0=u00
 !!$  call simulateChemostatEuler(u0, 100.d0, 150.d0, 0.05d0, 300.d0, 0.01d0)
 !!$  call printU(u0)

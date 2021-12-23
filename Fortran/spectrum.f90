@@ -24,8 +24,9 @@ module spectrum
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
      real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp
      ! Mortality:
-     real(dp), dimension(:), allocatable:: mortpred, mortHTL
-     real(dp):: mort2
+     real(dp), dimension(:), allocatable:: mortpred, mortHTL, mort2
+     real(dp) :: mort2constant
+     !real(dp):: mort2
 
      contains 
 
@@ -87,13 +88,14 @@ contains
 
     allocate(this%mortpred(n))
     allocate(this%mortHTL(n))
+    allocate(this%mort2(n))
     ! Set feeding to dummy values. Relevant for non-feeding groups (diatoms)
     this%AF = 0.d0
     this%JFmax = 1.d0
     this%flvl = 0.d0
     this%JF = 0.d0
     this%palatability = 1.d0 ! set to default
-    this%mort2 = 0.d0
+    this%mort2constant = 0.0002*n
 
     contains
 
@@ -205,5 +207,5 @@ contains
     write(*,99) "jLossPass.", this%JlossPassive / this%m
 
   end subroutine printRatesUnicellular
-  
+
  end module spectrum

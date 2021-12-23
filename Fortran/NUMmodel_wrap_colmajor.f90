@@ -1,6 +1,6 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int
-  use NUMmodel, only:  setupGeneralistsOnly, &!setupGeneralistsOnly_csp, &
+  use NUMmodel, only:  dudt, setupGeneralistsOnly, setHTL, getRates, &!setupGeneralistsOnly_csp, &
        !setupDiatomsOnly, setupDiatoms_simpleOnly, &
        !setupGeneralistsDiatoms, setupGeneralistsDiatoms_simple, &
        !setupGeneralistsCopepod, &
@@ -20,53 +20,53 @@ contains
     call setupGeneralistsOnly(n)
   end subroutine f_setupGeneralistsOnly
 
-  subroutine f_setupGeneralistsOnly_csp() bind(c)
-    !call setupGeneralistsOnly_csp()
-  end subroutine f_setupGeneralistsOnly_csp
+  ! subroutine f_setupGeneralistsOnly_csp() bind(c)
+  !   !call setupGeneralistsOnly_csp()
+  ! end subroutine f_setupGeneralistsOnly_csp
 
-  subroutine f_setupDiatomsOnly(n) bind(c)
-    integer(c_int), intent(in), value:: n
-    !call setupDiatomsOnly(n)
-  end subroutine f_setupDiatomsOnly
+  ! subroutine f_setupDiatomsOnly(n) bind(c)
+  !   integer(c_int), intent(in), value:: n
+  !   !call setupDiatomsOnly(n)
+  ! end subroutine f_setupDiatomsOnly
 
-  subroutine f_setupDiatoms_simpleOnly(n) bind(c)
-    integer(c_int), intent(in), value:: n
-    !call setupDiatoms_simpleOnly(n)
-  end subroutine f_setupDiatoms_simpleOnly
+  ! subroutine f_setupDiatoms_simpleOnly(n) bind(c)
+  !   integer(c_int), intent(in), value:: n
+  !   !call setupDiatoms_simpleOnly(n)
+  ! end subroutine f_setupDiatoms_simpleOnly
 
-  subroutine f_setupGeneralistsDiatoms(n) bind(c)
-    integer(c_int), intent(in), value:: n
-    !call setupGeneralistsDiatoms(n)
-  end subroutine f_setupGeneralistsDiatoms
+  ! subroutine f_setupGeneralistsDiatoms(n) bind(c)
+  !   integer(c_int), intent(in), value:: n
+  !   !call setupGeneralistsDiatoms(n)
+  ! end subroutine f_setupGeneralistsDiatoms
 
-  subroutine f_setupGeneralistsDiatoms_simple(n) bind(c)
-    integer(c_int), intent(in), value:: n
-    !call setupGeneralistsDiatoms_simple(n)
-  end subroutine f_setupGeneralistsDiatoms_simple
+  ! subroutine f_setupGeneralistsDiatoms_simple(n) bind(c)
+  !   integer(c_int), intent(in), value:: n
+  !   !call setupGeneralistsDiatoms_simple(n)
+  ! end subroutine f_setupGeneralistsDiatoms_simple
 
-  subroutine f_setupGeneralistsCopepod() bind(c)
-    !call setupGeneralistsCopepod()
-  end subroutine f_setupGeneralistsCopepod
+  ! subroutine f_setupGeneralistsCopepod() bind(c)
+  !   !call setupGeneralistsCopepod()
+  ! end subroutine f_setupGeneralistsCopepod
 
-  subroutine f_setupGeneric(nCopepods, mAdult) bind(c)
-    integer(c_int), intent(in), value:: nCopepods
-    real(c_double), intent(in):: mAdult(nCopepods)
+  ! subroutine f_setupGeneric(nCopepods, mAdult) bind(c)
+  !   integer(c_int), intent(in), value:: nCopepods
+  !   real(c_double), intent(in):: mAdult(nCopepods)
 
-    !call setupGeneric(mAdult)
-  end subroutine f_setupGeneric
+  !   !call setupGeneric(mAdult)
+  ! end subroutine f_setupGeneric
 
-  subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
-    integer(c_int), intent(in), value:: nCopepods
-    real(c_double), intent(in):: mAdult(nCopepods)
+  ! subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
+  !   integer(c_int), intent(in), value:: nCopepods
+  !   real(c_double), intent(in):: mAdult(nCopepods)
 
-    !call setupGeneric_csp(mAdult)
-  end subroutine f_setupGeneric_csp
+  !   !call setupGeneric_csp(mAdult)
+  ! end subroutine f_setupGeneric_csp
 
-  subroutine f_parametersHTL(mortHTL, bQuadraticHTL) bind(c)
-    real(c_double), intent(in), value:: mortHTL
+  subroutine f_parametersHTL(mHTL, mortHTL, bQuadraticHTL) bind(c)
+    real(c_double), intent(in), value:: mHTL, mortHTL
     logical, intent(in), value:: bQuadraticHTL
 
-    !call setHTL(mortHTL, bQuadraticHTL)
+    call setHTL(mHTL, mortHTL, bQuadraticHTL)
   end subroutine f_parametersHTL 
 
   subroutine test(x) bind(c)
@@ -75,33 +75,33 @@ contains
     write(6,*) x
   end subroutine test
 
-  subroutine f_calcDerivatives(nGrid, u, L, T, dt, dudt) bind(c)
+  subroutine f_calcDerivatives(nGrid, u, L, T, dt, dudt_) bind(c)
     integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(in), value:: L, T, dt
     real(c_double), intent(in):: u(nGrid)
-    real(c_double), intent(out):: dudt(nGrid)
+    real(c_double), intent(out):: dudt_(nGrid)
 
     call calcDerivatives(u, L, T, dt)
-  
+    dudt_ = dudt
   end subroutine f_calcDerivatives
 
-  subroutine f_calcRates(nGrid, u, L, T, jN, jL, jF, jTot, mortHTL, mortpred, g) bind(c)
-    use NUMmodel, only: idxB
-    integer(c_int), intent(in), value:: nGrid
-    real(c_double), intent(in):: u(nGrid)
-    real(c_double), intent(in), value:: L, T
-    real(c_double), intent(out):: jN(nGrid), jL(nGrid), jF(nGrid)
-    real(c_double), intent(out):: jTot(nGrid), mortHTL(nGrid), mortpred(nGrid), g(nGrid)
+  ! subroutine f_calcRates(nGrid, u, L, T, jN, jL, jF, jTot, mortHTL, mortpred, g) bind(c)
+  !   use NUMmodel, only: idxB
+  !   integer(c_int), intent(in), value:: nGrid
+  !   real(c_double), intent(in):: u(nGrid)
+  !   real(c_double), intent(in), value:: L, T
+  !   real(c_double), intent(out):: jN(nGrid), jL(nGrid), jF(nGrid)
+  !   real(c_double), intent(out):: jTot(nGrid), mortHTL(nGrid), mortpred(nGrid), g(nGrid)
 
-    call calcDerivatives(u, L, T, 0.d0)
-    ! jN(idxB:nGrid) = rates%JN(idxB:nGrid) / m(idxB:nGrid)
-    ! jL(idxB:nGrid) = rates%JL(idxB:nGrid) / m(idxB:nGrid)
-    ! jF(idxB:nGrid) = rates%JF(idxB:nGrid) / m(idxB:nGrid)
-    ! jtot(idxB:nGrid) = rates%Jtot(idxB:nGrid) / m(idxB:nGrid)
-    ! mortHTL(idxB:nGrid) = rates%mortHTL(idxB:nGrid)
-    ! mortpred(idxB:nGrid) = rates%mortpred(idxB:nGrid)
-    ! g(idxB:nGrid) = rates%g(idxB:nGrid)
-  end subroutine f_calcRates
+  !   call calcDerivatives(u, L, T, 0.d0)
+  !   ! jN(idxB:nGrid) = rates%JN(idxB:nGrid) / m(idxB:nGrid)
+  !   ! jL(idxB:nGrid) = rates%JL(idxB:nGrid) / m(idxB:nGrid)
+  !   ! jF(idxB:nGrid) = rates%JF(idxB:nGrid) / m(idxB:nGrid)
+  !   ! jtot(idxB:nGrid) = rates%Jtot(idxB:nGrid) / m(idxB:nGrid)
+  !   ! mortHTL(idxB:nGrid) = rates%mortHTL(idxB:nGrid)
+  !   ! mortpred(idxB:nGrid) = rates%mortpred(idxB:nGrid)
+  !   ! g(idxB:nGrid) = rates%g(idxB:nGrid)
+  ! end subroutine f_calcRates
 
   subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt) bind(c)
     !integer(c_int), intent(in), value:: nGrid
@@ -121,17 +121,17 @@ contains
     call simulateEuler(u, L, T, tEnd, dt)
   end subroutine f_simulateEuler
 
-  subroutine f_getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro) bind(c)
-    real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+  ! subroutine f_getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro) bind(c)
+  !   real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
 
-    !call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
-  end subroutine f_getFunctions
+  !   !call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+  ! end subroutine f_getFunctions
 
-  subroutine f_getBalance(Nbalance, Cbalance) bind(c)
-    real(c_double), intent(out):: Nbalance, Cbalance
+  ! subroutine f_getBalance(Nbalance, Cbalance) bind(c)
+  !   real(c_double), intent(out):: Nbalance, Cbalance
 
-    !call getBalance(Nbalance, Cbalance)
-  end subroutine f_getBalance  
+  !   !call getBalance(Nbalance, Cbalance)
+  ! end subroutine f_getBalance  
   
   subroutine f_getMass(m, mDelta) bind(c)
     use globals
@@ -143,7 +143,7 @@ contains
   end subroutine f_getMass
 
   subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-    jTot, jMax, jFmaxx, jR, jLossPassive, &
+    jTot, jMax, jFmax, jR, jLossPassive, &
     jNloss,jLreal, &
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
@@ -151,16 +151,16 @@ contains
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
     real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
-    real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmaxx(nGrid-nNutrients)
+    real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
-   ! call getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-   ! jTot, jMax, jFmaxx, jR, jLossPassive, &
-   ! jNloss,jLreal, &
-   ! mortpred, mortHTL, mort2, mort)
+   call getRates(jN, jDOC, jL, jSi, jF, jFreal,&
+   jTot, jMax, jFmax, jR, jLossPassive, &
+   jNloss,jLreal, &
+   mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates
   
 end module NUMmodel_wrap
