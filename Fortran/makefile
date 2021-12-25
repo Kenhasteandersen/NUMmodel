@@ -19,7 +19,7 @@ LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/
 # lfortran
 #
 
-OBJ = globals.o spectrum.o generalists.o diatoms_simple.o NUMmodel.o #debug.o  generalists_csp.o diatoms.o copepods.o NUMmodel.o
+OBJ = globals.o spectrum.o generalists.o diatoms_simple.o diatoms.o NUMmodel.o #debug.o  generalists_csp.o diatoms.o copepods.o NUMmodel.o
 
 all: NUMmodel libMatlab #libR
 

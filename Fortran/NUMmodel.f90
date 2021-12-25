@@ -8,7 +8,7 @@ module NUMmodel
   use generalists
   use diatoms_simple
   !use generalists_csp
-  !use diatoms
+  use diatoms
   !use diatoms_simple
   !use copepods
   !use debug
@@ -64,15 +64,15 @@ contains
 !     call parametersFinalize(0.003d0, .true.) ! Serra-Pompei (2020))
 !   end subroutine setupGeneralistsOnly_csp
 
-!   ! -----------------------------------------------
-!   ! A basic setup with only diatoms:
-!   ! -----------------------------------------------
-!   subroutine setupDiatomsOnly(n)
-!    integer, intent(in):: n
-!    call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
-!    call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
-!    call parametersFinalize(0.2d0, .false.)
-!  end subroutine setupDiatomsOnly
+  ! -----------------------------------------------
+  ! A basic setup with only diatoms:
+  ! -----------------------------------------------
+  subroutine setupDiatomsOnly(n)
+   integer, intent(in):: n
+   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
+   call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
+   call parametersFinalize(0.2d0, .false.)
+ end subroutine setupDiatomsOnly
 
 !  ! -----------------------------------------------
 !   ! A basic setup with only simple diatoms:
@@ -84,16 +84,16 @@ contains
    call parametersFinalize(0.2d0, .false.)
  end subroutine setupDiatoms_simpleOnly
  
-!   ! -----------------------------------------------
-!   ! Generalists and diatoms:
-!   ! -----------------------------------------------
-!    subroutine setupGeneralistsDiatoms(n)
-!       integer, intent(in):: n
-!       call parametersInit(2, 2*n, 3)
-!       call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
-!       call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
-!       call parametersFinalize(.2d0, .false.)
-!    end subroutine setupGeneralistsDiatoms
+  ! -----------------------------------------------
+  ! Generalists and diatoms:
+  ! -----------------------------------------------
+   subroutine setupGeneralistsDiatoms(n)
+      integer, intent(in):: n
+      call parametersInit(2, 2*n, 3)
+      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
+      call parametersFinalize(.2d0, .false.)
+   end subroutine setupGeneralistsDiatoms
  
    subroutine setupGeneralistsDiatoms_simple(n)
       integer, intent(in):: n
@@ -206,6 +206,7 @@ contains
 
     type(spectrumGeneralists) :: specGeneralists
     type(spectrumDiatoms_simple):: specDiatoms_simple
+    type(spectrumDiatoms):: specDiatoms
     !
     ! Find the group number and grid location:
     !
@@ -227,13 +228,13 @@ contains
     case (typeDiatom_simple)
       call initDiatoms_simple(specDiatoms_simple, n, mMax)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms_simple )
+    case (typeDiatom)
+      call initDiatoms(specDiatoms, n, mMax)
+      allocate( group( iCurrentGroup )%spec, source=specDiatoms )
         !group(iCurrentGroup) = spectrumContainer( )
       !call group(iCurrentGroup)%init( n, ixStart-1, mMax)
    !  case (typeGeneralist_csp)
    !    group(iCurrentGroup) = initGeneralists_csp(n, group(iCurrentGroup)%ixStart-1, mMax)
-   !  case (typeDiatom)
-   !    group(iCurrentGroup) = initDiatoms(n, group(iCurrentGroup)%ixStart-1, mMax)
-   !    !palatability(group(iCurrentGroup)%ixStart:group(iCurrentGroup)%ixEnd) = 0.5d0 ! Lower palatability for diatoms
    !  case(typeCopepod)
    !     group(iCurrentGroup) = initCopepod(n, group(iCurrentGroup)%ixStart-1, mMax)
     end select
@@ -458,6 +459,9 @@ contains
       type is (spectrumDiatoms_simple)
          call calcRatesDiatoms_simple(spec, &
                      L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
+      type is (spectrumDiatoms)
+         call calcRatesDiatoms(spec, &
+                     L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
         ! call calcRatesGeneralists(group(iGroup), &
         !      rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
       ! case(typeGeneralist_csp)
@@ -502,6 +506,10 @@ contains
               dudt(idxN), dudt(idxDOC), dudt(ixStart(iGroup):ixEnd(iGroup)))
       type is (spectrumDiatoms_simple)
          call calcDerivativesDiatoms_simple(spec, &
+              upositive(ixStart(iGroup):ixEnd(iGroup)), &
+              dudt(idxN), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
+      type is (spectrumDiatoms)
+         call calcDerivativesDiatoms(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
               dudt(idxN), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
       ! case (typeGeneralist_csp)
@@ -728,6 +736,8 @@ contains
    end select
    select type (spectrum => group(iGroup)%spec)
       class is (spectrumDiatoms_simple)
+        jSi( i1:i2 ) = spectrum%JSi / spectrum%m
+      class is (spectrumDiatoms)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       end select
 

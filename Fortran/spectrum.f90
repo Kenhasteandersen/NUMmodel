@@ -202,7 +202,7 @@ contains
 
     write(*,'(a10, 20d10.3)') "r:", this%r
     write(*,99) "jN:", this%JN / this%m
-    write(*,99) "jL:", this%JL / this%m
+    write(*,*) "jL:", this%JL / this%m
     write(*,99) "jLreal:", this%JLreal / this%m
     write(*,99) "jDOC:", this%JDOC / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m

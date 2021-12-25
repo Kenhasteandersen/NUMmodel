@@ -1,9 +1,9 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int
   use NUMmodel, only:  nGrid, setupGeneralistsOnly, setHTL, getRates, &!setupGeneralistsOnly_csp, &
-       !setupDiatomsOnly, '(a10, 20d10.3)'
+       setupDiatomsOnly, &
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
-       !setupGeneralistsDiatoms, setupGeneralistsDiatoms_simple, &
+       setupGeneralistsDiatoms, &
        !setupGeneralistsCopepod, &
        !setupGeneric, setupGeneric_csp, &
        calcderivatives, &
@@ -25,20 +25,20 @@ contains
   !   !call setupGeneralistsOnly_csp()
   ! end subroutine f_setupGeneralistsOnly_csp
 
-  ! subroutine f_setupDiatomsOnly(n) bind(c)
-  !   integer(c_int), intent(in), value:: n
-  !   !call setupDiatomsOnly(n)
-  ! end subroutine f_setupDiatomsOnly
+  subroutine f_setupDiatomsOnly(n) bind(c)
+    integer(c_int), intent(in), value:: n
+    call setupDiatomsOnly(n)
+  end subroutine f_setupDiatomsOnly
 
   subroutine f_setupDiatoms_simpleOnly(n) bind(c)
     integer(c_int), intent(in), value:: n
     call setupDiatoms_simpleOnly(n)
   end subroutine f_setupDiatoms_simpleOnly
 
-  ! subroutine f_setupGeneralistsDiatoms(n) bind(c)
-  !   integer(c_int), intent(in), value:: n
-  !   !call setupGeneralistsDiatoms(n)
-  ! end subroutine f_setupGeneralistsDiatoms
+  subroutine f_setupGeneralistsDiatoms(n) bind(c)
+    integer(c_int), intent(in), value:: n
+    call setupGeneralistsDiatoms(n)
+  end subroutine f_setupGeneralistsDiatoms
 
   subroutine f_setupGeneralistsDiatoms_simple(n) bind(c)
     integer(c_int), intent(in), value:: n

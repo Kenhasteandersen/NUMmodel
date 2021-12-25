@@ -55,90 +55,72 @@ module diatoms
      real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
      real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
      real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
-     !
-     ! Needed internal variables:
-     !
-     real(dp), dimension(:), allocatable:: AN(:), AL(:), Jmax(:), JlossPassive(:)
-     real(dp), dimension(:), allocatable:: nu(:), mort(:)
-     real(dp), dimension(:), allocatable:: JN(:), JL(:), Jresp(:)
 
-     real(dp):: mort2
-     public initDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
+     type, extends(spectrumUnicellular) :: spectrumDiatoms
+       real(dp), dimension(:), allocatable:: JSi
+
+     contains
+       procedure, pass :: initDiatoms
+       procedure :: calcRates => calcRatesDiatoms
+       procedure :: printRates => printRatesDiatoms
+     end type spectrumDiatoms
+
+     public spectrumDiatoms, initDiatoms, calcRatesDiatoms, calcDerivativesDiatoms, printRatesDiatoms
    contains
        
-     function initDiatoms(n, ixOffset, mMax) result(this)
-       type(typeSpectrum):: this
+     subroutine initDiatoms(this, n, mMax)
+       class(spectrumDiatoms):: this
        real(dp), intent(in):: mMax
-       integer, intent(in):: n, ixOffset
+       integer, intent(in):: n
        real(dp), parameter:: mMin = 3.1623d-9
-       real(dp):: r(n)
        real(dp):: hs(n) ! Shell thickness mum ! TO BE FIXED!!
        real(dp), parameter:: rho = 0.57*1d6*1d-12
        real(dp) :: fl !investment in photosynthesis
    
-       this = initSpectrum(typeDiatom, n, ixOffset, mMin, mMax)
-   
-       if ( allocated(AN) ) then
-          deallocate(AN)
-          deallocate(AL)
-          deallocate(Jmax)
-          deallocate(Jresp)
-          deallocate(JlossPassive)
-          deallocate(nu)
-          deallocate(mort)
-        end if
-       
-       allocate(AN(n)) 
-       allocate(AL(n))
-       allocate(Jmax(n))
-       allocate(Jresp(n))
-       allocate(JlossPassive(n))
-       allocate(nu(n))
-       allocate(mort(n))
-       
+       call this%initUnicellular(n, mMin, mMax)
+       allocate(this%JSi(this%n))
+       !
        ! Radius:
        !
-       r = (3./(4.*pi*cb*(1-v))*this%m)**onethird ! Andy's approximation
+       this%r = (3./(4.*pi*cb*(1-v))*this%m)**onethird ! Andy's approximation
        fl=4.d0/3.d0*a*dcr/kappa !investment in photoharvesting
        !
        ! Affinities:
        !
-       AN = alphaN*r**(-2.) / (1.+(r/rNstar)**(-2.)) * this%m
+       this%AN = alphaN*this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
         !AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
-       AL = cL*r**2.*( 1.-exp(-kappa*fl*r*(1-v)) )! *this%m
+       this%AL = cL*this%r**2.*( 1.-exp(-kappa*fl*this%r*(1-v)) )! *this%m
        !AL = alphaL/r * (1-exp(-r/rLstar)) * this%m
        this%beta = 0.d0 ! No feeding
        this%palatability = 0.5d0
  
-       JlossPassive = cLeakage/r * this%m ! in units of C
+       this%JlossPassive = cLeakage/this%r * this%m ! in units of C
    
-       nu = 3*delta/r ! wall fraction
-       hs = 0.0023*r**(0.72) !eq from ecotip report
-       Jmax = alphaJ * this%m * (1.d0-nu) ! mugC/day
-       Jresp = cR*alphaJ*this%m
-       mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);
-       mort2 = 0.0002*n
-     end function initDiatoms
+       this%nu = 3*delta/this%r ! wall fraction
+       hs = 0.0023*this%r**(0.72) !eq from ecotip report
+       this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
+       this%Jresp = cR*alphaJ*this%m
+       !mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);
+       
+     end subroutine initDiatoms
   
-     subroutine calcRatesDiatoms(this, rates, L, N, DOC, Si, gammaN, gammaDOC, gammaSi)
-       type(typeSpectrum), intent(in):: this
-       real(dp), intent(in):: gammaN, gammaDOC, gammaSi
-       type(typeRates), intent(inout):: rates
-       real(dp), intent(in):: L, N, DOC, Si
-       integer:: ix, i
+     subroutine calcRatesDiatoms(this, L, N, Si, gammaN, gammaSi)
+       class(spectrumDiatoms), intent(inout):: this
+       real(dp), intent(in):: gammaN, gammaSi
+       real(dp), intent(in):: L, N, Si
+       integer:: i
 
        real(dp) :: dN,dN1,dN2,dN3, dSi, dSi1,dSi2,dSi3,dL ,Jlieb
     
    
        do i = 1, this%n
-          ix = i+this%ixOffset
           !
           ! Uptakes
           !
-          rates%JN(ix) =   gammaN * AN(i)*N ! Diffusive nutrient uptake in units of N/time
-          rates%JDOC(ix) = gammaDOC * AN(i)*DOC ! Diffusive DOC uptake, units of C/time
-          rates%JSi(ix) = gammaSi * AN(i)*Si! Diffusive Si uptake, units of Si/time
-          rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
+          this%JN(i) =   gammaN * this%AN(i)*N ! Diffusive nutrient uptake in units of N/time
+          !this%JDOC(i) = gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
+          this%JSi(i) = gammaSi * this%AN(i)*Si! Diffusive Si uptake, units of Si/time
+          this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
           !
           ! calculate Jtot Ecotip eqs(4.31) for three different cases of resourse limitation
           !
@@ -148,19 +130,19 @@ module diatoms
           !
           dL = 1. 
           !dL=-1.
-          !dN = max(0.,min(1.,(rhoCSi * (rates%JL(ix)*(1-bL)-Jresp(i) ) ) / &
-          !( rates%JN(ix)*(rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ) )))
-          !dSi = max(0.,min(1.,( rhoCN *(rates%JL(ix)*(1-bL)-Jresp(i) ) ) / &
-          !( rates%JSi(ix)* (rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ))))
+          !dN = max(0.,min(1.,(rhoCSi * (this%JL(i)*(1-bL)-Jresp(i) ) ) / &
+          !( this%JN(i)*(rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ) )))
+          !dSi = max(0.,min(1.,( rhoCN *(this%JL(i)*(1-bL)-Jresp(i) ) ) / &
+          !( this%JSi(i)* (rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ))))
 
           !if ((dN .gt. 1.) .or. (dSi .gt. 1.)) then
                ! 
                ! Si-limited case
                !
                
-           !    dL = max(0.,(Jresp(i)*rhoCN + rates%JSi(ix)*rhoCSi*rhoCN + rates%JSi(ix)*bSi*rhoCN + rates%JSi(ix)*bN*rhoCSi) &
-           !    /(rhoCN*(rates%JL(ix)*(1 -bL))))
-           !    dN = max(0.,min(1.,rates%JSi(ix)*rhoCSi / rates%JN(ix)*rhoCN))
+           !    dL = max(0.,(Jresp(i)*rhoCN + this%JSi(i)*rhoCSi*rhoCN + this%JSi(i)*bSi*rhoCN + this%JSi(i)*bN*rhoCSi) &
+           !    /(rhoCN*(this%JL(i)*(1 -bL))))
+           !    dN = max(0.,min(1.,this%JSi(i)*rhoCSi / this%JN(i)*rhoCN))
            !    dSi = 1.
 
             !   if ((dL .gt. 1.) .or. (dN .gt. 1.)) then
@@ -168,88 +150,99 @@ module diatoms
                     ! C limited
                     !
                     !dL = ... stuff ... ! Only needed for DOC dynamics
-             !       dN = max(0.,min(1.,(rhoCSi * (rates%JL(ix)*(1-bL)-Jresp(i) ) ) / &
-             !            ( rates%JN(ix)*(rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ) )))
+             !       dN = max(0.,min(1.,(rhoCSi * (this%JL(i)*(1-bL)-Jresp(i) ) ) / &
+             !            ( this%JN(i)*(rhoCN*bSi+rhoCSi*bN+rhoCN*rhoCsi ) )))
              !  end if
           !end if
           !
           !if ((dL .gt. 1) .or. (dN .gt. 1) .or. (dSi .gt. 1) )then
-          !     write(*,*) rates%JN(ix)
-          !     write(*,*) rates%JL(ix)
-          !     write(*,*) rates%JSi(ix)
+          !     write(*,*) this%JN(i)
+          !     write(*,*) this%JL(i)
+          !     write(*,*) this%JSi(i)
           !     write(*,*) '-----'
           ! end if  
 
           !
           ! Estimate the limiting growth rate:
           !
-          Jlieb= min( rates%JN(ix)*rhoCN, rates%JL(ix)-Jresp(i), rates%JSi(ix)*rhoCSi )
+          Jlieb= min( this%JN(i)*rhoCN, this%JL(i)-this%Jresp(i), this%JSi(i)*rhoCSi )
           !    
           ! Account for possible carbon limitation
           !
-          Jlieb = min( Jlieb, rates%JL(ix)-Jresp(i) - bN*Jlieb/rhoCN - bSi*Jlieb/rhoCSi)
+          Jlieb = min( Jlieb, this%JL(i)-this%Jresp(i) - bN*Jlieb/rhoCN - bSi*Jlieb/rhoCSi)
           !
           !
           ! Liebig's Law
           !
-          !Jlieb = max(0., min( rates%JL(ix)*(1-bL)-Jresp(i) - dN*bN*rates%JN(ix) - dSi*bSi*rates%JSi(ix), &
-          !     dN*rates%JN(ix)*rhoCN, dSi*rates%JSi(ix)*rhoCSi ) )
+          !Jlieb = max(0., min( this%JL(i)*(1-bL)-Jresp(i) - dN*bN*this%JN(i) - dSi*bSi*this%JSi(i), &
+          !     dN*this%JN(i)*rhoCN, dSi*this%JSi(i)*rhoCSi ) )
           !
           !BEFORE THIS I need to find JCtot 
           !      
           ! Jtot saturation
-          rates%Jtot(ix)=Jmax(i)*Jlieb / ( Jlieb + Jmax(i) )
+          this%Jtot(i)=this%Jmax(i)*Jlieb / ( Jlieb + this%Jmax(i) )
           !
           ! Fix units of JN and JSi:
           !
-          rates%JN(ix) = rates%JN(ix)*rhoCN
-          rates%JSi(ix) = rates%Jsi(ix)*rhoCSi
+          this%JN(i) = this%JN(i)*rhoCN
+          this%JSi(i) = this%Jsi(i)*rhoCSi
        end do
  
      end subroutine calcRatesDiatoms
    
-     subroutine calcDerivativesDiatoms(this, u, rates)
-       type(typeSpectrum), intent(in):: this
-       type(typeRates), intent(inout):: rates
+     subroutine calcDerivativesDiatoms(this, u, dNdt, dSidt, dudt)
+       class(spectrumDiatoms), intent(inout):: this
        real(dp), intent(in):: u(this%n)
+       real(dp), intent(inout):: dNdt, dSidt, dudt( this%n )
        real(dp):: mortloss
-       integer:: i, ix
+       integer:: i
    
+       this%mort2 = this%mort2constant*u
        do i = 1, this%n
-         ix = i+this%ixOffset
-         mortloss = u(i)*(remin2*mort2*u(i) +reminHTL* rates%mortHTL(ix))
+         mortloss = u(i)*(remin2*this%mort2(i) +reminHTL* this%mortHTL(i))
          ! update rates based on Ecotip (5.7)- no JxLoss
          !
          ! Update nitrogen:
          !
-         rates%dudt(idxN) = rates%dudt(idxN)  &
-         - ((rates%Jtot(ix))*u(i)/this%m(i) &
-         !+ rates%JNloss(ix))*u(i)/this%m(i) &
+         dNdt = dNdt  & 
+         - ((this%Jtot(i))*u(i)/this%m(i) &
+         !+ this%JNloss(i))*u(i)/this%m(i) &
          + mortloss)/rhoCN
  
          !
          ! Update DOC:
          !
-         rates%dudt(idxDOC) = 0.d0 !rates%dudt(idxDOC) &
-              !+ (-rates%JDOC(ix) &
-              !+ rates%JCloss(ix))*u(i)/this%m(i) &
+         !this%dudt(idxDOC) = 0.d0 !this%dudt(idxDOC) & ! NOTE: DON'T SET dDOCdt TO ZERO!!!
+              !+ (-this%JDOC(i) &
+              !+ this%JCloss(i))*u(i)/this%m(i) &
               !+ mortloss
          !
          ! Update Si:
          !
-         rates%dudt(idxSi) = rates%dudt(idxSi) &
-              + ((-rates%Jtot(ix))*u(i)/this%m(i) &
+         dSidt = dSidt &
+              + ((-this%Jtot(i))*u(i)/this%m(i) &
               + mortloss)/rhoCSi
          !
          ! Update the diatoms:
          !
-         rates%dudt(ix) = (rates%Jtot(ix)/this%m(i)  &
-              - mort(i) &
-              - rates%mortpred(ix) &
-              - mort2*u(i) &
-              - rates%mortHTL(ix))*u(i)
+         dudt(i) = (this%Jtot(i)/this%m(i)  &
+              !- mort(i) &
+              - this%mortpred(i) &
+              - this%mort2(i) &
+              - this%mortHTL(i))*u(i)
  
       end do
     end subroutine calcDerivativesDiatoms
       
+    subroutine printRatesDiatoms(this)
+      class(spectrumDiatoms), intent(in):: this
+ 
+      write(*,*) "Diatoms with ", this%n, " size classes:"
+      call this%printRatesUnicellular()
+ 
+      99 format (a10, 20f10.6)
+  
+      write(*,99) "jSi:", this%JSi / this%m
+    end subroutine printRatesDiatoms
+
    end module diatoms
