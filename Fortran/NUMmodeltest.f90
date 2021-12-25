@@ -2,7 +2,7 @@ program NUMmodeltest
   use NUMmodel
   implicit none
 
-  real(dp), allocatable:: u0(:), u00(:)
+  real(dp), allocatable:: u0(:), u00(:), dudt(:)
   !real(dp):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
   integer:: i
 
@@ -13,7 +13,7 @@ program NUMmodeltest
   !call setupGeneralistsOnly_csp()
  ! call setupGeneralistsOnly_csp()
   !call setupGeneralistsOnly_csp()
-  call setupGeneralistsOnly(5)
+  call setupGeneralistsDiatoms_simple(5)
   !call parametersFinalize(0.d0, .false.)
   
   !call setupGeneralistsDiatoms(10)
@@ -22,17 +22,20 @@ program NUMmodeltest
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
-  u00(idxN) = 5.d0
+  allocate(dudt(nGrid))
+  u00(idxN) = 150.d0
   u00(idxDOC) = 0.d0
-  u00(idxSi) = 7.d0
+  u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 5.0d0 !*(i-2)
+     u00(i) = 1.0d0 !*(i-2)
   end do
-  
+  dudt = 0.d0
+
   !call simulateEuler(u00, 60.d0, 100.d0, 0.1d0)
-  call simulateChemostatEuler(u00, 60.d0, 20.d0, u00(1:3), 0.1d0, 0.2d0, 0.1d0)
-  
-  write(*,*) u00
+  !call simulateChemostatEuler(u00, 60.d0, 20.d0, u00(1:3), 0.1d0, 0.2d0, 0.1d0)
+  !write(*,*) u00
+  call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
+  call printRates()
 !!$  u0=u00
 !!$  call simulateChemostatEuler(u0, 100.d0, 150.d0, 0.05d0, 300.d0, 0.01d0)
 !!$  call printU(u0)

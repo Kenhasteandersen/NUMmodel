@@ -23,6 +23,9 @@ module globals
   real(dp), parameter :: threequarters = 3.d0/4.d0
   real(dp), parameter :: pi = 4*ATAN(1.d0)
 
+  ! Small number to avoid divisions by zero
+  real(dp), parameter :: eps = 1d-200
+
   ! type typeRates
   !    real(dp), dimension(:), allocatable:: flvl, JF, F, JEnc
   !    real(dp), dimension(:), allocatable:: JN, JDOC, JSi, JL

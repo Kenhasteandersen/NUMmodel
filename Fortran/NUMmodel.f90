@@ -6,6 +6,7 @@ module NUMmodel
   use globals
   use spectrum
   use generalists
+  use diatoms_simple
   !use generalists_csp
   !use diatoms
   !use diatoms_simple
@@ -76,12 +77,12 @@ contains
 !  ! -----------------------------------------------
 !   ! A basic setup with only simple diatoms:
 !   ! -----------------------------------------------
-!  subroutine setupDiatoms_simpleOnly(n)
-!    integer, intent(in):: n
-!    call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
-!    call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
-!    call parametersFinalize(0.2d0, .false.)
-!  end subroutine setupDiatoms_simpleOnly
+ subroutine setupDiatoms_simpleOnly(n)
+   integer, intent(in):: n
+   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
+   call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
+   call parametersFinalize(0.2d0, .false.)
+ end subroutine setupDiatoms_simpleOnly
  
 !   ! -----------------------------------------------
 !   ! Generalists and diatoms:
@@ -94,13 +95,13 @@ contains
 !       call parametersFinalize(.2d0, .false.)
 !    end subroutine setupGeneralistsDiatoms
  
-!    subroutine setupGeneralistsDiatoms_simple(n)
-!       integer, intent(in):: n
-!       call parametersInit(2, 2*n, 3)
-!       call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
-!       call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
-!       call parametersFinalize(0.2d0, .false.)
-!    end subroutine setupGeneralistsDiatoms_simple
+   subroutine setupGeneralistsDiatoms_simple(n)
+      integer, intent(in):: n
+      call parametersInit(2, 2*n, 3)
+      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
+      call parametersFinalize(0.2d0, .false.)
+   end subroutine setupGeneralistsDiatoms_simple
  
 !   ! -----------------------------------------------
 !   ! A basic setup with generalists and 1 copepod
@@ -203,7 +204,8 @@ contains
     integer, intent(in):: typeGroup, n
     real(dp), intent(in):: mMax
 
-    type(spectrumGeneralists) :: generalists
+    type(spectrumGeneralists) :: specGeneralists
+    type(spectrumDiatoms_simple):: specDiatoms_simple
     !
     ! Find the group number and grid location:
     !
@@ -220,17 +222,17 @@ contains
     !
     select case (typeGroup)
     case (typeGeneralist)
-      call initGeneralists(generalists, n, mMax)
-      allocate( group( iCurrentGroup )%spec, source=generalists )
+      call initGeneralists(specGeneralists, n, mMax)
+      allocate( group( iCurrentGroup )%spec, source=specGeneralists )
+    case (typeDiatom_simple)
+      call initDiatoms_simple(specDiatoms_simple, n, mMax)
+      allocate( group( iCurrentGroup )%spec, source=specDiatoms_simple )
         !group(iCurrentGroup) = spectrumContainer( )
       !call group(iCurrentGroup)%init( n, ixStart-1, mMax)
    !  case (typeGeneralist_csp)
    !    group(iCurrentGroup) = initGeneralists_csp(n, group(iCurrentGroup)%ixStart-1, mMax)
    !  case (typeDiatom)
    !    group(iCurrentGroup) = initDiatoms(n, group(iCurrentGroup)%ixStart-1, mMax)
-   !    !palatability(group(iCurrentGroup)%ixStart:group(iCurrentGroup)%ixEnd) = 0.5d0 ! Lower palatability for diatoms
-   !  case (typeDiatom_simple)
-   !    group(iCurrentGroup) = initDiatoms_simple(n, group(iCurrentGroup)%ixStart-1, mMax)
    !    !palatability(group(iCurrentGroup)%ixStart:group(iCurrentGroup)%ixEnd) = 0.5d0 ! Lower palatability for diatoms
    !  case(typeCopepod)
    !     group(iCurrentGroup) = initCopepod(n, group(iCurrentGroup)%ixStart-1, mMax)
@@ -249,11 +251,12 @@ contains
     !
     ! Calc theta:
     !
+    theta = 0.d0
     do iGroup = 1, nGroups
       do i = 1, group(iGroup)%spec%n !group(iGroup)%ixStart, group(iGroup)%ixEnd
          do jGroup = 1, nGroups
             do j = 1, group(jGroup)%spec%n!group(jGroup)%ixStart, group(jGroup)%ixEnd
-               theta(i+ixStart(jGroup)-1, j+ixStart(jGroup)-1) = &
+               theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
                   group(jGroup)%spec%palatability * &
                   calcPhi(group(iGroup)%spec%m(i)/group(jGroup)%spec%m(j), &
                      group(iGroup)%spec%beta, group(iGroup)%spec%sigma, &
@@ -384,6 +387,7 @@ contains
           F(i) = F(i) + theta(i,j)*upositive(j)
        end do
     end do
+
     ! Calculate feeding for each group:
     do iGroup = 1, nGroups
       call calcFeeding(group(iGroup)%spec, F( ixStart(iGroup):ixEnd(iGroup) ))
@@ -447,10 +451,13 @@ contains
    ! Calc uptakes of all unicellular groups:
    !
    do iGroup = 1, nGroups
-      select type (spectrum => group(iGroup)%spec)
+      select type (spec => group(iGroup)%spec)
       type is (spectrumGeneralists)
-         call calcRatesGeneralists(spectrum, &
+         call calcRatesGeneralists(spec, &
                      L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
+      type is (spectrumDiatoms_simple)
+         call calcRatesDiatoms_simple(spec, &
+                     L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
         ! call calcRatesGeneralists(group(iGroup), &
         !      rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
       ! case(typeGeneralist_csp)
@@ -460,10 +467,7 @@ contains
       !         call calcRatesDiatoms(group(iGroup), &
       !         rates, L, upositive(idxN), upositive(idxDOC) , upositive(idxSi), &
       !         gammaN, gammaDOC, gammaSi)
-      !      case(typeDiatom_simple)
-      !         call calcRatesDiatoms_simple(group(iGroup), &
-      !         rates, L, upositive(idxN), upositive(idxDOC) , upositive(idxSi), &
-      !         gammaN, gammaDOC, gammaSi) 
+
       end select
    end do
    !
@@ -477,9 +481,9 @@ contains
             do j = ixStart(jGroup), ixEnd(jGroup)
                ixj = j-ixStart(jGroup)+1
                if (F(j) .gt. 0.d0) then
-                  group(iGroup)%spec%mortpred(ixi) = group(iGroup)%spec%mortpred(ixi) &
-                     + theta(j,i) * group(jGroup)%spec%JF(ixj)*upositive(j) &
-                     / (group(jGroup)%spec%epsilonF*group(jGroup)%spec%m(ixj)*F(j))
+                 group(iGroup)%spec%mortpred(ixi) = group(iGroup)%spec%mortpred(ixi) &
+                    + theta(j,i) * group(jGroup)%spec%JF(ixj)*upositive(j) &
+                    / (group(jGroup)%spec%epsilonF*group(jGroup)%spec%m(ixj)*F(j))
                end if
             end do
          end do
@@ -491,21 +495,21 @@ contains
    dudt(1:(idxB-1)) = 0.d0 ! Set derivatives of nutrients to zero
    
    do iGroup = 1, nGroups
-      select type (spectrum => group(iGroup)%spec)
+      select type (spec => group(iGroup)%spec)
       type is (spectrumGeneralists)
-         call calcDerivativesGeneralists(spectrum, &
+         call calcDerivativesGeneralists(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
               dudt(idxN), dudt(idxDOC), dudt(ixStart(iGroup):ixEnd(iGroup)))
+      type is (spectrumDiatoms_simple)
+         call calcDerivativesDiatoms_simple(spec, &
+              upositive(ixStart(iGroup):ixEnd(iGroup)), &
+              dudt(idxN), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
       ! case (typeGeneralist_csp)
       !    call calcDerivativesGeneralists_csp(group(iGroup),&
       !         upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
       !         rates)
       !    case (typeDiatom)
       !         call calcDerivativesDiatoms(group(iGroup),&
-      !         upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
-      !         rates)
-      !   case (typeDiatom_simple)
-      !         call calcDerivativesDiatoms_simple(group(iGroup),&
       !         upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
       !         rates)
                  
@@ -721,10 +725,13 @@ contains
         jMax( i1:i2 ) = spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
+   end select
+   select type (spectrum => group(iGroup)%spec)
+      class is (spectrumDiatoms_simple)
+        jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       end select
 
-      jSi = 0 ! Dummy
-      mort = 0
+      mort = 0 ! dummy
 
    end do
   end subroutine getRates

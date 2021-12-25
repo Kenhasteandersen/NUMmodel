@@ -1,7 +1,8 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int
   use NUMmodel, only:  nGrid, setupGeneralistsOnly, setHTL, getRates, &!setupGeneralistsOnly_csp, &
-       !setupDiatomsOnly, setupDiatoms_simpleOnly, &
+       !setupDiatomsOnly, '(a10, 20d10.3)'
+      setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        !setupGeneralistsDiatoms, setupGeneralistsDiatoms_simple, &
        !setupGeneralistsCopepod, &
        !setupGeneric, setupGeneric_csp, &
@@ -29,20 +30,20 @@ contains
   !   !call setupDiatomsOnly(n)
   ! end subroutine f_setupDiatomsOnly
 
-  ! subroutine f_setupDiatoms_simpleOnly(n) bind(c)
-  !   integer(c_int), intent(in), value:: n
-  !   !call setupDiatoms_simpleOnly(n)
-  ! end subroutine f_setupDiatoms_simpleOnly
+  subroutine f_setupDiatoms_simpleOnly(n) bind(c)
+    integer(c_int), intent(in), value:: n
+    call setupDiatoms_simpleOnly(n)
+  end subroutine f_setupDiatoms_simpleOnly
 
   ! subroutine f_setupGeneralistsDiatoms(n) bind(c)
   !   integer(c_int), intent(in), value:: n
   !   !call setupGeneralistsDiatoms(n)
   ! end subroutine f_setupGeneralistsDiatoms
 
-  ! subroutine f_setupGeneralistsDiatoms_simple(n) bind(c)
-  !   integer(c_int), intent(in), value:: n
-  !   !call setupGeneralistsDiatoms_simple(n)
-  ! end subroutine f_setupGeneralistsDiatoms_simple
+  subroutine f_setupGeneralistsDiatoms_simple(n) bind(c)
+    integer(c_int), intent(in), value:: n
+    call setupGeneralistsDiatoms_simple(n)
+  end subroutine f_setupGeneralistsDiatoms_simple
 
   ! subroutine f_setupGeneralistsCopepod() bind(c)
   !   !call setupGeneralistsCopepod()
@@ -145,7 +146,7 @@ contains
     jNloss,jLreal, &
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
-    use NUMmodel, only: nNutrients!, getRates
+    use NUMmodel, only: nNutrients, getRates
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
     real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)

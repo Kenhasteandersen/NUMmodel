@@ -8,8 +8,7 @@ module spectrum
   type, abstract :: typeSpectrum
      integer:: type
      integer:: n  ! Number of size classes
-     !integer:: ixStart, ixEnd ! Start and end indices into u and rates
-     !integer:: ixOffset ! ixStart-1
+
      ! Grid:
      real(dp), dimension(:), allocatable:: m(:)  ! Geometric center mass of size-bin
      real(dp), dimension(:), allocatable:: mLower(:)  ! Smallest size in the bin
@@ -91,9 +90,10 @@ contains
     allocate(this%mort2(n))
     ! Set feeding to dummy values. Relevant for non-feeding groups (diatoms)
     this%AF = 0.d0
-    this%JFmax = 1.d0
+    this%JFmax = 0.d0
     this%flvl = 0.d0
     this%JF = 0.d0
+    this%epsilonF = 0.d0
     this%palatability = 1.d0 ! set to default
     this%mort2constant = 0.0002*n
 
@@ -156,7 +156,7 @@ contains
     real(dp), intent(in):: F(this%n)
 
     this%flvl = this%epsilonF * this%AF*F / &
-      (this%AF*F + fTemp2*this%JFmax)
+      ((this%AF*F+eps) + fTemp2*this%JFmax)
     this%JF = this%flvl * fTemp2*this%JFmax
   end subroutine
   
@@ -200,6 +200,7 @@ contains
  
     call this%printRatesSpectrum()
 
+    write(*,'(a10, 20d10.3)') "r:", this%r
     write(*,99) "jN:", this%JN / this%m
     write(*,99) "jL:", this%JL / this%m
     write(*,99) "jLreal:", this%JLreal / this%m
