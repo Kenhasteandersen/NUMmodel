@@ -110,7 +110,8 @@ module diatoms
        real(dp), intent(in):: L, N, Si
        integer:: i
 
-       real(dp) :: dN,dN1,dN2,dN3, dSi, dSi1,dSi2,dSi3,dL ,Jlieb
+       !real(dp) :: dN,dN1,dN2,dN3, dSi, dSi1,dSi2,dSi3,dL ,Jlieb
+       real(dp) :: dL, Jlieb
     
    
        do i = 1, this%n

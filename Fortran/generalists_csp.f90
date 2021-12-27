@@ -50,7 +50,7 @@ module generalists_csp
   !real(dp):: mort2
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists_csp
-   real(dp),  dimension(:), allocatable:: JNmax(:), JLmax(:)
+   real(dp),  dimension(:), allocatable:: JNmax(:), JLmax(:), JFreal(:)
    real(dp),  dimension(:), allocatable:: Vol2(:), rhomu(:),Qmu(:),mu_inf(:),mu_max(:), volu(:) 
   contains
     procedure, pass :: initGeneralists_csp
@@ -78,9 +78,11 @@ contains
        deallocate(this%Qmu)
        deallocate(this%mu_inf)
        deallocate(this%mu_max)
+       deallocate(this%JFreal)
     endif
     allocate(this%JNmax(n))
     allocate(this%JLmax(n))
+    allocate(this%JFreal(n))
     allocate(this%volu(n))
     allocate(this%Vol2(n))
     allocate(this%rhomu(n))

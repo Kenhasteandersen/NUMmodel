@@ -18,7 +18,7 @@ module spectrum
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width
      real(dp):: epsilonF ! Assimilation efficiency
-     real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), JFreal(:)
+     real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:)
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
      real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp
@@ -77,7 +77,7 @@ contains
     allocate(this%JFmax(n))
     allocate(this%flvl(n))
     allocate(this%JF(n))
-    allocate(this%JFreal(n))
+    !allocate(this%JFreal(n))
 
     allocate(this%Jtot(n))
     allocate(this%Jresp(n))

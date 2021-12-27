@@ -44,7 +44,9 @@ module generalists
   real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
-    contains
+    real(dp), allocatable :: JFreal(:)
+    
+  contains
     procedure, pass :: initGeneralists
     procedure :: calcRates => calcRatesGeneralists
     procedure :: printRates => printRatesGeneralists
@@ -60,6 +62,7 @@ contains
     real(dp), parameter:: rho = 0.57*1d6*1d-12
 
     call this%initUnicellular(n, mMin, mMax)
+    allocate(this%JFreal(n))
 
     this%beta = beta
     this%sigma = sigma
