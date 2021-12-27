@@ -393,7 +393,6 @@ contains
     do iGroup = 1, nGroups
       call calcFeeding(group(iGroup)%spec, F( ixStart(iGroup):ixEnd(iGroup) ))
     end do 
-    write(*,*) F
     !
     ! Calc HTL mortality:
     !
@@ -411,7 +410,7 @@ contains
     gammaDOC = 1.d0
     gammaSi = 1.d0
 
-    call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
+    call calcDerivativesUnicellulars()
     !
     ! Make a correction if nutrient fields will become less than zero:
     !
@@ -427,7 +426,7 @@ contains
       end if
     end if
     if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0) .or. (gammaSi .lt. 1.d0)) then
-       call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
+       call calcDerivativesUnicellulars()
     end if
     !
     ! Calc derivatives of multicellular groups:
@@ -448,9 +447,8 @@ contains
   !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
   !   used for correction of Euler integration. If no correction is used, just set to 1.0
   !   This correction procedure is needed for correct Euler integration.
-  subroutine calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
-   real(dp), intent(in):: upositive(:), L, gammaN, gammaDOC, gammaSi
-   integer:: i,j, iGroup, jGroup, ixj, ixi
+  subroutine calcDerivativesUnicellulars()
+   integer :: jGroup, ixj, ixi
    !
    ! Calc uptakes of all unicellular groups:
    !
