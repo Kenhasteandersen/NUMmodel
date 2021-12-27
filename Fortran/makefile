@@ -4,7 +4,7 @@
 # iFortran:
 #
 FORT=ifort
-#FLAGS=-O2
+FLAGS=-O2
 #LINK=-l
 #
 # gfortran:

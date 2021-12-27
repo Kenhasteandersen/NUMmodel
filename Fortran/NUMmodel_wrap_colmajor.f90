@@ -64,12 +64,12 @@ contains
     call setupGeneric_csp(mAdult)
   end subroutine f_setupGeneric_csp
 
-  subroutine f_parametersHTL(mHTL, mortHTL, bQuadraticHTL) bind(c)
+  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
-    logical, intent(in), value:: bQuadraticHTL
+    logical, intent(in), value:: bQuadraticHTL, bDecliningHTL
 
-    call setHTL(mHTL, mortHTL, bQuadraticHTL)
-  end subroutine f_parametersHTL 
+    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
+  end subroutine f_setHTL 
 
   subroutine test(x) bind(c)
     integer(c_int), intent(in), value:: x

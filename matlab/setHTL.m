@@ -11,15 +11,20 @@
 %  mortHTL - the HTL mortality (or the constant if bQuadratic=true)
 %  bQuadraticHTL - boolean which determines whether to use a fixed or
 %                  "quadratic" mortality
+%  bDecliningHTL - boolean which determines whether the HTL mortality
+%                  declines with size as mass^-0.25.
 %
 % Out:
 %  Nothing; the function only affects the fortran library.
 %
-function parametersHTL(mortHTL, bQuadraticHTL)
+function setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
 
 arguments
+    mHTL double;
     mortHTL double {mustBeNonnegative} = 0.2;
     bQuadraticHTL logical = false;
+    bDecliningHTL logical = false;
 end
 
-calllib(loadNUMmodelLibrary(), 'f_parametershtl', double(mortHTL), logical(bQuadraticHTL) );
+calllib(loadNUMmodelLibrary(), 'f_sethtl', ...
+    double(mHTL), double(mortHTL), logical(bQuadraticHTL), logical(bDecliningHTL) );

@@ -147,6 +147,15 @@ contains
     this%JF = this%flvl * fTemp2*this%JFmax
   end subroutine calcFeeding
 
+  ! subroutine calcHTL(this, u, pHTL)
+  !   class(typeSpectrum), intent(in) :: this
+  !   real(dp), intent(in):: u(this%n), pHTL(this%n)
+  !   !
+  !   ! First calc the biomass within a size range:
+  !   !
+  !   this%mortHTL = pHTL * u / this%m
+  ! end subroutine calcHTL
+
   subroutine printRatesSpectrum(this)
     class (typeSpectrum), intent(in):: this
 
@@ -221,29 +230,5 @@ contains
   subroutine printRatesMulticellular(this)
     class(spectrumMulticellular), intent(in) :: this
   end subroutine printRatesMulticellular
-
-
-  ! function calcHTL(u, i) result(mHTL)
-  !   real(dp) :: mHTL, B
-  !   real(dp), intent(in):: u(:)
-  !   integer, intent(in):: i
-  !   integer:: j
-
-  !   !
-  !   ! First calc the biomass within a size range:
-  !   !
-  !   B = 0.d0
-  !   do j = 1, nGrid
-  !      if (m(j)>m(i)/3.16 .and. m(j)<m(i)*3.16) then
-  !         B = B + u(j)
-  !      end if
-  !   end do
-  !   ! FIX
-  !   mHTL = 0.d0! FIXpHTL(i)*mortHTL/z(i)*u(i)**gammaHTL*B**(1.-gammaHTL)
-  ! end function calcHTL
-
-
-  
-  
 
  end module spectrum

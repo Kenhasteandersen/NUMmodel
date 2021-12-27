@@ -8,8 +8,9 @@ for iGroup = 1:p.nGroups
     semilogx(m, rates.jR(ix), 'k-', 'linewidth',2)
     semilogx(m, rates.mort2(ix), 'b-','linewidth',2)
 %    loglog(m, rates.mortStarve(ix), 'b-o','linewidth',2)
+    loglog(m, rates.mortHTL(ix), 'm-','linewidth',2)
 end
-loglog(m, rates.mortHTL(ix), 'm-','linewidth',2)
+
 
 hold off
 xlim(calcXlim(p))

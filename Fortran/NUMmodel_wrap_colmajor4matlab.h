@@ -16,7 +16,7 @@ void f_setupgeneric(const int nCopepods, const double mAdult[]);
 
 void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
 
-void f_parametershtl(const double mortHTL, const bool bQuadraticHTL);
+void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
 
 void f_calcderivatives(
 		       const double u[],

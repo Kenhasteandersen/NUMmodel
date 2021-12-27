@@ -8,6 +8,8 @@ program NUMmodeltest
 
 
   call setupGeneric( (/0.1d0, 1.0d0 /) )
+  !call setHTL(0.0001d0, 1.d0, .true.)
+
   !call setupGeneralistsCopepod()
   !call setupGeneralistsOnly(10)
   !call setupGeneralistsOnly_csp()
