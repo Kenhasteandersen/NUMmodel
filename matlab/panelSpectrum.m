@@ -1,6 +1,6 @@
 %
-% Plot Sheldon biomass spectrum. The biomasses are normalised by the width
-% of the cell and multiplied by mass.
+% Plot Sheldon biomass spectrum. The biomasses are normalised by the log of
+% the ratio between upper and lower masses in each bin
 %
 function panelSpectrum(sim, ixTime)
 
@@ -16,7 +16,7 @@ for iGroup = 1:p.nGroups
     ix = p.ixStart(iGroup):p.ixEnd(iGroup);
     m = p.m(ix);
     
-    loglog(m, sim.B(ixTime,ix-p.idxB+1)./p.mDelta(ix).*m, 'linewidth',2)
+    loglog(m, sim.B(ixTime,ix-p.idxB+1)./log(p.mUpper(ix)./p.mLower(ix)), 'linewidth',2)
     hold on
     
     sLegend{iGroup} = p.nameGroup{iGroup};

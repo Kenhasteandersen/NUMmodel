@@ -376,15 +376,13 @@ contains
       do iGroup = 1, nGroups
         pHTL( ixStart(iGroup):ixEnd(iGroup) ) = mortalityHTL &
            * pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
-           / group(iGroup)%spec%z
+           / log(1/group(iGroup)%spec%z)
       end do
     end if
 
-   write(*,*) mHTL
-    write(*,*) pHTL
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
 
-    end subroutine setHTL
+  end subroutine setHTL
   
   ! ======================================
   !  Calculate rates and derivatives:
