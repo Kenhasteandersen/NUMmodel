@@ -381,7 +381,6 @@ contains
     end if
 
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
-
   end subroutine setHTL
   
   ! ======================================
@@ -396,6 +395,7 @@ contains
   !    L: light level
   !    T: temperature
   !    dt: time step for predictor-corrector
+  !    dudt: vector to hold the derivative (which is returned)
   ! 
   !  Uses a simple predictor-corrector scheme.
   !  If one of the nutrients would become negative after an Euler 
