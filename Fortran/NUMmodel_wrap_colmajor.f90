@@ -1,6 +1,7 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int
-  use NUMmodel, only:  nGrid, setupGeneralistsOnly, setHTL, getRates, &!setupGeneralistsOnly_csp, &
+  use NUMmodel, only:  nGrid, setupGeneralistsOnly, setHTL, getRates, &         
+       setupGeneralistsOnly_csp, &
        setupDiatomsOnly, &
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
@@ -21,9 +22,9 @@ contains
     call setupGeneralistsOnly(n)
   end subroutine f_setupGeneralistsOnly
 
-  ! subroutine f_setupGeneralistsOnly_csp() bind(c)
-  !   !call setupGeneralistsOnly_csp()
-  ! end subroutine f_setupGeneralistsOnly_csp
+  subroutine f_setupGeneralistsOnly_csp() bind(c)
+    call setupGeneralistsOnly_csp()
+  end subroutine f_setupGeneralistsOnly_csp
 
   subroutine f_setupDiatomsOnly(n) bind(c)
     integer(c_int), intent(in), value:: n

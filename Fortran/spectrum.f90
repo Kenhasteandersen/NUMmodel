@@ -18,7 +18,7 @@ module spectrum
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width
      real(dp):: epsilonF ! Assimilation efficiency
-     real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:)
+     real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), JFreal(:)
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
      real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp
@@ -77,6 +77,7 @@ contains
     allocate(this%JFmax(n))
     allocate(this%flvl(n))
     allocate(this%JF(n))
+    allocate(this%JFreal(n))
 
     allocate(this%Jtot(n))
     allocate(this%Jresp(n))
@@ -158,7 +159,7 @@ contains
     this%flvl = this%epsilonF * this%AF*F / &
       ((this%AF*F+eps) + fTemp2*this%JFmax)
     this%JF = this%flvl * fTemp2*this%JFmax
-  end subroutine
+  end subroutine calcFeeding
   
 
   
@@ -202,7 +203,7 @@ contains
 
     write(*,'(a10, 20d10.3)') "r:", this%r
     write(*,99) "jN:", this%JN / this%m
-    write(*,*) "jL:", this%JL / this%m
+    write(*,99) "jL:", this%JL / this%m
     write(*,99) "jLreal:", this%JLreal / this%m
     write(*,99) "jDOC:", this%JDOC / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m

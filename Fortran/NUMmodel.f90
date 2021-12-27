@@ -7,6 +7,7 @@ module NUMmodel
   use spectrum
   use generalists
   use diatoms_simple
+  use generalists_csp
   !use generalists_csp
   use diatoms
   !use diatoms_simple
@@ -58,11 +59,11 @@ contains
   ! -----------------------------------------------
   ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
   ! -----------------------------------------------
-!   subroutine setupGeneralistsOnly_csp()
-!     call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
-!     call parametersAddGroup(typeGeneralist_csp, 10, 10.d0**(-1.3d0)) ! generalists with 10 size classes
-!     call parametersFinalize(0.003d0, .true.) ! Serra-Pompei (2020))
-!   end subroutine setupGeneralistsOnly_csp
+   subroutine setupGeneralistsOnly_csp()
+     call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
+     call parametersAddGroup(typeGeneralist_csp, 10, 10.d0**(-1.3d0)) ! generalists with 10 size classes
+     call parametersFinalize(0.003d0, .true.) ! Serra-Pompei (2020))
+   end subroutine setupGeneralistsOnly_csp
 
   ! -----------------------------------------------
   ! A basic setup with only diatoms:
@@ -179,7 +180,6 @@ contains
        deallocate(ixStart)
        deallocate(ixEnd)
        deallocate(upositive)
-       !deallocate(dudt)
        deallocate(F)
        deallocate(theta)
     end if
@@ -188,11 +188,10 @@ contains
     allocate(ixStart(nGroups))
     allocate(ixEnd(nGroups))
     allocate(upositive(nGrid))
-    !allocate(dudt(nGrid))
     allocate(F(nGrid))
     allocate(theta(nGrid,nGrid))     ! Interaction matrix:
- 
   end subroutine parametersInit
+
   ! -----------------------------------------------
   !  Add a size spectrum group
   !  In:
@@ -207,6 +206,7 @@ contains
     type(spectrumGeneralists) :: specGeneralists
     type(spectrumDiatoms_simple):: specDiatoms_simple
     type(spectrumDiatoms):: specDiatoms
+    type(spectrumGeneralists_csp):: specGeneralists_csp
     !
     ! Find the group number and grid location:
     !
@@ -231,10 +231,9 @@ contains
     case (typeDiatom)
       call initDiatoms(specDiatoms, n, mMax)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms )
-        !group(iCurrentGroup) = spectrumContainer( )
-      !call group(iCurrentGroup)%init( n, ixStart-1, mMax)
-   !  case (typeGeneralist_csp)
-   !    group(iCurrentGroup) = initGeneralists_csp(n, group(iCurrentGroup)%ixStart-1, mMax)
+    case (typeGeneralist_csp)
+      call initGeneralists_csp(specGeneralists_csp, n, mMax)
+      allocate( group ( iCurrentGroup )%spec, source=specGeneralists_csp )
    !  case(typeCopepod)
    !     group(iCurrentGroup) = initCopepod(n, group(iCurrentGroup)%ixStart-1, mMax)
     end select
@@ -382,6 +381,7 @@ contains
     !
     ! Calc available food:
     !
+    dudt(1) = F(1)
     do i = idxB, nGrid
        F(i) = 0.d0
        do j = idxB, nGrid
@@ -393,6 +393,7 @@ contains
     do iGroup = 1, nGroups
       call calcFeeding(group(iGroup)%spec, F( ixStart(iGroup):ixEnd(iGroup) ))
     end do 
+    write(*,*) F
     !
     ! Calc HTL mortality:
     !
@@ -420,8 +421,10 @@ contains
     if ((u(idxDOC) + dudt(idxDOC)*dt) .lt. 0) then
        gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(dudt(idxDOC)*dt)))
     end if
-    if ((u(idxSi) + dudt(idxSi)*dt) .lt. 0) then
-      gammaSi = max(0.d0, min(1.d0, -u(idxSi)/(dudt(idxSi)*dt)))
+    if (nNutrients .gt. 2) then
+      if ((u(idxSi) + dudt(idxSi)*dt) .lt. 0) then
+        gammaSi = max(0.d0, min(1.d0, -u(idxSi)/(dudt(idxSi)*dt)))
+      end if
     end if
     if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0) .or. (gammaSi .lt. 1.d0)) then
        call calcDerivativesUnicellulars(upositive, L, gammaN, gammaDOC, gammaSi)
@@ -462,6 +465,9 @@ contains
       type is (spectrumDiatoms)
          call calcRatesDiatoms(spec, &
                      L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
+      type is (spectrumGeneralists_csp)
+         call calcRatesGeneralists_csp(spec, &
+                     L, upositive(idxN), F( ixStart(iGroup):ixEnd(iGroup) ), gammaN)
         ! call calcRatesGeneralists(group(iGroup), &
         !      rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
       ! case(typeGeneralist_csp)
@@ -512,15 +518,10 @@ contains
          call calcDerivativesDiatoms(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
               dudt(idxN), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
-      ! case (typeGeneralist_csp)
-      !    call calcDerivativesGeneralists_csp(group(iGroup),&
-      !         upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
-      !         rates)
-      !    case (typeDiatom)
-      !         call calcDerivativesDiatoms(group(iGroup),&
-      !         upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
-      !         rates)
-                 
+      type is (spectrumGeneralists_csp)
+         call calcDerivativesGeneralists_csp(spec, &
+              upositive(ixStart(iGroup):ixEnd(iGroup)), &
+              dudt(idxN), dudt(ixStart(iGroup):ixEnd(iGroup)))              
       end select
    end do
  end subroutine calcDerivativesUnicellulars
@@ -733,8 +734,8 @@ contains
         jMax( i1:i2 ) = spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
-   end select
-   select type (spectrum => group(iGroup)%spec)
+      end select
+      select type (spectrum => group(iGroup)%spec)
       class is (spectrumDiatoms_simple)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       class is (spectrumDiatoms)

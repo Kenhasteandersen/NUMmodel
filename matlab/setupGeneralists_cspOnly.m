@@ -30,4 +30,4 @@ p.u0(1:2) = [150, 0]; % Initial conditions (and deep layer concentrations)
 p.u0(p.idxB:p.n) = 1;
 
 % This model is usually run with quadratic HTL mortality:
-parametersHTL(0.003, true)
+%parametersHTL(0.003, true)

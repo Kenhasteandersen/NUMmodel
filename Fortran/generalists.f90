@@ -88,7 +88,6 @@ contains
     real(dp), intent(in):: L, N, DOC
     real(dp):: f, JmaxT
     integer:: i
-    real(dp) :: JFreal(this%n)
 
     do i = 1, this%n
        !
@@ -109,31 +108,31 @@ contains
        JmaxT = fTemp2*this%Jmax(i)
        f = this%Jtot(i)/(this%Jtot(i) + max(0.,JmaxT))
        if (this%Jtot(i) .gt. 0) then
-        JFreal(i) = max(0.d0, min(JmaxT, this%JF(i) - (this%Jtot(i)-f*JmaxT)))
+        this%JFreal(i) = max(0.d0, min(JmaxT, this%JF(i) - (this%Jtot(i)-f*JmaxT)))
         !rates%Jtot(ix) = f * JmaxT
        else
-        JFreal(i) = max(0.d0, this%JF(i))
+        this%JFreal(i) = max(0.d0, this%JF(i))
        end if
       this%Jtot(i) = f * JmaxT ! Apply limitation
       
       this%JLreal(i) = this%JL(i) - max( 0.d0, &
-            min((this%JCtot(i) - (this%JF(i)-JFreal(i))-this%Jtot(i)), this%JL(i)))
+            min((this%JCtot(i) - (this%JF(i)-this%JFreal(i))-this%Jtot(i)), this%JL(i)))
 
       ! Actual uptakes:
       this%JCtot(i) = &
             + this%JLreal(i)  &
             + this%JDOC(i)  &
-            + JFreal(i)  &
+            + this%JFreal(i)  &
             - fTemp2*this%Jresp(i)  &
             - this%JlossPassive(i)
       this%JNtot(i) = &
             this%JN(i) + &
-            JFreal(i) - &
+            this%JFreal(i) - &
             this%JlossPassive(i)
       !
       ! Losses:
       !
-      this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*JFreal(i) ! Incomplete feeding (units of carbon per time)
+      this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
       this%JNlossLiebig(i) = max( 0.d0, this%JNtot(i)-this%Jtot(i))  ! In units of C
       this%JClossLiebig(i) = max( 0.d0, this%JCtot(i)-this%Jtot(i)) ! C losses from Liebig, not counting losses from photoharvesting
@@ -147,7 +146,7 @@ contains
             this%JCloss_photouptake(i) + &
             this%JClossLiebig(i) +&
             this%JlossPassive(i)
-      this%JF(i) = JFreal(i)
+      this%JF(i) = this%JFreal(i)
       !
       ! Test for conservation budget. Should be close to zero:
       !

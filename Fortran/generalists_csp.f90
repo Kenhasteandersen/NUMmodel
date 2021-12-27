@@ -47,223 +47,210 @@ module generalists_csp
   real(dp), parameter:: mu_infp1 = 4.7
   real(dp), parameter:: mu_infp2 = -0.26
 
- real(dp),  dimension(:), allocatable:: AN(:), AL(:), JNmax(:), JLmax(:), Jmax(:), volu(:), JlossPassive(:)
-  real(dp),  dimension(:), allocatable:: nu(:), mort(:), mort2(:)
-  real(dp),  dimension(:), allocatable:: JN(:), JL(:), Jresp(:), JFreal(:)
-  real(dp),  dimension(:), allocatable:: Vol2(:), rhomu(:),Qmu(:),mu_inf(:),mu_max(:)
   !real(dp):: mort2
 
+  type, extends(spectrumUnicellular) :: spectrumGeneralists_csp
+   real(dp),  dimension(:), allocatable:: JNmax(:), JLmax(:)
+   real(dp),  dimension(:), allocatable:: Vol2(:), rhomu(:),Qmu(:),mu_inf(:),mu_max(:), volu(:) 
+  contains
+    procedure, pass :: initGeneralists_csp
+    procedure :: calcRates => calcRatesGeneralists_csp
+    procedure :: printRates => printRatesGeneralists_csp
+  end type spectrumGeneralists_csp
+
   public initGeneralists_csp, calcRatesGeneralists_csp, calcDerivativesGeneralists_csp
+  public printRatesGeneralists_csp, spectrumGeneralists_csp
 contains
 
-  function initGeneralists_csp(n, ixOffset, mMax) result(this)
-    type(typeSpectrum):: this
+  subroutine initGeneralists_csp(this, n, mMax)
+    class(spectrumGeneralists_csp), intent(inout):: this
     real(dp), intent(in):: mMax
-    integer, intent(in):: n, ixOffset
+    integer, intent(in):: n
     real(dp), parameter:: mMin = 10**(-6.7) ! 3.1623d-9
 
-    this = initSpectrum(typeGeneralist_csp, n, ixOffset, mMin, mMax)
+    call this%initUnicellular(n, mMin, mMax)
 
-    if (allocated(AN)) then
-       deallocate(AN)
-       deallocate(AL)
-       deallocate(JNmax)
-       deallocate(JLmax)
-       deallocate(volu)
-       deallocate(Jresp)
-       deallocate(JlossPassive)
-       deallocate(nu)
-       deallocate(mort)
-       deallocate(mort2)
-       deallocate(Vol2)
-       deallocate(rhomu)
-       deallocate(Qmu)
-       deallocate(mu_inf)
-       deallocate(mu_max)
-       
-       deallocate(JN)
-       deallocate(JL)
-       deallocate(JFreal)
+    if (allocated(this%JLmax)) then
+       deallocate(this%JLmax)
+       deallocate(this%volu)
+       deallocate(this%Vol2)
+       deallocate(this%rhomu)
+       deallocate(this%Qmu)
+       deallocate(this%mu_inf)
+       deallocate(this%mu_max)
     endif
-    allocate(AN(n))
-    allocate(AL(n))
-    allocate(JNmax(n))
-    allocate(JLmax(n))
-    allocate(volu(n))
-    allocate(Jresp(n))
-    allocate(JlossPassive(n))
-    allocate(nu(n))
-    allocate(mort(n))
-    allocate(mort2(n))
-    allocate(Vol2(n))
-    allocate(rhomu(n))
-    allocate(Qmu(n))
-    allocate(mu_inf(n))
-    allocate(mu_max(n))
-
-    allocate(JN(n))
-    allocate(JL(n))
-    allocate(JFreal(n))   
+    allocate(this%JNmax(n))
+    allocate(this%JLmax(n))
+    allocate(this%volu(n))
+    allocate(this%Vol2(n))
+    allocate(this%rhomu(n))
+    allocate(this%Qmu(n))
+    allocate(this%mu_inf(n))
+    allocate(this%mu_max(n))
  
     this%beta = beta
     this%sigma = sigma
     this%epsilonF = epsilonF
 
-    AN = alphaN*this%m**onethird
-    AL = alphaL*this%m**twothirds * (1-exp(-cL*this%m**onethird ))  ! shading formula
+    this%AN = alphaN*this%m**onethird
+    this%AL = alphaL*this%m**twothirds * (1-exp(-cL*this%m**onethird ))  ! shading formula
     this%AF = alphaF*this%m**threequarters
-    JlossPassive =0.d0! cLeakage * this%m**twothirds ! in units of C
+    this%JlossPassive =0.d0! cLeakage * this%m**twothirds ! in units of C
     this%JFmax = cF*this%m**twothirds * Q20corr
-    JNmax = cmaxN*this%m**cmaxN2 * Q20corr
-    volu=(this%m/pvol)**pvol2
-    JLmax = min(pl11*volu**pl12 , pl21*volu**pl22)*this%m * Q20corr
+    this%JNmax = cmaxN*this%m**cmaxN2 * Q20corr
+    this%volu=(this%m/pvol)**pvol2
+    this%JLmax = min(pl11*this%volu**pl12 , pl21*this%volu**pl22)*this%m * Q20corr
     !nu = c * this%m**(-onethird)
     !Jmax = 0.d0*this%m! alphaJ * this%m * (1.d0-nu) ! mugC/day
 
-    Vol2=pvol3*this%m**pvol2
-    rhomu=rhomup1*Vol2**rhomup2
-    Qmu=Qmup1*Vol2**Qmup2
-    mu_inf=mu_infp1*Vol2**(mu_infp2)
-    mu_max=mu_inf*rhomu/(mu_inf*Qmu + rhomu)
-    mu_max=(mu_max + mu_max*0.17) * Q20corr
+    this%Vol2=pvol3*this%m**pvol2
+    this%rhomu=rhomup1*this%Vol2**rhomup2
+    this%Qmu=Qmup1*this%Vol2**Qmup2
+    this%mu_inf = mu_infp1*this%Vol2**(mu_infp2)
+    this%mu_max = this%mu_inf*this%rhomu/(this%mu_inf*this%Qmu + this%rhomu)
+    this%mu_max = (this%mu_max + this%mu_max*0.17) * Q20corr
     
-    Jresp = 0.2*mu_max*this%m *Q20corr !cR*alphaJ*this%m
+    this%Jresp = 0.2*this%mu_max*this%m *Q20corr !cR*alphaJ*this%m
 
-    mort = 0.d0 !0*0.005*(Jmax/this%m) * this%m**(-0.25);
-    mort2 = mu_max*0.03/(this%z) !0.0002*n
-    write(*,*) mort2
-  end function initGeneralists_csp
+    !this%mort2 = this%mu_max*0.03/(this%z) !0.0002*n
+    !write(*,*) mort2
+  end subroutine initGeneralists_csp
 
-  subroutine calcRatesGeneralists_csp(this, rates, L, N, gammaN)
-    type(typeSpectrum), intent(in):: this
+  subroutine calcRatesGeneralists_csp(this, L, N, F, gammaN)
+    class(spectrumGeneralists_csp), intent(inout):: this
     real(dp), intent(in):: gammaN
-    type(typeRates), intent(inout):: rates
-    real(dp), intent(in):: L, N
-    integer:: ix, i
+    real(dp), intent(in):: L, N, F(this%n)
+    integer:: i
 
     do i = 1, this%n
-       ix = i+this%ixOffset
        !
        ! Uptakes
        !
-       !rates%JN(ix) =   gammaN * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-       rates%JN(ix) =   gammaN *JNmax(i) * ftemp15*AN(i) * N * rhoCN / &
-        (ftemp2*JNmax(i) +gammaN * ftemp15*AN(i) * N * rhoCN)  
+       !this%JN(i) =   gammaN * AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
+       this%JN(i) =   gammaN * this%JNmax(i) * ftemp15*this%AN(i) * N * rhoCN / &
+          (ftemp2*this%JNmax(i) +gammaN * ftemp15*this%AN(i) * N * rhoCN)  
 
        if (N .lt. 0.d0) then
          write(*,*) "negative N"
        end if
 
-       rates%JDOC(ix) = 0.d0 ! Diffusive DOC uptake, units of C/time
-       rates%JL(ix) =  JLmax(i) * AL(i) * L /(ftemp2*JLmax(i) + AL(i) * L)
-       ! Recalc feeding because we use a different Q10:
-       rates%flvl(ix) = ftemp15*this%AF(i)*rates%F(ix) / (ftemp15*this%AF(i)*rates%F(ix)+fTemp2*this%JFmax(i))
-       rates%JF(ix) = rates%flvl(ix) * fTemp2*this%JFmax(i)
+       this%JDOC(i) = 0.d0 ! Diffusive DOC uptake, units of C/time
+       this%JL(i) =  this%JLmax(i) * this%AL(i) * L /(ftemp2*this%JLmax(i) + this%AL(i) * L)
 
-       !rates%JL(ix) =   epsilonL * AL(i)*L  ! Photoharvesting
+        ! Recalc feeding because we use a different Q10:
+       this%flvl(i) = ftemp15*this%AF(i)*F(i) / (ftemp15*this%AF(i)*F(i)+fTemp2*this%JFmax(i))
+       this%JF(i) = this%flvl(i) * fTemp2*this%JFmax(i)
+       !this%JL(i) =   epsilonL * AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
-       rates%JNtot(ix) = rates%JN(ix)+rates%JF(ix) ! In units of C
+       this%JNtot(i) = this%JN(i)+this%JF(i) ! In units of C
        ! Total carbon uptake
-       rates%JCtot(ix) = rates%JL(ix)+rates%JF(ix)+rates%JDOC(ix)-Jresp(i)-JlossPassive(i)
+       this%JCtot(i) = this%JL(i)+this%JF(i)+this%JDOC(i)-this%Jresp(i)-this%JlossPassive(i)
        ! Liebig + synthesis limitation:
-       rates%Jtot(ix) = min( rates%JNtot(ix), rates%JCtot(ix))
-       !f = rates%Jtot(ix)/(rates%Jtot(ix) + Jmax(i))
+       this%Jtot(i) = min( this%JNtot(i), this%JCtot(i))
+       !f = this%Jtot(i)/(this%Jtot(i) + Jmax(i))
        ! If synthesis-limited then down-regulate feeding:
-       !if (rates%Jtot(ix) .gt. 0) then
-      !    JFreal(i) = max(0.d0, rates%JF(ix) - (rates%Jtot(ix)-f*Jmax(i)))
+       !if (this%Jtot(i) .gt. 0) then
+      !    JFreal(i) = max(0.d0, this%JF(i) - (this%Jtot(i)-f*Jmax(i)))
        !else
-      !    JFreal(i) = max(0.d0, rates%JF(ix))
+      !    JFreal(i) = max(0.d0, this%JF(i))
        !end if
-       JFreal(i) = rates%JF(ix)
-       !rates%Jtot(ix) = f * Jmax(i)
-       rates%JLreal(ix) = rates%JL(ix) !- max( 0.d0, &
-            !min((rates%JCtot(ix) - (rates%JF(ix)-JFreal(i))-rates%Jtot(ix)), rates%JL(ix)))
+       this%JFreal(i) = this%JF(i)
+       !this%Jtot(i) = f * Jmax(i)
+       this%JLreal(i) = this%JL(i) !- max( 0.d0, &
+            !min((this%JCtot(i) - (this%JF(i)-JFreal(i))-this%Jtot(i)), this%JL(i)))
 
        ! Actual uptakes:
-       !rates%JCtot(ix) = &
-        !    + rates%JLreal(ix)  &
-        !    + rates%JDOC(ix)  &
+       !this%JCtot(i) = &
+        !    + this%JLreal(i)  &
+        !    + this%JDOC(i)  &
         !    + JFreal(i)  &
         !    - Jresp(i)  &
         !    - JlossPassive(i)
-      ! rates%JNtot(ix) = &
-        !    rates%JN(ix) + &
+      ! this%JNtot(i) = &
+        !    this%JN(i) + &
         !    JFreal(i) - &
         !    JlossPassive(i)
        !
        ! Losses:
        !
-       rates%JCloss_feeding(ix) =0.d0! (1.-epsilonF)/epsilonF*JFreal(i) ! Incomplete feeding (units of carbon per time)
-       rates%JCloss_photouptake(ix) = 0.d0! (1.-epsilonL)/epsilonL * rates%JLreal(ix)
-       rates%JNlossLiebig(ix) = max( 0.d0, rates%JN(ix) - rates%JL(ix) + Jresp(i))  ! In units of C
-       rates%JClossLiebig(ix) =0.d0! max( 0.d0, rates%JCtot(ix)-rates%Jtot(ix)) ! C losses from Liebig, not counting losses from photoharvesting
+       this%JCloss_feeding(i) =0.d0! (1.-epsilonF)/epsilonF*JFreal(i) ! Incomplete feeding (units of carbon per time)
+       this%JCloss_photouptake(i) = 0.d0! (1.-epsilonL)/epsilonL * this%JLreal(i)
+       this%JNlossLiebig(i) = max( 0.d0, this%JN(i) - this%JL(i) + this%Jresp(i))  ! In units of C
+       this%JClossLiebig(i) =0.d0! max( 0.d0, this%JCtot(i)-this%Jtot(i)) ! C losses from Liebig, not counting losses from photoharvesting
 
-       rates%JNloss(ix) = rates%JNlossLiebig(ix)
-            !rates%JCloss_feeding(ix) + &
-            !rates%JNlossLiebig(ix) +&
+       this%JNloss(i) = this%JNlossLiebig(i)
+            !this%JCloss_feeding(i) + &
+            !this%JNlossLiebig(i) +&
             !JlossPassive(i) ! In units of C
-       rates%JCloss(ix) = 0.d0
-            !rates%JCloss_feeding(ix) + &
-            !rates%JCloss_photouptake(ix) + &
-            !rates%JClossLiebig(ix) +&
+       this%JCloss(i) = 0.d0
+            !this%JCloss_feeding(i) + &
+            !this%JCloss_photouptake(i) + &
+            !this%JClossLiebig(i) +&
             !JlossPassive(i)
-       rates%JF(ix) = JFreal(i)
+       this%JF(i) = this%JFreal(i)
     end do
 
-    write(*,*) '----'
-    write(*,*) 'log10(m):',log10(this%m)
-    write(*,*) 'aN:',ftemp15*AN/this%m
-    write(*,*) 'aL:',AL/this%m
-    write(*,*) 'aF:',ftemp15*this%AF/this%m
-    write(*,*) 'jN:', rates%JN(3:12)/this%m
-    write(*,*) 'jL:', rates%JL(3:12)/this%m
-    write(*,*) 'jF:', rates%JF(3:12)/this%m
+    ! write(*,*) '----'
+    ! write(*,*) 'log10(m):',log10(this%m)
+    ! write(*,*) 'aN:',ftemp15*AN/this%m
+    ! write(*,*) 'aL:',AL/this%m
+    ! write(*,*) 'aF:',ftemp15*this%AF/this%m
+    ! write(*,*) 'jN:', this%JN(3:12)/this%m
+    ! write(*,*) 'jL:', this%JL(3:12)/this%m
+    ! write(*,*) 'jF:', this%JF(3:12)/this%m
 
   end subroutine calcRatesGeneralists_csp
 
-  subroutine calcDerivativesGeneralists_csp(this, u, rates)
-    type(typeSpectrum), intent(in):: this
-    type(typeRates), intent(inout):: rates
-    real(dp), intent(in):: u(this%n)
+  subroutine calcDerivativesGeneralists_csp(this, u, dNdt, dudt)
+    class(spectrumGeneralists_csp), intent(inout):: this
+    real(dp), intent(in) :: u(this%n)
+    real(dp), intent(inout):: dNdt, dudt(this%n)
     real(dp):: mortloss
-    integer:: i, ix
+    integer:: i
 
+    this%mort2 = this%mu_max*0.03/(this%z) * u!0.0002*n
     do i = 1, this%n
-      ix = i+this%ixOffset
-      mortloss = u(i)*(remin2*ftemp2*mort2(i)*u(i) +reminHTL* ftemp2*rates%mortHTL(ix))
+      mortloss = u(i)*(remin2*ftemp2*this%mort2(i) +reminHTL* ftemp2*this%mortHTL(i))
       !
       ! Update nitrogen:
       !
-!!$      rates%dudt(idxN) = rates%dudt(idxN)  &
-!!$           + (-rates%JN(ix) &
-!!$           + rates%JNloss(ix))*u(i)/this%m(i) &
+!!$      this%dudt(idxN) = this%dudt(idxN)  &
+!!$           + (-this%JN(i) &
+!!$           + this%JNloss(i))*u(i)/this%m(i) &
 !!$           + (remin2*mort2*u(i)*u(i) &
 !!$           + remin*mortloss)/rhoCN
-      rates%dudt(idxN) = rates%dudt(idxN)  &
-           + ((-rates%JN(ix) &
-           + rates%JNloss(ix))*u(i)/this%m(i) &
+      dNdt = dNdt +  &
+           + ((-this%JN(i) &
+           + this%JNloss(i))*u(i)/this%m(i) &
            + mortloss)/rhoCN
       !
       ! Update DOC:
       !
-!!$      rates%dudt(idxDOC) = rates%dudt(idxDOC) &
-!!$           + (-rates%JDOC(ix) &
-!!$           + rates%JCloss(ix))*u(i)/this%m(i) &
+!!$      this%dudt(idxDOC) = this%dudt(idxDOC) &
+!!$           + (-this%JDOC(i) &
+!!$           + this%JCloss(i))*u(i)/this%m(i) &
 !!$           + remin2*mort2*u(i)*u(i) &
 !!$           + remin*mortloss
-      rates%dudt(idxDOC) = 0.d0 !rates%dudt(idxDOC) &
-           !+ (-rates%JDOC(ix) &
-           !+ rates%JCloss(ix))*u(i)/this%m(i) &
+      !this%dudt(idxDOC) = 0.d0 !this%dudt(idxDOC) &
+           !+ (-this%JDOC(i) &
+           !+ this%JCloss(i))*u(i)/this%m(i) &
            !+ mortloss
       !
       ! Update the generalists:
       !
-      rates%dudt(ix) = (rates%Jtot(ix)/this%m(i)  &
-           - mort(i) &
-           - rates%mortpred(ix) &
-           - mort2(i)*u(i) &
-           - ftemp2*rates%mortHTL(ix))*u(i)
+      dudt(i) = (this%Jtot(i)/this%m(i)  &
+          ! - mort(i) &
+           - this%mortpred(i) &
+           - this%mort2(i) &
+           - ftemp2*this%mortHTL(i))*u(i)
    end do
  end subroutine calcDerivativesGeneralists_csp
+
+ subroutine printRatesGeneralists_csp(this)
+   class(spectrumGeneralists_csp), intent(in):: this
+
+   write(*,*) "Generalists_csp with ", this%n, " size classes:"
+   call this%printRatesUnicellular()
+ end subroutine printRatesGeneralists_csp
 
 end module generalists_csp
