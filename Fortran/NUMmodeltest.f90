@@ -7,13 +7,13 @@ program NUMmodeltest
   integer:: i
 
 
-  !call setupGeneric( (/0.1d0, 1.0d0 /) )
+  call setupGeneric( (/0.1d0, 1.0d0 /) )
   !call setupGeneralistsCopepod()
   !call setupGeneralistsOnly(10)
   !call setupGeneralistsOnly_csp()
  ! call setupGeneralistsOnly_csp()
   !call setupGeneralistsOnly_csp()
-  call setupGeneralistsOnly_csp()
+  !call setupGeneralistsOnly_csp()
   !call parametersFinalize(0.d0, .false.)
   
   !call setupGeneralistsDiatoms(10)
@@ -27,7 +27,7 @@ program NUMmodeltest
   u00(idxDOC) = 0.d0
   u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 1.0d0 !*(i-2)
+     u00(i) = 10.0d0 !*(i-2)
   end do
   dudt = 0.d0
 

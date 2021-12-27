@@ -5,8 +5,8 @@ module NUMmodel_wrap
        setupDiatomsOnly, &
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
-       !setupGeneralistsCopepod, &
-       !setupGeneric, setupGeneric_csp, &
+       setupGeneralistsCopepod, &
+       setupGeneric, setupGeneric_csp, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler!, getFunctions, &
        !parametersHTL, getBalance
@@ -46,23 +46,23 @@ contains
     call setupGeneralistsDiatoms_simple(n)
   end subroutine f_setupGeneralistsDiatoms_simple
 
-  ! subroutine f_setupGeneralistsCopepod() bind(c)
-  !   !call setupGeneralistsCopepod()
-  ! end subroutine f_setupGeneralistsCopepod
+  subroutine f_setupGeneralistsCopepod() bind(c)
+    call setupGeneralistsCopepod()
+  end subroutine f_setupGeneralistsCopepod
 
-  ! subroutine f_setupGeneric(nCopepods, mAdult) bind(c)
-  !   integer(c_int), intent(in), value:: nCopepods
-  !   real(c_double), intent(in):: mAdult(nCopepods)
+  subroutine f_setupGeneric(nCopepods, mAdult) bind(c)
+    integer(c_int), intent(in), value:: nCopepods
+    real(c_double), intent(in):: mAdult(nCopepods)
 
-  !   !call setupGeneric(mAdult)
-  ! end subroutine f_setupGeneric
+    call setupGeneric(mAdult)
+  end subroutine f_setupGeneric
 
-  ! subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
-  !   integer(c_int), intent(in), value:: nCopepods
-  !   real(c_double), intent(in):: mAdult(nCopepods)
+  subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
+    integer(c_int), intent(in), value:: nCopepods
+    real(c_double), intent(in):: mAdult(nCopepods)
 
-  !   !call setupGeneric_csp(mAdult)
-  ! end subroutine f_setupGeneric_csp
+    call setupGeneric_csp(mAdult)
+  end subroutine f_setupGeneric_csp
 
   subroutine f_parametersHTL(mHTL, mortHTL, bQuadraticHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL

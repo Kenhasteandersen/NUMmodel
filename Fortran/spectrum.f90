@@ -4,7 +4,9 @@
 module spectrum
   use globals
   implicit none
-
+  !
+  ! Abstract class for all spectra:
+  !
   type, abstract :: typeSpectrum
      integer:: type
      integer:: n  ! Number of size classes
@@ -34,7 +36,9 @@ module spectrum
      procedure :: printRates => printRatesSpectrum
      procedure :: printRatesSpectrum
   end type typeSpectrum
-
+  !
+  ! Abstract class for all unicellular spectra:
+  !
   type, abstract, extends(typeSpectrum) :: spectrumUnicellular
     real(dp),  dimension(:), allocatable:: nu, r
  
@@ -52,14 +56,27 @@ module spectrum
 
     procedure, pass :: initUnicellular
     procedure :: printRatesUnicellular
-
   end type spectrumUnicellular
-
+  !
+  ! Abstact class for all multicellular spectra:
+  ! 
+  type, abstract, extends(typeSpectrum) :: spectrumMulticellular
+  contains
+    procedure :: initMulticellular
+    procedure :: printRatesMulticellular
+  end type spectrumMulticellular
+  !
+  ! Type needed to make an array of spectra:
+  !
   type spectrumContainer 
     class(typeSpectrum), allocatable :: spec
   end type spectrumContainer
 
 contains
+
+! ==========================================================================
+!  Member functions for the abstract spectrum parent class:
+! ==========================================================================
 
   subroutine initSpectrum(this, n, mMin, mMax)
     class(typeSpectrum) :: this
@@ -121,9 +138,32 @@ contains
 
   end subroutine initSpectrum
 
-  
+  subroutine calcFeeding(this, F)
+    class (typeSpectrum), intent(inout):: this
+    real(dp), intent(in):: F(this%n)
+
+    this%flvl = this%epsilonF * this%AF*F / &
+      ((this%AF*F+eps) + fTemp2*this%JFmax)
+    this%JF = this%flvl * fTemp2*this%JFmax
+  end subroutine calcFeeding
+
+  subroutine printRatesSpectrum(this)
+    class (typeSpectrum), intent(in):: this
+
+    99 format (a10, 20f10.6)
+    write(*,'(a10, 20d10.3)') "m: ", this%m
+    write(*,99) "jF:", this%JF / this%m
+    write(*,99) "jTot:", this%Jtot / this%m
+    write(*,99) "mortpred", this%mortpred
+    write(*,99) "mortHTL", this%mortHTL
+  end subroutine printRatesSpectrum
+
+  ! ==========================================================================
+  !  Member functions for the abstract unicellular class:
+  ! ==========================================================================
+
   subroutine initUnicellular(this, n, mMin, mMax)
-    class(spectrumUnicellular) :: this
+    class(spectrumUnicellular), intent(inout) :: this
     integer, intent(in):: n
     real(dp), intent(in):: mMin, mMax
 
@@ -151,18 +191,38 @@ contains
     allocate(this%Jmax(n))
   end subroutine initUnicellular
 
+  subroutine printRatesUnicellular(this)
+    class (spectrumUnicellular), intent(in):: this 
+    
+    99 format (a10, 20f10.6)
+ 
+    call this%printRatesSpectrum()
 
-  subroutine calcFeeding(this, F)
-    class (typeSpectrum), intent(inout):: this
-    real(dp), intent(in):: F(this%n)
+    write(*,'(a10, 20d10.3)') "r:", this%r
+    write(*,99) "jN:", this%JN / this%m
+    write(*,99) "jL:", this%JL / this%m
+    write(*,99) "jLreal:", this%JLreal / this%m
+    write(*,99) "jDOC:", this%JDOC / this%m
+    write(*,99) "jLossPass.", this%JlossPassive / this%m
+  end subroutine printRatesUnicellular
 
-    this%flvl = this%epsilonF * this%AF*F / &
-      ((this%AF*F+eps) + fTemp2*this%JFmax)
-    this%JF = this%flvl * fTemp2*this%JFmax
-  end subroutine calcFeeding
+  ! ==========================================================================
+  !  Member functions for the abstract unicellular class:
+  ! ==========================================================================
+
+  subroutine initMulticellular(this, n, mMin, mMax)
+    class(spectrumMulticellular), intent(inout) :: this
+    integer, intent(in):: n
+    real(dp), intent(in):: mMin, mMax
+    
+    call this%initSpectrum(n, mMin, mMax)
+  end subroutine initMulticellular
   
+  subroutine printRatesMulticellular(this)
+    class(spectrumMulticellular), intent(in) :: this
+  end subroutine printRatesMulticellular
 
-  
+
   ! function calcHTL(u, i) result(mHTL)
   !   real(dp) :: mHTL, B
   !   real(dp), intent(in):: u(:)
@@ -183,31 +243,7 @@ contains
   ! end function calcHTL
 
 
-  subroutine printRatesSpectrum(this)
-    class (typeSpectrum), intent(in):: this
-
-    99 format (a10, 20f10.6)
-    write(*,'(a10, 20d10.3)') "m: ", this%m
-    write(*,99) "jF:", this%JF / this%m
-    write(*,99) "jTot:", this%Jtot / this%m
-    write(*,99) "mortpred", this%mortpred
-    write(*,99) "mortHTL", this%mortHTL
-  end subroutine printRatesSpectrum
-
-  subroutine printRatesUnicellular(this)
-    class (spectrumUnicellular), intent(in):: this 
-    
-    99 format (a10, 20f10.6)
- 
-    call this%printRatesSpectrum()
-
-    write(*,'(a10, 20d10.3)') "r:", this%r
-    write(*,99) "jN:", this%JN / this%m
-    write(*,99) "jL:", this%JL / this%m
-    write(*,99) "jLreal:", this%JLreal / this%m
-    write(*,99) "jDOC:", this%JDOC / this%m
-    write(*,99) "jLossPass.", this%JlossPassive / this%m
-
-  end subroutine printRatesUnicellular
+  
+  
 
  end module spectrum

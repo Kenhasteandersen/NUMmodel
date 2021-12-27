@@ -61,6 +61,7 @@ module diatoms_simple
       contains
       procedure, pass :: initDiatoms_simple
       procedure :: calcRates => calcRatesDiatoms_simple
+      procedure :: calcDerivativesDiatoms_simple
       procedure :: printRates => printRatesDiatoms_simple
     end type spectrumDiatoms_simple
   contains

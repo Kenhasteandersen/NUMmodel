@@ -5,19 +5,7 @@ module globals
   ! Useful constants:
   !
 
-  ! Indices into the state-variable vector:
-  integer, parameter :: idxN = 1
-  integer, parameter :: idxDOC = 2
-  integer, parameter :: idxSi = 3
-
-  ! Types of spectra:
-   integer, parameter :: typeGeneralist = 1
-   integer, parameter :: typeGeneralist_csp = 2
-   integer, parameter :: typeDiatom = 3
-   integer, parameter :: typeDiatom_simple = 4  
-   integer, parameter :: typeCopepod = 10
-
-  ! Useful mathematical constants:
+    ! Useful mathematical constants:
   real(dp), parameter :: onethird = 1.d0/3.d0
   real(dp), parameter :: twothirds = 2.d0/3.d0
   real(dp), parameter :: threequarters = 3.d0/4.d0

@@ -6,8 +6,12 @@ function plotSimulation(sim)
 switch sim.p.nameModel
     
     case 'chemostat'
+        figure(1)
         clf
         plotSizespectrum(sim);
+        
+        figure(2)
+        plotGroupsTime(sim);
         
     case 'watercolumn'
         day = 170;

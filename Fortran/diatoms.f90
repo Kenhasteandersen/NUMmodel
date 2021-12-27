@@ -62,6 +62,7 @@ module diatoms
      contains
        procedure, pass :: initDiatoms
        procedure :: calcRates => calcRatesDiatoms
+       procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
      end type spectrumDiatoms
 

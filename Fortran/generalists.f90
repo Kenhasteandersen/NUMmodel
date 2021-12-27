@@ -49,6 +49,7 @@ module generalists
   contains
     procedure, pass :: initGeneralists
     procedure :: calcRates => calcRatesGeneralists
+    procedure :: calcDerivativesGeneralists
     procedure :: printRates => printRatesGeneralists
   end type spectrumGeneralists
  

@@ -23,14 +23,20 @@ module copepods
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
   real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
 
-  real(dp),  dimension(:), allocatable:: Jresp(:), gamma(:)
+  type, extends(spectrumMulticellular) :: spectrumCopepod
+    real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:)
+  contains
+    procedure, pass :: initCopepod
+    procedure :: calcDerivativesCopepod
+    procedure :: printRates => printRatesCopepod
+  end type spectrumCopepod
 
-  public initCopepod, calcDerivativesCopepod
+  public spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod
 contains
 
-  function initCopepod(n, ixOffset, mAdult) result(this)
-    type(typeSpectrum):: this
-    integer, intent(in):: n, ixOffset
+  subroutine initCopepod(this, n, mAdult)
+    class(spectrumCopepod), intent(inout):: this
+    integer, intent(in):: n
     real(dp), intent(in):: mAdult
     real(dp):: lnDelta, mMin
     !
@@ -38,69 +44,77 @@ contains
     !
     lnDelta = (log(mAdult)-log(mAdult/AdultOffspring)) / (n-0.5)
     mMin = exp(log(mAdult/AdultOffspring)+0.5*lnDelta);
-    this = initSpectrum(typeCopepod, n, ixOffset, mMin, mAdult)
+    call this%initSpectrum(n, mMin, mAdult)
 
-    if ( allocated(Jresp) ) then
-       deallocate(Jresp)
-       deallocate(gamma)
-    endif
-
-    allocate(Jresp(n))
-    allocate(gamma(n))
+    allocate(this%gamma(n))
+    allocate(this%g(n))
+    allocate(this%mortStarve(n))
+    allocate(this%mort(n))
 
     this%beta = beta
     this%sigma = sigma
     this%epsilonF = epsilonF
     this%AF = alphaF*this%m**q
     this%JFmax = h*this%m**hExponent
-    Jresp = Kappa*this%m**p
-  end function initCopepod
+    this%Jresp = Kappa*this%m**p
+  end subroutine initCopepod
 
-  subroutine calcDerivativesCopepod(this, u, rates)
-    type(typeSpectrum), intent(in):: this
-    real(dp), intent(in):: u(:)
-    type(typeRates), intent(inout):: rates
-    integer:: ix, i
+  subroutine calcDerivativesCopepod(this, u, dudt)
+     class(spectrumCopepod), intent(inout):: this
+    real(dp), intent(in):: u(this%n)
+    real(dp), intent(inout):: dudt(this%n)
+    integer:: i
     real(dp):: nu, b
 
     do i = 1, this%n
-       ix = i+this%ixOffset
        !
        ! Growth and reproduction:
        !
-       nu = epsilonF*rates%JF(ix) - Jresp(i)
-       rates%g(ix) = max(0.d0, nu)/this%m(i)
-       rates%mortStarve(ix) = -min(0.d0, nu)/this%m(i)
+       nu = epsilonF*this%JF(i) - this%Jresp(i)
+       this%g(i) = max(0.d0, nu)/this%m(i)
+       this%mortStarve(i) = -min(0.d0, nu)/this%m(i)
        !
        ! Mortality:
-       !rates%mortHTL(ix) = rates%mortHTL(ix)*u(ix)
-       rates%mort(ix) = rates%mortpred(ix) + rates%mortHTL(ix)*h + rates%mortStarve(ix)
+       !this%mortHTL(i) = this%mortHTL(i)*u(i)
+       this%mort(i) = this%mortpred(i) + this%mortHTL(i)*h + this%mortStarve(i)
        ! Flux:
-       if ( rates%g(ix) .ne. 0.) then
-          gamma(i) = (rates%g(ix)-rates%mort(ix)) / (1 - this%z(i)**(1-rates%mort(ix)/rates%g(ix)))
+       if ( this%g(i) .ne. 0.) then
+         this%gamma(i) = (this%g(i)-this%mort(i)) / (1 - this%z(i)**(1-this%mort(i)/this%g(i)))
        else
-          gamma(i) = 0.d0
+         this%gamma(i) = 0.d0
        end if
-       rates%Jtot(ix) = nu
+       this%Jtot(i) = nu
     end do
-    b = epsilonR * rates%g(this%ixEnd) ! Birth rate
+    b = epsilonR * this%g(this%n) ! Birth rate
     !
     ! Assemble derivatives:
     !
     ! 1st stage:
-    rates%dudt(this%ixStart) = b*u(this%n) &
-         + (rates%g(this%ixStart)-gamma(1)-rates%mort(this%ixStart))*u(1)
+    dudt(1) = b*u(this%n) &
+         + (this%g(1) - this%gamma(1) - this%mort(1))*u(1)
     ! Middle stages:
     do i = 2, this%n-1
-       ix = i+this%ixOffset
-       rates%dudt(ix) = &
-            gamma(i-1)*u(i-1) & ! growth into group
-            + (rates%g(ix)-gamma(i)-rates%mort(ix))*u(i)  ! growth out of group
+       dudt(i) = &
+            this%gamma(i-1)*u(i-1) & ! growth into group
+            + (this%g(i) - this%gamma(i) - this%mort(i))*u(i)  ! growth out of group
     end do
     !Adults
-    rates%dudt(this%ixEnd) = &
-         gamma(this%n-1)*u(this%n-1) & ! growth into adult group
-         - rates%mort(this%ixEnd)*u(this%n); ! adult mortality
+    dudt(this%n) = &
+         this%gamma(this%n-1)*u(this%n-1) & ! growth into adult group
+         - this%mort(this%n)*u(this%n); ! adult mortality
   end subroutine calcDerivativesCopepod
 
-  end module copepods
+  subroutine printRatesCopepod(this)
+   class(spectrumCopepod), intent(in):: this
+
+   write(*,*) "Copepod with ", this%n, " size classes and adult size ", this%m(this%n), "ugC."
+     call this%printRatesSpectrum()
+
+     99 format (a10, 20f10.6)
+ 
+     write(*,99) "gamma:", this%gamma
+     write(*,99) "mortStarve:", this%mortStarve
+     write(*,99) "g:", this%g
+  end subroutine printRatesCopepod
+
+end module copepods

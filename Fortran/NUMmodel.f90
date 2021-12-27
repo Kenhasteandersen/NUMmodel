@@ -8,13 +8,21 @@ module NUMmodel
   use generalists
   use diatoms_simple
   use generalists_csp
-  !use generalists_csp
+  use copepods
   use diatoms
-  !use diatoms_simple
-  !use copepods
-  !use debug
   implicit none
 
+  ! Indices into the state-variable vector:
+  integer, parameter :: idxN = 1
+  integer, parameter :: idxDOC = 2
+  integer, parameter :: idxSi = 3
+
+  ! Types of spectra:
+   integer, parameter :: typeGeneralist = 1
+   integer, parameter :: typeGeneralist_csp = 2
+   integer, parameter :: typeDiatom = 3
+   integer, parameter :: typeDiatom_simple = 4  
+   integer, parameter :: typeCopepod = 10
   !
   ! Variables that contain the size spectrum groups
   !
@@ -104,51 +112,52 @@ contains
       call parametersFinalize(0.2d0, .false.)
    end subroutine setupGeneralistsDiatoms_simple
  
-!   ! -----------------------------------------------
-!   ! A basic setup with generalists and 1 copepod
-!   ! -----------------------------------------------
-!   subroutine setupGeneralistsCopepod()
-!     call parametersInit(2, 20, 2)
-!     call parametersAddGroup(typeGeneralist, 10, 0.1d0)
-!     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
-!     call parametersFinalize(0.003d0, .true.) ! Use quadratic mortality
-!   end subroutine setupGeneralistsCopepod
+  ! -----------------------------------------------
+  ! A basic setup with generalists and 1 copepod
+  ! -----------------------------------------------
+  subroutine setupGeneralistsCopepod()
+    call parametersInit(2, 20, 2)
+    call parametersAddGroup(typeGeneralist, 10, 0.1d0)
+    call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
+    call parametersFinalize(0.003d0, .true.) ! Use quadratic mortality
+  end subroutine setupGeneralistsCopepod
 
-!   ! -----------------------------------------------
-!   ! A generic setup with generalists and a number of copepod species
-!   ! -----------------------------------------------
-!   subroutine setupGeneric(mAdult)
-!     real(dp), intent(in):: mAdult(:)
-!     integer, parameter:: n = 10 ! number of size classes in each group
-!     integer:: iCopepod
+  ! -----------------------------------------------
+  ! A generic setup with generalists and a number of copepod species
+  ! -----------------------------------------------
+  subroutine setupGeneric(mAdult)
+    real(dp), intent(in):: mAdult(:)
+    integer, parameter:: n = 10 ! number of size classes in each group
+    integer:: iCopepod
+    logical:: bQuadraticHTL = .true.
 
-!     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-!     call parametersAddGroup(typeGeneralist, n, 0.1d0)
-!     if ( size(mAdult) .eq. 0) then
-!        bQuadraticHTL = .false. ! Use standard "linear" mortality
-!     else
-!        do iCopepod = 1, size(mAdult)
-!           call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
-!        end do
-!     end if
-!     call parametersFinalize(0.003d0, .true.)
-!   end subroutine setupGeneric
+    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
+    call parametersAddGroup(typeGeneralist, n, 0.1d0)
+    if ( size(mAdult) .eq. 0) then
+       bQuadraticHTL = .false. ! Use standard "linear" mortality
+    else
+       do iCopepod = 1, size(mAdult)
+          call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
+       end do
+    end if
+    call parametersFinalize(0.003d0, bQuadraticHTL)
+  end subroutine setupGeneric
 
-!   ! -----------------------------------------------
-!   ! A generic setup with generalists and a number of copepod species
-!   ! -----------------------------------------------
-!   subroutine setupGeneric_csp(mAdult)
-!     real(dp), intent(in):: mAdult(:)
-!     integer, parameter:: n = 10 ! number of size classes in each group
-!     integer:: iCopepod
+  ! -----------------------------------------------
+  ! A generic setup with generalists and a number of copepod species
+  ! -----------------------------------------------
+  subroutine setupGeneric_csp(mAdult)
+    real(dp), intent(in):: mAdult(:)
+    integer, parameter:: n = 10 ! number of size classes in each group
+    integer:: iCopepod
 
-!     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-!     call parametersAddGroup(typeGeneralist_csp, n, 0.1d0)
-!     do iCopepod = 1, size(mAdult)
-!        call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
-!     end do
-!     call parametersFinalize(0.003d0, .true.)
-!   end subroutine setupGeneric_csp
+    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
+    call parametersAddGroup(typeGeneralist_csp, n, 0.1d0)
+    do iCopepod = 1, size(mAdult)
+       call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
+    end do
+    call parametersFinalize(0.003d0, .true.)
+  end subroutine setupGeneric_csp
 
 
 
@@ -207,6 +216,7 @@ contains
     type(spectrumDiatoms_simple):: specDiatoms_simple
     type(spectrumDiatoms):: specDiatoms
     type(spectrumGeneralists_csp):: specGeneralists_csp
+    type(spectrumCopepod):: specCopepod
     !
     ! Find the group number and grid location:
     !
@@ -234,8 +244,9 @@ contains
     case (typeGeneralist_csp)
       call initGeneralists_csp(specGeneralists_csp, n, mMax)
       allocate( group ( iCurrentGroup )%spec, source=specGeneralists_csp )
-   !  case(typeCopepod)
-   !     group(iCurrentGroup) = initCopepod(n, group(iCurrentGroup)%ixStart-1, mMax)
+   case(typeCopepod)
+      call initCopepod(specCopepod, n, mMax)
+      allocate (group( iCurrentGroup )%spec, source=specCopepod)
     end select
   end subroutine parametersAddGroup
   ! -----------------------------------------------
@@ -431,13 +442,14 @@ contains
     !
     ! Calc derivatives of multicellular groups:
     !
-   !  do iGroup = 1, nGroups
-   !    if (group(iGroup)%type .eq. typeCopepod) then
-   !       call calcDerivativesCopepod(group(iGroup), &
-   !          upositive(group(iGroup)%ixStart:group(iGroup)%ixEnd), &
-   !          rates)
-   !    end if
-   !  end do
+    do iGroup = 1, nGroups
+      select type (spec => group(iGroup)%spec)
+      type is (spectrumCopepod)
+         call calcDerivativesCopepod(spec, &
+            upositive(ixStart(iGroup):ixEnd(iGroup)), &
+            dudt(ixStart(iGroup):ixEnd(iGroup)))
+      end select
+    end do
 
     contains
 
@@ -466,16 +478,6 @@ contains
       type is (spectrumGeneralists_csp)
          call calcRatesGeneralists_csp(spec, &
                      L, upositive(idxN), F( ixStart(iGroup):ixEnd(iGroup) ), gammaN)
-        ! call calcRatesGeneralists(group(iGroup), &
-        !      rates, L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
-      ! case(typeGeneralist_csp)
-      !    call calcRatesGeneralists_csp(group(iGroup), &
-      !         rates, L, upositive(idxN),  gammaN)
-      !      case(typeDiatom)
-      !         call calcRatesDiatoms(group(iGroup), &
-      !         rates, L, upositive(idxN), upositive(idxDOC) , upositive(idxSi), &
-      !         gammaN, gammaDOC, gammaSi)
-
       end select
    end do
    !

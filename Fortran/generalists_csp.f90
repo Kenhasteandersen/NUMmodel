@@ -55,6 +55,7 @@ module generalists_csp
   contains
     procedure, pass :: initGeneralists_csp
     procedure :: calcRates => calcRatesGeneralists_csp
+    procedure :: calcDerivativesGeneralists_csp
     procedure :: printRates => printRatesGeneralists_csp
   end type spectrumGeneralists_csp
 
