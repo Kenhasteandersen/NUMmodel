@@ -4,7 +4,7 @@
 module spectrum
   use globals
   implicit none
-  !
+  ! ------------------------------------------------
   ! Abstract class for all spectra:
   !
   type, abstract :: typeSpectrum
@@ -27,8 +27,7 @@ module spectrum
      ! Mortality:
      real(dp), dimension(:), allocatable:: mortpred, mortHTL, mort2
      real(dp) :: mort2constant
-     !real(dp):: mort2
-
+ 
      contains 
 
      procedure, pass :: initSpectrum
@@ -36,7 +35,7 @@ module spectrum
      procedure :: printRates => printRatesSpectrum
      procedure :: printRatesSpectrum
   end type typeSpectrum
-  !
+  ! ------------------------------------------------
   ! Abstract class for all unicellular spectra:
   !
   type, abstract, extends(typeSpectrum) :: spectrumUnicellular
@@ -58,7 +57,7 @@ module spectrum
     procedure :: printRatesUnicellular
     procedure :: getProdNet
   end type spectrumUnicellular
-  !
+  ! ------------------------------------------------
   ! Abstact class for all multicellular spectra:
   ! 
   type, abstract, extends(typeSpectrum) :: spectrumMulticellular
@@ -66,7 +65,7 @@ module spectrum
     procedure :: initMulticellular
     procedure :: printRatesMulticellular
   end type spectrumMulticellular
-  !
+  ! ------------------------------------------------
   ! Type needed to make an array of spectra:
   !
   type spectrumContainer 
@@ -148,15 +147,6 @@ contains
     this%JF = this%flvl * fTemp2*this%JFmax
   end subroutine calcFeeding
 
-  ! subroutine calcHTL(this, u, pHTL)
-  !   class(typeSpectrum), intent(in) :: this
-  !   real(dp), intent(in):: u(this%n), pHTL(this%n)
-  !   !
-  !   ! First calc the biomass within a size range:
-  !   !
-  !   this%mortHTL = pHTL * u / this%m
-  ! end subroutine calcHTL
-
   subroutine printRatesSpectrum(this)
     class (typeSpectrum), intent(in):: this
 
@@ -228,8 +218,6 @@ contains
                    (this%JLreal(i)-ftemp2*this%Jresp(i))*u(i)/this%m(i) )
      end do
     end function getProdNet
-
-    
 
   ! ==========================================================================
   !  Member functions for the abstract unicellular class:

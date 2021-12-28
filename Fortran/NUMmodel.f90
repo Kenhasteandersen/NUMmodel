@@ -41,11 +41,9 @@ module NUMmodel
   ! Variables for HTL mortalities:
   !
   real(dp), dimension(:), allocatable:: pHTL ! Selectivity function for HTL mortality
-  !real(dp) :: mortHTL ! Level of HTL mortality (see below for override)
-  !real(dp):: gammaHTL ! Parameter for quadratic HTL mortality
   logical:: bQuadraticHTL ! Boolean flag to signify whether mortality is standard or "quadratic"
-  ! Defaults to true; can be overridden but parameters must then be set with a
-  ! call to parametersFinalize()
+                          ! Defaults to true; can be overridden but parameters must then be set with a
+                          ! call to parametersFinalize()
 
 contains
 
@@ -440,7 +438,6 @@ contains
        do iGroup = 1, nGroups
          group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) &
             * u(ixStart(iGroup):ixEnd(iGroup))
-          !call group(iGroup)%spec%calcHTL(upositive, pHTL( ixStart(iGroup):ixEnd(iGroup) ))
        end do
      end if
     !

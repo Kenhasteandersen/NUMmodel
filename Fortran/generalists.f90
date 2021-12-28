@@ -80,12 +80,9 @@ contains
     
     this%JlossPassive = cLeakage/this%r * this%m ! in units of C
 
-    !nu = c * this%m**(-onethird)
     this%nu = 3*delta/this%r
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
     this%Jresp = cR*alphaJ*this%m
-    !mort = 0*0.005*(Jmax/this%m) * this%m**(-0.25);
-    !this%mort2constant = 0.0002*this%n
   end subroutine initGeneralists
 
   subroutine calcRatesGeneralists(this, L, N, DOC, gammaN, gammaDOC)
@@ -173,7 +170,6 @@ contains
     !
     ! To make mass balance check:
     !
-    !this%dudt = 0*this%dudt
     this%mort2 = this%mort2constant*u
     do i = 1, this%n
       mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
