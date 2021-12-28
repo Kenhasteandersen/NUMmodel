@@ -723,18 +723,23 @@ contains
   ! ---------------------------------------------------
   ! Returns mass conservation calculated from last call to calcDerivatives
   ! ---------------------------------------------------
-!   subroutine getBalance(Nbalance,Cbalance)
-!    real(dp), intent(out):: Nbalance, Cbalance
-!    integer:: i
+  subroutine getBalance(u, dudt, Nbalance,Cbalance)
+   real(dp), intent(in):: u(nGrid), dudt(nGrid)
+   real(dp), intent(out):: Nbalance, Cbalance
+   integer:: iGroup
    
-!    i = 1 ! Do it only for the first group, whihc we assume are generalists
-!       if (group(i)%type .eq. typeGeneralist) then
-!          Nbalance = getNbalanceGeneralists(group(i),  upositive(ixStart(i):ixEnd(i)))  
-!          Cbalance = getCbalanceGeneralists(group(i),  upositive(ixStart(i):ixEnd(i)))
-    
-!       end if   
- 
-! end subroutine getBalance
+   iGroup = 1 ! Do it only for the first group, whihc we assume are generalists
+   select type ( spec => group(iGroup)%spec )
+      type is (spectrumGeneralists)
+         Nbalance = spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
+                     u(ixStart(iGroup):ixEnd(iGroup) ), &
+                     dudt( ixStart(iGroup):ixEnd(iGroup) ))
+         Cbalance = spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
+                     u(ixStart(iGroup):ixEnd(iGroup) ), &
+                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
+  end select
+   end subroutine getBalance
+   
 !   ! ---------------------------------------------------
 !   ! Returns the rates calculated from last call to calcDerivatives
 !   ! ---------------------------------------------------

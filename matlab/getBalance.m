@@ -19,7 +19,7 @@ end
 u = double(u);
 dudt = 0*u';
 [u, dudt]=calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
-            length(u), u, L, T, 0.0, dudt);
+            u, L, T, 0.0, dudt);
 %
 % Then extract balance:
 %
@@ -27,5 +27,6 @@ Nbalance = 100;
 Cbalance = 100;
 
 
-[Nbalance, Cbalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
-    Nbalance, Cbalance);
+[~, ~, Nbalance, Cbalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
+    u, dudt, Nbalance, Cbalance);
+

@@ -51,6 +51,8 @@ module generalists
     procedure :: calcRates => calcRatesGeneralists
     procedure :: calcDerivativesGeneralists
     procedure :: printRates => printRatesGeneralists
+    procedure :: getNbalanceGeneralists
+    procedure :: getCbalanceGeneralists
   end type spectrumGeneralists
  
 contains
@@ -107,13 +109,13 @@ contains
                         - fTemp2*this%Jresp(i)-this%JlossPassive(i)
        ! Liebig + synthesis limitation:
        this%Jtot(i) = min( this%JNtot(i), this%JCtot(i) )
-       !f = rates%Jtot(ix)/(rates%Jtot(ix) + JmaxT)
+       !f = this%Jtot(ix)/(this%Jtot(ix) + JmaxT)
        ! If synthesis-limited then down-regulate feeding:
        JmaxT = fTemp2*this%Jmax(i)
        f = this%Jtot(i)/(this%Jtot(i) + max(0.,JmaxT))
        if (this%Jtot(i) .gt. 0) then
         this%JFreal(i) = max(0.d0, min(JmaxT, this%JF(i) - (this%Jtot(i)-f*JmaxT)))
-        !rates%Jtot(ix) = f * JmaxT
+        !this%Jtot(ix) = f * JmaxT
        else
         this%JFreal(i) = max(0.d0, this%JF(i))
        end if
@@ -154,11 +156,11 @@ contains
       !
       ! Test for conservation budget. Should be close to zero:
       !
-      !write(*,*) 'N budget', i,':',(rates%JN(ix)+JFreal(i)-JlossPassive(i) &
-      !    - rates%JNlossLiebig(ix)  - rates%Jtot(ix))/this%m(i)
-      !write(*,*) 'C budget', i,':',(rates%JLreal(ix) + rates%JDOC(ix)+JFreal(i) &
+      !write(*,*) 'N budget', i,':',(this%JN(ix)+JFreal(i)-JlossPassive(i) &
+      !    - this%JNlossLiebig(ix)  - this%Jtot(ix))/this%m(i)
+      !write(*,*) 'C budget', i,':',(this%JLreal(ix) + this%JDOC(ix)+JFreal(i) &
       !    -JlossPassive(i)-fTemp2*Jresp(i) &
-      !    - rates%JClossLiebig(ix)  - rates%Jtot(ix))/this%m(i)
+      !    - this%JClossLiebig(ix)  - this%Jtot(ix))/this%m(i)
     end do
   end subroutine calcRatesGeneralists
 
@@ -171,7 +173,7 @@ contains
     !
     ! To make mass balance check:
     !
-    !rates%dudt = 0*rates%dudt
+    !this%dudt = 0*this%dudt
     this%mort2 = this%mort2constant*u
     do i = 1, this%n
       mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
@@ -214,32 +216,30 @@ subroutine printRatesGeneralists(this)
   call this%printRatesUnicellular()
 end subroutine printRatesGeneralists
  
-  ! function getNbalanceGeneralists(this, u, rates) result(Nbalance)
-  !   real(dp):: Nbalance
-  !   class(spectrumGeneralists), intent(in):: this
-  !   type(typeRates), intent(in):: rates
-  !   real(dp), intent(in):: u(this%n)
+  function getNbalanceGeneralists(this, N, dNdt, u, dudt) result(Nbalance)
+    real(dp):: Nbalance
+    class(spectrumGeneralists), intent(in):: this
+    real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
 
-  !   Nbalance = (rates%dudt(idxN) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
-  !   + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
-  !   + (1-1)*mort2*u(1:this%n)**2 & ! full N remineralization of viral mortality
-  !   + (1-1)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
-  !      * u(1:this%n))/rhoCN)/u(idxN) ! full N remineralization of feeding losses
-  ! end function getNbalanceGeneralists 
+    Nbalance = (dNdt + sum( dudt &
+    + (1-reminHTL)*this%mortHTL*u &
+    + (1-1)*this%mort2*u & ! full N remineralization of viral mortality
+    + (1-1)*this%JCloss_feeding/this%m * u &
+       )/rhoCN)/N ! full N remineralization of feeding losses
+  end function getNbalanceGeneralists 
 
-  ! function getCbalanceGeneralists(this, u, rates) result(Cbalance)
-  !   real(dp):: Cbalance
-  !   class(spectrumGeneralists), intent(in):: this
-  !   type(typeRates), intent(in):: rates
-  !   real(dp), intent(in):: u(this%n)
+  function getCbalanceGeneralists(this, DOC, dDOCdt, u, dudt) result(Cbalance)
+    real(dp):: Cbalance
+    class(spectrumGeneralists), intent(in):: this
+    real(dp), intent(in):: DOC, dDOCdt, u(this%n), dudt(this%n)
 
-  !   Cbalance = (rates%dudt(idxDOC) + sum(rates%dudt(1+this%ixOffset:this%ixOffset+this%n) &
-  !   + (1-reminHTL)*rates%mortHTL(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n) &
-  !   + (1-remin2)*mort2*u(1:this%n)**2 &
-  !   - rates%JLreal(1+this%ixOffset:this%ixOffset+this%n)*u(1:this%n)/this%m(1:this%n) &
-  !   + fTemp2*Jresp(1:this%n)*u(1:this%n)/this%m(1:this%n) &
-  !   + (1-reminF)*rates%JCloss_feeding(1+this%ixOffset:this%ixOffset+this%n)/this%m(1:this%n)&
-  !   * u(1:this%n) ))/u(idxDOC)
-  ! end function getCbalanceGeneralists 
+    Cbalance = (dDOCdt + sum(dudt &
+    + (1-reminHTL)*this%mortHTL*u &
+    + (1-remin2)*this%mort2*u &
+    - this%JLreal*u/this%m &
+    + fTemp2*this%Jresp*u/this%m &
+    + (1-reminF)*this%JCloss_feeding/this%m * u &
+    )) / DOC
+  end function getCbalanceGeneralists 
   
 end module generalists

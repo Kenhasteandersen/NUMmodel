@@ -25,7 +25,7 @@ void f_calcderivatives(
 		       const double dt,
 		       double dudt[]);
 
-void f_calcrates(
+/* void f_calcrates(
 		       const int nGrid,
 		       const double u[],
 		       const double L,
@@ -36,7 +36,7 @@ void f_calcrates(
 		       double jTot[],
 		       double mortHTL[],
 		       double mortpred[],
-		       double g[]);
+		       double g[]);*/
 
 void f_simulatechemostateuler(
 			      double u[],
@@ -69,8 +69,11 @@ void f_getfunctions(
 		    double *Bnano,
 		    double *Bmicro);
 
-void f_getbalance(double *Nbalance,
-				  double *Cbalance);
+void f_getbalance(
+	const double u[],
+	const double dudt[],
+	double *Nbalance,
+	double *Cbalance);
 				  
 void f_getrates(
 		double *jN,
