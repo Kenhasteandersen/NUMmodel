@@ -222,7 +222,7 @@ contains
 !!$           + this%JNloss(i))*u(i)/this%m(i) &
 !!$           + (remin2*mort2*u(i)*u(i) &
 !!$           + remin*mortloss)/rhoCN
-      dNdt = dNdt +  &
+      dNdt = dNdt   &
            + ((-this%JN(i) &
            + this%JNloss(i))*u(i)/this%m(i) &
            + mortloss)/rhoCN

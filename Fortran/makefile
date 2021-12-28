@@ -3,15 +3,15 @@
 #
 # iFortran:
 #
-FORT=ifort
-FLAGS=-O2
+#FORT=ifort
+#FLAGS=-O2
 #LINK=-l
 #
 # gfortran:
 #
-#FORT=gfortran
+FORT=gfortran
 #FLAGS=-g3
-#FLAGS=-O2
+FLAGS=-O2
 # Link needed on Macos:
 LINK=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/
 #LINK=
