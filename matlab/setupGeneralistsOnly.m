@@ -1,3 +1,12 @@
+%
+% Sets up a spectrum of generalists.
+%
+% In:
+%  n - number of size classes
+%  bParallel - Whether to prepare parallel execution
+%  options.bTest - If true makes a test an returns the success in
+%                  p.bTestSuccess.
+%
 function p = setupGeneralistsOnly(n, bParallel)
 
 arguments
