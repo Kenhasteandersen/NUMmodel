@@ -213,19 +213,6 @@ subroutine printRatesGeneralists(this)
   write(*,*) "Generalists with ", this%n, " size classes:"
   call this%printRatesUnicellular()
 end subroutine printRatesGeneralists
-
- function getProdNetGeneralists(this, u) result(ProdNet)
-   real(dp):: ProdNet
-   class(spectrumGeneralists), intent(in):: this
-   real(dp), intent(in):: u(this%n)
-   integer:: i
-
-   ProdNet = 0.d0
-   do i = 1, this%n
-      ProdNet = ProdNet + max( 0.d0, &
-                  (this%JLreal(i)-ftemp2*this%Jresp(i))*u(i)/this%m(i) )
-    end do
-  end function getProdNetGeneralists
  
   ! function getNbalanceGeneralists(this, u, rates) result(Nbalance)
   !   real(dp):: Nbalance

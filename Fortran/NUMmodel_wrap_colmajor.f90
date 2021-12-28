@@ -8,8 +8,8 @@ module NUMmodel_wrap
        setupGeneralistsCopepod, &
        setupGeneric, setupGeneric_csp, &
        calcderivatives, &
-       simulateChemostatEuler, simulateEuler!, getFunctions, &
-       !parametersHTL, getBalance
+       simulateChemostatEuler, simulateEuler, getFunctions!, &
+       !getBalance
 
   use globals
 
@@ -121,11 +121,12 @@ contains
     call simulateEuler(u, L, T, tEnd, dt)
   end subroutine f_simulateEuler
 
-  ! subroutine f_getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro) bind(c)
-  !   real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+  subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro) bind(c)
+    real(c_double), intent(in):: u(nGrid)
+    real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
 
-  !   !call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
-  ! end subroutine f_getFunctions
+    call getFunctions(u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+  end subroutine f_getFunctions
 
   ! subroutine f_getBalance(Nbalance, Cbalance) bind(c)
   !   real(c_double), intent(out):: Nbalance, Cbalance

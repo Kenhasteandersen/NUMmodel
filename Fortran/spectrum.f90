@@ -56,6 +56,7 @@ module spectrum
 
     procedure, pass :: initUnicellular
     procedure :: printRatesUnicellular
+    procedure :: getProdNet
   end type spectrumUnicellular
   !
   ! Abstact class for all multicellular spectra:
@@ -214,6 +215,19 @@ contains
     write(*,99) "jDOC:", this%JDOC / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m
   end subroutine printRatesUnicellular
+
+  function getProdNet(this, u) result(ProdNet)
+    real(dp):: ProdNet
+    class(spectrumUnicellular), intent(in):: this
+    real(dp), intent(in):: u(this%n)
+    integer:: i
+ 
+    ProdNet = 0.d0
+    do i = 1, this%n
+       ProdNet = ProdNet + max( 0.d0, &
+                   (this%JLreal(i)-ftemp2*this%Jresp(i))*u(i)/this%m(i) )
+     end do
+    end function getProdNet
 
   ! ==========================================================================
   !  Member functions for the abstract unicellular class:

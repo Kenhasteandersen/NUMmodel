@@ -60,6 +60,7 @@ void f_getmass(
 				double *mDelta);
 
 void f_getfunctions(
+			double u[],
 		    double *ProdGross,
 		    double *ProdNet,
 		    double *ProdHTL,

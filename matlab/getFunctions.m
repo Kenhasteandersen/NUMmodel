@@ -20,7 +20,7 @@ function [ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro] = getFunctions(u, 
 u = double(u);
 dudt = 0*u';
 [u, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
-            length(u), u, L, T, 0.0, dudt);
+            u, L, T, 0.0, dudt);
 %
 % Then extract the functions:
 %
@@ -32,6 +32,6 @@ Bpico = 0;
 Bnano = 0;
 Bmicro = 0;
 
-[ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro]...
+[u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro]...
     = calllib(loadNUMmodelLibrary(), 'f_getfunctions', ...
-    ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro);
+    u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro);

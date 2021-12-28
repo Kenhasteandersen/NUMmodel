@@ -659,54 +659,66 @@ contains
   ! Get the ecosystem functions as calculated from the last call
   ! to calcDerivatives
   ! ---------------------------------------------------
-!   subroutine getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
-!     real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
-!     real(dp) :: conversion
-!     real(dp) :: ESD(nGrid)
-!     integer:: i
+  subroutine getFunctions(u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+    real(dp), intent(in):: u(nGrid)
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+    real(dp) :: conversion
+    real(dp) :: ESD(nGrid)
+    real(dp):: m(nGrid), mDelta(nGrid)
+    integer:: i
 
-!     ProdGross = 0.d0
-!     ProdNet = 0.d0
-!     ProdHTL = 0.d0
-!     Bpico = 0.d0
-!     Bnano = 0.d0
-!     Bmicro = 0.d0
-    
-!     conversion = 365.*1d-6*1000. ! Convert to gC/yr/m3
-!     do i = 1, nGroups
-!        select type (spectrum => group(i)%spec)
-!           type is (spectrumGeneralists)
-!             ProdGross = ProdGross + conversion * &
-!                sum(  spectrum%JL * upositive(idxB:nGrid) / spectrum%m )
+    ProdGross = 0.d0
+    ProdNet = 0.d0
+    ProdHTL = 0.d0
+    Bpico = 0.d0
+    Bnano = 0.d0
+    Bmicro = 0.d0
+    !
+    ! Get primary production only from unicellular spectra:
+    !
+    conversion = 365.*1d-6*1000. ! Convert to gC/yr/m3
+    do i = 1, nGroups
+       select type (spec => group(i)%spec)
+          class is (spectrumUnicellular)
+            ProdGross = ProdGross + conversion * &
+               sum(  spec%JLreal * u(idxB:nGrid) / spec%m )
           
-!           ProdNet = ProdNet + conversion * &
-!                getProdNetGeneralists(spectrum,  upositive(group(i)%spec%ixStart:group(i)%spec%ixEnd))
-!        end select
-!     end do
-
-!     ESD = 10000. * 1.5 * (m*1d-6)**onethird
-!     conversion = 1d-6*1000 ! Convert to gC/m3
-!     do i = idxB, nGrid
-!        if (ESD(i) .le. 2.) then
-!           Bpico = Bpico + conversion*upositive(i)
-!        endif
+            ProdNet = ProdNet + conversion * &
+               spec%getProdNet(u( ixStart(i):ixEnd(i) ))
+       end select
+    end do
+    !
+    ! Make a rough estimate of pico-nano-micro plankton biomasses:
+    !
+    call getMass(m, mDelta )
+    ESD = 10000. * 1.5 * (m*1d-6)**onethird
+    conversion = 1d-6*1000 ! Convert to gC/m3
+    do i = idxB, nGrid
+       if (ESD(i) .le. 2.) then
+          Bpico = Bpico + conversion*u(i)
+       endif
        
-!        if ((ESD(i).gt.2.) .and. (ESD(i) .le. 20.)) then
-!           Bnano = Bnano + conversion*upositive(i)
-!        endif
+       if ((ESD(i).gt.2.) .and. (ESD(i) .le. 20.)) then
+          Bnano = Bnano + conversion*u(i)
+       endif
 
-!        if (ESD(i) .gt. 20.) then
-!           Bmicro = Bmicro + conversion*upositive(i)
-!        endif
+       if (ESD(i) .gt. 20.) then
+          Bmicro = Bmicro + conversion*u(i)
+       endif
+    end do
+    !
+    ! HTL production:
+    !  
+    do i = 1, nGroups
+       ProdHTL = ProdHTL + 365*conversion* &
+          sum(group(i)%spec%mortHTL*u( ixStart(i):ixEnd(i) ))
+    end do
 
-!        ProdHTL = ProdHTL + 365*conversion*mortHTL(i)*upositive(i)
-!     end do
-
-!     eHTL = eHTL / ProdNet
-!     if (eHTL .gt. 1) then
-!        eHTL = -1.
-!     end if
-!   end subroutine getFunctions
+    eHTL = ProdHTL / ProdNet
+    if (eHTL .gt. 1) then
+       eHTL = -1.d0
+    end if
+  end subroutine getFunctions
 
   ! ---------------------------------------------------
   ! Returns mass conservation calculated from last call to calcDerivatives
