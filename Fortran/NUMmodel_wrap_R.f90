@@ -23,25 +23,23 @@ end subroutine f_setupGeneralistsOnly
 !!$    write(6,*) x
 !!$  end subroutine test
 
-  subroutine f_parametersHTL(mortHTL, bQuadraticHTL)
+  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
     use globals
-    use NUMmodel, only: parametersHTL
-    real(dp), intent(in):: mortHTL
-    logical, intent(in):: bQuadraticHTL
+    use NUMmodel, only: setHTL
+    real(dp), intent(in):: mHTL, mortHTL
+    logical, intent(in):: bQuadraticHTL, bDecliningHTL
 
-    call parametersHTL(mortHTL, bQuadraticHTL)
-  end subroutine f_parametersHTL
+    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
+  end subroutine f_setHTL
 
-  subroutine f_calcDerivatives(nn, u, L, T, dt, dudt)
+  subroutine f_calcDerivatives(u, L, T, dt, dudt)
     use globals
-    use NUMmodel, only: calcDerivatives, rates
-    integer, intent(in):: nn
+    use NUMmodel, only: calcDerivatives, nGrid
     real(dp), intent(in):: L, T, dt
-    real(dp), intent(in):: u(nn)
-    real(dp), intent(out):: dudt(nn)
+    real(dp), intent(in):: u(nGrid)
+    real(dp), intent(out):: dudt(nGrid)
 
-    call calcDerivatives(u, L, T, dt)
-    dudt = rates%dudt
+    call calcDerivatives(u, L, T, dt, dudt)
   end subroutine f_calcDerivatives
 
 ! Returns the rates calculated from last call to calcDerivatives
@@ -76,25 +74,26 @@ end subroutine f_setupGeneralistsOnly
     !call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
 !end subroutine f_simulateChemostatEuler
 
-  subroutine f_getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+  subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
     use globals
-    use NUMmodel, only: getFunctions
-   real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+    use NUMmodel, only: getFunctions, nGrid
+    real(dp), intent(in) :: u(nGrid)
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
 
-    call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+    call getFunctions(u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
   end subroutine f_getFunctions
   
-  subroutine f_getBalance(Nbalance, Cbalance)
-    use globals
-    use NUMmodel, only: getBalance
-   real(dp), intent(out):: Nbalance, Cbalance
+!  subroutine f_getBalance(Nbalance, Cbalance)
+!    use globals
+!    use NUMmodel, only: getBalance
+!   real(dp), intent(out):: Nbalance, Cbalance
 
-    call getBalance(Nbalance, Cbalance)
-  end subroutine f_getBalance
+!    call getBalance(Nbalance, Cbalance)
+!  end subroutine f_getBalance
 
    subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt)
     use globals
-    use NUMmodel, only: simulateChemostatEuler
+    use NUMmodel, only: simulateChemostatEuler, nGrid
 
     integer, intent(in):: nNutrients
     real(dp), intent(inout):: u(nGrid)
