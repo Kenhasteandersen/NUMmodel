@@ -4,6 +4,12 @@ modelling framework.  The model is described in: Serra-Pompei et al (2020): [A g
 
 :fire: **This is alpha-software in development. Things may be broken and results may not be correct** :fire:
 
+
+
+https://user-images.githubusercontent.com/13268353/147639388-edb7b89c-0584-48d8-b671-63166969be4d.mp4
+
+
+
 The core library is written in fortran90 and is interfaced from matlab or R. Requires a fairly recent version of matlab to run.
 
 ### Compiling
