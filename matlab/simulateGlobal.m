@@ -215,9 +215,10 @@ for i=1:simtime
     % Transport
     %
     if p.bTransport
-        for k = 1:p.n
-            u(:,k) =  Aimp * (Aexp * u(:,k));
-        end
+        %for k = 1:p.n
+        %    u(:,k) =  Aimp * (Aexp * u(:,k));
+        %end
+        u =  Aimp*(Aexp*u);
     end
     %
     % Enforce minimum B concentration
