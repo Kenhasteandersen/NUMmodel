@@ -9,6 +9,8 @@
 %
 % In:
 %  mortHTL - the HTL mortality (or the constant if bQuadratic=true)
+%  mHTL - the size where the HTL starts (usually set to the maximum size
+%         divided by 500^1.5)
 %  bQuadraticHTL - boolean which determines whether to use a fixed or
 %                  "quadratic" mortality
 %  bDecliningHTL - boolean which determines whether the HTL mortality
@@ -17,11 +19,11 @@
 % Out:
 %  Nothing; the function only affects the fortran library.
 %
-function setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
+function setHTL(mortHTL, mHTL, bQuadraticHTL, bDecliningHTL)
 
 arguments
-    mHTL double;
     mortHTL double {mustBeNonnegative} = 0.2;
+    mHTL double = 1/500^1.5; % Suits simulations with only generalists
     bQuadraticHTL logical = false;
     bDecliningHTL logical = false;
 end
