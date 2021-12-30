@@ -24,6 +24,8 @@ arguments
     options.sProjection string = 'fast';
 end
 
+colorLand = [0.3 0.4 0.3];
+
 % Adjust to global plot (close gap at lat 0)
 z = [z;z(1,:)];
 x = [x-x(1);360];
@@ -54,11 +56,10 @@ else
     %plabel('PlabelLocation',20, 'PLabelMeridian', 91)
     contourfm(y,x,z, vContourLevels,'linestyle','none');
     %shading interp
+    % Draw the land:
     load coastlines
-    h=patchm(coastlat,coastlon,0.4*[1 1 1]);
+    h=patchm(coastlat,coastlon, colorLand); 
     set(h,'linestyle','none')
-    %geoshow('landareas.shp', 'FaceColor', [0.8 0.8 0.8], 'EdgeColor',
-    %'black'); % Slow
 end
 
 cbar = colorbar('eastoutside', 'FontSize',14);

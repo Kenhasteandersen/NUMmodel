@@ -6,7 +6,7 @@
 %  lat, lon - latitude and longitude
 %  Optional:
 %  options.bNewplot - whether to clear the figure.
-%  options.depthMax - mx depth for ylimit.
+%  options.depthMax - max depth for ylimit.
 %
 function plotGlobalWatercolumn(sim, time, lat, lon, options)
 
@@ -21,11 +21,11 @@ end
 
 [~, iTime] = min(abs(sim.t-time));
 
-tiledlayout(2,2)
+tiledlayout(4,1,'TileSpacing','compact','padding','compact');
 %
 % Global plot
 %
-nexttile(1,[1,2])
+nexttile(1,[2,1])
 
 B = calcIntegrateGlobal(sim, sim.B);
 c = panelGlobal(sim.x, sim.y, ...
@@ -48,20 +48,20 @@ title('Total plankton biomass')
 plotWatercolumn(sim, time, lat, lon, depthMax=200, bNewPlot=false);
 
 nexttile(4)
-ylabel('')
-set(gca,'yticklabel','')
-xticklabel = get(gca,'xticklabel');
+%ylabel('')
+%set(gca,'yticklabel','')
+%xticklabel = get(gca,'xticklabel');
 title('Trophic strategy')
 
 nexttile(3)
-title('')
-set(gca,'xtick',10.^(-9:2),'xticklabel',xticklabel)
-xlabel('Cell mass (\mugC)')
-colorbar('off')
+%title('')
+%set(gca,'xtick',10.^(-9:2),'xticklabel',xticklabel)
+%xlabel('Cell mass (\mugC)')
+%colorbar('off')
 title('Size spectrum')
 
-annotation(gcf,'rectangle',...
-    [0.0277857142857143 0 0.9115 0.490476190476193],'edgecolor','red');
+%annotation(gcf,'rectangle',...
+%    [0.0277857142857143 0 0.9115 0.490476190476193],'edgecolor','red');
 
 hold off
 
