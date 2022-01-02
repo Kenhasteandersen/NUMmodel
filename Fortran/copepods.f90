@@ -8,6 +8,7 @@ module copepods
   implicit none
 
   private
+  
   real(dp), parameter:: rhoCN = 5.68
   real(dp), parameter:: epsilonF = 0.67 ! Assimilation efficiency
   real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency

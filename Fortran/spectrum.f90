@@ -88,7 +88,7 @@ contains
     allocate(this%mLower(n))
     allocate(this%mDelta(n))
     allocate(this%z(n))
-    call calcGrid(this, mMin, mMax)
+    call calcGrid()
 
     allocate(this%AF(n))
     allocate(this%JFmax(n))
@@ -120,9 +120,9 @@ contains
       !
   ! Set up a grid given minimum and maximum center masses
   !
-  subroutine calcGrid(this, mMin, mMax)
-    class (typeSpectrum), intent(inout):: this
-    real(dp), intent(in):: mMin, mMax
+  subroutine calcGrid()
+    !class (typeSpectrum), intent(inout):: this
+    !real(dp), intent(in):: mMin, mMax
     real(dp):: deltax, x
     integer:: i
 

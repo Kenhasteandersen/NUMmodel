@@ -6,6 +6,8 @@ module generalists
   use spectrum
   implicit none
 
+  private 
+
   real(dp), parameter:: rhoCN = 5.68
   !
   ! Light uptake:
@@ -55,6 +57,9 @@ module generalists
     procedure :: getCbalanceGeneralists
   end type spectrumGeneralists
  
+  public initGeneralists, spectrumGeneralists, calcRatesGeneralists, calcDerivativesGeneralists
+  public printRatesGeneralists, getNbalanceGeneralists, getCbalanceGeneralists
+
 contains
 
   subroutine initGeneralists(this, n, mMax)

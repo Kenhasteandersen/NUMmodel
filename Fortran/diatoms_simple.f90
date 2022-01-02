@@ -14,6 +14,7 @@ module diatoms_simple
     use spectrum
     implicit none
 
+    private
     !
     ! Stoichiometry:
     !
@@ -64,6 +65,9 @@ module diatoms_simple
       procedure :: calcDerivativesDiatoms_simple
       procedure :: printRates => printRatesDiatoms_simple
     end type spectrumDiatoms_simple
+
+    public spectrumDiatoms_simple, initDiatoms_simple, calcRatesDiatoms_simple
+    public calcDerivativesDiatoms_simple, printRatesDiatoms_simple
   contains
       
     subroutine initDiatoms_simple(this, n, mMax)
