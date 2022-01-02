@@ -182,6 +182,7 @@ module diatoms
           !BEFORE THIS I need to find JCtot 
           !      
           ! Jtot saturation
+          ! CHECK THIS BELOW: IT DOES NOT HANDLE NEGATIVE VALUES OF JMAX AND JTOT WELL
           this%Jtot(i)=this%Jmax(i)*Jlieb / ( Jlieb + this%Jmax(i) )
           !
           ! Fix units of JN and JSi:
