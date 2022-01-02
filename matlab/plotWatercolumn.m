@@ -99,11 +99,18 @@ for iGroup = 1:sim.p.nGroups
     % Biomass spectrum:
     %
     nexttile
-    panelField(m, -z, (B(:,ix-sim.p.idxB+1))');
+    BB = B(:,ix-sim.p.idxB+1);
+    BB = [BB(1,:); BB]; % Add dummy layer on top
+    BB( BB<0.01 ) = 0.01;
+    %panelField(m, -z, (B(:,ix-sim.p.idxB+1))');
+    contourf( sim.p.m(sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup)), -z, BB, ...
+        10.^linspace(-2,2,20),'linestyle','none')
     
     set(gca,'xscale','log','colorscale','log')    
     set(gca,'xtick',10.^(-9:2), 'XTickLabel',[])
-    caxis([0.01 100])
+    
+    %caxis([0.01 100])
+    %caxis([-3 2])
     
     title(sim.p.nameGroup(iGroup))
     if (iGroup==1)
@@ -116,6 +123,8 @@ for iGroup = 1:sim.p.nGroups
     if (iGroup == sim.p.nGroups)
         cbar = colorbar;
         cbar.Label.String  = 'biomass (\mug C l^{-1})';
+        %set(cbar,'limits',[0.01, 100], ...
+        %'ticks',[0.01,0.1,1,10,100],'ticklabels',{'0.01','0.1','1','10','100'})
     end
     %
     % Trophic strategy:
