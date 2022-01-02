@@ -7,8 +7,6 @@
 !  - lower predation risk due to silicate shell
 !  - inability to take up DOC
 !
-! Does not scale rates with temperature
-!
 module diatoms_simple
     use globals
     use spectrum
