@@ -10,7 +10,7 @@ https://user-images.githubusercontent.com/13268353/147639388-edb7b89c-0584-48d8-
 
 
 
-The core library is written in fortran90 and is interfaced from matlab or R. Requires a fairly recent version of matlab to run.
+The core library is written in fortran2003 and is interfaced from matlab or R. Requires a fairly recent version of matlab to run.
 
 ### Compiling
 Use the makefile in the Fortran directory. Edit the compiler and flags in the makefile to suit your operating system and compile by writing: `make`.
