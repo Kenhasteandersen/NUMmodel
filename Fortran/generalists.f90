@@ -118,12 +118,12 @@ contains
        if (this%Jtot(i) .gt. 0) then
         f = this%Jtot(i)/(this%Jtot(i) + max(0.,JmaxT))
         this%JFreal(i) = max(0.d0, min(JmaxT, this%JF(i) - (this%Jtot(i)-f*JmaxT)))
-        !this%Jtot(ix) = f * JmaxT
+        this%Jtot(i) = f * JmaxT
        else
-        f = this%Jtot(i) / max(0.,JmaxT)
+        !f = this%Jtot(i) / max(,JmaxT)
         this%JFreal(i) = max(0.d0, this%JF(i))
        end if
-      this%Jtot(i) = f * JmaxT ! Apply limitation
+      
       
       this%JLreal(i) = this%JL(i) - max( 0.d0, &
             min((this%JCtot(i) - (this%JF(i)-this%JFreal(i))-this%Jtot(i)), this%JL(i)))
