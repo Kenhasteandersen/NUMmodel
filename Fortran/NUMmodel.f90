@@ -156,7 +156,7 @@ contains
   end subroutine setupGeneric_csp
 
 
-  
+
   ! ======================================
   !  Model initialization stuff:
   ! ======================================
@@ -381,6 +381,8 @@ contains
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
   
+
+
   ! ======================================
   !  Calculate rates and derivatives:
   ! ======================================
@@ -554,6 +556,7 @@ contains
 
    
   end subroutine calcDerivatives
+
 
 
   ! ======================================
@@ -761,7 +764,7 @@ contains
       ! Extract common fields:
       jF( i1:i2 ) = group(iGroup)%spec%flvl * group(iGroup)%spec%JFmax / group(iGroup)%spec%m
       jFreal( i1:i2 ) = group(iGroup)%spec%JF / group(iGroup)%spec%m
-      jFmax( i1:i2 ) = group(iGroup)%spec%JFmax / group(iGroup)%spec%m
+      jFmax( i1:i2 ) = fTemp2 * group(iGroup)%spec%JFmax / group(iGroup)%spec%m
       Jtot( i1:i2 ) = group(iGroup)%spec%Jtot / group(iGroup)%spec%m
       mortpred( i1:i2 ) = group(iGroup)%spec%mortpred
       mortHTL( i1:i2 ) = group(iGroup)%spec%mortHTL
@@ -771,10 +774,10 @@ contains
 
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumUnicellular)
-        jN( i1:i2 ) = spectrum%JN / spectrum%m
-        jDOC( i1:i2 ) = spectrum%JDOC / spectrum%m
+        jN( i1:i2 ) = fTemp15 * spectrum%JN / spectrum%m
+        jDOC( i1:i2 ) = fTemp15 * spectrum%JDOC / spectrum%m
         jL( i1:i2 ) = spectrum%JL / spectrum%m
-        jMax( i1:i2 ) = spectrum%Jmax / spectrum%m
+        jMax( i1:i2 ) = fTemp2 * spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
       end select
