@@ -58,7 +58,7 @@ contains
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
     call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
-    call parametersFinalize(0.2d0, .false., .false.) ! Use standard "linear" mortality
+    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
@@ -77,7 +77,7 @@ contains
    integer, intent(in):: n
    call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
    call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
-   call parametersFinalize(0.2d0, .false., .false.)
+   call parametersFinalize(0.1d0, .false., .false.)
  end subroutine setupDiatomsOnly
 
 !  ! -----------------------------------------------
@@ -87,7 +87,7 @@ contains
    integer, intent(in):: n
    call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
    call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
-   call parametersFinalize(0.2d0, .false., .false.)
+   call parametersFinalize(0.1d0, .false., .false.)
  end subroutine setupDiatoms_simpleOnly
  
   ! -----------------------------------------------
@@ -98,7 +98,7 @@ contains
       call parametersInit(2, 2*n, 3)
       call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
-      call parametersFinalize(.2d0, .false., .false.)
+      call parametersFinalize(.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms
  
    subroutine setupGeneralistsDiatoms_simple(n)
@@ -106,7 +106,7 @@ contains
       call parametersInit(2, 2*n, 3)
       call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
-      call parametersFinalize(0.2d0, .false., .false.)
+      call parametersFinalize(0.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms_simple
  
   ! -----------------------------------------------
@@ -156,7 +156,7 @@ contains
   end subroutine setupGeneric_csp
 
 
-
+  
   ! ======================================
   !  Model initialization stuff:
   ! ======================================

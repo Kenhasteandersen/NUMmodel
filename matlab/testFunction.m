@@ -19,5 +19,5 @@ end
 if bSuccess
     fprintf('OK.\n');
 else
-    fprintf('Failed!\n');
+    fprintf(2,'Failed!\n');
 end
