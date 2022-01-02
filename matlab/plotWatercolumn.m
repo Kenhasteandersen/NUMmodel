@@ -1,6 +1,9 @@
 %
 % Plot a water column from either a global or a water column simulation.
 %
+% Warning: the "setup" function needs to be called before this plot is
+% made. If not matlab may crash or the results be incorrect.
+%
 % In:
 %  time - time (in days)
 %  lat, lon - latitude and longitude (only for global simulation)
