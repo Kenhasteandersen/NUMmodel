@@ -3,9 +3,7 @@
 %
 % In:
 %  n - number of size classes
-%  bParallel - Whether to prepare parallel execution
-%  options.bTest - If true makes a test an returns the success in
-%                  p.bTestSuccess.
+%  bParallel - Whether to prepare parallel execution (for global runs)
 %
 function p = setupGeneralistsOnly(n, bParallel)
 

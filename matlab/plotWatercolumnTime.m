@@ -18,6 +18,7 @@ arguments
     lon double = [];
     options.bNewPlot logical = true
     options.depthMax {mustBePositive} = [];
+    options.nLevels = 20;
 end
 
 switch sim.p.nameModel
@@ -51,6 +52,20 @@ N(N<=0) = 1e-8;
 DOC(DOC<=0) = 1e-8;
 
 t = sim.t;
+%
+% Make a layer at z = 0 with the same value as in the first grid point:
+%
+z = [0; z];
+N = [N(1,:); N];
+if isfield(sim,'Si')
+    Si = [Si(1,:); Si];
+end
+DOC = [DOC(1,:); DOC];
+for i = 1:sim.p.nGroups
+    B(i,2:length(z),:) = B(i,:,:);
+    B(i,1,:) = B(i,2,:);
+end
+
 
 if options.bNewPlot
     clf
@@ -63,59 +78,61 @@ end
 ylimit = [-options.depthMax, 0];
 
 nexttile
-surface(t,-z, N)
+%z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
+%panelField([t t(end)], -z, N');
+%surface(t,-z, N)
+contourf(t,-z,log10(N),linspace(-2,3,options.nLevels),'LineStyle','none')
 title(['Nitrogen, lat ', num2str(lat),', lon ', num2str(lon)])
 ylabel('Depth (m)')
-%set(gca,'XTickLabel','');
-%set(gca,'yscale','log')
-set(gca,'ColorScale','log')
-shading interp
+%set(gca,'ColorScale','log')
+%shading interp
 axis tight
-colorbar('ticks',10.^(-2:3))
+colorbar('ticks',-2:3)
 %caxis([-1 2])
 ylim(ylimit)
 
 if isfield(sim,'Si')
     nexttile
-    surface(t,-z, Si)
+    %surface(t,-z, Si)
+    contourf(t,-z,log10(Si),linspace(-2,3,options.nLevels),'LineStyle','none')
     title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
     ylabel('Depth (m)')
-    %set(gca,'XTickLabel','');
-    %set(gca,'yscale','log')
-    set(gca,'ColorScale','log')
-    shading interp
+    %set(gca,'ColorScale','log')
+    %shading interp
     axis tight
-    colorbar('ticks',10.^(-2:3))
-    caxis([0.1 1000])
+    colorbar('ticks',-2:3)
+    %caxis([0.1 1000])
     ylim(ylimit)
 end
 
 nexttile
-surface(t,-z, DOC)
+contourf(t,-z,log10(DOC),options.nLevels,'LineStyle','none')
+%surface(t,-z, DOC)
 title(['DOC, lat ', num2str(lat),', lon ', num2str(lon)])
 ylabel('Depth (m)')
 %xlabel('Concentration (\mugC l^{-1})')
-set(gca,'colorscale','log')
+%set(gca,'colorscale','log')
 %set(gca,'ColorScale','log')
 shading interp
 axis tight
 colorbar
-caxis([0.1,2])
+%caxis([0.1,2])
 ylim(ylimit)
 
 for i = 1:sim.p.nGroups
     nexttile
-    surface(t,-z, squeeze(B(i,:,:)))
+    %surface(t,-z, squeeze(B(i,:,:)))
+    B(B < 0.01) = 0.01; % Set low biomasses to the lower limit to avoid white space in plot
+    contourf(t,-z,log10(squeeze(B(i,:,:))),[linspace(-2,3,options.nLevels)],'LineStyle','none')
     title(sim.p.nameGroup(i))
     ylabel('Depth (m)')
     xlabel('Time (days)')
-    %set(gca,'yscale','log')
-    set(gca,'ColorScale','log')
-    shading interp
+    %set(gca,'ColorScale','log')
+    %shading interp
     axis tight
     colorbar
-    caxis([0.1 100])
-    colorbar('ticks',10.^(-2:3))
+    %caxis([0.1 100])
+    colorbar('ticks',-2:3,'limits',[-2 3])
     ylim(ylimit)
 end
 
