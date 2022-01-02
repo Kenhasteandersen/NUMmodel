@@ -114,7 +114,7 @@ contains
        !f = this%Jtot(ix)/(this%Jtot(ix) + JmaxT)
        ! If synthesis-limited then down-regulate feeding:
        JmaxT = fTemp2*this%Jmax(i)
-       f = this%Jtot(i)/(this%Jtot(i) + max(0.,JmaxT))
+       f = this%Jtot(i)/(max(0., this%Jtot(i)) + max(0.,JmaxT))
        if (this%Jtot(i) .gt. 0) then
         this%JFreal(i) = max(0.d0, min(JmaxT, this%JF(i) - (this%Jtot(i)-f*JmaxT)))
         !this%Jtot(ix) = f * JmaxT
