@@ -45,7 +45,7 @@ elseif nTMmodel == 2
     p.pathN0    = strcat(path,'/../TMs/MITgcm_ECCO_N0');
     p.pathInit = strcat(sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0)));
     
-    p.dt = 0.05; % For Euler time stepping
+    p.dt = 0.1; % For Euler time stepping
 end
 %
 % Numerical parameters:
