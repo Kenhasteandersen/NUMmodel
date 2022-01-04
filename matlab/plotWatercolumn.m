@@ -133,7 +133,7 @@ for iGroup = 1:sim.p.nGroups
     
     panelField(m,-z,colStrategy(ix-sim.p.idxB+1,:,:));
     set(gca,'xscale','log')
-    set(gca,'xtick',10.^(-9:2))
+    set(gca,'xtick',10.^(-9:2:2))
     xlabel('Cell mass (\mugC)')
     if (iGroup==1)
         ylabel('Depth (m)')

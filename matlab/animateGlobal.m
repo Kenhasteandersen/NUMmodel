@@ -86,6 +86,8 @@ for iTime = 1:n
     annotation('ellipse',[x-r,x-r,2*r,2*r],'facecolor','b')
     t = iTime/n*2*pi;
     annotation('line',[x, x+r*sin(t)],[x, x+r*cos(t)],'color','r','linewidth',3)
+    annotation('textbox',[x-0.01,x,r,0.1],'string',...
+        strcat("\color{white}",month(datetime(1,floor(iTime/365*12)+1,1),'shortname')))
     
     % add watercolumns:
     if options.bIncludeWatercolumn
@@ -97,9 +99,9 @@ for iTime = 1:n
         plotWatercolumn(sim,time,options.lat, options.lon,...
             bNewplot=false,depthMax=200);
         nexttile(t,1)
-        title('Biomass spectrum')
+        title('Biomass spectrum', 'fontweight','normal')
         nexttile(t,2)
-        title('Trophic strategy RGB = phago-, photo-, osmo-trophy')
+        title('Trophic strategy: {\color{red}phago-}, {\color{green}photo-}, {\color{blue}osmo}trophy', 'fontweight','normal')
     end
     
     %   end

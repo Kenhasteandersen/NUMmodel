@@ -50,8 +50,8 @@ else
     ax = axesm ( 'Origin',  [0 -90 0], 'MapProjection',options.sProjection, ...
         'Grid','on', 'Frame', 'on','ScaleFactor', 1, 'labelrotation',...
         'off', 'FLineWidth', 2);
-    ax.XColor = 'white';
-    ax.YColor = 'white';
+    ax.XColor = 'black';
+    ax.YColor = 'black';
     axis tight manual
     %plabel('PlabelLocation',20, 'PLabelMeridian', 91)
     contourfm(y,x,z, vContourLevels,'linestyle','none');
