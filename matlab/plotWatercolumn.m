@@ -98,7 +98,7 @@ for iGroup = 1:sim.p.nGroups
     %
     % Biomass spectrum:
     %
-    nexttile
+    %nexttile
     BB = B(:,ix-sim.p.idxB+1);
     BB = [BB(1,:); BB]; % Add dummy layer on top
     BB( BB<0.01 ) = 0.01;

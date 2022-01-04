@@ -8,7 +8,7 @@ end
 %
 if ~isfield(sim,'Bpnm')
     sim.Bpnm = zeros(length(sim.x), length(sim.y), 3);
-    for iTime = find1:12
+    for iTime = find(sim.t > sim.t(end)-365) % Average over last year
         for i = 1:length(sim.x)
             for j = 1:length(sim.y)
                 tmp = [0 0 0];
@@ -17,31 +17,33 @@ if ~isfield(sim,'Bpnm')
                     tmp2(isnan(tmp2))=0;
                     tmp = tmp + tmp2 * sim.dznom(k)*0.001; % gC/m2
                 end
-                sim.Bpnm(i,j,1:3) = sim.Bpnm(i,j,1:3) + reshape(tmp/12,1,1,3);
+                sim.Bpnm(i,j,1:3) = sim.Bpnm(i,j,1:3) + reshape(tmp,1,1,3);
             end
         end
     end
+    sim.Bpnm = sim.Bpnm/iTime;
 end
+
 %%
 clf
 tiles = tiledlayout(3,1,'TileSpacing','compact','padding','compact');
 
 nexttile
-cbar = panelGlobal(sim.x,sim.y,(log10(sim.Bpnm(:,:,1))),[0,2],...
-    sTitle='log10(Pico)',sProjection=sProjection);
+cbar = panelGlobal(sim.x,sim.y,(log10(sim.Bpnm(:,:,1))),[-1,1],...
+    sTitle='Pico',sProjection=sProjection);
 cbar.Visible='off';
-caxis([0,2])
+caxis([-1,1])
 
 nexttile
-cbar = panelGlobal(sim.x,sim.y,(log10(sim.Bpnm(:,:,2))),[0,2],...
+cbar = panelGlobal(sim.x,sim.y,(log10(sim.Bpnm(:,:,2))),[-1,1],...
     sTitle='Nano', sProjection=sProjection);
 cbar.Visible='off';
-caxis([0,2])
+caxis([-1,1])
 
 nexttile
-cbar = panelGlobal(sim.x,sim.y,(log10(sim.Bpnm(:,:,3))),[0,2],...
+cbar = panelGlobal(sim.x,sim.y,(log10(sim.Bpnm(:,:,3))),[-1,1],...
     sTitle='Micro', sProjection=sProjection);
-caxis([0,2])
+caxis([-1,1])
 
 cbar.Label.String = 'log10(gC m^{-2})';
 cbar.Location = 'SouthOutside';

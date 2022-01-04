@@ -1,6 +1,6 @@
 %
 % Global run using transport matrices
-% 
+%
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
 % (choose MITgcm_2.8deg), and be put into the location 'NUMmodel/TMs'
 %
@@ -118,7 +118,7 @@ end
 % Load Light:
 %
 if p.bUse_parday_light
-  load 'Transport Matrix/parday';
+    load 'Transport Matrix/parday';
 end
 L0 = zeros(nb,730);
 for i = 1:730
@@ -148,12 +148,12 @@ tSave = [];
 % Matrices for annual averages:
 %
 if bCalcAnnualAverages
-   sim.ProdGrossAnnual = zeros( nb,1 );
-   sim.ProdNetAnnual = zeros( nb,1 );
-   sim.ProdHTLAnnual = zeros( nb,1 );
-   sim.BpicoAnnualMean = zeros( nb,1 );
-   sim.BnanoAnnualMean = zeros( nb,1 );
-   sim.BmicroAnnualMean = zeros( nb,1 );
+    sim.ProdGrossAnnual = zeros( nb,1 );
+    sim.ProdNetAnnual = zeros( nb,1 );
+    sim.ProdHTLAnnual = zeros( nb,1 );
+    sim.BpicoAnnualMean = zeros( nb,1 );
+    sim.BnanoAnnualMean = zeros( nb,1 );
+    sim.BmicroAnnualMean = zeros( nb,1 );
 end
 
 % ---------------------------------------
@@ -206,11 +206,6 @@ for i=1:simtime
             %u(k,:) = utmp(end,:);
         end
     end
-    
-    if any(isnan(u))
-        warning('NaNs after running current time step');
-        keyboard
-    end
     %
     % Transport
     %
@@ -223,13 +218,19 @@ for i=1:simtime
     %
     % Enforce minimum B concentration
     %
-    u(u<p.umin) = p.umin; 
+    u(u<p.umin) = p.umin;
     
     %
     % Save timeseries in grid format
     %
     if ((mod(i/2,p.tSave) < mod((i-1)/2,p.tSave)) || (i==simtime))
         fprintf('t = %u days',floor(i/2))
+        
+        if any(isnan(u))
+            warning('NaNs after running current time step');
+            keyboard
+        end
+        
         iSave = iSave + 1;
         sim.N(:,:,:,iSave) = single(matrixToGrid(u(:,ixN), [], p.pathBoxes, p.pathGrid));
         sim.DOC(:,:,:,iSave) = single(matrixToGrid(u(:,ixDOC), [], p.pathBoxes, p.pathGrid));
@@ -242,7 +243,7 @@ for i=1:simtime
         sim.L(:,:,:,iSave) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
         sim.T(:,:,:,iSave) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
         tSave = [tSave, i*0.5];
-        fprintf('.\n');      
+        fprintf('.\n');
     end
     %
     % Update annual averages:
@@ -250,8 +251,8 @@ for i=1:simtime
     if bCalcAnnualAverages
         for k = 1:nb
             [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
-                            getFunctions(u(k,:), L(k), T(k));
-            sim.ProdGrossAnnual(k) = sim.ProdGrossAnnual(k) + ProdGross1/(p.tEnd*2);            
+                getFunctions(u(k,:), L(k), T(k));
+            sim.ProdGrossAnnual(k) = sim.ProdGrossAnnual(k) + ProdGross1/(p.tEnd*2);
             sim.ProdNetAnnual(k) = sim.ProdNetAnnual(k) + ProdNet1/(p.tEnd*2);
             sim.ProdHTLAnnual(k) = sim.ProdHTLAnnual(k) + ProdHTL1/(p.tEnd*2);
             sim.BpicoAnnualMean(k) = sim.BpicoAnnualMean(k) + Bpico1/(p.tEnd*2*365);

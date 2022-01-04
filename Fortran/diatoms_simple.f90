@@ -7,8 +7,6 @@
 !  - lower predation risk due to silicate shell
 !  - inability to take up DOC
 !
-! Does not scale rates with temperature
-!
 module diatoms_simple
     use globals
     use spectrum
@@ -106,20 +104,22 @@ module diatoms_simple
       class(spectrumDiatoms_simple), intent(inout):: this
       real(dp), intent(in):: gammaN, gammaSi
       real(dp), intent(in):: L, N, Si
+      real(dp):: JmaxT
       integer:: i
   
       do i = 1, this%n
          !
          ! Uptakes
          !
-         this%JN(i) =   gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
+         this%JN(i) =   fTemp15 * gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
          !this%JDOC(i) = gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
-         this%JSi(i) = gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
+         this%JSi(i) = fTemp15 * gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
          this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
          !
          ! Estimate the limiting growth nutrient (Liebig):
          !
-         this%Jtot(i) = min( this%Jmax(i), this%JN(i), this%JL(i)-this%Jresp(i), this%JSi(i) )
+         JmaxT = max(0.d0, fTemp2 * this%Jmax(i))
+         this%Jtot(i) = min( JmaxT, this%JN(i), this%JL(i)-this%Jresp(i), this%JSi(i) )
          !    
          ! Account for possible carbon limitation due to carbon costs of uptakes:
          !
@@ -128,7 +128,7 @@ module diatoms_simple
          
          ! Jtot synthesis limitation:
         if (this%Jtot(i) .gt. 0.) then
-              this%Jtot(i) = this%Jmax(i)*this%Jtot(i) / ( this%Jtot(i) + this%Jmax(i) )
+              this%Jtot(i) = JmaxT*this%Jtot(i) / ( this%Jtot(i) + JmaxT )
         end if
 
         this%JLreal(i) = this%JL(i)

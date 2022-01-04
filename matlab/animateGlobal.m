@@ -50,31 +50,60 @@ end
 for iTime = 1:n
     clf
     
-    if options.bIncludeWatercolumn
-        time = iTime/n*sim.t(end);
-        plotGlobalWatercolumn(sim, time, options.lat, options.lon)
-    else
-        c = panelGlobal(sim.x,sim.y, field(:,:,iTime), options.vContourLevels, ...
-            sTitle=options.sTitle, sProjection=options.sProjection);
-        c.Label.String  = options.sUnits;
-        
-        %caxis([0 options.limit]);
-        % Set bckground color
-        set(gcf,'color',options.color);
-        set(gca,'color',options.color);
+    %  if options.bIncludeWatercolumn
+    %      time = iTime/n*sim.t(end);
+    %      plotGlobalWatercolumn(sim, time, options.lat, options.lon)
+    
+    
+    
+    %  else
+    c = panelGlobal(sim.x,sim.y, field(:,:,iTime), options.vContourLevels, ...
+        sTitle=options.sTitle, sProjection=options.sProjection);
+    c.Label.String  = options.sUnits;
+    
+    %caxis([0 options.limit]);
+    % Set bckground color
+    set(gcf,'color',options.color);
+    set(gca,'color',options.color);
+    if ~strcmp( options.sProjection, 'fast')
         gridm('off'); % Remove grid lines
         framem('off'); % Remove lines around map
-        
-        % Possible delete the colorbar:
-        if ~options.bColorbar
-            colorbar off
-        end
-        
-        % Do spin:
-        if options.bSpin
-            setm(gca,'Origin',[20 -iTime/n*360 0])
-        end
     end
+    
+    % Possible delete the colorbar:
+    if ~options.bColorbar
+        colorbar off
+    end
+    
+    % Do spin:
+    if options.bSpin
+        setm(gca,'Origin',[20 -iTime/n*360 0])
+    end
+    
+    % Indicate time:
+    x = 0.875;
+    r = 0.075;
+    annotation('ellipse',[x-r,x-r,2*r,2*r],'facecolor','b')
+    t = iTime/n*2*pi;
+    annotation('line',[x, x],[x + r, x+r],'color','r','linewidth',3)
+    
+    % add watercolumns:
+    if options.bIncludeWatercolumn
+        time = iTime/n*sim.t(end);
+        plotm(options.lat,options.lon,'rp','markersize',20, 'MarkerFaceColor','red','markeredgecolor','red')
+        h = uipanel('position',[0.5 0.02 0.48 0.48]);
+        t = tiledlayout(h,2,1,'TileSpacing','compact','padding','compact');
+        nexttile(t)
+        plotWatercolumn(sim,time,options.lat, options.lon,...
+            bNewplot=false,depthMax=200);
+        nexttile(t,1)
+        title('Biomass spectrum')
+        nexttile(t,2)
+        title('Trophic strategy RGB = phago-, photo-, osmo-trophy')
+        keyboard
+    end
+    
+    %   end
     % Get the frame.
     drawnow
     F(iTime) = getframe(figure(1));

@@ -60,6 +60,7 @@ else
     load coastlines
     h=patchm(coastlat,coastlon, colorLand); 
     set(h,'linestyle','none')
+    gridm('off'); % Remove grid lines
 end
 
 cbar = colorbar('eastoutside', 'FontSize',14);
