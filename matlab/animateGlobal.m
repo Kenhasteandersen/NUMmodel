@@ -6,8 +6,7 @@
 %  field: with three dimensions: x, y, and time
 %
 % Example:
-%  B = calcIntegrateGlobal(sim, sim.B);
-%  animateGlobal(sim, log10(B), vContourLevels=[0 2],...
+%  animateGlobal(sim, vContourLevels=[0 2],...
 %      sProjection='ortho',bSpin=true, color=[0 0 0], bColorbar=false, time=20);
 %
 function F = animateGlobal(sim,field, options)
@@ -57,7 +56,8 @@ for iTime = 1:n
     
     
     %  else
-    c = panelGlobal(sim.x,sim.y, field(:,:,iTime), options.vContourLevels, ...
+    B = calcIntegrateGlobal(sim,sim.B(:,:,:,:,iTime));
+    c = panelGlobal(sim.x,sim.y, log10(B), options.vContourLevels, ...
         sTitle=options.sTitle, sProjection=options.sProjection);
     c.Label.String  = options.sUnits;
     
@@ -100,7 +100,6 @@ for iTime = 1:n
         title('Biomass spectrum')
         nexttile(t,2)
         title('Trophic strategy RGB = phago-, photo-, osmo-trophy')
-        keyboard
     end
     
     %   end
