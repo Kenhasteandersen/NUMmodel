@@ -197,6 +197,7 @@ contains
            + ((-this%JDOC(i) &
            +   this%JlossPassive(i) &
            +   this%JClossLiebig(i) &
+           +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
            +  remin2*this%mort2(i) &
            +  reminHTL*this%mortHTL(i)) * u(i)
@@ -240,6 +241,7 @@ end subroutine printRatesGeneralists
     + (1-reminHTL)*this%mortHTL*u &
     + (1-remin2)*this%mort2*u &
     - this%JLreal*u/this%m &
+    - this%JCloss_photouptake*u/this%m &
     + fTemp2*this%Jresp*u/this%m &
     + (1-reminF)*this%JCloss_feeding/this%m * u &
     )) / DOC
