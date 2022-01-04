@@ -85,7 +85,7 @@ for iTime = 1:n
     r = 0.075;
     annotation('ellipse',[x-r,x-r,2*r,2*r],'facecolor','b')
     t = iTime/n*2*pi;
-    annotation('line',[x, x],[x + r, x+r],'color','r','linewidth',3)
+    annotation('line',[x, x+r*sin(t)],[x, x+r*cos(t)],'color','r','linewidth',3)
     
     % add watercolumns:
     if options.bIncludeWatercolumn
