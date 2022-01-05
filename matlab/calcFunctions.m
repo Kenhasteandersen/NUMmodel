@@ -79,14 +79,16 @@ switch sim.p.nameModel
         
         
     case 'global'
-        % Get grid volumes:
-        load(sim.p.pathGrid,'dv','dz');
-        ix = ~isnan(sim.N(:,:,1,1)); % Find all relevant grid cells
+        
         
         %
         % Primary production in gC per m2/year::
         %
         if ~isfield(sim,'ProdGross')
+            % Get grid volumes:
+            load(sim.p.pathGrid,'dv','dz');
+            ix = ~isnan(sim.N(:,:,1,1)); % Find all relevant grid cells
+            
             sim.ProdGross = zeros(length(sim.x), length(sim.y), length(sim.t));
             sim.ProdNet = sim.ProdGross;
             sim.ProdHTL = sim.ProdGross;
@@ -134,20 +136,21 @@ switch sim.p.nameModel
                     end
                 end
             end
-        end
-        %
-        % Global totals
-        %
-        calcTotal = @(u) sum(u(ix(:)).*dv(ix(:))); % mug/day
-        
-        for i = 1:length(sim.t)
-            sim.Ntotal(i) = calcTotal(sim.N(:,:,:,i));
-            sim.DOCtotal(i) = calcTotal(sim.DOC(:,:,:,i)); % mugC
-            sim.Btotal(i) = 0;
-            for j = 1:(sim.p.n-sim.p.idxB+1)
-                sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(:,:,:,j,i)); % mugC
+            
+            %
+            % Global totals
+            %
+            calcTotal = @(u) sum(u(ix(:)).*dv(ix(:))); % mug/day
+            
+            for i = 1:length(sim.t)
+                sim.Ntotal(i) = calcTotal(sim.N(:,:,:,i));
+                sim.DOCtotal(i) = calcTotal(sim.DOC(:,:,:,i)); % mugC
+                sim.Btotal(i) = 0;
+                for j = 1:(sim.p.n-sim.p.idxB+1)
+                    sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(:,:,:,j,i)); % mugC
+                end
+                sim.ProdNetTotal(i) = calcTotal(sim.ProdNet(:,:,i)); % gC/yr
             end
-            sim.ProdNetTotal(i) = calcTotal(sim.ProdNet(:,:,i)); % gC/yr
         end
         %
         % Watercolumn totals:
