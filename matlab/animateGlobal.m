@@ -92,7 +92,7 @@ for iTime = 1:n
     % add watercolumns:
     if options.bIncludeWatercolumn
         time = iTime/n*sim.t(end);
-        plotm(options.lat,options.lon,'rp','markersize',20, 'MarkerFaceColor','red','markeredgecolor','red')
+        plotm(options.lat,options.lon,'rp','markersize',40, 'MarkerFaceColor','red','markeredgecolor','red')
         h = uipanel('position',[0.5 0.02 0.48 0.48]);
         t = tiledlayout(h,2,1,'TileSpacing','compact','padding','compact');
         nexttile(t)
