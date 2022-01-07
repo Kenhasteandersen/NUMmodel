@@ -681,7 +681,7 @@ contains
        select type (spec => group(i)%spec)
           class is (spectrumUnicellular)
             ProdGross = ProdGross + conversion * &
-               sum(  spec%JLreal * u(idxB:nGrid) / spec%m )
+               sum(  spec%JLreal * u( ixStart(i):ixEnd(i) ) / spec%m )
           
             ProdNet = ProdNet + conversion * &
                spec%getProdNet(u( ixStart(i):ixEnd(i) ))
@@ -715,9 +715,7 @@ contains
     end do
 
     eHTL = ProdHTL / ProdNet
-    if (eHTL .gt. 1) then
-       eHTL = -1.d0
-    end if
+    
   end subroutine getFunctions
 
   ! ---------------------------------------------------
