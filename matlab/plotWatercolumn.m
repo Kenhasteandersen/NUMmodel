@@ -83,6 +83,7 @@ if options.bNewplot
     clf
     tiles = tiledlayout(2,sim.p.nGroups,'tilespacing','compact','padding','compact');
     tiles.TileIndexing = 'columnmajor';
+    nexttile
 end
 
 if isempty(options.depthMax)

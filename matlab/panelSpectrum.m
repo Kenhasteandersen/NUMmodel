@@ -21,7 +21,7 @@ for iGroup = 1:p.nGroups
     
     sLegend{iGroup} = p.nameGroup{iGroup};
 end
-ylim([0.0001,500])
+ylim([0.1,500])
 xlim(calcXlim(sim.p))
 hold off
 

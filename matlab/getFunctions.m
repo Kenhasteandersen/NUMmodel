@@ -13,7 +13,7 @@
 %  Bpico, Bnano, Bmicro - biomasses in pico, nano, and micro size groups
 %                         (gC/m3).
 %
-function [ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro] = getFunctions(u, L, T)
+function [ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro] = getFunctions(u, L, T)
 %
 % First make a call to calc a derivative:
 %
@@ -27,11 +27,12 @@ dudt = 0*u';
 ProdGross = 0;
 ProdNet = 0;
 ProdHTL = 0;
+ProdBact = 0;
 eHTL = 0;
 Bpico = 0;
 Bnano = 0;
 Bmicro = 0;
 
-[u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro]...
+[u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro]...
     = calllib(loadNUMmodelLibrary(), 'f_getfunctions', ...
-    u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro);
+    u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro);

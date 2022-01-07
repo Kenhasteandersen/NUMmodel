@@ -65,8 +65,9 @@ end
 
 cbar = colorbar('eastoutside', 'FontSize',14);
 cbar.Label.String  = '\mug C l^{-1}';
+cbar.FontSize = 10;
 box off
-title(options.sTitle)
+title(options.sTitle,'fontweight','normal')
 caxis(vContourLevels([1,end]))
 
 

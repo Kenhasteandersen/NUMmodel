@@ -659,9 +659,9 @@ contains
   ! Get the ecosystem functions as calculated from the last call
   ! to calcDerivatives
   ! ---------------------------------------------------
-  subroutine getFunctions(u, ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
+  subroutine getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
     real(dp), intent(in):: u(nGrid)
-    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
     real(dp) :: conversion
     real(dp) :: ESD(nGrid)
     real(dp):: m(nGrid), mDelta(nGrid)
@@ -670,6 +670,7 @@ contains
     ProdGross = 0.d0
     ProdNet = 0.d0
     ProdHTL = 0.d0
+    ProdBact = 0.d0
     Bpico = 0.d0
     Bnano = 0.d0
     Bmicro = 0.d0
@@ -685,6 +686,9 @@ contains
           
             ProdNet = ProdNet + conversion * &
                spec%getProdNet(u( ixStart(i):ixEnd(i) ))
+
+            ProdBact = ProdBact + conversion * &
+               spec%getProdBact(u( ixStart(i):ixEnd(i) ))
        end select
     end do
     !
