@@ -46,6 +46,7 @@ title('Total plankton biomass')
 %
 % Watercolumn:
 %
+nexttile
 plotWatercolumn(sim, time, lat, lon, depthMax=200, bNewPlot=false);
 
 nexttile(4)
