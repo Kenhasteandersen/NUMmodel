@@ -47,6 +47,7 @@ caxis([-1,1])
 
 cbar.Label.String = 'log10(gC m^{-2})';
 cbar.Location = 'SouthOutside';
+cbar.FontSize = 10;
 
 
 

@@ -56,6 +56,7 @@ module spectrum
     procedure, pass :: initUnicellular
     procedure :: printRatesUnicellular
     procedure :: getProdNet
+    procedure :: getProdBact => getProdBactUnicellular
   end type spectrumUnicellular
   ! ------------------------------------------------
   ! Abstact class for all multicellular spectra:
@@ -218,6 +219,14 @@ contains
                    (this%JLreal(i)-ftemp2*this%Jresp(i))*u(i)/this%m(i) )
      end do
     end function getProdNet
+
+  function getProdBactUnicellular(this, u) result(ProdBact)
+    real(dp):: ProdBact
+    class(spectrumUnicellular), intent(in):: this
+    real(dp), intent(in):: u(this%n)
+
+    ProdBact = 0.d0
+  end function getProdBactUnicellular
 
   ! ==========================================================================
   !  Member functions for the abstract unicellular class:

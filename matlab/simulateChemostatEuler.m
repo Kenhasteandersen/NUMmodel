@@ -43,4 +43,6 @@ end
 sim.L = L;
 sim.T = T;
 
+[sim.Nbalance, sim.Cbalance] = getBalance(u, sim.L, sim.T); % in units per day
+
 end

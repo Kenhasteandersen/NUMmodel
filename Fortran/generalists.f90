@@ -55,6 +55,7 @@ module generalists
     procedure :: printRates => printRatesGeneralists
     procedure :: getNbalanceGeneralists
     procedure :: getCbalanceGeneralists
+    procedure :: getProdBact => getProdBactGeneralists
   end type spectrumGeneralists
  
   public initGeneralists, spectrumGeneralists, calcRatesGeneralists, calcDerivativesGeneralists
@@ -247,4 +248,18 @@ end subroutine printRatesGeneralists
     )) / DOC
   end function getCbalanceGeneralists 
   
+
+  function getProdBactGeneralists(this, u) result(ProdBact)
+    real(dp):: ProdBact
+    class(spectrumGeneralists), intent(in):: this
+    real(dp), intent(in):: u(this%n)
+    integer:: i
+
+    ProdBact = 0.d0
+    do i = 1, this%n
+      ProdBact = ProdBact + max(0.d0, this%JDOC(i) - ftemp2*this%Jresp(i))*u(i)/this%m(i)
+    enddo
+
+  end function getProdBactGeneralists
+
 end module generalists

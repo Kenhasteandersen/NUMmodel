@@ -37,13 +37,14 @@ nexttile
 cbar = panelGlobal(sim.x,sim.y,log10(sim.ProdHTLAnnual(:,:,end)),[0,2],...
     sTitle='HTL production', sProjection=sProjection);
 cbar.Label.String = 'log_{10}(gC m^{-2}yr^{-1})';
+
 caxis([0,2])
 %cbar.Visible='off';
 %caxis([-3,2])
 
 nexttile
 cbar = panelGlobal(sim.x,sim.y,sim.ProdHTLAnnual(:,:,end)./sim.ProdNetAnnual(:,:,end),[0,1],...
-    sTitle='eHTL', sProjection=sProjection);
+    sTitle='\epsilon_{HTL}', sProjection=sProjection);
 caxis([0,1])
 cbar.Label.String = '';
 %cbar.Location = 'SouthOutside';

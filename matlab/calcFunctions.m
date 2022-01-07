@@ -27,13 +27,14 @@ switch sim.p.nameModel
     
     case 'chemostat'
         u = [sim.N(end), sim.DOC(end), sim.B(end,:)];
-        [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.eHTL,...
+        [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
             sim.Bpico, sim.Bnano, sim.Bmicro] = ...
             getFunctions(u, sim.L, sim.T);
         % Multiply by the assumed depth of the productive layer:
         sim.ProdGross = sim.ProdGross * sim.p.depthProductiveLayer;
         sim.ProdNet = sim.ProdNet * sim.p.depthProductiveLayer;
         sim.ProdHTL = sim.ProdHTL * sim.p.depthProductiveLayer;
+        sim.ProdBact = sim.ProdBact * sim.p.depthProductiveLayer;
         sim.Bpico = sim.Bpico * sim.p.depthProductiveLayer;
         sim.Bnano = sim.Bnano * sim.p.depthProductiveLayer;
         sim.Bmicro = sim.Bmicro * sim.p.depthProductiveLayer;
@@ -45,6 +46,7 @@ switch sim.p.nameModel
             ProdGross = 0;
             ProdNet = 0;
             ProdHTL = 0;
+            ProdBact = 0;
             Bpico = 0;
             Bnano = 0;
             Bmicro = 0;
@@ -55,13 +57,14 @@ switch sim.p.nameModel
                     u = [squeeze(sim.N(k,iTime)), ...
                         squeeze(sim.DOC(k,iTime)), ...
                         squeeze(sim.B(k,:,iTime))];
-                    [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
+                    [ProdGross1, ProdNet1,ProdHTL1,ProdBact1,~,Bpico1,Bnano1,Bmicro1] = ...
                         getFunctions(u, sim.L(k,iTime), sim.T(k,iTime));
                     % Multiply by the thickness of each layer:
                     conv = sim.dznom(k);
                     ProdGross = ProdGross + ProdGross1*conv;
                     ProdNet = ProdNet + ProdNet1*conv;
                     ProdHTL = ProdHTL +ProdHTL1*conv;
+                    ProdBact = ProdBact + ProdBact1*conv;
                     %eHTL = eHTL + eHTL1/length(sim.z);
                     Bpico = Bpico + Bpico1*conv; % gC/m2
                     Bnano = Bnano + Bnano1*conv;
@@ -71,25 +74,28 @@ switch sim.p.nameModel
             sim.ProdGross(iTime) = ProdGross;
             sim.ProdNet(iTime) = ProdNet;
             sim.ProdHTL(iTime) = ProdHTL;
+            sim.ProdBact(iTime) = ProdBact;
             %%sim.eHTL(i,j,iTime) = eHTL;
             sim.Bpico(iTime) = Bpico;
             sim.Bnano(iTime) = Bnano;
             sim.Bmicro(iTime) = Bmicro;
         end
-        
+        sim.eHTL = sim.ProdHTL./sim.ProdNet;
+        sim.ePP = sim.ProdNet./sim.ProdGross;
         
     case 'global'
-        % Get grid volumes:
-        load(sim.p.pathGrid,'dv','dz');
-        ix = ~isnan(sim.N(:,:,1,1)); % Find all relevant grid cells
-        
         %
         % Primary production in gC per m2/year::
         %
         if ~isfield(sim,'ProdGross')
+            % Get grid volumes:
+            load(sim.p.pathGrid,'dv','dz','dx','dy');
+            ix = ~isnan(sim.N(:,:,1,1)); % Find all relevant grid cells
+            
             sim.ProdGross = zeros(length(sim.x), length(sim.y), length(sim.t));
             sim.ProdNet = sim.ProdGross;
             sim.ProdHTL = sim.ProdGross;
+            sim.ProdBact = sim.ProdGross;
             sim.Bpico = sim.ProdGross;
             sim.Bnano = sim.ProdGross;
             sim.Bmicro = sim.ProdGross;
@@ -104,6 +110,7 @@ switch sim.p.nameModel
                         ProdGross = 0;
                         ProdNet = 0;
                         ProdHTL = 0;
+                        ProdBact = 0;
                         Bpico = 0;
                         Bnano = 0;
                         Bmicro = 0;
@@ -112,12 +119,13 @@ switch sim.p.nameModel
                                 u = [squeeze(sim.N(i,j,k,iTime)), ...
                                     squeeze(sim.DOC(i,j,k,iTime)), ...
                                     squeeze(sim.B(i,j,k,:,iTime))'];
-                                [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
+                                [ProdGross1, ProdNet1,ProdHTL1,ProdBact1, ~,Bpico1,Bnano1,Bmicro1] = ...
                                     getFunctions(u, sim.L(i,j,k,iTime), sim.T(i,j,k,iTime));
                                 conv = squeeze(dz(i,j,k));
-                                ProdGross = ProdGross + ProdGross1*conv;
+                                ProdGross = ProdGross + ProdGross1*conv; % gC/m2/yr
                                 ProdNet = ProdNet + ProdNet1*conv;
                                 ProdHTL = ProdHTL +ProdHTL1*conv;
+                                ProdBact = ProdBact +ProdBact1*conv;
                                 %eHTL = eHTL + eHTL1/length(sim.z);
                                 Bpico = Bpico + Bpico1*dz(i,j,k); % gC/m2
                                 Bnano = Bnano + Bnano1*dz(i,j,k);
@@ -127,27 +135,33 @@ switch sim.p.nameModel
                         sim.ProdGross(i,j,iTime) = ProdGross;
                         sim.ProdNet(i,j,iTime) = ProdNet;
                         sim.ProdHTL(i,j,iTime) = ProdHTL;
-                        %%sim.eHTL(i,j,iTime) = eHTL;
+                        sim.ProdBact(i,j,iTime) = ProdBact;
                         sim.Bpico(i,j,iTime) = Bpico;
                         sim.Bnano(i,j,iTime) = Bnano;
                         sim.Bmicro(i,j,iTime) = Bmicro;
                     end
                 end
             end
-        end
-        %
-        % Global totals
-        %
-        calcTotal = @(u) sum(u(ix(:)).*dv(ix(:))); % mug/day
-        
-        for i = 1:length(sim.t)
-            sim.Ntotal(i) = calcTotal(sim.N(:,:,:,i));
-            sim.DOCtotal(i) = calcTotal(sim.DOC(:,:,:,i)); % mugC
-            sim.Btotal(i) = 0;
-            for j = 1:(sim.p.n-sim.p.idxB+1)
-                sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(:,:,:,j,i)); % mugC
+            sim.eHTL = sim.ProdHTL./sim.ProdNet;
+            sim.ePP = sim.ProdNet./sim.ProdGross;
+            
+            %
+            % Global totals
+            %
+            calcTotal = @(u) sum(u(ix(:)).*dv(ix(:))); % mug/day
+            
+            for i = 1:length(sim.t)
+                sim.Ntotal(i) = calcTotal(sim.N(:,:,:,i));
+                sim.DOCtotal(i) = calcTotal(sim.DOC(:,:,:,i)); % mugC
+                sim.Btotal(i) = 0;
+                for j = 1:(sim.p.n-sim.p.idxB+1)
+                    sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(:,:,:,j,i)); % mugC
+                end
+                
+                sim.ProdNetTotal(i) = sum(sum(sim.ProdNet(:,:,i).*dx.*dy)); % gC/yr
+                sim.ProdGrossTotal(i) = sum(sum(sim.ProdGross(:,:,i).*dx.*dy)); % gC/yr
+                sim.ProdHTLTotal(i) = sum(sum(sim.ProdHTL(:,:,i).*dx.*dy));
             end
-            sim.ProdNetTotal(i) = calcTotal(sim.ProdNet(:,:,i)); % gC/yr
         end
         %
         % Watercolumn totals:

@@ -64,6 +64,7 @@ void f_getfunctions(
 		    double *ProdGross,
 		    double *ProdNet,
 		    double *ProdHTL,
+			double *ProdBact,
 		    double *eHTL,
 		    double *Bpico,
 		    double *Bnano,
