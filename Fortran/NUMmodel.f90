@@ -719,7 +719,7 @@ contains
     end do
 
     eHTL = ProdHTL / ProdNet
-    
+ 
   end subroutine getFunctions
 
   ! ---------------------------------------------------
