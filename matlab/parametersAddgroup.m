@@ -29,7 +29,7 @@ switch p.typeGroups(p.nGroups)
         p.nameGroup{p.nGroups} = 'Diatoms simple';
         p.colGroup{p.nGroups} = [0 0.5 0];
     case 10
-        p.nameGroup{p.nGroups} = sprintf('Copepod %.0f',mAdult);
+        p.nameGroup{p.nGroups} = sprintf('Copepod %.1f {\\mu}g',mAdult);
         p.colGroup{p.nGroups} = [0.75 0.0 0];
 end
 

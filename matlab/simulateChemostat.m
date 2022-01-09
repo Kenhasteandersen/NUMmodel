@@ -24,7 +24,7 @@ end
 % Concentrations in the deep layer:
 %
 if options.bUnicellularloss
-    ix = 1:length(p.u0); % All fields are lost to the deep layer
+    ix = 1:p.ixEnd(1); % Nutrients and first field are lost to the deep layer
 else
     ix = 1:(p.idxB-1); % Nutrients
 end
