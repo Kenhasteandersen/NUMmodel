@@ -1,4 +1,11 @@
-function p = parametersAddgroup(typeGroup, p, n)
+function p = parametersAddgroup(typeGroup, p, n, mAdult)
+
+arguments
+    typeGroup ;
+    p struct,
+    n ;
+    mAdult = 0;
+end
 
 if ~isfield(p,'nGroups')
     p.nGroups = 1;
@@ -22,7 +29,7 @@ switch p.typeGroups(p.nGroups)
         p.nameGroup{p.nGroups} = 'Diatoms simple';
         p.colGroup{p.nGroups} = [0 0.5 0];
     case 10
-        p.nameGroup{p.nGroups} = sprintf('Copepod %f',;
+        p.nameGroup{p.nGroups} = sprintf('Copepod %.0f',mAdult);
         p.colGroup{p.nGroups} = [0.75 0.0 0];
 end
 

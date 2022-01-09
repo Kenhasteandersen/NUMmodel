@@ -19,7 +19,7 @@ p.n = 2;
 p = parametersAddgroup(1,p,10);
 
 for i = 1:length(mAdult)
-    p = parametersAddgroup(10,p,10);
+    p = parametersAddgroup(10,p,10, mAdult(i));
 end
 
 
