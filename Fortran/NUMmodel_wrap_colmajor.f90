@@ -1,5 +1,5 @@
 module NUMmodel_wrap
-  use iso_c_binding, only: c_double, c_int
+  use iso_c_binding, only: c_double, c_int, c_bool
   use NUMmodel, only:  nGrid, setupGeneralistsOnly, setHTL, getRates, &         
        setupGeneralistsOnly_csp, &
        setupDiatomsOnly, &
@@ -104,14 +104,15 @@ contains
   !   ! g(idxB:nGrid) = rates%g(idxB:nGrid)
   ! end subroutine f_calcRates
 
-  subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt) bind(c)
+  subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt, bLosses) bind(c)
     !integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(inout):: u(nGrid)
     integer(c_int), intent(in), value:: nNutrients
     real(c_double), intent(in):: Ndeep(nNutrients)
     real(c_double), intent(in), value:: L, T, diff, tEnd, dt
+    logical(c_bool), intent(in), value:: bLosses
 
-    call simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt)
+    call simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt, bLosses)
   end subroutine f_simulateChemostatEuler
 
   subroutine f_simulateEuler(u, L, T, tEnd, dt) bind(c)

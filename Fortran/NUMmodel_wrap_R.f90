@@ -91,15 +91,16 @@ end subroutine f_setupGeneralistsOnly
 !    call getBalance(Nbalance, Cbalance)
 !  end subroutine f_getBalance
 
-   subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt)
+   subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt, bLosses)
     use globals
     use NUMmodel, only: simulateChemostatEuler, nGrid
 
     integer, intent(in):: nNutrients
     real(dp), intent(inout):: u(nGrid)
     real(dp), intent(in):: L, T, Ndeep(nNutrients), diff, tEnd, dt
+    logical(1), intent(in):: bLosses
 
-    call simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt)
+    call simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt, bLosses)
   end subroutine f_simulateChemostatEuler
 !!$
 !!$  subroutine f_simulateEuler(nGrid, u, L, tEnd, dt)

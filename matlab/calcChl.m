@@ -10,9 +10,14 @@
 %   L - Light (in mu mol photons per m2 per s)
 %
 % Out:
-%   Total mass of ChlA in each size group (mug Chl/l)
+%   Total mass of ChlA (mg Chl/m2)
 %
-function BChl = calcChl(B, rates, L)
+function BChl = calcChl(sim)
 
-BChl = 3 * B .* rates.jLreal'/L;
+switch sim.p.nameModel
+    
+    case 'chemostat'
+        BChl = 3 * sum( sim.B(end,:) .* sim.rates.jLreal' )/sim.L ...
+             *sim.p.depthProductiveLayer; % Unit conversion
+end
 

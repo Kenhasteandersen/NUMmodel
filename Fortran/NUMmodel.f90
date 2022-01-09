@@ -568,7 +568,7 @@ contains
   ! Ndeep is a vector with the concentrations of
   ! nutrients in the deep layer.
   ! -----------------------------------------------
-  subroutine simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt)
+  subroutine simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt, bLosses)
     real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
     real(dp), intent(in):: L      ! Light level
     real(dp), intent(in):: T ! Temperature
@@ -576,6 +576,7 @@ contains
     real(dp), intent(in):: diff      ! Diffusivity
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
+    logical(1), intent(in):: bLosses ! Whether to losses to the deep
     real(dp) :: dudt(nGrid)
     integer:: i, iEnd
 
@@ -591,8 +592,11 @@ contains
        !
        ! Note: should not be done for copepods:
        !
-       dudt(idxB:nGrid) = dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
-       u = u + dudt*dt
+       if (bLosses) then
+         dudt(idxB:nGrid) = dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
+       endif
+
+       u = u + dudt*dt ! Euler update
     end do
   end subroutine simulateChemostatEuler
 

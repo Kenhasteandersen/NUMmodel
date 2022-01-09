@@ -46,7 +46,8 @@ void f_simulatechemostateuler(
 			      const double Ndeep[],
 			      const double diff,
 			      const double tEnd,
-			      const double dt);
+			      const double dt,
+				  const bool bLosses);
 
 void f_simulateeuler(
 			      double u[],

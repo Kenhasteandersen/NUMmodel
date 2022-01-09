@@ -61,10 +61,9 @@ if isfield(sim,'Si')
     Si = [Si(1,:); Si];
 end
 DOC = [DOC(1,:); DOC];
-for i = 1:sim.p.nGroups
-    B(i,2:length(z),:) = B(i,:,:);
-    B(i,1,:) = B(i,2,:);
-end
+B(:,2:length(z),:) = B;
+B(:,1,:) = B(:,2,:);
+
 
 
 if options.bNewPlot

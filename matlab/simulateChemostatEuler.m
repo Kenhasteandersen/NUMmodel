@@ -4,15 +4,19 @@
 %  p - parameter object (including chemostat parameters from
 %      parametersChemostat). Not used if running from the fortran library. 
 %  L - Light
+%  T - Temperature
+%  bLosses - whether to have losses to the deep
+%
 % Out:
 %  sim - simulation object
 %
-function sim = simulateChemostatEuler(p, L, T)
+function sim = simulateChemostatEuler(p, L, T, bLosses)
 
 arguments
     p struct = parametersChemostat(setupGeneralistsOnly);
     L double = 100;
     T double = 10;
+    bLosses logical = false;
 end
 
 %
@@ -24,7 +28,7 @@ dudt = 0*u;
 u = calllib(loadNUMmodelLibrary(), 'f_simulatechemostateuler', u, ...
     L, T, ...
     int32(p.idxB-1), ...
-    p.u0(1:(p.idxB-1)), p.d, p.tEnd, 0.01);
+    p.u0(1:(p.idxB-1)), p.d, p.tEnd, 0.01, bLosses);
 %
 % Assemble result:
 %

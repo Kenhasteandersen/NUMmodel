@@ -25,7 +25,7 @@ switch sim.p.nameModel
             u = [sim.N(iTime), sim.DOC(iTime), s.B];
         end
         s.L = sim.L;
-    
+        
     case 'watercolumn'
         % Extract from a single water column:
         z = sim.z;
@@ -76,14 +76,14 @@ set(gca,'XTickLabel','');
 %
 nexttile
 
-rates = getRates(sim.p, u, s.L);
+if ~isfield('sim','rates')
+    sim.rates = getRates(sim.p, u, s.L);
+end
 %panelGains(sim.p,rates)
-panelGains(sim.p,rates);
+panelGains(sim.p, sim.rates);
 set(gca,'XTickLabel','');
 %
 % Losses:
 %
 nexttile
-panelLosses(sim.p, rates);
-
-s.rates = rates;
+panelLosses(sim.p, sim.rates);
