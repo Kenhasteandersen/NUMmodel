@@ -5,7 +5,7 @@ module globals
   ! Useful constants:
   !
 
-    ! Useful mathematical constants:
+  ! Useful mathematical constants:
   real(dp), parameter :: onethird = 1.d0/3.d0
   real(dp), parameter :: twothirds = 2.d0/3.d0
   real(dp), parameter :: threequarters = 3.d0/4.d0
@@ -13,17 +13,6 @@ module globals
 
   ! Small number to avoid divisions by zero
   real(dp), parameter :: eps = 1d-200
-
-  ! type typeRates
-  !    real(dp), dimension(:), allocatable:: flvl, JF, F, JEnc
-  !    real(dp), dimension(:), allocatable:: JN, JDOC, JSi, JL
-  !    real(dp), dimension(:), allocatable:: JNtot, JLreal, JCtot, Jtot
-  !    real(dp), dimension(:), allocatable:: JCloss_feeding, JCloss_photouptake, JNlossLiebig, JClossLiebig
-  !    real(dp), dimension(:), allocatable:: JNloss, JCloss, JSiloss
-  !    real(dp), dimension(:), allocatable:: mortpred, mortHTL
-  !    real(dp), dimension(:), allocatable:: g, mortStarve, mort ! Multicellular rates
-  !    real(dp), dimension(:), allocatable:: dudt
-  ! end type typeRates
 
   ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
   real(dp) :: fTemp2, fTemp15

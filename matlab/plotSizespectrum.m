@@ -18,22 +18,23 @@ switch sim.p.nameModel
     
     case 'chemostat'
         % Extract from a chemostat:
-        s.B = squeeze(sim.B(iTime,:));
+        s.B = sim.B;
         if isfield(sim,'Si')
-            u = [sim.N(iTime), sim.DOC(iTime), sim.Si(iTime), s.B];
+            u = [sim.N(iTime), sim.DOC(iTime), sim.Si(iTime), squeeze(sim.B(iTime,:))];
         else
-            u = [sim.N(iTime), sim.DOC(iTime), s.B];
+            u = [sim.N(iTime), sim.DOC(iTime), squeeze(sim.B(iTime,:))];
         end
         s.L = sim.L;
         
     case 'watercolumn'
         % Extract from a single water column:
         z = sim.z;
-        s.B = squeeze(sim.B(iDepth,:,iTime));
+        s.B = squeeze(sim.B(iDepth,:,:))';
         if isfield(sim,'Si')
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iDepth,iTime), s.B];
+            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iTime,:), ...
+                squeeze(s.B(:,iTime))'];
         else
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), s.B];
+            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), squeeze(s.B(iTime,:))];
         end
         s.L = sim.L(iDepth,iTime);
         
@@ -42,7 +43,7 @@ switch sim.p.nameModel
         % Extract from global run:
         idx = calcGlobalWatercolumn(lat,lon,sim);
         z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
-        s.B = squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))';
+        s.B = squeeze(sim.B(idx.x, idx.y, iDepth, :, :))';
         if isfield(sim,'Si')
             u = [sim.N(idx.x, idx.y,iDepth,iTime), ...
                 sim.DOC(idx.x, idx.y,iDepth,iTime), ...
@@ -68,7 +69,7 @@ tiledlayout(3,1,'tilespacing','compact','padding','compact')
 % Spectrum
 %
 nexttile
-panelSpectrum(s,1)
+panelSpectrum(s,iTime)
 xlabel('')
 set(gca,'XTickLabel','');
 %
