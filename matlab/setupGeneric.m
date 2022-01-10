@@ -1,14 +1,22 @@
 %
 % Setup with generalists and a number of copepods
 %
-function p = setupGeneric(mAdult)
+function p = setupGeneric(mAdult, bParallel)
 
 arguments
     mAdult (1,:) = [];
+    bParallel = false;
 end
 
 loadNUMmodelLibrary();
 calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult );
+if bParallel
+    h = gcp('nocreate');
+    poolsize = h.NumWorkers;
+    parfor i=1:poolsize
+        calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult );
+    end
+end
 
 p.idxN = 1;
 p.idxDOC = 2;

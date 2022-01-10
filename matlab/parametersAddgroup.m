@@ -18,10 +18,10 @@ p.typeGroups(p.nGroups) = typeGroup;
 switch p.typeGroups(p.nGroups)
     case 1
         p.nameGroup{p.nGroups} = 'Generalists';
-        p.colGroup{p.nGroups} = [0 0 1];
+        p.colGroup{p.nGroups} = [0 0 0.75];
     case 2
         p.nameGroup{p.nGroups} = 'Generalists CSP';
-        p.colGroup{p.nGroups} = [0 0 1];
+        p.colGroup{p.nGroups} = [0 0 0.75];
     case 3
         p.nameGroup{p.nGroups} = 'Diatoms';
         p.colGroup{p.nGroups} = [0 0.5 0];
