@@ -28,7 +28,7 @@ n = length(range);
 %
 for i = 1:n
     pp(i) = p;
-    eval( strcat('ppp(i).',sField, '= range(i);') );
+    eval( strcat('pp(i).',sField, '= range(i);') );
 end
 %
 % Do the simulations:
@@ -72,9 +72,11 @@ end
 %
 % Nutrients:
 %
+semilogy(range, N,'linewidth',2,'color','b');
+hold on
 patch([range range(end:-1:1)], [Nlower, Nupper(end:-1:1)], 0.75*[0,0,1], ...
     'edgecolor','none','facealpha',0.15)
-hold on
+
 legendentries(1) = semilogy(range, N,'linewidth',2,'color','b');
 sLegend{1} = 'N';
 %
@@ -84,12 +86,16 @@ for iGroup = 1:nGroups
     patch([range range(end:-1:1)], [Blower(:,iGroup)', Bupper(end:-1:1,iGroup)'],...
         p.colGroup{iGroup}, 'edgecolor','none','facealpha',0.15)
    
-    set(gca,'xscale','log','yscale','log')
-    legendentries(1+iGroup) = semilogy(range, B(:,iGroup),'color', p.colGroup{iGroup},'linewidth',2);
+    lwd = 2;
+    if (p.typeGroups(iGroup) == 10)
+        lwd = 1 + (iGroup-2)*0.5;
+    end
+    legendentries(1+iGroup) = ...
+        semilogy(range, B(:,iGroup),'color', p.colGroup{iGroup},'linewidth',lwd);
     
     sLegend{iGroup+1} = p.nameGroup{iGroup};
 end
-
+set(gca,'xscale','log','yscale','log')
 hold off
 %
 % Legend
@@ -97,3 +103,4 @@ hold off
 legend(legendentries, sLegend, 'location','northwest','box','off')
 xlabel(sField)
 ylabel('Biomass ({\mu}g/l)')
+ylim([1e-10 1e10])
