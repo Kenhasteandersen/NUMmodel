@@ -18,7 +18,7 @@ module generalists
   !
   ! Dissolved nutrient uptake:
   !
-  real(dp), parameter:: alphaN = 0.682 ! L/d/mugC/mum^2
+  real(dp), parameter:: alphaN = 0.972 !0.682 ! L/d/mugC/mum^2
   real(dp), parameter:: rNstar = 2 ! mum
   !
   ! Phagotrophy:
@@ -32,7 +32,7 @@ module generalists
   ! Metabolism
   !
   real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
-  real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
+  !real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
   real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
             !The constant is increased a bit to limit the lower cell size
   real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
