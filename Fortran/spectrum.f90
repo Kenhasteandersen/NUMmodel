@@ -114,7 +114,6 @@ contains
     this%JF = 0.d0
     this%epsilonF = 0.d0
     this%palatability = 1.d0 ! set to default
-    this%mort2constant = 0.0002*n
 
     contains
 
@@ -135,6 +134,7 @@ contains
        this%mDelta(i) =  exp(x + 0.5*deltax)-this%mLower(i)
        this%z(i) = this%mLower(i)/(this%mLower(i) + this%mDelta(i))
     end do
+    this%mort2constant = 0.004/log(this%m(2) / this%m(1))
   end subroutine calcGrid
 
   end subroutine initSpectrum
