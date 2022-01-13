@@ -130,7 +130,7 @@ switch sim.p.nameModel
                                 Bpico = Bpico + Bpico1*dz(i,j,k); % gC/m2
                                 Bnano = Bnano + Bnano1*dz(i,j,k);
                                 Bmicro = Bmicro + Bmicro1*dz(i,j,k);
-                                Chl = Chl + calcChl(
+                                %Chl = Chl + calcChl(
                             end
                         end
                         sim.ProdGross(i,j,iTime) = ProdGross;
