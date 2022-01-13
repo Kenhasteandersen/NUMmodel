@@ -35,7 +35,7 @@ program NUMmodeltest
 
   !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
 
-  call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0)
+  call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
 
   !call calcDerivatives(u00, 20.d0, 10.d0, 0.1d0, dudt)
 
