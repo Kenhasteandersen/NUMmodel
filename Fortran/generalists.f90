@@ -32,7 +32,6 @@ module generalists
   ! Metabolism
   !
   real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
-  !real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
   real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
             !The constant is increased a bit to limit the lower cell size
   real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
@@ -79,16 +78,19 @@ contains
 
     this%r = (3./(4.*pi)*this%m/rho)**onethird
     
+    this%nu = 3*delta/this%r
+
     this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
-    this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m
+    this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu)
     this%AF = alphaF*this%m
     this%JFmax = cF/this%r * this%m
     
     this%JlossPassive = cLeakage/this%r * this%m ! in units of C
 
-    this%nu = 3*delta/this%r
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
     this%Jresp = cR*alphaJ*this%m
+
+    this%AL = this%AL * (1.d0 - this%nu)
   end subroutine initGeneralists
 
   subroutine calcRatesGeneralists(this, L, N, DOC, gammaN, gammaDOC)
