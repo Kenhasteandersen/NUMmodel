@@ -66,6 +66,7 @@ contains
     class(spectrumGeneralists):: this
     real(dp), intent(in):: mMax
     integer, intent(in):: n
+    integer:: i
     real(dp), parameter:: mMin = 3.1623d-9
     real(dp), parameter:: rho = 0.57*1d6*1d-12
 
@@ -79,6 +80,9 @@ contains
     this%r = (3./(4.*pi)*this%m/rho)**onethird
     
     this%nu = 3*delta/this%r
+    do i = 1,this%n
+      this%nu(i) = min(1.d0, this%nu(i))
+    enddo
 
     this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
     this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu)
