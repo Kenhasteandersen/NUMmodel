@@ -87,17 +87,17 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
         error( 'Error: Cannot find transport matrix file: %s', p.pathBoxes);
     end
     % Load TMs
-    for month=1:12
-        load(strcat(p.pathMatrix, sprintf('%02i.mat',month)));
+    parfor month=1:12
+        matrix = load(strcat(p.pathMatrix, sprintf('%02i.mat',month)),'Aimp');
         %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
         
         %AexpM(month,:,:) = full(function_convert_TM_positive(Aexp(idxGrid,idxGrid)));
-        AimpM(month,:,:) = full(function_convert_TM_positive(Aimp(idxGrid,idxGrid)));
+        AimpM(month,:,:) = full(function_convert_TM_positive(matrix.Aimp(idxGrid,idxGrid)));
         
         % Preparing for timestepping. 43200s.
-        load(p.pathGrid,'deltaT');
+        temp = load(p.pathGrid,'deltaT');
         %AexpM(month,:,:) = Ix(idxGrid,idxGrid) + squeeze((12*60*60)*AexpM(month,:,:));
-        AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(12*60*60/deltaT);
+        AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(12*60*60/temp.deltaT);
         fprintf('.');
     end
     %

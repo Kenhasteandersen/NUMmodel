@@ -8,7 +8,7 @@ p.tSave = 5;
 sim = simulateGlobal(p);
 
 sumB = sum(sim.B(~isnan(sim.B)));
-if ( sumB > 8.1e5 && sumB < 8.2e5 )
+if ( sumB > 7.7e5 && sumB < 7.8e5 )
     bSuccess = true;
 else
     bSuccess = false;

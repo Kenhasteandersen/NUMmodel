@@ -22,15 +22,15 @@ try
         bSuccess = true;
     else
         bSuccess = false;
-        fprintf('sum(dudt) = %4.0f\n.',round(sum(dudt)*1000));
+        fprintf(2,'sum(dudt) = %4.0f\n.',round(sum(dudt)*1000));
     end
 catch ME
-    fprintf('Error: %s\n', ME.identifier);
+    fprintf(2,'Error: %s\n', ME.identifier);
     bSuccess = false;
 end
 
 if bSuccess
     fprintf('OK.\n');
 else
-    fprintf('Failed!\n');
+    fprintf(2,'Failed!\n');
 end
