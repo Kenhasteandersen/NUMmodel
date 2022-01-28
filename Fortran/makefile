@@ -1,7 +1,11 @@
 #
 # Define lib-names depending on the system
 #
-UNAME := $(shell uname)
+ifeq '$(findstring ;,$(PATH))' ';'
+    UNAME := Windows
+else
+    UNAME := $(shell uname 2>/dev/null || echo Unknown)
+endif
 
 ifeq ($(UNAME), Darwin)
  libMatlab = ../lib/libNUMmodel_matlab.so
