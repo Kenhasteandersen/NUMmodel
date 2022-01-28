@@ -8,20 +8,29 @@ arguments
     bParallel logical = false;
 end
 
-sLibname = 'NUMmodel_matlab';
+sLibname = 'libNUMmodel_matlab';
+
+switch computer('arch')
+    case {'maci','maci64'}
+        sExtension = '.so';
+    case {'glnx86','glnxa64'}
+        sExtension = '.so';
+    case {'win32','win64'}
+        sExtension = '.dll';
+end
 
 path = fileparts(mfilename('fullpath'));
 
 if bParallel
     if isempty(gcp('nocreate'))
         parpool('AttachedFiles',...
-            {strcat(path,'/../Fortran/NUMmodel_matlab.so'),...
+            {strcat(path,'/../lib/',sLibname,sExtension),...
             strcat(path,'/../Fortran/NUMmodel_wrap_colmajor4matlab.h')});
     end
 else
     if ~libisloaded(sLibname)
         [notfound,warnings] = loadlibrary(...
-            strcat(path,'/../Fortran/',sLibname,'.so'), ...
+            strcat(path,'/../lib/',sLibname,sExtension), ...
             strcat(path,'/../Fortran/NUMmodel_wrap_colmajor4matlab.h'));
     end
 end
