@@ -8,13 +8,13 @@ else
 endif
 
 ifeq ($(UNAME), Darwin)
- libMatlab = ../lib/libNUMmodel_matlab.so
- libR = ../lib/libNUMmodel_R.so
+ libMatlab = ../lib/libNUMmodel_OSX_matlab.so
+ libR = ../lib/libNUMmodel_OSX_R.so
 endif
 
 ifeq ($(UNAME), Linux)
- libMatlab = ../lib/libNUMmodel_matlab.so
- libR = ../lib/libNUMmodel_R.so
+ libMatlab = ../lib/libNUMmodel_linux_matlab.so
+ libR = ../lib/libNUMmodel_linux_R.so
 endif
 
 ifeq ($(UNAME), Windows)

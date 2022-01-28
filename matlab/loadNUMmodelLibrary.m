@@ -8,15 +8,18 @@ arguments
     bParallel logical = false;
 end
 
-sLibname = 'libNUMmodel_matlab';
-
 switch computer('arch')
     case {'maci','maci64'}
+        sLibname = 'libNUMmodel_OSX_matlab';
         sExtension = '.so';
     case {'glnx86','glnxa64'}
+        sLibname = 'libNUMmodel_linux_matlab';
         sExtension = '.so';
     case {'win32','win64'}
+        sLibname = 'libNUMmodel_matlab';
         sExtension = '.dll';
+    otherwise
+        error('Architecture %s not found.\n', computer('arch'));
 end
 
 path = fileparts(mfilename('fullpath'));
