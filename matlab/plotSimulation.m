@@ -33,18 +33,22 @@ switch sim.p.nameModel
         clf
         plotGlobal(sim);
         
+        lat = 60;
+        lon = -15;
+        
         figure(2)
         clf
-        plotWatercolumnTime(sim,60,-10, depthMax=200);
+        plotWatercolumnTime(sim,lat,lon, depthMax=200);
         
         figure(3)
-        plotWatercolumn(sim,150,60,-10, bNewplot=true, depthMax=200);
+        plotWatercolumn(sim,150,lat,lon, bNewplot=true, depthMax=200);
         
         figure(4)
-        plotSizespectrumTime(sim,1,60,-10);
+        plotSizespectrumTime(sim,1,lat,lon);
+        title(sprintf('Size spectrum at (%3.0f,%3.0f).\n',[lat,lon]));
         
         figure(5)
-        plotSizespectrum(sim,150,1,60,-10);
+        plotSizespectrum(sim,150,1,60,-15);
         
     otherwise
         error('Simulation type %s not supported.', sim.p.nameModel);

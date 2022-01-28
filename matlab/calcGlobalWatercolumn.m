@@ -26,4 +26,10 @@ ix = ix(1);
 idx.x = mod(ix, length(sim.x))+1;
 idx.y = floor(ix/length(sim.x));
 idx.z = find(sim.bathy(idx.x, idx.y,:)==1);
+%
+% Check whether we're asking for a land point:
+%
+if isempty(idx.z)
+    error('The point %f, %f is on land.\n', [lat,lon]);
+end
 
