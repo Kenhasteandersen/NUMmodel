@@ -99,6 +99,8 @@ switch sim.p.nameModel
             sim.Bpico = sim.ProdGross;
             sim.Bnano = sim.ProdGross;
             sim.Bmicro = sim.ProdGross;
+            ChlArea = 0*dx;
+            ChlVolume = sim.ProdGross;
             
             nTime = length(sim.t);
             nX = length(sim.x);
@@ -130,7 +132,13 @@ switch sim.p.nameModel
                                 Bpico = Bpico + Bpico1*dz(i,j,k); % gC/m2
                                 Bnano = Bnano + Bnano1*dz(i,j,k);
                                 Bmicro = Bmicro + Bmicro1*dz(i,j,k);
-                                %Chl = Chl + calcChl(
+                                % Chl:
+                                rates = getRates(sim.p, u, sim.L(i,j,k,iTime), sim.T(i,j,k,iTime));
+                                tmp =  calcChl( squeeze(sim.B(i,j,k,:,iTime)), rates, sim.L(i,j,k,iTime)) / 1000; % Convert to mg
+                                if ~isnan(tmp)
+                                    ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
+                                    ChlVolume(i,j,k) = ChlVolume(i,j,k) + tmp;
+                                end
                             end
                         end
                         sim.ProdGross(i,j,iTime) = ProdGross;
@@ -145,7 +153,8 @@ switch sim.p.nameModel
             end
             sim.eHTL = sim.ProdHTL./sim.ProdNet;
             sim.ePP = sim.ProdNet./sim.ProdGross;
-            
+            sim.ChlArea = ChlArea/length(sim.t);
+            sim.ChlVolume = ChlVolume/length(sim.t);
             %
             % Global totals
             %
@@ -163,6 +172,9 @@ switch sim.p.nameModel
                 sim.ProdGrossTotal(i) = sum(sum(sim.ProdGross(:,:,i).*dx.*dy)); % gC/yr
                 sim.ProdHTLTotal(i) = sum(sum(sim.ProdHTL(:,:,i).*dx.*dy));
             end
+            
+            sim.ChlTotal = ChlArea.*dx.*dy;
+            sim.ChlTotal = sum(sim.ChlTotal(:))/ 1000; %gChl
         end
         %
         % Watercolumn totals:
