@@ -22,7 +22,12 @@ ifeq ($(UNAME), Windows)
  libR = ../lib/libNUMmodel_R.dll
 endif
 
-
+#
+# Compile from OSX -> windows
+#
+#FORT = /usr/local/Cellar/mingw-w64/9.0.0_2/toolchain-x86_64/bin/x86_64-w64-mingw32-gfortran
+#libMatlab = ../lib/libNUMmodel_matlab.dll
+#libR = ../lib/libNUMmodel_R.dll
 #
 # iFortran:
 #

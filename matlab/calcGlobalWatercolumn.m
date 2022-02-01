@@ -30,6 +30,6 @@ idx.z = find(sim.bathy(idx.x, idx.y,:)==1);
 % Check whether we're asking for a land point:
 %
 if isempty(idx.z)
-    error('The point %f, %f is on land.\n', [lat,lon]);
+    error('The point %3.0f, %3.0f is on land.\n', lat,lon);
 end
 
