@@ -2,6 +2,15 @@
 % Returns all rates from the unicellulars for a given state (u) and light
 % level.
 %
+% In:
+%  p - parameters
+%  u - vector of state variables
+%  L - Light
+%  T - Temperature
+%
+% Out
+%  Struct with rates
+%
 function rates = getRates(p, u, L, T)
 arguments
     p struct;
