@@ -42,6 +42,9 @@ switch sim.p.nameModel
     case 'watercolumn'
         nTime = length(sim.t);
         nZ = length(sim.z);
+        ChlArea = zeros(nTime,1);
+        ChlVolume = zeros(nTime, nZ);
+        jLreal = zeros(nTime,nZ,sim.p.n-2);
         for iTime = 1:nTime
             ProdGross = 0;
             ProdNet = 0;
@@ -69,6 +72,14 @@ switch sim.p.nameModel
                     Bpico = Bpico + Bpico1*conv; % gC/m2
                     Bnano = Bnano + Bnano1*conv;
                     Bmicro = Bmicro + Bmicro1*conv;
+                    % Chl:
+                    rates = getRates(sim.p, u, sim.L(k,iTime), sim.T(k,iTime));
+                    tmp =  calcChl( squeeze(sim.B(k,:,iTime)), rates, sim.L(k,iTime)) / 1000; % Convert to mg
+                    if ~isnan(tmp)
+                        jLreal(iTime,k,:) = rates.jLreal;
+                        ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
+                        ChlVolume(iTime,k) = ChlVolume(iTime,k) + sum(tmp);
+                    end
                 end
             end
             sim.ProdGross(iTime) = ProdGross;
@@ -82,6 +93,9 @@ switch sim.p.nameModel
         end
         sim.eHTL = sim.ProdHTL./sim.ProdNet;
         sim.ePP = sim.ProdNet./sim.ProdGross;
+        sim.ChlArea = ChlArea;
+        sim.ChlVolume = ChlVolume;
+        sim.jLreal = jLreal;
         
     case 'global'
         %

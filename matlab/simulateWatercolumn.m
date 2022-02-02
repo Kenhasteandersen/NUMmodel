@@ -26,6 +26,12 @@ arguments
     options.bExtractcolumn logical = false; % Extract the watercolumn even though a saved one exists
     options.bRecalcLight logical = false; % Recalc the light (different from the extracted watercolumn)
 end
+%
+% Get the watercolumn parameters if they are not already set:
+%
+if ~isfield(p,'nameModel')
+    p = parametersWatercolumn(p);
+end
 
 ixN = p.idxN;
 ixDOC = p.idxDOC;

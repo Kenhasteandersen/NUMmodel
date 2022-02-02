@@ -18,6 +18,12 @@ arguments
     T double = 10;
     bLosses logical = false;
 end
+%
+% Get the chemostat parameters if they are not already set:
+%
+if ~isfield(p,'nameModel')
+    p = parametersChemostat(p);
+end
 
 %
 % Simulate:

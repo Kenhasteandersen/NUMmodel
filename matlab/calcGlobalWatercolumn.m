@@ -2,7 +2,7 @@
 % Returns the indices of the watercolumn in a global simulation.
 %
 % In:
-%  lat, lat - latitude and longitude
+%  lat, lon - latitude and longitude
 %
 % Out:
 %  structure with fields 'x" and "y" and closest to lat and lon. Also includes the

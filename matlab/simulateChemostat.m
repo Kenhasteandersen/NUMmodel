@@ -21,6 +21,12 @@ arguments
     options.bUnicellularloss logical = false;
 end
 %
+% Get the chemostat parameters if they are not already set:
+%
+if ~isfield(p,'nameModel')
+    p = parametersChemostat(p);
+end
+%
 % Concentrations in the deep layer:
 %
 if options.bUnicellularloss

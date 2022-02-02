@@ -19,6 +19,12 @@ arguments
     sim struct = [];
     bCalcAnnualAverages = false; % Whether to calculate annual averages
 end
+%
+% Get the global parameters if they are not already set:
+%
+if ~isfield(p,'nameModel')
+    p = parametersGlobal(p);
+end
 
 ixN = p.idxN;
 ixDOC = p.idxDOC;
