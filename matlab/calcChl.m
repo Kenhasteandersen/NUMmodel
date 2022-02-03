@@ -51,7 +51,7 @@
 % end
 
     function Bchl = calc(B,rates,L)
-        Bchl = sum( B .* rates.jLreal )/L * 1000; % in units of mu g Chl per m^3 
+        Bchl = sum( B .* rates.jLreal )/L; % in units of mu g Chl per l 
     end
 
 %end

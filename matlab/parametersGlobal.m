@@ -6,6 +6,7 @@
 %  nTMmodel - Which transport matrices to use:
 %       1 = MITgcm_2.8 (default)
 %       2 = MITgcm_ECCO
+%       3 = UVicOSUpicdefault (experimental)
 %
 % Out:
 %  simulation structure
@@ -46,6 +47,19 @@ elseif nTMmodel == 2
     p.pathInit = strcat(sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0)));
     
     p.dt = 0.1; % For Euler time stepping
+elseif nTMmodel == 3
+    % Experimental
+     p.TMname = 'UVicOSUpicdefault';
+    p.pathMatrix = strcat(path,'/../TMs/UVicOSUpicdefault/Matrix1/TMs/matrix_nocorrection_');
+    p.pathBoxes = strcat(path,'/../TMs/UVicOSUpicdefault/Matrix1/Data/boxes.mat');
+    p.pathGrid = strcat(path,'/../TMs/UVicOSUpicdefault/grid.mat');
+    p.pathConfigData = strcat(path,'/../TMs/UVicOSUpicdefault/config_data.mat');
+    p.pathTemp = strcat(path,'/../TMs/UVicOSUpicdefault/BiogeochemData/Theta_bc.mat'); 
+    p.pathN0    = strcat(path,'/../TMs/UVicOSUpicdefault_N0');
+    p.pathInit = strcat(sprintf('Transport matrix/globalInitUVicOSUpicdefault_%02i',length(p.u0)));
+    
+    p.dt = 0.1; % For Euler time stepping
+
 end
 %
 % Numerical parameters:

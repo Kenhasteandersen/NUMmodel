@@ -74,7 +74,7 @@ switch sim.p.nameModel
                     Bmicro = Bmicro + Bmicro1*conv;
                     % Chl:
                     rates = getRates(sim.p, u, sim.L(k,iTime), sim.T(k,iTime));
-                    tmp =  calcChl( squeeze(sim.B(k,:,iTime)), rates, sim.L(k,iTime)) / 1000; % Convert to mg
+                    tmp =  calcChl( squeeze(sim.B(k,:,iTime)), rates, sim.L(k,iTime)); % Convert to mg
                     if ~isnan(tmp)
                         jLreal(iTime,k,:) = rates.jLreal;
                         ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
