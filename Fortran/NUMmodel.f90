@@ -16,7 +16,8 @@ module NUMmodel
   integer, parameter :: idxN = 1
   integer, parameter :: idxDOC = 2
   integer, parameter :: idxSi = 3
-
+  integer, parameter :: idxSDeC = 3
+  integer, parameter :: idxLDeC = 4
   ! Types of spectra:
    integer, parameter :: typeGeneralist = 1
    integer, parameter :: typeGeneralist_csp = 2
@@ -60,6 +61,17 @@ contains
     call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
+
+  ! -----------------------------------------------
+  ! A basic setup with generalists and POC (SDeC + LDeC)
+  ! -----------------------------------------------
+  subroutine setupGeneralistsPOC(n)
+    integer, intent(in):: n
+    call parametersInit(1, n, 4) ! 1 group, n size classes (excl nutrients, DOC SDeC and LDeC),
+    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+  end subroutine setupGeneralistsPOC
+
 
   ! -----------------------------------------------
   ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
@@ -459,11 +471,12 @@ contains
     if ((u(idxDOC) + dudt(idxDOC)*dt) .lt. 0) then
        gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(dudt(idxDOC)*dt)))
     end if
-    if (nNutrients .gt. 2) then
+    if (nNutrients .eq. 3) then
       if ((u(idxSi) + dudt(idxSi)*dt) .lt. 0) then
         gammaSi = max(0.d0, min(1.d0, -u(idxSi)/(dudt(idxSi)*dt)))
       end if
     end if
+
     if ((gammaN .lt. 1.d0) .or. (gammaDOC .lt. 1.d0) .or. (gammaSi .lt. 1.d0)) then
        call calcDerivativesUnicellulars()
     end if
@@ -535,9 +548,15 @@ contains
    do iGroup = 1, nGroups
       select type (spec => group(iGroup)%spec)
       type is (spectrumGeneralists)
-         call calcDerivativesGeneralists(spec, &
-              upositive(ixStart(iGroup):ixEnd(iGroup)), &
-              dudt(idxN), dudt(idxDOC), dudt(ixStart(iGroup):ixEnd(iGroup)))
+         if (idxB .eq. 5 ) then
+           call calcDerivativesGeneralists_poc(spec, &
+                upositive(ixStart(iGroup):ixEnd(iGroup)), &
+                dudt(idxN), dudt(idxDOC), dudt(idxSDeC), dudt(idxLDeC), dudt(ixStart(iGroup):ixEnd(iGroup)))
+         else
+           call calcDerivativesGeneralists(spec, &
+                upositive(ixStart(iGroup):ixEnd(iGroup)), &
+                dudt(idxN), dudt(idxDOC), dudt(ixStart(iGroup):ixEnd(iGroup)))
+         end if 
       type is (spectrumDiatoms_simple)
          call calcDerivativesDiatoms_simple(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &

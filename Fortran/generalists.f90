@@ -42,7 +42,7 @@ module generalists
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
   real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to DOC
   real(dp), parameter:: reminF = 0.1d0
-  real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
+  real(dp), parameter:: reminHTL = 0.5d0 ! fraction of HTL mortality remineralized to N and DOC
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
@@ -58,6 +58,7 @@ module generalists
   end type spectrumGeneralists
  
   public initGeneralists, spectrumGeneralists, calcRatesGeneralists, calcDerivativesGeneralists
+  public calcDerivativesGeneralists_poc
   public printRatesGeneralists, getNbalanceGeneralists, getCbalanceGeneralists
 
 contains
@@ -195,8 +196,8 @@ contains
            +  this%JlossPassive(i) &
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) &
-           + this%mort2(i) &
-           + reminHTL*this%mortHTL(i)) * u(i)/rhoCN
+           +  this%mort2(i) &
+           +  reminHTL*this%mortHTL(i)) * u(i)/rhoCN
       !
       ! Update DOC:
       !
@@ -218,7 +219,63 @@ contains
            - this%mortHTL(i))*u(i)
    end do
   
- end subroutine calcDerivativesGeneralists
+  end subroutine calcDerivativesGeneralists
+
+  subroutine calcDerivativesGeneralists_poc(this, u, dNdt, dDOCdt, dSDeCdt, dLDeCdt, dudt)
+    class(spectrumGeneralists), intent(inout):: this
+    real(dp), intent(in):: u(this%n)
+    real(dp), intent(inout) :: dNdt, dDOCdt, dSDeCdt, dLDeCdt, dudt(this%n)
+    real(dp):: mortloss
+    integer:: i
+    !
+    ! To make mass balance check:
+    !
+    this%mort2 = this%mort2constant*u
+    do i = 1, this%n
+      mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
+      !
+      ! Update nitrogen:
+      !
+      dNdt = dNdt  &
+           + ((-this%JN(i) &
+           +  this%JlossPassive(i) &
+           +  this%JNlossLiebig(i) &
+           +  this%JCloss_feeding(i))/this%m(i) &
+           +  remin2*this%mort2(i)) * u(i)/rhoCN
+      !
+      ! Update DOC:
+      !
+      dDOCdt = dDOCdt &
+           + ((-this%JDOC(i) &
+           +   this%JlossPassive(i) &
+           +   this%JClossLiebig(i) &
+           +   this%JCloss_photouptake(i) &
+           +   reminF*this%JCloss_feeding(i))/this%m(i) &
+           +   remin2*this%mort2(i)) * u(i)
+      !
+      ! Update the generalists:
+      !
+      dudt(i) = (this%Jtot(i)/this%m(i)  &
+           !- mort(i) &
+           - this%mortpred(i) &
+           - this%mort2(i) &
+           - this%mortHTL(i))*u(i)
+
+      !
+      ! Update Small detritus SDeC
+      !
+      !dSDeCdt = dSDeCdt
+      dSDeCdt = dSDeCdt &
+              +  ((1-remin2)*this%mort2(i)) * u(i)
+
+      !
+      ! Update Large detritus LDeC
+      !
+      dLDeCdt = dLDeCdt &
+              + (reminHTL*this%mortHTL(i)) * u(i) 
+   end do
+
+ end subroutine calcDerivativesGeneralists_poc
 
 subroutine printRatesGeneralists(this)
   class(spectrumGeneralists), intent(in):: this
