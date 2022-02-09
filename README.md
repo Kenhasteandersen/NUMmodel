@@ -11,10 +11,10 @@ https://user-images.githubusercontent.com/13268353/148120839-6bbfc0ac-69f1-445b-
 
 
 
-The core library is written in fortran2003 and is interfaced from matlab or R. Requires a fairly recent version of matlab to run.
+The core library is written in Fortran2008 and is interfaced from matlab or R.
 
-### Compiling
-Use the makefile in the Fortran directory. Edit the compiler and flags in the makefile to suit your operating system and compile by writing: `make`.
+### Installation
+The library requires a recent version of matlab (2021 or later). It also requires the Matlab MEX module to be installed (Home -> Add-ons -> Get Add-ons -> MATLAB Support for MinGW-w64 C/C++ Compiler). To run global simulation it further requires that the mapping toolbox is installed.  Compiled versions of the library is available for windows (64 bit), linux and osx.  Compiling the library requires a Fortran compiler, e.g., gfortran.  Use the makefile in the Fortran directory. Edit the compiler and flags in the makefile to suit your operating system and compile by writing: `make`.
 
 ### Basic structure
 There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.
