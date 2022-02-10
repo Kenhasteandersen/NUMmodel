@@ -13,7 +13,7 @@ module generalists
   ! Light uptake:
   !
   real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
-  real(dp), parameter:: alphaL = 0.206
+  real(dp), parameter:: alphaL = 0.13 ! 0.206
   real(dp), parameter:: rLstar = 8.25
   !
   ! Dissolved nutrient uptake:

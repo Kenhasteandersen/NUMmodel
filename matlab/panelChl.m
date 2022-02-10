@@ -1,3 +1,5 @@
+%
+% Makes a panel of the Chl in a water
 function sim = panelChl(sim)
 
 if sim.p.nameModel ~= 'watercolumn'

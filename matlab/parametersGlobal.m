@@ -18,6 +18,13 @@ arguments
     nTMmodel {mustBeInteger} = 1;
 end
 
+    function check(sFilename)
+       if ~exist(sFilename, 'file')
+           error('  Did not find the file:\n  p.TMname%s.\n  Check that transport matrices are downloaded and placed in ../TMs/%s.\nDownload TMs from \n  http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/',...
+               sFilename,p.TMname);
+       end
+    end
+
 p.nameModel = 'global';
 
 path = fileparts(mfilename('fullpath'));
@@ -26,7 +33,7 @@ path = fileparts(mfilename('fullpath'));
 % Set load paths for tranport matrices:
 %
 if (nargin==1 || nargin==0 || nTMmodel == 1)
-    p.TMname = 'MITgcm_2.8';
+    p.TMname = 'MITgcm_2.8deg';
     p.pathMatrix   = strcat(path,'/../TMs/MITgcm_2.8deg/Matrix5/TMs/matrix_nocorrection_');
     p.pathBoxes     = strcat(path,'/../TMs/MITgcm_2.8deg/Matrix5/Data/boxes.mat');
     p.pathGrid      = strcat(path,'/../TMs/MITgcm_2.8deg/grid.mat');
@@ -59,8 +66,19 @@ elseif nTMmodel == 3
     p.pathInit = strcat(sprintf('Transport matrix/globalInitUVicOSUpicdefault_%02i',length(p.u0)));
     
     p.dt = 0.1; % For Euler time stepping
-
 end
+%
+% Test that the TMs are available:
+%
+sTest = strcat(path,'/../TMs/',p.TMname);
+if ~exist( sTest )
+    error('Transport matrix directory %s does not exist.\nDownload TMs from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/',...
+    sTest);
+end
+check(p.pathBoxes);
+check(p.pathGrid);
+check(p.pathConfigData);
+check(p.pathTemp);
 %
 % Numerical parameters:
 %
@@ -77,3 +95,7 @@ p.bUse_parday_light = false; % Using the parday file includes changes in cloud c
 p.EinConv = 4.57; % conversion factor from W m^-2 to \mu mol s^-1 m^-2 (Thimijan & Heins 1983)
 p.PARfrac = 0.4; % Fraction of light available as PAR. Source unknown
 p.kw = 0.05; % m^-1
+
+
+
+end
