@@ -12,13 +12,11 @@ p = setupGeneric(mAdult);
 p = parametersChemostat(p);
 p.tEnd = 365;
 %
-% Setup fortran library:
+% Set to "normal" HTL mortality if there are no copepods:
 %
-if libisloaded('NUMmodel')
-    unloadlibrary('NUMmodel')
+if isempty(mAdult)
+    setHTL(0.1, 1/500^1.5,false,false);
 end
-loadNUMmodelLibrary();
-calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult);
 %
 % Simulate
 %
