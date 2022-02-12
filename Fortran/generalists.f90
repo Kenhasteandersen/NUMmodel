@@ -14,7 +14,7 @@ module generalists
   !
   real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
   real(dp), parameter:: alphaL = 0.13 ! 0.206
-  real(dp), parameter:: rLstar = 8.25
+  real(dp), parameter:: rLstar = 7.5 !8.25
   !
   ! Dissolved nutrient uptake:
   !
@@ -68,7 +68,7 @@ contains
     integer, intent(in):: n
     integer:: i
     real(dp), parameter:: mMin = 3.1623d-9
-    real(dp), parameter:: rho = 0.57*1d6*1d-12
+    real(dp), parameter:: rho = 0.4*1d6*1d-12
 
     call this%initUnicellular(n, mMin, mMax)
     allocate(this%JFreal(n))

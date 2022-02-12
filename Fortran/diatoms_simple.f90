@@ -26,8 +26,8 @@ module diatoms_simple
     ! Light uptake:
     !
     real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
-    real(dp), parameter:: alphaL = 0.206
-    real(dp), parameter:: rLstar = 8.25
+    real(dp), parameter:: alphaL = 0.13
+    real(dp), parameter:: rLstar = 7.5
     !
     ! Costs
     !
@@ -73,7 +73,7 @@ module diatoms_simple
       real(dp), intent(in):: mMax
       integer, intent(in):: n
       real(dp), parameter:: mMin = 3.1623d-9
-      real(dp), parameter:: rho = 0.57*1d6*1d-12
+      real(dp), parameter:: rho = 0.4*1d6*1d-12
   
       call this%initUnicellular(n, mMin, mMax)
       allocate(this%JSi(this%n))
