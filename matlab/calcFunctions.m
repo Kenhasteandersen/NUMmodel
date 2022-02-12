@@ -114,7 +114,7 @@ switch sim.p.nameModel
             sim.Bnano = sim.ProdGross;
             sim.Bmicro = sim.ProdGross;
             ChlArea = 0*dx;
-            ChlVolume = sim.ProdGross;
+            ChlVolume = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z));
             
             nTime = length(sim.t);
             nX = length(sim.x);
@@ -151,7 +151,7 @@ switch sim.p.nameModel
                                 tmp =  calcChl( squeeze(sim.B(i,j,k,:,iTime)), rates, sim.L(i,j,k,iTime)) / 1000; % Convert to mg
                                 if ~isnan(tmp)
                                     ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
-                                    ChlVolume(i,j,k) = ChlVolume(i,j,k) + tmp;
+                                    ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp;
                                 end
                             end
                         end
