@@ -2,7 +2,10 @@
 % Global run using transport matrices
 %
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
-% (choose MITgcm_2.8deg), and be put into the location 'NUMmodel/TMs'
+% and be put into the location 'NUMmodel/TMs'
+% Simulations currently works with:
+%  - MITgcm_2.8deg (low resolution; runs on a laptop)
+%  - MITgcm_ECCO (higher resolution; requires more memory).
 %
 % Input:
 %  p: parameter structure from parametersGlobal
