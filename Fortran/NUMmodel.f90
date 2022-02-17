@@ -776,7 +776,7 @@ contains
       mortHTL( i1:i2 ) = group(iGroup)%spec%mortHTL
       mort2( i1:i2 ) = group(iGroup)%spec%mort2
       jNloss( i1:i2 ) = group(iGroup)%spec%JNloss / group(iGroup)%spec%m
-      jR( i1:i2 ) = fTemp15 * group(iGroup)%spec%Jresp / group(iGroup)%spec%m
+      jR( i1:i2 ) = fTemp2 * group(iGroup)%spec%Jresp / group(iGroup)%spec%m
 
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumUnicellular)

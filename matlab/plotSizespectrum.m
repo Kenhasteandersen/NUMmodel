@@ -25,6 +25,7 @@ switch sim.p.nameModel
             u = [sim.N(iTime), sim.DOC(iTime), squeeze(sim.B(iTime,:))];
         end
         s.L = sim.L;
+        s.T = sim.T;
         
     case 'watercolumn'
         % Extract from a single water column:
@@ -37,7 +38,7 @@ switch sim.p.nameModel
             u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), squeeze(s.B(iTime,:))];
         end
         s.L = sim.L(iDepth,iTime);
-        
+        s.T = sim.T(iDepth,iTime);
         
     case 'global'
         % Extract from global run:
@@ -55,7 +56,7 @@ switch sim.p.nameModel
                 squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))'];
         end
         s.L = sim.L(idx.x, idx.y, iDepth,iTime);
-        
+        s.T = sim.T(idx.x, idx.y, iDepth,iTime);
 end
 
 s.p = sim.p;
@@ -78,7 +79,7 @@ set(gca,'XTickLabel','');
 nexttile
 
 if ~isfield('sim','rates')
-    sim.rates = getRates(sim.p, u, s.L);
+    sim.rates = getRates(sim.p, u, s.L, s.T);
 end
 %panelGains(sim.p,rates)
 panelGains(sim.p, sim.rates);

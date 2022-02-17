@@ -1,5 +1,6 @@
 program NUMmodeltest
   use NUMmodel
+  use globals
   implicit none
 
   real(dp), allocatable:: u0(:), u00(:), dudt(:)
@@ -35,8 +36,8 @@ program NUMmodeltest
 
   !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
 
-  call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
-
+  call simulateChemostatEuler(u00, 100.d0, 20.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
+  write(*,*) "fTemp2",fTemp2
   !call calcDerivatives(u00, 20.d0, 10.d0, 0.1d0, dudt)
 
   ProdGross = 0
