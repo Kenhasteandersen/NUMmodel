@@ -106,7 +106,7 @@ contains
     allocate(this%JCloss(n))
 
     allocate(this%mPOM(n))
-    allocate(this%JPOM(n))
+    allocate(this%jPOM(n))
 
     allocate(this%mortpred(n))
     allocate(this%mortHTL(n))
@@ -119,7 +119,7 @@ contains
     this%epsilonF = 0.d0
     this%palatability = 1.d0 ! set to default
     this%mPOM = 0.d0
-    this%JPOM = 0.d0
+    this%jPOM = 0.d0
 
     contains
 
@@ -163,7 +163,7 @@ contains
     write(*,99) "jTot:", this%Jtot / this%m
     write(*,99) "mortpred", this%mortpred
     write(*,99) "mortHTL", this%mortHTL
-    write(*,99) "jPOM:", this%JPOM / this%m
+    write(*,99) "jPOM:", this%jPOM
   end subroutine printRatesSpectrum
 
   ! ==========================================================================
@@ -197,6 +197,9 @@ contains
     allocate(this%JClossLiebig(n))
 
     allocate(this%Jmax(n))
+
+    this%mPOM = this%m ! Assume that POM created by dead cells are 
+                       !the same size as the cells
   end subroutine initUnicellular
 
   subroutine printRatesUnicellular(this)

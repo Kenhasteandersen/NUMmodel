@@ -70,6 +70,17 @@ contains
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
+  ! A basic setup with generalists and POM
+  ! -----------------------------------------------
+  subroutine setupGeneralistsPOM(n, nPOM)
+   integer, intent(in):: n, nPOM
+   call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+   call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+   call parametersAddGroup(typePOM, nPOM, 1.d0) ! POM with nPOM size classes and max size 1 ugC
+   call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+ end subroutine setupGeneralistsPOM
+
+  ! -----------------------------------------------
   ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
   ! -----------------------------------------------
    subroutine setupGeneralistsOnly_csp()
@@ -307,15 +318,18 @@ contains
       allocate( thetaPOM(nGrid) )
       thetaPOM = 0
       do iGroup = 1, nGroups
-         do i = 1, group(iGroup)%spec%n
-            ! Find the size class in POM corresponding to mPOM:
-            j = 1
-            do while ( (group(iGroup)%spec%mPOM(i) .lt. group(idxPOM)%spec%m(j)) &
-               .and. (j .lt. group(idxPOM)%spec%n))
-               j = j + 1
-            end do
-            thetaPOM( ixStart(iGroup)+i-1 ) = j
-         end do
+         if (iGroup .ne. idxPOM) then
+           do i = 1, group(iGroup)%spec%n
+              ! Find the size class in POM corresponding to mPOM:
+              j = 1
+              do while ( (group(iGroup)%spec%mPOM(i) .gt. &
+                      (group(idxPOM)%spec%mLower(j)+group(idxPOM)%spec%mDelta(j))) &
+                 .and. (j .lt. group(idxPOM)%spec%n))
+                 j = j + 1
+              end do
+              thetaPOM( ixStart(iGroup)+i-1 ) = j
+           end do
+         end if
       end do
    end if
 
@@ -530,8 +544,8 @@ contains
       select type (spec => group(idxPOM)%spec)
       type is (spectrumPOM)
          call calcDerivativesPOM(spec, &
-         upositive(ixStart(idxPOM):ixEnd(idxPOM)), &
-         dudt(idxN), dudt(idxDOC), dudt(ixStart(idxPOM):ixEnd(idxPOM)))
+           upositive(ixStart(idxPOM):ixEnd(idxPOM)), &
+           dudt(idxN), dudt(idxDOC), dudt(ixStart(idxPOM):ixEnd(idxPOM)))
       end select
     end if
     
@@ -688,10 +702,8 @@ contains
       do iGroup = 1, nGroups
          call group(iGroup)%spec%printRates()
       end do
-
    end subroutine printRates
 
-  
   function calcN(u) result(N)
    real(dp), intent(in):: u(:)
    integer:: i
