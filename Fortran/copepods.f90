@@ -63,7 +63,7 @@ contains
   end subroutine initCopepod
 
   subroutine calcDerivativesCopepod(this, u, dudt)
-     class(spectrumCopepod), intent(inout):: this
+    class(spectrumCopepod), intent(inout):: this
     real(dp), intent(in):: u(this%n)
     real(dp), intent(inout):: dudt(this%n)
     integer:: i

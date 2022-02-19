@@ -10,6 +10,7 @@ module NUMmodel
   use generalists_csp
   use copepods
   use diatoms
+  use POM
   implicit none
 
   ! Indices into the state-variable vector:
@@ -23,6 +24,7 @@ module NUMmodel
    integer, parameter :: typeDiatom = 3
    integer, parameter :: typeDiatom_simple = 4  
    integer, parameter :: typeCopepod = 10
+   integer, parameter :: typePOM = 100
   !
   ! Variables that contain the size spectrum groups
   !
@@ -44,6 +46,12 @@ module NUMmodel
   logical:: bQuadraticHTL ! Boolean flag to signify whether mortality is standard or "quadratic"
                           ! Defaults to true; can be overridden but parameters must then be set with a
                           ! call to parametersFinalize()
+  !
+  ! Variables for POM:
+  !
+  integer :: idxPOM = 0     ! Index to the POM group:
+  integer, dimension(:), allocatable:: thetaPOM ! Which POM size class does
+                                       ! each size class in u deliver POM to
 
 contains
 
@@ -215,6 +223,7 @@ contains
     type(spectrumDiatoms):: specDiatoms
     type(spectrumGeneralists_csp):: specGeneralists_csp
     type(spectrumCopepod):: specCopepod
+    type(spectrumPOM):: specPOM
     !
     ! Find the group number and grid location:
     !
@@ -245,7 +254,12 @@ contains
    case(typeCopepod)
       call initCopepod(specCopepod, n, mMax)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
+   case(typePOM)
+      call initPOM(specPOM, n, mMax)
+      allocate (group( iCurrentGroup )%spec, source=specPOM)
+      idxPOM = iCurrentGroup 
     end select
+
   end subroutine parametersAddGroup
   ! -----------------------------------------------
   !  Finalize the setting of parameters. Must be called when
@@ -286,6 +300,24 @@ contains
    mHTL = mHTL/betaHTL**1.5
 
    call setHTL(mHTL, mortHTL, boolQuadraticHTL, boolDecliningHTL)
+   !
+   ! If there is a POM group then calculate the interactions with other groups
+   !
+   if ( idxPOM .ne. 0) then
+      allocate( thetaPOM(nGrid) )
+      thetaPOM = 0
+      do iGroup = 1, nGroups
+         do i = 1, group(iGroup)%spec%n
+            ! Find the size class in POM corresponding to mPOM:
+            j = 1
+            do while ( (group(iGroup)%spec%mPOM(i) .lt. group(idxPOM)%spec%m(j)) &
+               .and. (j .lt. group(idxPOM)%spec%n))
+               j = j + 1
+            end do
+            thetaPOM( ixStart(iGroup)+i-1 ) = j
+         end do
+      end do
+   end if
 
   contains
     !
@@ -381,8 +413,6 @@ contains
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
   
-
-
   ! ======================================
   !  Calculate rates and derivatives:
   ! ======================================
@@ -405,7 +435,7 @@ contains
   subroutine calcDerivatives(u, L, T, dt, dudt)
     real(dp), intent(in):: L, T, dt, u(nGrid)
     real(dp), intent(inout) :: dudt(nGrid)
-    integer:: i, j, iGroup
+    integer:: i, j, iGroup, ix
     real(dp):: gammaN, gammaDOC, gammaSi
 
     !
@@ -478,7 +508,33 @@ contains
             dudt(ixStart(iGroup):ixEnd(iGroup)))
       end select
     end do
-
+    !
+    ! Transfer POM to POM group:
+    !
+    if (idxPOM .ne. 0) then
+      do iGroup = 1, nGroups ! run over all groups
+         if (iGroup .ne. idxPOM) then
+            do i = 1, group(iGroup)%spec%n ! run over all size classes
+               ix = ixStart(iGroup)+i-1
+               if (thetaPOM(ix) .ne. 0) then
+                  j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
+                  dudt(j) = dudt(j) &
+                    + group(iGroup)%spec%jPOM(i)*u(ixStart(iGroup)+i-1) 
+               end if
+            end do
+         end if
+      end do
+     !
+     ! Update POM
+     ! 
+      select type (spec => group(idxPOM)%spec)
+      type is (spectrumPOM)
+         call calcDerivativesPOM(spec, &
+         upositive(ixStart(idxPOM):ixEnd(idxPOM)), &
+         dudt(idxN), dudt(idxDOC), dudt(ixStart(idxPOM):ixEnd(idxPOM)))
+      end select
+    end if
+    
     contains
 
      !

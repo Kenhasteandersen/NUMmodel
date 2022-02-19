@@ -48,7 +48,7 @@ LINK=
 
 
 
-OBJ = globals.o spectrum.o generalists.o diatoms_simple.o diatoms.o generalists_csp.o copepods.o NUMmodel.o
+OBJ = globals.o spectrum.o generalists.o diatoms_simple.o diatoms.o generalists_csp.o copepods.o NUMmodel.o POM.o
 
 all: NUMmodel libMatlab libR
 

@@ -24,6 +24,7 @@ module spectrum
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
      real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp
+     real(dp), dimension(:), allocatable:: mPOM, jPOM ! mass and flux of POM created
      ! Mortality:
      real(dp), dimension(:), allocatable:: mortpred, mortHTL, mort2
      real(dp) :: mort2constant
@@ -104,6 +105,9 @@ contains
     allocate(this%JNloss(n))
     allocate(this%JCloss(n))
 
+    allocate(this%mPOM(n))
+    allocate(this%JPOM(n))
+
     allocate(this%mortpred(n))
     allocate(this%mortHTL(n))
     allocate(this%mort2(n))
@@ -114,6 +118,8 @@ contains
     this%JF = 0.d0
     this%epsilonF = 0.d0
     this%palatability = 1.d0 ! set to default
+    this%mPOM = 0.d0
+    this%JPOM = 0.d0
 
     contains
 
@@ -157,6 +163,7 @@ contains
     write(*,99) "jTot:", this%Jtot / this%m
     write(*,99) "mortpred", this%mortpred
     write(*,99) "mortHTL", this%mortHTL
+    write(*,99) "jPOM:", this%JPOM / this%m
   end subroutine printRatesSpectrum
 
   ! ==========================================================================
