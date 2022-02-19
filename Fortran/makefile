@@ -8,8 +8,8 @@ else
 endif
 
 ifeq ($(UNAME), Darwin)
- libMatlab = ../lib/libNUMmodel_OSX_matlab.so
- libR = ../lib/libNUMmodel_OSX_R.so
+ libMatlab = ../lib/libNUMmodel_matlab.dylib
+ libR = ../lib/libNUMmodel_R.dylib
 endif
 
 ifeq ($(UNAME), Linux)
@@ -41,6 +41,12 @@ FORT=gfortran
 #FLAGS=-g3
 FLAGS=-O2
 LINK=
+#
+# nag fortran
+#
+#FORT = nagfor
+
+
 
 OBJ = globals.o spectrum.o generalists.o diatoms_simple.o diatoms.o generalists_csp.o copepods.o NUMmodel.o
 
@@ -51,10 +57,10 @@ debugging: FLAGS=-g -check all -fpe0 -warn -traceback -debug extended
 debugging:  all
 
 %.o: %.f90
-	$(FORT) -c -fPIC $(FLAGS) -o $@ $<
+	$(FORT) -c  $(FLAGS) -o $@ $<
 
 NUMmodel: $(OBJ)  NUMmodeltest.o
-	$(FORT) $(LINK) $(FLAGS) -o $@ $^
+	$(FORT) $(LINK) -fPIC $(FLAGS) -o $@ $^
 
 libMatlab: $(OBJ) NUMmodel_wrap_colmajor.o
 	$(FORT) -shared $(LINK) $(FLAGS) -o $(libMatlab) $^
