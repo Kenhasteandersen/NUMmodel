@@ -1,5 +1,7 @@
 void f_setupgeneralistsonly(const int n);
 
+void f_setupgeneralistspom(const int n, const int nPOM);
+
 void f_setupgeneralistsonly_csp();
 
 void f_setupdiatomsonly(const int n);

@@ -116,7 +116,7 @@ contains
     this%JFmax = 0.d0
     this%flvl = 0.d0
     this%JF = 0.d0
-    this%epsilonF = 0.d0
+    this%epsilonF = 1.d0 ! Probably overridden by the specific group, but must be >0.
     this%palatability = 1.d0 ! set to default
     this%mPOM = 0.d0
     this%jPOM = 0.d0

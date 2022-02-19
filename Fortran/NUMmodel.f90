@@ -452,6 +452,7 @@ contains
     integer:: i, j, iGroup, ix
     real(dp):: gammaN, gammaDOC, gammaSi
 
+    dudt = 0.d0
     !
     ! Use only the positive part of biomasses for calculation of derivatives:
     !
@@ -465,7 +466,7 @@ contains
     !
     ! Calc available food:
     !
-    dudt(1) = F(1)
+    !dudt(1) = F(1) ! ???
     do i = idxB, nGrid
        F(i) = 0.d0
        do j = idxB, nGrid
