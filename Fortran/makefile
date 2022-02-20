@@ -31,16 +31,16 @@ endif
 #
 # iFortran:
 #
-#FORT=ifort
-#FLAGS=-O2
-#LINK=-l
+FORT=ifort
+FLAGS=-fPIC#-O2
+LINK= #-l
 #
 # gfortran:
 #
-FORT=gfortran
+#FORT=gfortran
 #FLAGS=-g3
-FLAGS=-O2
-LINK=
+#FLAGS=-O2
+#LINK=
 #
 # nag fortran
 #
@@ -48,11 +48,11 @@ LINK=
 
 
 
-OBJ = globals.o spectrum.o generalists.o diatoms_simple.o diatoms.o generalists_csp.o copepods.o NUMmodel.o POM.o
+OBJ = globals.o spectrum.o generalists.o diatoms_simple.o diatoms.o generalists_csp.o copepods.o POM.o NUMmodel.o 
 
 all: NUMmodel libMatlab libR
 
-debugging: FLAGS=-g #-check all -fpe0 -warn -traceback -debug extended
+debugging: FLAGS=-fPIC -g -check all -fpe0 -warn -traceback -debug extended
 
 debugging:  all
 

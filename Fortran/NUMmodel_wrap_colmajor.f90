@@ -160,7 +160,7 @@ contains
 
   subroutine f_getSinking(velocity) bind(c)
     use globals
-    use NUMmodel, only: getSinking
+    use NUMmodel, only: getSinking, nGrid
 
     real(c_double), intent(inout):: velocity(nGrid)
 

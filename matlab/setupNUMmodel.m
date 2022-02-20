@@ -13,13 +13,13 @@ end
 
 loadNUMmodelLibrary();
 calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
-    int32(n), int32(nCopepods), int32(nPOM), mAdult );
+    int32(n), int32(nCopepods), int32(nPOM),length(mAdult), mAdult );
 if bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
     parfor i=1:poolsize
         calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
-            int32(n), int32(nCopepods), int32(nPOM), mAdult );
+            int32(n), int32(nCopepods), int32(nPOM),length(mAdult), mAdult );
     end
 end
 

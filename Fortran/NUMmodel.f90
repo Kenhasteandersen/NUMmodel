@@ -167,6 +167,7 @@ contains
  
    call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
    call parametersAddGroup(typeGeneralist, n, 0.1d0)
+
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
    end do
@@ -755,6 +756,7 @@ contains
       do iGroup = 1,nGroups
          velocity( ixStart(iGroup):ixEnd(iGroup) ) = group(iGroup)%spec%velocity
       end do
+     
    end subroutine getSinking
   
   ! ---------------------------------------------------
