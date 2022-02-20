@@ -13,7 +13,8 @@ program NUMmodeltest
 
   !call setupGeneralistsCopepod()
   !call setupGeneralistsOnly(5)
-  call setupGeneralistsPOM(5,5)
+  !call setupGeneralistsPOM(5,5)
+  call setupNUMmodel(5,5,5, (/0.1d0, 1.0d0 /) )
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -22,20 +23,19 @@ program NUMmodeltest
   u00(idxDOC) = 0.d0
   !u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 1.0d0 !*(i-2)
+     u00(i) = 10.0d0 !*(i-2)
   end do
-  !u00(8:12) = 0.d0 ! No POM
+  u00(17:22) = 0.d0 ! No POM
   dudt = 0.d0
 
-  !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
-
-  call getSinking(u00)
   write(*,*) u00
-
-  !call simulateChemostatEuler(u00, 100.d0, 20.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
+  !call simulateChemostatEuler(u00, 60.d0, 100.d0, (/150.d0, 0.d0/), 0.01d0, .01d0, 0.01d0, logical(.true.,1))
+  !write(*,*) u00
+  
+  call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
   !call calcDerivatives(u00, 20.d0, 10.d0, 0.1d0, dudt)
   !write(*,*) 'dudt:',dudt
-  !write(*,*) 'u',u00
+  write(*,*) 'u',u00
   !call printRates()
 
   !write(*, '(6f10.6)') theta

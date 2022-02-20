@@ -16,6 +16,8 @@ void f_setupgeneralistscopepod();
 
 void f_setupgeneric(const int nCopepods, const double mAdult[]);
 
+void f_setupnummodel(const int n, const int nCopepods, const int nPOM, const double mAdult[]);
+
 void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
 
 void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);

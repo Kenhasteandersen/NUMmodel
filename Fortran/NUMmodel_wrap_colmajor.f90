@@ -7,7 +7,7 @@ module NUMmodel_wrap
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
        setupGeneralistsCopepod, &
-       setupGeneric, setupGeneric_csp, &
+       setupGeneric, setupNUMmodel, setupGeneric_csp, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
        getBalance
@@ -62,6 +62,13 @@ contains
 
     call setupGeneric(mAdult)
   end subroutine f_setupGeneric
+
+  subroutine f_setupNUMmodel(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
+    integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
+    real(c_double), intent(in):: mAdult(nCopepods)
+
+    call setupNUMmodel(n,nCopepod,nPOM,mAdult)
+  end subroutine f_setupNUMmodel
 
   subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
     integer(c_int), intent(in), value:: nCopepods

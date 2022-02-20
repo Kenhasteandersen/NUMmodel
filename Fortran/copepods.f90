@@ -60,6 +60,8 @@ contains
     this%Jresp = Kappa*this%m**p
     this%mort2constant = 0.d0 ! No quadratic mortality
     this%mort2 = 0.d0
+
+    this%mPOM = 0.1*this%m ! Size of fecal pellets
   end subroutine initCopepod
 
   subroutine calcDerivativesCopepod(this, u, dudt)
@@ -74,6 +76,7 @@ contains
        ! Growth and reproduction:
        !
        nu = epsilonF*this%JF(i) - fTemp2*this%Jresp(i)
+       this%jPOM = (1-epsilonF)*this%JF(i)/this%m(i)
        this%g(i) = max(0.d0, nu)/this%m(i)
        this%mortStarve(i) = -min(0.d0, nu)/this%m(i)
        !

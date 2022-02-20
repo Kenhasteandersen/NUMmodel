@@ -157,6 +157,23 @@ contains
        call parametersFinalize(0.001d0, .true., .true.)
     end if
   end subroutine setupGeneric
+  ! -----------------------------------------------
+  ! Full NUM model setup with generalists, copepods, and POM
+  ! -----------------------------------------------
+  subroutine setupNUMmodel(n, nCopepod, nPOM, mAdult)
+   integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
+   real(dp), intent(in):: mAdult(:)
+   integer:: iCopepod
+ 
+   call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
+   call parametersAddGroup(typeGeneralist, n, 0.1d0)
+   do iCopepod = 1, size(mAdult)
+      call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
+   end do
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM)) ! POM with nPOM size classes and max size 1 ugC
+   call parametersFinalize(0.001d0, .true., .true.)
+
+  end subroutine setupNUMmodel
 
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
@@ -207,7 +224,9 @@ contains
        deallocate(F)
        deallocate(theta)
        deallocate(pHTL)
-       deallocate(thetaPOM)
+       if (allocated(thetaPOM)) then
+         deallocate(thetaPOM)
+       endif
     end if
 
     allocate( group(nGroups) )
