@@ -1,3 +1,10 @@
+!
+! Module for handling particular organic matter (POM)
+! To have other groups produce POM, do the following:
+!  1) Define the masses of POM that each group produces in the vector mPOM 
+!     This vector is already set to default as mPOM = m, which works for unicellular groups
+!  2) Define the fluxes to POM in jPOM (note this is a rate 1/day)
+!
 module POM
     use globals
     use spectrum
