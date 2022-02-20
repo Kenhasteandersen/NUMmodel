@@ -28,6 +28,8 @@ module spectrum
      ! Mortality:
      real(dp), dimension(:), allocatable:: mortpred, mortHTL, mort2
      real(dp) :: mort2constant
+     ! Sinking:
+     real(dp), dimension(:), allocatable:: velocity ! sinking velocity m/day
  
      contains 
 
@@ -111,6 +113,8 @@ contains
     allocate(this%mortpred(n))
     allocate(this%mortHTL(n))
     allocate(this%mort2(n))
+
+    allocate(this%velocity(n))
     ! Set feeding to dummy values. Relevant for non-feeding groups (diatoms)
     this%AF = 0.d0
     this%JFmax = 0.d0
@@ -120,6 +124,7 @@ contains
     this%palatability = 1.d0 ! set to default
     this%mPOM = 0.d0
     this%jPOM = 0.d0
+    this%velocity = 0.d0 ! Probably overridden by the specific group (POM at least)
 
     contains
 

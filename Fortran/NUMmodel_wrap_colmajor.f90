@@ -151,6 +151,15 @@ contains
     call getMass(m, mDelta) 
   end subroutine f_getMass
 
+  subroutine f_getSinking(velocity) bind(c)
+    use globals
+    use NUMmodel, only: getSinking
+
+    real(c_double), intent(inout):: velocity(nGrid)
+
+    call getSinking(velocity)
+  end subroutine f_getSinking
+
   subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmax, jR, jLossPassive, &
     jNloss,jLreal, &

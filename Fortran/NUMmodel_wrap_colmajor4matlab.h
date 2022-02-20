@@ -62,6 +62,8 @@ void f_getmass(
 				double *m,
 				double *mDelta);
 
+void f_getsinking(double *velocity);
+
 void f_getfunctions(
 			double u[],
 		    double *ProdGross,

@@ -43,6 +43,7 @@ if (nargin==1 || nargin==0 || nTMmodel == 1)
     p.pathInit      = strcat(sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0)));
     
     p.dt = 0.1; % For Euler time stepping
+    p.dtTransport = 0.5; % The TM time step
 elseif nTMmodel == 2
     p.TMname = 'MITgcm_ECCO';
     p.pathMatrix = strcat(path,'/../TMs/MITgcm_ECCO/Matrix1/TMs/matrix_nocorrection_');
@@ -54,6 +55,7 @@ elseif nTMmodel == 2
     p.pathInit = strcat(sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0)));
     
     p.dt = 0.1; % For Euler time stepping
+    p.dtTransport = 0.5; % The TM time step
 elseif nTMmodel == 3
     % Experimental
      p.TMname = 'UVicOSUpicdefault';

@@ -207,6 +207,7 @@ contains
        deallocate(F)
        deallocate(theta)
        deallocate(pHTL)
+       deallocate(thetaPOM)
     end if
 
     allocate( group(nGroups) )
@@ -717,7 +718,6 @@ contains
    end do
  end function calcN
  
- 
  subroutine getMass(m, mDelta)
    real(dp), intent(inout):: m(nGrid), mDelta(nGrid)
    integer:: i
@@ -727,6 +727,16 @@ contains
       mDelta(ixStart(i):ixEnd(i)) = group(i)%spec%mDelta
    end do
    end subroutine getMass
+
+   subroutine getSinking(velocity)
+      real(dp), intent(inout):: velocity(nGrid)
+      integer:: iGroup
+
+      velocity(1:(idxB-1)) = 0.d0 ! No sinking of nutrient groups
+      do iGroup = 1,nGroups
+         velocity( ixStart(iGroup):ixEnd(iGroup) ) = group(iGroup)%spec%velocity
+      end do
+   end subroutine getSinking
   
   ! ---------------------------------------------------
   ! Get the ecosystem functions as calculated from the last call
