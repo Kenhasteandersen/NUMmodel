@@ -13,7 +13,7 @@ module POM
     private 
   
     real(dp), parameter:: rhoCN = 5.68
-    real(dp), parameter:: remin = 0.0 ! remineralisation rate
+    real(dp), parameter:: remin = 0.5d0 ! remineralisation rate (1/day)
     real(dp), parameter:: mMin = 1e-9 ! Smallest POM mass
   
     type, extends(typeSpectrum) :: spectrumPOM
