@@ -251,9 +251,13 @@ for i=1:simtime
     % Transport
     %
     u =  squeeze(AimpM(month+1,:,:)) * u; % Vertical advection & diffusion
+    % Sinking:
     for j = p.idxSinking
-       u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); % Sinking
+       u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); 
     end
+    % Bottom BC for nutrients:
+    u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
+       p.DiffBottom/sim.dznom(nGrid)^2*(p.u0(p.idxN)-u(end,p.idxN));
     %
     % Enforce minimum concentraion
     %
