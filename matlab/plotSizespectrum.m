@@ -89,3 +89,5 @@ set(gca,'XTickLabel','');
 %
 nexttile
 panelLosses(sim.p, sim.rates);
+
+s.rates = sim.rates;

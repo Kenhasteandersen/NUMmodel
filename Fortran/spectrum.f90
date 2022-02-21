@@ -125,6 +125,12 @@ contains
     this%mPOM = 0.d0
     this%jPOM = 0.d0
     this%velocity = 0.d0 ! Probably overridden by the specific group (POM at least)
+    this%JResp = 0.d0
+    this%Jtot = 0.d0
+    this%JCloss_feeding = 0.d0
+    this%JNlossLiebig = 0.d0
+    this%JNloss = 0.d0
+    this%jCloss = 0.d0
 
     contains
 

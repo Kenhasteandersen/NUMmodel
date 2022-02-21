@@ -36,6 +36,7 @@ module POM
     call this%initSpectrum(n, mMin, mMax)
 
     this%velocity = 10.d0 ! Size-independent fast sinking (10 m/day)
+    this%mort2 = 0.d0 ! No virulysis of POM
   end subroutine initPOM
 
   subroutine calcDerivativesPOM(this, u, dNdt, dDOCdt, dudt)
