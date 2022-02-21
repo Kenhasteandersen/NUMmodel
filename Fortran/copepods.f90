@@ -64,10 +64,10 @@ contains
     this%mPOM = 0.1*this%m ! Size of fecal pellets
   end subroutine initCopepod
 
-  subroutine calcDerivativesCopepod(this, u, dudt)
+  subroutine calcDerivativesCopepod(this, u, dNdt, dudt)
     class(spectrumCopepod), intent(inout):: this
     real(dp), intent(in):: u(this%n)
-    real(dp), intent(inout):: dudt(this%n)
+    real(dp), intent(inout):: dNdt, dudt(this%n)
     integer:: i
     real(dp):: nu, b
 
@@ -108,6 +108,9 @@ contains
     dudt(this%n) = &
          this%gamma(this%n-1)*u(this%n-1) & ! growth into adult group
          - this%mort(this%n)*u(this%n); ! adult mortality
+
+    dNdt = dNdt + sum( this%Jresp*u/this%m/rhoCN ) ! All respiration means that there is corresponding
+                                    ! surplus of nutrients. This surplus (pee) is routed to nutrients
   end subroutine calcDerivativesCopepod
 
   subroutine printRatesCopepod(this)

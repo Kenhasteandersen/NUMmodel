@@ -542,6 +542,7 @@ contains
       type is (spectrumCopepod)
          call calcDerivativesCopepod(spec, &
             upositive(ixStart(iGroup):ixEnd(iGroup)), &
+            dudt(idxN), &
             dudt(ixStart(iGroup):ixEnd(iGroup)))
       end select
     end do
