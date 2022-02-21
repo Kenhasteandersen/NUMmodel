@@ -141,7 +141,7 @@ end
 %
 % Calculate sinking matrix:
 %
-[Asink,p] = calcSinkingMatrix(p, sim, nGrid);
+%[Asink,p] = calcSinkingMatrix(p, sim, nGrid);
 %
 % Matrices for saving the solution:
 %
