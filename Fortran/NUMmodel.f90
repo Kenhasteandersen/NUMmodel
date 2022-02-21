@@ -227,6 +227,7 @@ contains
        deallocate(pHTL)
        if (allocated(thetaPOM)) then
          deallocate(thetaPOM)
+         idxPOM = 0
        endif
     end if
 
@@ -670,7 +671,7 @@ contains
     real(dp), intent(in):: dt    ! time step
     logical(1), intent(in):: bLosses ! Whether to losses to the deep
     real(dp) :: dudt(nGrid)
-    integer:: i, iEnd
+    integer:: i, iEnd, iGroup
 
     iEnd = floor(tEnd/dt)
    
@@ -682,11 +683,22 @@ contains
          dudt(idxSi) = dudt(idxSi) + diff*(Ndeep(idxSi) - u(idxSi))
        end if  
        !
-       ! Note: should not be done for copepods:
+       ! Mixing:
        !
        if (bLosses) then
-         dudt(idxB:nGrid) = dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
-       endif
+         do iGroup = 1, nGroups
+            if ( group(iGroup)%spec%type .ne. typeCopepod ) then
+               dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) + diff*(0.d0 - u(idxB:nGrid))
+            end if
+         end do
+       end if
+       !
+       ! Sinking:
+       !
+       do iGroup = 1, nGroups
+         dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) - &
+            group(iGroup)%spec%velocity*u( ixStart(iGroup):ixEnd(iGroup) )
+       end do
 
        u = u + dudt*dt ! Euler update
     end do

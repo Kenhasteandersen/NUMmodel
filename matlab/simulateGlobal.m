@@ -228,9 +228,9 @@ for i=1:simtime
         %end
         u =  Aimp*(Aexp*u);
 
-        for j = p.idxSinking
-            u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); % Sinking
-        end
+        %for j = p.idxSinking
+        %    u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); % Sinking
+        %end
     end
     %
     % Enforce minimum B concentration

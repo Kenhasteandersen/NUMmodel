@@ -21,11 +21,13 @@ for iGroup = 1:p.nGroups
     % Plot background to show oscillations over the last half of the simulation:
     %
     ixAve = find( sim.t > sim.t(end)/2 );
-    Blower = min( sim.B(ixAve,ixB) )./ log(Delta);
-    Bupper = max( sim.B(ixAve,ixB) )./ log(Delta);
-    patch([m, m(end:-1:1)], [Blower, Bupper(end:-1:1)] , ...
-        p.colGroup{iGroup},...
-        'edgecolor','none', 'facealpha',0.15);
+    if (length(sim.t) > 1)
+        Blower = min( sim.B(ixAve,ixB) )./ log(Delta);
+        Bupper = max( sim.B(ixAve,ixB) )./ log(Delta);
+        patch([m, m(end:-1:1)], [Blower, Bupper(end:-1:1)] , ...
+            p.colGroup{iGroup},...
+            'edgecolor','none', 'facealpha',0.15);
+    end
     set(gca,'xscale','log','yscale','log')
     hold on
 end
@@ -43,7 +45,7 @@ for iGroup = 1:p.nGroups
         'color',p.colGroup{iGroup});
     loglog(m, sim.B(ixTime, ixB)./log(Delta), ':','linewidth',1,...
         'color',p.colGroup{iGroup})
-    
+
     sLegend{iGroup} = p.nameGroup{iGroup};
 end
 ylim([0.1,500])
