@@ -120,8 +120,9 @@ contains
          this%gamma(this%n-1)*u(this%n-1) & ! growth into adult group
          - this%mort(this%n)*u(this%n); ! adult mortality
 
-    dNdt = dNdt + sum( this%Jresp*u/(this%m*rhoCN) ) ! All respiration of carbon results in a corresponding
+    dNdt = dNdt + sum( this%Jresp*u/(this%m*rhoCN) )  &! All respiration of carbon results in a corresponding
                                     ! surplus of nutrients. This surplus (pee) is routed to nutrients
+                + (1-epsilonR)*this%g(this%n)*u(this%n) 
   end subroutine calcDerivativesCopepod
 
   subroutine printRatesCopepod(this)
