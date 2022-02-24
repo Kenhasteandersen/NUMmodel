@@ -1,6 +1,7 @@
 !
 ! Module to handle copepods defined by their adult mass.
-! All parameters are for active copepods
+! All parameters are for active copepods. Follows Serra-Pompei et al (2020) with
+! the update to respiration in Serra-Pompei (2022).
 !
 module copepods
   use globals
@@ -14,18 +15,19 @@ module copepods
   real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency
   real(dp), parameter:: beta = 10000.d0
   real(dp), parameter:: sigma = 1.5d0
-  real(dp), parameter:: alphaF = 0.01 !
+  real(dp), parameter:: alphaF = 0.011 ! Clearance rate coefficient
   real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
   real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
   real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
-  real(dp), parameter:: Kappa = 0.16 ! Factor for respiration
+  real(dp), parameter:: kBasal = 0.1 ! Factor for basal metabolism 
+  real(dp), parameter:: kSDA = 0.2 ! Factor for SDA metabolism
   real(dp), parameter:: p = 0.75 ! Exponent for respiration
   real(dp), parameter:: AdultOffspring = 100.
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
   real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
 
   type, extends(spectrumMulticellular) :: spectrumCopepod
-    real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:)
+    real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:), JrespFactor(:)
   contains
     procedure, pass :: initCopepod
     procedure :: calcDerivativesCopepod
@@ -51,13 +53,15 @@ contains
     allocate(this%g(n))
     allocate(this%mortStarve(n))
     allocate(this%mort(n))
+    allocate(this%JrespFactor(n))
 
     this%beta = beta
     this%sigma = sigma
     this%epsilonF = epsilonF
     this%AF = alphaF*this%m**q
     this%JFmax = h*this%m**hExponent
-    this%Jresp = Kappa*this%m**p
+    !this%Jresp = Kappa*this%m**p
+    this%JrespFactor = epsilonF*h*this%m**hExponent
     this%mort2constant = 0.d0 ! No quadratic mortality
     this%mort2 = 0.d0
 
@@ -75,14 +79,21 @@ contains
        !
        ! Growth and reproduction:
        !
-       nu = epsilonF*this%JF(i) - fTemp2*this%Jresp(i)
+
+       ! Basal and SDA respiration:
+       this%Jresp(i) = this%JrespFactor(i) * (fTemp2*kBasal + kSDA*this%JF(i)/(fTemp2*this%JFmax(i)))
+       ! Available energy:
+       nu = epsilonF*this%JF(i) - this%Jresp(i)
+       ! Production of POM:
        this%jPOM = (1-epsilonF)*this%JF(i)/this%m(i)
+       ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
+       ! Starvation:
        this%mortStarve(i) = -min(0.d0, nu)/this%m(i)
        !
        ! Mortality:
        !this%mortHTL(i) = this%mortHTL(i)*u(i)
-       this%mort(i) = this%mortpred(i) + this%mortHTL(i)*h + this%mortStarve(i)
+       this%mort(i) = this%mortpred(i) + this%mortHTL(i) + this%mortStarve(i)
        ! Flux:
        if ( this%g(i) .ne. 0.) then
          this%gamma(i) = (this%g(i)-this%mort(i)) / (1 - this%z(i)**(1-this%mort(i)/this%g(i)))
@@ -109,7 +120,7 @@ contains
          this%gamma(this%n-1)*u(this%n-1) & ! growth into adult group
          - this%mort(this%n)*u(this%n); ! adult mortality
 
-    dNdt = dNdt + sum( this%Jresp*u/this%m/rhoCN ) ! All respiration means that there is corresponding
+    dNdt = dNdt + sum( this%Jresp*u/(this%m*rhoCN) ) ! All respiration of carbon results in a corresponding
                                     ! surplus of nutrients. This surplus (pee) is routed to nutrients
   end subroutine calcDerivativesCopepod
 
