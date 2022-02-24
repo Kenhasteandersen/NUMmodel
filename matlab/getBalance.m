@@ -14,7 +14,7 @@ function [Nbalance, Cbalance] = getBalance(u, L, T)
 arguments
     u double;
     L double;
-    T double = 10;
+    T double;
 end
 u = double(u);
 dudt = 0*u';

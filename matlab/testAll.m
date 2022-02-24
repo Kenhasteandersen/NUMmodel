@@ -1,4 +1,4 @@
-testFunction('testLoadFortran');
+loadNUMmodelLibrary
 
 testSetup('setupGeneralistsOnly', 1174);
 testSetup('setupGeneralistsDiatoms_simple', 1576);

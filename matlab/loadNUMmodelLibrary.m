@@ -10,8 +10,8 @@ end
 
 switch computer('arch')
     case {'maci','maci64'}
-        sLibname = 'libNUMmodel_OSX_matlab';
-        sExtension = '.so';
+        sLibname = 'libNUMmodel_matlab';
+        sExtension = '.dylib';
     case {'glnx86','glnxa64'}
         sLibname = 'libNUMmodel_linux_matlab';
         sExtension = '.so';

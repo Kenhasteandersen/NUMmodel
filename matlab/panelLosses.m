@@ -7,6 +7,7 @@ for iGroup = 1:p.nGroups
     hold on
     semilogx(m, rates.jR(ix), 'k-', 'linewidth',2)
     semilogx(m, rates.mort2(ix), 'b-','linewidth',2)
+    semilogx(m, rates.jLossPassive(ix), 'color',[0 0.5 0],'linewidth',2)
 %    loglog(m, rates.mortStarve(ix), 'b-o','linewidth',2)
     loglog(m, rates.mortHTL(ix), 'm-','linewidth',2)
 end
@@ -17,5 +18,5 @@ xlim(calcXlim(p))
 
 ylabel('Losses (day^{-1})')
 xlabel('Mass ({\mu}gC)')
-legend({'Predation','Respiration','virulysis','HTL'}, ...
+legend({'Predation','Respiration','Viral lysis','Passive exudation','HTL'}, ...
     'location','northwest','box','off')

@@ -24,9 +24,12 @@ module spectrum
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
      real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp
+     real(dp), dimension(:), allocatable:: mPOM, jPOM ! mass and flux of POM created
      ! Mortality:
      real(dp), dimension(:), allocatable:: mortpred, mortHTL, mort2
      real(dp) :: mort2constant
+     ! Sinking:
+     real(dp), dimension(:), allocatable:: velocity ! sinking velocity m/day
  
      contains 
 
@@ -104,16 +107,30 @@ contains
     allocate(this%JNloss(n))
     allocate(this%JCloss(n))
 
+    allocate(this%mPOM(n))
+    allocate(this%jPOM(n))
+
     allocate(this%mortpred(n))
     allocate(this%mortHTL(n))
     allocate(this%mort2(n))
+
+    allocate(this%velocity(n))
     ! Set feeding to dummy values. Relevant for non-feeding groups (diatoms)
     this%AF = 0.d0
     this%JFmax = 0.d0
     this%flvl = 0.d0
     this%JF = 0.d0
-    this%epsilonF = 0.d0
+    this%epsilonF = 1.d0 ! Probably overridden by the specific group, but must be >0.
     this%palatability = 1.d0 ! set to default
+    this%mPOM = 0.d0
+    this%jPOM = 0.d0
+    this%velocity = 0.d0 ! Probably overridden by the specific group (POM at least)
+    this%JResp = 0.d0
+    this%Jtot = 0.d0
+    this%JCloss_feeding = 0.d0
+    this%JNlossLiebig = 0.d0
+    this%JNloss = 0.d0
+    this%jCloss = 0.d0
 
     contains
 
@@ -157,6 +174,7 @@ contains
     write(*,99) "jTot:", this%Jtot / this%m
     write(*,99) "mortpred", this%mortpred
     write(*,99) "mortHTL", this%mortHTL
+    write(*,99) "jPOM:", this%jPOM
   end subroutine printRatesSpectrum
 
   ! ==========================================================================
@@ -190,6 +208,9 @@ contains
     allocate(this%JClossLiebig(n))
 
     allocate(this%Jmax(n))
+
+    this%mPOM = this%m ! Assume that POM created by dead cells are 
+                       !the same size as the cells
   end subroutine initUnicellular
 
   subroutine printRatesUnicellular(this)

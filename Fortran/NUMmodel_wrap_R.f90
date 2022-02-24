@@ -48,7 +48,7 @@ end subroutine f_setupGeneralistsOnly
     jNloss,jLreal, &
     mortpred, mortHTL, mort2, mort)
     use globals
-    use NUMmodel, only: getRates, nNutrients
+    use NUMmodel, only: getRates, nNutrients, nGrid
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
     real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)

@@ -88,7 +88,7 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
     %
     path = fileparts(mfilename('fullpath'));
     addpath(strcat(path,'/Transport matrix'));
-    
+
     if ~exist(p.pathBoxes,'file')
         error( 'Error: Cannot find transport matrix file: %s', p.pathBoxes);
     end
@@ -96,10 +96,10 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
     parfor month=1:12
         matrix = load(strcat(p.pathMatrix, sprintf('%02i.mat',month)),'Aimp');
         %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
-        
+
         %AexpM(month,:,:) = full(function_convert_TM_positive(Aexp(idxGrid,idxGrid)));
         AimpM(month,:,:) = full(function_convert_TM_positive(matrix.Aimp(idxGrid,idxGrid)));
-        
+
         % Preparing for timestepping. 43200s.
         temp = load(p.pathGrid,'deltaT');
         %AexpM(month,:,:) = Ix(idxGrid,idxGrid) + squeeze((12*60*60)*AexpM(month,:,:));
@@ -126,7 +126,7 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
         Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*zup);
         L0(:,i) = Lup.*(1-exp(-p.kw*dz))./(p.kw*dz);
     end
-    
+
     fprintf('\n');
     save(sFile,'AimpM','Tmat','L0','versionTMcolumn');
 end
@@ -145,11 +145,12 @@ if options.bRecalcLight
         %Lold = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*Zbox(idxGrid));
     end
 end
-
+% Get sinking matrix:
+[Asink,p] = calcSinkingMatrix(p, sim, nGrid);
 % ---------------------------------------
 % Initialize run:
 % ---------------------------------------
-simtime = p.tEnd*2; %simulation time in half days
+simtime = p.tEnd/p.dtTransport; %simulation time in TM time steps
 
 % Preparing timestepping
 
@@ -238,10 +239,10 @@ for i=1:simtime
     %else
     for k = 1:nGrid
         u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-            u(k,:),L(k), T(k), 0.5, dt);
+            u(k,:),L(k), T(k), p.dtTransport, dt);
     end
     %end
-    
+
     if any(isnan(u))
         warning('NaNs after running current time step');
         keyboard
@@ -249,14 +250,14 @@ for i=1:simtime
     %
     % Transport
     %
-    if p.bTransport
-        for k = 1:p.n
-            u(:,k) =  squeeze(AimpM(month+1,:,:)) * u(:,k);
-            %u(:,k) =  squeeze(AimpM(month+1,:,:)) * (squeeze(AexpM(month+1,:,:)) * u(:,k));
-            % Enforce conservation crudely:
-            %u(:,k) = u(:,k) ./(squeeze(AimpM(month+1,:,:)) * (squeeze(AexpM(month+1,:,:)) * ones(nGrid,1)));
-        end
+    u =  squeeze(AimpM(month+1,:,:)) * u; % Vertical advection & diffusion
+    % Sinking:
+    for j = p.idxSinking
+       u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); 
     end
+    % Bottom BC for nutrients:
+    u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
+       p.DiffBottom/sim.dznom(nGrid)^2*(p.u0(p.idxN)-u(end,p.idxN));
     %
     % Enforce minimum concentraion
     %
@@ -276,7 +277,7 @@ for i=1:simtime
         end
         sim.L(:,iSave) = L;
         sim.T(:,iSave) = T;
-        tSave = [tSave, i*0.5];
+        tSave = [tSave, i*p.dtTransport];
     end
     %
     % Update annual averages:
@@ -293,7 +294,7 @@ for i=1:simtime
     %             sim.BmicroAnnualMean(k) = sim.BmicroAnnualMean(k) + Bmicro1/(p.tEnd*2*365);
     %         end
     %     end
-    
+
 end
 time = toc;
 fprintf('Solving time: %2u:%02u:%02u\n', ...
@@ -310,7 +311,7 @@ sim.z = sim.z(1:length(idx.z));
 sim.dznom = sim.dznom(1:length(idx.z));
 
 sim.Ntot = sum(sim.N.*(sim.dznom*ones(1,length(sim.t)))) + ... % N/m2 in dissolved phase
-    sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68; % N/m2 in biomass 
+    sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68; % N/m2 in biomass
 
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));

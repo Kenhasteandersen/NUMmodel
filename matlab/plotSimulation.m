@@ -14,7 +14,8 @@ switch sim.p.nameModel
         plotGroupsTime(sim);
         
     case 'watercolumn'
-        day = 170;
+        day = sim.p.tEnd - 170;
+        iDepth = 4;
         
         figure(1)
         plotWatercolumnTime(sim,'depthMax',200);
@@ -23,7 +24,7 @@ switch sim.p.nameModel
         plotWatercolumn(sim,day,'depthMax',200);
         
         figure(3)
-        plotSizespectrum(sim,day,1);
+        plotSizespectrum(sim,day,iDepth);
         
         figure(4)
         plotSizespectrumTime(sim,1);

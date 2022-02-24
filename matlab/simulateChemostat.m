@@ -37,6 +37,17 @@ end
 uDeep = p.u0;
 uDeep(p.idxB:end) = 0;
 %
+% Check if there is POM:
+%
+ixGroupPOM = find(p.typeGroups==100);
+if ~isempty(ixGroupPOM)
+    ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
+else
+    ixPOM = [];
+end
+p.velocity = 0*p.m;
+p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
+%
 % Simulate:
 %
 sLibname = loadNUMmodelLibrary();
@@ -53,7 +64,7 @@ if isfield(p, 'idxSi')
 end
 sim.B = u(:,p.idxB:end);
 sim.p = p;
-sim.rates = getRates(p, u(end,:), L);
+sim.rates = getRates(p, u(end,:), L, T);
 for iGroup = 1:p.nGroups
     sim.Bgroup(:,iGroup) = sum( u(:, p.ixStart(iGroup):p.ixEnd(iGroup)),2);
 end
@@ -77,6 +88,10 @@ sim.T = T;
         % Chemostat dynamics for nutrients and unicellulars:
         %
         dudt(ix) = dudt(ix) + p.d*(uDeep(ix)-u(ix)');
+        %
+        % Sinking of POM:
+        %
+        dudt(ixPOM) = dudt(ixPOM) - p.velocity(ixPOM).*u(ixPOM)';
         dudt = dudt';
     end
 end

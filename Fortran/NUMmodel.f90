@@ -10,6 +10,7 @@ module NUMmodel
   use generalists_csp
   use copepods
   use diatoms
+  use POM
   implicit none
 
   ! Indices into the state-variable vector:
@@ -23,6 +24,7 @@ module NUMmodel
    integer, parameter :: typeDiatom = 3
    integer, parameter :: typeDiatom_simple = 4  
    integer, parameter :: typeCopepod = 10
+   integer, parameter :: typePOM = 100
   !
   ! Variables that contain the size spectrum groups
   !
@@ -44,6 +46,12 @@ module NUMmodel
   logical:: bQuadraticHTL ! Boolean flag to signify whether mortality is standard or "quadratic"
                           ! Defaults to true; can be overridden but parameters must then be set with a
                           ! call to parametersFinalize()
+  !
+  ! Variables for POM:
+  !
+  integer :: idxPOM = 0     ! Index to the POM group:
+  integer, dimension(:), allocatable:: thetaPOM ! Which POM size class does
+                                       ! each size class in u deliver POM to
 
 contains
 
@@ -60,6 +68,17 @@ contains
     call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
+
+  ! -----------------------------------------------
+  ! A basic setup with generalists and POM
+  ! -----------------------------------------------
+  subroutine setupGeneralistsPOM(n, nPOM)
+   integer, intent(in):: n, nPOM
+   call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+   call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+   call parametersAddGroup(typePOM, nPOM, 1.d0) ! POM with nPOM size classes and max size 1 ugC
+   call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+ end subroutine setupGeneralistsPOM
 
   ! -----------------------------------------------
   ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
@@ -138,6 +157,24 @@ contains
        call parametersFinalize(0.001d0, .true., .true.)
     end if
   end subroutine setupGeneric
+  ! -----------------------------------------------
+  ! Full NUM model setup with generalists, copepods, and POM
+  ! -----------------------------------------------
+  subroutine setupNUMmodel(n, nCopepod, nPOM, mAdult)
+   integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
+   real(dp), intent(in):: mAdult(:)
+   integer:: iCopepod
+ 
+   call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
+   call parametersAddGroup(typeGeneralist, n, 0.1d0)
+
+   do iCopepod = 1, size(mAdult)
+      call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
+   end do
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM)) ! POM with nPOM size classes and max size 1 ugC
+   call parametersFinalize(0.001d0, .true., .true.)
+
+  end subroutine setupNUMmodel
 
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
@@ -188,6 +225,10 @@ contains
        deallocate(F)
        deallocate(theta)
        deallocate(pHTL)
+       if (allocated(thetaPOM)) then
+         deallocate(thetaPOM)
+         idxPOM = 0
+       endif
     end if
 
     allocate( group(nGroups) )
@@ -215,6 +256,7 @@ contains
     type(spectrumDiatoms):: specDiatoms
     type(spectrumGeneralists_csp):: specGeneralists_csp
     type(spectrumCopepod):: specCopepod
+    type(spectrumPOM):: specPOM
     !
     ! Find the group number and grid location:
     !
@@ -245,7 +287,12 @@ contains
    case(typeCopepod)
       call initCopepod(specCopepod, n, mMax)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
+   case(typePOM)
+      call initPOM(specPOM, n, mMax)
+      allocate (group( iCurrentGroup )%spec, source=specPOM)
+      idxPOM = iCurrentGroup 
     end select
+
   end subroutine parametersAddGroup
   ! -----------------------------------------------
   !  Finalize the setting of parameters. Must be called when
@@ -286,6 +333,27 @@ contains
    mHTL = mHTL/betaHTL**1.5
 
    call setHTL(mHTL, mortHTL, boolQuadraticHTL, boolDecliningHTL)
+   !
+   ! If there is a POM group then calculate the interactions with other groups
+   !
+   if ( idxPOM .ne. 0) then
+      allocate( thetaPOM(nGrid) )
+      thetaPOM = 0
+      do iGroup = 1, nGroups
+         if (iGroup .ne. idxPOM) then
+           do i = 1, group(iGroup)%spec%n
+              ! Find the size class in POM corresponding to mPOM:
+              j = 1
+              do while ( (group(iGroup)%spec%mPOM(i) .gt. &
+                      (group(idxPOM)%spec%mLower(j)+group(idxPOM)%spec%mDelta(j))) &
+                 .and. (j .lt. group(idxPOM)%spec%n))
+                 j = j + 1
+              end do
+              thetaPOM( ixStart(iGroup)+i-1 ) = j
+           end do
+         end if
+      end do
+   end if
 
   contains
     !
@@ -381,8 +449,6 @@ contains
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
   
-
-
   ! ======================================
   !  Calculate rates and derivatives:
   ! ======================================
@@ -405,9 +471,10 @@ contains
   subroutine calcDerivatives(u, L, T, dt, dudt)
     real(dp), intent(in):: L, T, dt, u(nGrid)
     real(dp), intent(inout) :: dudt(nGrid)
-    integer:: i, j, iGroup
+    integer:: i, j, iGroup, ix
     real(dp):: gammaN, gammaDOC, gammaSi
 
+    dudt = 0.d0
     !
     ! Use only the positive part of biomasses for calculation of derivatives:
     !
@@ -421,7 +488,7 @@ contains
     !
     ! Calc available food:
     !
-    dudt(1) = F(1)
+    !dudt(1) = F(1) ! ???
     do i = idxB, nGrid
        F(i) = 0.d0
        do j = idxB, nGrid
@@ -475,10 +542,37 @@ contains
       type is (spectrumCopepod)
          call calcDerivativesCopepod(spec, &
             upositive(ixStart(iGroup):ixEnd(iGroup)), &
+            dudt(idxN), &
             dudt(ixStart(iGroup):ixEnd(iGroup)))
       end select
     end do
-
+    !
+    ! Transfer POM to POM group:
+    !
+    if (idxPOM .ne. 0) then
+      do iGroup = 1, nGroups ! run over all groups
+         if (iGroup .ne. idxPOM) then
+            do i = 1, group(iGroup)%spec%n ! run over all size classes
+               ix = ixStart(iGroup)+i-1
+               if (thetaPOM(ix) .ne. 0) then
+                  j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
+                  dudt(j) = dudt(j) &
+                    + group(iGroup)%spec%jPOM(i)*u(ixStart(iGroup)+i-1) 
+               end if
+            end do
+         end if
+      end do
+     !
+     ! Update POM
+     ! 
+      select type (spec => group(idxPOM)%spec)
+      type is (spectrumPOM)
+         call calcDerivativesPOM(spec, &
+           upositive(ixStart(idxPOM):ixEnd(idxPOM)), &
+           dudt(idxN), dudt(idxDOC), dudt(ixStart(idxPOM):ixEnd(idxPOM)))
+      end select
+    end if
+    
     contains
 
      !
@@ -578,7 +672,7 @@ contains
     real(dp), intent(in):: dt    ! time step
     logical(1), intent(in):: bLosses ! Whether to losses to the deep
     real(dp) :: dudt(nGrid)
-    integer:: i, iEnd
+    integer:: i, iEnd, iGroup
 
     iEnd = floor(tEnd/dt)
    
@@ -590,11 +684,22 @@ contains
          dudt(idxSi) = dudt(idxSi) + diff*(Ndeep(idxSi) - u(idxSi))
        end if  
        !
-       ! Note: should not be done for copepods:
+       ! Mixing:
        !
        if (bLosses) then
-         dudt(idxB:nGrid) = dudt(idxB:nGrid) + diff*(0.d0 - u(idxB:nGrid))
-       endif
+         do iGroup = 1, nGroups
+            if ( group(iGroup)%spec%type .ne. typeCopepod ) then
+               dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) + diff*(0.d0 - u(idxB:nGrid))
+            end if
+         end do
+       end if
+       !
+       ! Sinking:
+       !
+       do iGroup = 1, nGroups
+         dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) - &
+            group(iGroup)%spec%velocity*u( ixStart(iGroup):ixEnd(iGroup) )
+       end do
 
        u = u + dudt*dt ! Euler update
     end do
@@ -632,10 +737,8 @@ contains
       do iGroup = 1, nGroups
          call group(iGroup)%spec%printRates()
       end do
-
    end subroutine printRates
 
-  
   function calcN(u) result(N)
    real(dp), intent(in):: u(:)
    integer:: i
@@ -648,7 +751,6 @@ contains
    end do
  end function calcN
  
- 
  subroutine getMass(m, mDelta)
    real(dp), intent(inout):: m(nGrid), mDelta(nGrid)
    integer:: i
@@ -658,6 +760,17 @@ contains
       mDelta(ixStart(i):ixEnd(i)) = group(i)%spec%mDelta
    end do
    end subroutine getMass
+
+   subroutine getSinking(velocity)
+      real(dp), intent(inout):: velocity(nGrid)
+      integer:: iGroup
+
+      velocity(1:(idxB-1)) = 0.d0 ! No sinking of nutrient groups
+      do iGroup = 1,nGroups
+         velocity( ixStart(iGroup):ixEnd(iGroup) ) = group(iGroup)%spec%velocity
+      end do
+     
+   end subroutine getSinking
   
   ! ---------------------------------------------------
   ! Get the ecosystem functions as calculated from the last call
@@ -776,7 +889,7 @@ contains
       mortHTL( i1:i2 ) = group(iGroup)%spec%mortHTL
       mort2( i1:i2 ) = group(iGroup)%spec%mort2
       jNloss( i1:i2 ) = group(iGroup)%spec%JNloss / group(iGroup)%spec%m
-      jR( i1:i2 ) = group(iGroup)%spec%Jresp / group(iGroup)%spec%m
+      jR( i1:i2 ) = fTemp2 * group(iGroup)%spec%Jresp / group(iGroup)%spec%m
 
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumUnicellular)

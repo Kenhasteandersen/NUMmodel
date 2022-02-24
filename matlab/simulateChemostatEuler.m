@@ -46,7 +46,7 @@ if isfield(p, 'idxSi')
 end
 sim.B = u(3:end);
 sim.p = p;
-sim.rates = getRates(sim.p, u(end,:), L);
+sim.rates = getRates(sim.p, u(end,:), L, T);
 for iGroup = 1:p.nGroups
     sim.Bgroup(:,iGroup) = sum( u(p.ixStart(iGroup):p.ixEnd(iGroup)));
 end

@@ -2,7 +2,10 @@
 % Global run using transport matrices
 %
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
-% (choose MITgcm_2.8deg), and be put into the location 'NUMmodel/TMs'
+% and be put into the location 'NUMmodel/TMs'
+% Simulations currently works with:
+%  - MITgcm_2.8deg (low resolution; runs on a laptop)
+%  - MITgcm_ECCO (higher resolution; requires more memory).
 %
 % Input:
 %  p: parameter structure from parametersGlobal
@@ -76,7 +79,7 @@ end
 % ---------------------------------------
 % Initialize run:
 % ---------------------------------------
-simtime = p.tEnd*2; %simulation time in half days
+simtime = p.tEnd/p.dtTransport; %simulation time in half days
 % Load grid data:
 %load(p.pathGrid);
 %load(p.pathConfigData);
@@ -136,6 +139,10 @@ for i = 1:730
     end
 end
 %
+% Calculate sinking matrix:
+%
+%[Asink,p] = calcSinkingMatrix(p, sim, nGrid);
+%
 % Matrices for saving the solution:
 %
 iSave = 0;
@@ -177,18 +184,18 @@ for i=1:simtime
         % Load TM
         load(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
         %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
-        
+
         Aexp=function_convert_TM_positive(Aexp);
         Aimp=function_convert_TM_positive(Aimp);
-        
+
         % Preparing for timestepping. 43200s.
         load(p.pathGrid,'deltaT')
         Aexp = Ix + (12*60*60)*Aexp;
         Aimp = Aimp^(12*60*60/deltaT);
-        
+
         % Set monthly mean temperature
         T = Tmat(:,month+1);
-        
+
         month = mod(month + 1, 12);
     end
     %
@@ -200,12 +207,12 @@ for i=1:simtime
     if ~isempty(gcp('nocreate'))
         parfor k = 1:nb
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
-                u(k,:), L(k), T(k), 0.5, dt);
+                u(k,:), L(k), T(k), p.dtTransport, dt);
         end
     else
         for k = 1:nb
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
-                u(k,:),L(k), T(k), 0.5, dt);
+                u(k,:),L(k), T(k), p.dtTransport, dt);
             %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
             % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
@@ -220,23 +227,27 @@ for i=1:simtime
         %    u(:,k) =  Aimp * (Aexp * u(:,k));
         %end
         u =  Aimp*(Aexp*u);
+
+        %for j = p.idxSinking
+        %    u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); % Sinking
+        %end
     end
     %
     % Enforce minimum B concentration
     %
     u(u<p.umin) = p.umin;
-    
+
     %
     % Save timeseries in grid format
     %
     if ((mod(i/2,p.tSave) < mod((i-1)/2,p.tSave)) || (i==simtime))
         fprintf('t = %u days',floor(i/2))
-        
+
         if any(isnan(u))
             warning('NaNs after running current time step');
             keyboard
         end
-        
+
         iSave = iSave + 1;
         sim.N(:,:,:,iSave) = single(matrixToGrid(u(:,ixN), [], p.pathBoxes, p.pathGrid));
         sim.DOC(:,:,:,iSave) = single(matrixToGrid(u(:,ixDOC), [], p.pathBoxes, p.pathGrid));
@@ -248,7 +259,7 @@ for i=1:simtime
         end
         sim.L(:,:,:,iSave) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
         sim.T(:,:,:,iSave) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
-        tSave = [tSave, i*0.5];
+        tSave = [tSave, i/p.dtTransport];
         fprintf('.\n');
     end
     %
@@ -266,7 +277,7 @@ for i=1:simtime
             sim.BmicroAnnualMean(k) = sim.BmicroAnnualMean(k) + Bmicro1/(p.tEnd*2*365);
         end
     end
-    
+
 end
 time = toc;
 fprintf('Solving time: %2u:%02u:%02u\n', ...

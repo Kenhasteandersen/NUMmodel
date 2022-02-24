@@ -31,6 +31,10 @@ switch p.typeGroups(p.nGroups)
     case 10
         p.nameGroup{p.nGroups} = sprintf('Copepod %.1f {\\mu}g',mAdult);
         p.colGroup{p.nGroups} = [0.75 0.0 0];
+    case 100
+        p.nameGroup{p.nGroups} = 'POM';
+        p.colGroup{p.nGroups} = [165 42 42]/256; % Brown
+        p.ixPOM = p.nGroups;
 end
 
 %

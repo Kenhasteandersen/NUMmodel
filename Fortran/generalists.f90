@@ -185,6 +185,8 @@ contains
     ! To make mass balance check:
     !
     this%mort2 = this%mort2constant*u
+    this%jPOM = 0*(1-remin2)*this%mort2 ! non-remineralized mort2 => POM
+
     do i = 1, this%n
       mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
       !
@@ -195,7 +197,7 @@ contains
            +  this%JlossPassive(i) &
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) &
-           + this%mort2(i) &
+           +  this%mort2(i) & 
            + reminHTL*this%mortHTL(i)) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -206,7 +208,7 @@ contains
            +   this%JClossLiebig(i) &
            +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
-           +  remin2*this%mort2(i) &
+           +   remin2*this%mort2(i) & 
            +  reminHTL*this%mortHTL(i)) * u(i)
       !
       ! Update the generalists:

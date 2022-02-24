@@ -16,7 +16,7 @@ arguments
     p struct;
     u double;
     L double;
-    T double = 10;
+    T double;
 end
 %
 % First make a call to calc a derivative:

@@ -1,12 +1,13 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int, c_bool
-  use NUMmodel, only:  nGrid, setupGeneralistsOnly, setHTL, getRates, &         
+  use NUMmodel, only:  nGrid, setupGeneralistsOnly,  &
+      setupGeneralistsPOM, setHTL, getRates, &         
        setupGeneralistsOnly_csp, &
        setupDiatomsOnly, &
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
        setupGeneralistsCopepod, &
-       setupGeneric, setupGeneric_csp, &
+       setupGeneric, setupNUMmodel, setupGeneric_csp, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
        getBalance
@@ -21,6 +22,11 @@ contains
     integer(c_int), intent(in), value:: n
     call setupGeneralistsOnly(n)
   end subroutine f_setupGeneralistsOnly
+
+  subroutine f_setupGeneralistsPOM(n, nPOM) bind(c)
+    integer(c_int), intent(in), value:: n, nPOM
+    call setupGeneralistsPOM(n, nPOM)
+  end subroutine f_setupGeneralistsPOM
 
   subroutine f_setupGeneralistsOnly_csp() bind(c)
     call setupGeneralistsOnly_csp()
@@ -56,6 +62,13 @@ contains
 
     call setupGeneric(mAdult)
   end subroutine f_setupGeneric
+
+  subroutine f_setupNUMmodel(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
+    integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
+    real(c_double), intent(in):: mAdult(nCopepods)
+
+    call setupNUMmodel(n,nCopepod,nPOM,mAdult)
+  end subroutine f_setupNUMmodel
 
   subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
     integer(c_int), intent(in), value:: nCopepods
@@ -144,6 +157,15 @@ contains
     
     call getMass(m, mDelta) 
   end subroutine f_getMass
+
+  subroutine f_getSinking(velocity) bind(c)
+    use globals
+    use NUMmodel, only: getSinking, nGrid
+
+    real(c_double), intent(inout):: velocity(nGrid)
+
+    call getSinking(velocity)
+  end subroutine f_getSinking
 
   subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmax, jR, jLossPassive, &
