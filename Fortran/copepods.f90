@@ -122,7 +122,7 @@ contains
 
     dNdt = dNdt + sum( this%Jresp*u/(this%m*rhoCN) )  &! All respiration of carbon results in a corresponding
                                     ! surplus of nutrients. This surplus (pee) is routed to nutrients
-                + (1-epsilonR)*this%g(this%n)*u(this%n) 
+                + (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  ! Should perhaps also go to DOC
   end subroutine calcDerivativesCopepod
 
   subroutine printRatesCopepod(this)
