@@ -19,7 +19,7 @@ module copepods
   real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
   real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
   real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
-  real(dp), parameter:: kBasal = 0.1 ! Factor for basal metabolism 
+  real(dp), parameter:: kBasal = 0.02 ! Factor for basal metabolism 
   real(dp), parameter:: kSDA = 0.2 ! Factor for SDA metabolism
   real(dp), parameter:: p = 0.75 ! Exponent for respiration
   real(dp), parameter:: AdultOffspring = 100.
