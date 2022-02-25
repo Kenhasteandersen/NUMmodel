@@ -65,7 +65,7 @@ contains
     this%mort2constant = 0.d0 ! No quadratic mortality
     this%mort2 = 0.d0
 
-    this%mPOM = 0.1*this%m ! Size of fecal pellets
+    this%mPOM = 3.5e-3*this%m ! Size of fecal pellets (Serra-Pompei 2022 approximated)
   end subroutine initCopepod
 
   subroutine calcDerivativesCopepod(this, u, dNdt, dudt)

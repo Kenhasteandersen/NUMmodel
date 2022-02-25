@@ -37,7 +37,7 @@ module POM
     
     call this%initSpectrum(n, mMin, mMax)
 
-    this%velocity = 10.d0 ! Size-independent fast sinking (10 m/day)
+    this%velocity = 400*this%m**0.513 ! Copepod fecal pellets from Serra-Pompei (2022)
     this%mort2 = 0.d0 ! No virulysis of POM
   end subroutine initPOM
 
