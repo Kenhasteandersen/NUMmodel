@@ -9,9 +9,9 @@
 %  mc - masses of the community spectrum (sorted version of m)
 %  Bc - Sheldon community spectrum
 %
-function [m, Bc] = calcCommunitySpectrum(m,B)
+function [m, Bc] = calcCommunitySpectrum(p,B)
 
-[m, idx] = sort(m);
+[m, idx] = sort(p.m(3:end));
 Bcumm = cumsum(B(idx));
 Bc = gradient(Bcumm);
 
@@ -21,11 +21,14 @@ Bc = gradient(Bcumm);
 % B = B./log(p.mUpper(p.idxB:end)./p.mLower(p.idxB:end));
 % for i = 1:p.nGroups
 %     ix = p.ixStart(i):p.ixEnd(i);
-%     ixSpline = ( m>p.mLower(p.ixStart(i)) & m<(p.mLower(p.ixEnd(i))+p.mDelta(p.ixEnd(i))));
+%     ix = ix( B(ix-p.idxB+1)>0 );
+%     
+%     ixSpline = ( m>p.m(p.ixStart(i)) & m<(p.m(p.ixEnd(i))) );
 % 
-%     BsplineGroup = spline(p.m(ix), B(ix-p.idxB+1), m(ixSpline))
-%     Bspline(ixSpline) = Bspline(ixSpline) + BsplineGroup;
-%     loglog(m(ixSpline), BsplineGroup)
+%     logBsplineGroup = spline(log10(p.m(ix)), log10(B(ix-p.idxB+1)), log10(m(ixSpline)));
+%     Bspline(ixSpline) = Bspline(ixSpline) + 10.^logBsplineGroup;
+%     loglog(m(ixSpline), 10.^logBsplineGroup)
 %     hold on
 % end
+% 
 

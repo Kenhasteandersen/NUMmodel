@@ -31,7 +31,14 @@ for iGroup = 1:p.nGroups
     set(gca,'xscale','log','yscale','log')
     hold on
 end
-
+%
+% Community spectrum:
+%
+[mc, Bc] = calcCommunitySpectrum(sim.p, exp(mean(log(sim.B(ixAve,:)))));
+loglog(mc, Bc, 'linewidth',2,'color',[0.7, 0.7, 0.7])
+%
+% Group spectra:
+%
 for iGroup = 1:p.nGroups
     ix = p.ixStart(iGroup):p.ixEnd(iGroup);
     m = p.m(ix);

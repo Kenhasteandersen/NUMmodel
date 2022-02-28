@@ -35,12 +35,12 @@ end
     
 % Create Sheldon size spectrum from biomasses by dividing with bin width:
 for iTime = 1:length(sim.t)
-    [mc, s.B(:,iTime)] = calcCommunitySpectrum(m, s.B(:,iTime));
+    [mc, s.Bc(:,iTime)] = calcCommunitySpectrum(sim.p, s.B(:,iTime));
     %s.B(:,iTime) = s.B(:,iTime) ./ sim.p.mDelta(sim.p.idxB:end)' .* m';
 end
 
 clf
-surface(mc, sim.t, log10(s.B)')
+surface(mc, sim.t, log10(s.Bc)')
 shading flat
 axis tight
 caxis([-5,2])
