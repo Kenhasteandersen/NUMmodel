@@ -41,5 +41,8 @@ p = parametersAddgroup(100, p, nPOM);
 p = getMass(p);
 
 p.u0(1:2) = [150, 0]; % Initial conditions (and deep layer concentrations)
-p.u0(p.idxB:p.n) = 1;
+% Initial condition at a Sheldon spectrum of "0.1":
+ix = 3:p.n;
+p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix)); 
+
 p.u0( p.ixStart(end):p.ixEnd(end) ) = 0; % No POM in initial conditions

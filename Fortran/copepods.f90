@@ -19,8 +19,12 @@ module copepods
   real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
   real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
   real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
-  real(dp), parameter:: kBasal = 0.02 ! Factor for basal metabolism 
-  real(dp), parameter:: kSDA = 0.2 ! Factor for SDA metabolism
+  real(dp), parameter:: kBasal = 0.006! 0.006 ! Factor for basal metabolism. This value represents basal
+                                       ! metabolism at starvation. Following Kiørboe (1985)
+                                       ! the starvation metabolism is approx 0.2*0.18=0.036 times 
+                                       ! the maximum metabolism (kSDA). Increased to 0.01 to avoid too long transients.
+  real(dp), parameter:: kSDA = 0.16 ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
+                                    ! data in Kiørboe and Hirst (2014) are for fully fed copepods.
   real(dp), parameter:: p = 0.75 ! Exponent for respiration
   real(dp), parameter:: AdultOffspring = 100.
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
