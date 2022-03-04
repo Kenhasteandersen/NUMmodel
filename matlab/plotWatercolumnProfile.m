@@ -1,3 +1,6 @@
+%
+% Plots a profile of the watercolumn at "day"
+% 
 function plotWatercolumnProfile(sim, day)
 
 arguments
