@@ -1,5 +1,0 @@
- - I had to increase the clearance rate of copepods
- - Include temperature
- - Avoid that biomasses -> zero. Set some lower threshold
- - Make diagnostics of N and C conservation
- - In global simulations change time index to be the first index in sim structure variables.

@@ -9,9 +9,13 @@
 %  p: parameter structure from parametersGlobal
 %  lat, lon: latitude and longitude
 %  sim: (optional) simulation to use for initial conditions
+%
+% Input options:
 %  bCalcAnnualAverages: increases the simulation time by a factor 2-3
 %  bExtractcolumn: (logical) forces the extraction of a water column from
-%  the transport matrix. Only used when the core code is changed.
+%            the transport matrix. Only used when the core code is changed.
+%  dayFixed: if non-zero then the run is done with fixed conditions at the
+%            specified day.
 %
 % Output:
 %  sim: structure with simulation results
@@ -25,6 +29,7 @@ arguments
     sim struct = [];
     options.bExtractcolumn logical = false; % Extract the watercolumn even though a saved one exists
     options.bRecalcLight logical = false; % Recalc the light (different from the extracted watercolumn)
+    options.dayFixed double = 0; 
 end
 %
 % Get the watercolumn parameters if they are not already set:
@@ -215,11 +220,19 @@ tSave = [];
 % ---------------------------------------
 disp('Starting simulation')
 tic
-for i=1:simtime
+for i = 1:simtime
+    %
+    % Find the iteration time
+    %
+    if (options.dayFixed ~= 0)
+        iTime = options.dayFixed / p.dtTransport;
+    else
+        iTime = i;
+    end
     %
     % Test for time to change monthly temperature
     %
-    if ismember(mod(i,730), 1+2*cumsum(mon))
+    if (ismember(mod(iTime,730), 1+2*cumsum(mon)) || i==1) 
         %fprintf('t = %u days\n',floor(i/2))
         % Set monthly mean temperature
         T = Tmat(:,month+1);
@@ -228,7 +241,7 @@ for i=1:simtime
     %
     % Run Euler time step for half a day:
     %
-    L = L0(:,mod(i,365*2)+1);
+    L = L0(:,mod(iTime,365*2)+1);
     dt = p.dt;
     n = p.n;
     %if ~isempty(gcp('nocreate'))
