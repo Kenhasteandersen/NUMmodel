@@ -158,8 +158,6 @@ end
 simtime = p.tEnd/p.dtTransport; %simulation time in TM time steps
 
 % Preparing timestepping
-
-month = 0;
 mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 % Initial conditions:
@@ -178,8 +176,9 @@ else
     if exist(strcat(p.pathN0,'.mat'),'file')
         load(p.pathN0, 'N');
         u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
+        p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
     else
-        u(:, ixN) = 150*ones(nb,1);
+        u(:, ixN) = p.u0(p.idxN)*ones(nb,1);
     end
     u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
     if bSilicate
@@ -232,11 +231,12 @@ for i = 1:simtime
     %
     % Test for time to change monthly temperature
     %
-    if (ismember(mod(iTime,730), 1+2*cumsum(mon)) || i==1) 
+    if (ismember(mod(iTime,365/p.dtTransport), 1+2*cumsum(mon)) || i==1) 
         %fprintf('t = %u days\n',floor(i/2))
         % Set monthly mean temperature
-        T = Tmat(:,month+1);
-        month = mod(month + 1, 12);
+        month = find(1+2*cumsum(mon) >= mod(iTime,365/p.dtTransport),1);
+        T = Tmat(:,month);
+        %month = mod(month + 1, 12);
     end
     %
     % Run Euler time step for half a day:
@@ -263,7 +263,7 @@ for i = 1:simtime
     %
     % Transport
     %
-    u =  squeeze(AimpM(month+1,:,:)) * u; % Vertical advection & diffusion
+    u =  squeeze(AimpM(month,:,:)) * u; % Vertical advection & diffusion
     % Sinking:
     for j = p.idxSinking
        u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); 
