@@ -176,7 +176,6 @@ else
     if exist(strcat(p.pathN0,'.mat'),'file')
         load(p.pathN0, 'N');
         u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
-        p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
     else
         u(:, ixN) = p.u0(p.idxN)*ones(nb,1);
     end
@@ -186,6 +185,7 @@ else
     end
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
     u = u(idxGrid,:); % Use only the specific water column
+    p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
 end
 %
 % Matrices for saving the solution:
@@ -325,6 +325,7 @@ sim.dznom = sim.dznom(1:length(idx.z));
 
 sim.Ntot = sum(sim.N.*(sim.dznom*ones(1,length(sim.t)))) + ... % N/m2 in dissolved phase
     sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68; % N/m2 in biomass
+sim.Nprod = p.DiffBottom/sim.dznom(nGrid)^2*(p.u0(p.idxN)-sim.N(end,:)); % Diffusion in from the bottom
 
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
