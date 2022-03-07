@@ -52,7 +52,7 @@ OBJ = globals.o spectrum.o generalists.o diatoms_simple.o diatoms.o generalists_
 
 all: NUMmodel libMatlab libR
 
-debugging: FLAGS=-fPIC -g -check all -fpe0 -warn -traceback -debug extended
+debugging: FLAGS=-fPIC -g3 -fbacktrace#-debug extended # -check all -fpe0 -warn -traceback 
 
 debugging:  all
 

@@ -8,7 +8,7 @@ module generalists
 
   private 
 
-  real(dp), parameter:: rhoCN = 5.68
+  real(dp), parameter:: rhoCN = 5.68 ! SHOULD BE MOVED TO GLOBALS
   !
   ! Light uptake:
   !
@@ -42,7 +42,7 @@ module generalists
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
   real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to DOC
   real(dp), parameter:: reminF = 0.1d0
-  real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
+  !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
@@ -188,7 +188,7 @@ contains
     this%jPOM = 0*(1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
     do i = 1, this%n
-      mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
+      !mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
       !
       ! Update nitrogen:
       !
@@ -198,7 +198,8 @@ contains
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) &
            +  this%mort2(i) & 
-           + reminHTL*this%mortHTL(i)) * u(i)/rhoCN
+           !+ reminHTL*this%mortHTL(i)&
+           ) * u(i)/rhoCN
       !
       ! Update DOC:
       !
@@ -209,7 +210,8 @@ contains
            +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
            +   remin2*this%mort2(i) & 
-           +  reminHTL*this%mortHTL(i)) * u(i)
+           !+  reminHTL*this%mortHTL(i)&
+           ) * u(i)
       !
       ! Update the generalists:
       !
@@ -235,7 +237,7 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
 
     Nbalance = (dNdt + sum( dudt &
-    + (1-reminHTL)*this%mortHTL*u &
+    !+ (1-reminHTL)*this%mortHTL*u &
     + (1-1)*this%mort2*u & ! full N remineralization of viral mortality
     + (1-1)*this%JCloss_feeding/this%m * u &
        )/rhoCN)/N ! full N remineralization of feeding losses
@@ -247,7 +249,7 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: DOC, dDOCdt, u(this%n), dudt(this%n)
 
     Cbalance = (dDOCdt + sum(dudt &
-    + (1-reminHTL)*this%mortHTL*u &
+    !+ (1-reminHTL)*this%mortHTL*u &
     + (1-remin2)*this%mort2*u &
     - this%JLreal*u/this%m &
     - this%JCloss_photouptake*u/this%m &

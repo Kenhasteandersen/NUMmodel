@@ -13,8 +13,8 @@ program NUMmodeltest
 
   !call setupGeneralistsCopepod()
   !call setupGeneralistsOnly(5)
-  !call setupGeneralistsPOM(5,5)
-  call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /) )
+  call setupGeneralistsPOM(25,5)
+  !call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /) )
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -30,10 +30,10 @@ program NUMmodeltest
 
   write(*,*) group(1)%spec%velocity
   write(*,*) group(2)%spec%velocity
-  write(*,*) group(3)%spec%velocity
-  write(*,*) group(4)%spec%velocity
-  call getSinking(u00)
-  write(*,*) u00
+  !write(*,*) group(3)%spec%velocity
+  !write(*,*) group(4)%spec%velocity
+  !call getSinking(u00)
+  !write(*,*) u00
   !write(*,*) u00
   !call simulateChemostatEuler(u00, 60.d0, 100.d0, (/150.d0, 0.d0/), 0.01d0, .01d0, 0.01d0, logical(.true.,1))
   !write(*,*) u00

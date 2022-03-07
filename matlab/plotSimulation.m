@@ -18,9 +18,11 @@ switch sim.p.nameModel
         iDepth = 4;
         
         figure(1)
+        clf
         plotWatercolumnTime(sim,'depthMax',200);
         
         figure(2)
+        clf
         plotWatercolumn(sim,day,'depthMax',200);
         
         figure(3)

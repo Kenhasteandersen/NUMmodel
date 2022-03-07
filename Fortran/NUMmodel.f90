@@ -25,6 +25,13 @@ module NUMmodel
    integer, parameter :: typeDiatom_simple = 4  
    integer, parameter :: typeCopepod = 10
    integer, parameter :: typePOM = 100
+   !
+   ! Specification of what to do with HTL losses:
+   !
+   real(dp), parameter :: fracHTL_to_N = 0.5 ! Half becomes urine that is routed back to N
+   real(dp), parameter :: fracHTL_to_POM = 0.5 ! Another half is fecal pellets that are routed back to the largest POM size class
+   real(dp), parameter :: rhoCN = 5.68
+
   !
   ! Variables that contain the size spectrum groups
   !
@@ -562,9 +569,16 @@ contains
             end do
          end if
       end do
-     !
-     ! Update POM
-     ! 
+      !
+      ! Throw a fraction of HTL production into the largest POM group:
+      !
+      do iGroup = 1, nGroups
+         dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
+             fracHTL_to_POM * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )
+      end do
+      !
+      ! Update POM
+      ! 
       select type (spec => group(idxPOM)%spec)
       type is (spectrumPOM)
          call calcDerivativesPOM(spec, &
@@ -572,6 +586,13 @@ contains
            dudt(idxN), dudt(idxDOC), dudt(ixStart(idxPOM):ixEnd(idxPOM)))
       end select
     end if
+    !
+    ! Some HTL mortality ends up as nutrients:
+    !
+    do iGroup = 1, nGroups
+      dudt(idxN) = dudt(idxN) + &
+          fracHTL_to_N * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
+    end do
     
     contains
 
