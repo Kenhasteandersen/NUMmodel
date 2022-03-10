@@ -563,12 +563,11 @@ contains
                ix = ixStart(iGroup)+i-1
                if (thetaPOM(ix) .ne. 0) then
                   j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
-                  dudt(j) = dudt(j) &
-                    + group(iGroup)%spec%jPOM(i)*u(ixStart(iGroup)+i-1) 
+                  dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*u(ix) 
                end if
                ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
-               fracHTL_to_POM * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )
+                 fracHTL_to_POM * u(ix) * group(iGroup)%spec%mortHTL(i)
             end do
          end if
       end do
@@ -586,8 +585,10 @@ contains
     ! Some HTL mortality ends up as nutrients:
     !
     do iGroup = 1, nGroups
-      dudt(idxN) = dudt(idxN) + &
-          fracHTL_to_N * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
+      if (iGroup .ne. idxPOM) then
+        dudt(idxN) = dudt(idxN) + &
+            fracHTL_to_N * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
+      end if
     end do
     
     contains

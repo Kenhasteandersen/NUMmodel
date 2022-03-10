@@ -174,6 +174,8 @@ end
 % ---------------------------------------
 disp('Starting simulation')
 sLibname = loadNUMmodelLibrary();
+dtTransport = p.dtTransport;
+n = p.n;
 
 tic
 for i=1:simtime
@@ -198,21 +200,31 @@ for i=1:simtime
 
         month = mod(month + 1, 12);
     end
+
+    %
+    % Enforce minimum B concentration
+    %
+    for k = 1:n
+        u(u(:,k)<p.umin(k),k) = p.umin(k);
+    end
     %
     % Run Euler time step for half a day:
     %
     L = L0(:,mod(i,365*2)+1);
     dt = p.dt;
-    n = p.n;
+
     if ~isempty(gcp('nocreate'))
         parfor k = 1:nb
+            %
+            % Integrate ODEs:
+            %
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
-                u(k,:), L(k), T(k), p.dtTransport, dt);
+                u(k,:), L(k), T(k), dtTransport, dt);
         end
     else
         for k = 1:nb
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
-                u(k,:),L(k), T(k), p.dtTransport, dt);
+                u(k,:),L(k), T(k), dtTransport, dt);
             %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
             % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
@@ -232,10 +244,7 @@ for i=1:simtime
         %    u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); % Sinking
         %end
     end
-    %
-    % Enforce minimum B concentration
-    %
-    u(u<p.umin) = p.umin;
+
 
     %
     % Save timeseries in grid format

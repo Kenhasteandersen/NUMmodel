@@ -16,25 +16,36 @@ end
 %
 % Constants:
 %
-epsilonF = 0.8;
-reminHTL = 0;
-reminF = 0.1;
+reminHTL = 0.5;
 rhoCN = 5.68;
+remin2 = 0.5;
 
 p = sim.p;
 gains = 0;
-losses = 0;
+lossHTL = 0;
 dt = gradient(sim.t);
 
 switch sim.p.nameModel
-    
+
     case 'chemostat'
+        loss = 0;
         for iTime = 1:length(sim.t)
             u = [ sim.N(iTime) sim.DOC(iTime), sim.B(iTime,:) ];
             rates = getRates(p, u, sim.L, sim.T );
-            % Losses from HTL:
-            losses = losses + ...
-                sum((1-reminHTL)*rates.mortHTL.*squeeze(sim.B(iTime,:)'))/rhoCN*dt(iTime);
+            if ~sum(ismember(p.typeGroups,100))
+                % Losses from HTL:
+                lossHTL = lossHTL + ...
+                    sum((1-reminHTL)*rates.mortHTL.*squeeze(sim.B(iTime,:)'))/rhoCN*dt(iTime);
+                % Losses from mort2:
+                loss = loss + sum(rates.mort2*(1-remin2).*sim.B(iTime,:)')/rhoCN*dt(iTime);
+            else
+                ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
+                loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);
+            end
+
+            % Losses from diffusion:
+            loss = loss + sim.bUnicellularloss*p.d*sum(sim.B(iTime,sim.p.ixStart(1):sim.p.ixEnd(1)))/rhoCN * dt(iTime);
+
             % Gains from diffusion:
             gains = gains + p.d*(p.u0(1)-sim.N(iTime)) * dt(iTime);
         end
@@ -43,34 +54,26 @@ switch sim.p.nameModel
         %
         accumulation = (sim.N(end)+sum(sim.B(end,:)/rhoCN)) - ...
             (sim.N(1)+sum(sim.B(1,:)/rhoCN));
-        dNdt = (accumulation - gains + losses)/1000*p.depthProductiveLayer/sim.t(end)*365; %gN/m2/yr
-        dNdt_per_N = (accumulation - gains + losses) / sim.N(end)/sim.t(end)*365; % Fraction per year
-        
+        dNdt = (accumulation - gains + lossHTL + loss)/1000*p.depthProductiveLayer/sim.t(end)*365; %gN/m2/yr
+        dNdt_per_N = (accumulation - gains + lossHTL+loss) / sim.N(end)/sim.t(end)*365; % Fraction per year
+        lossHTL = lossHTL/1000*p.depthProductiveLayer/sim.t(end)*365;
+        lossHTL_per_N = lossHTL/sim.N(end);
+
     case 'watercolumn'
-        for iTime = 1:length(sim.t)
-            for iDepth = 1:length(sim.z)
-                u = [sim.N(iDepth,iTime) sim.DOC(iDepth,iTime), ...
-                    sim.B(iDepth,:,iTime) ];
-                rates = getRates(p, u, sim.L(iDepth,iTime), sim.T(iDepth,iTime) );
-                % Losses from HTL:
-                losses = losses + ...
-                    sum((1-reminHTL)*rates.mortHTL.*squeeze(sim.B(iDepth,:,iTime))')/rhoCN*dt(iTime) ...
-                    * sim.dznom(iDepth)/1000; %  gN/m2/day
-            end
-        end
         %
         % Calculate total budget:
         %
-        accumulation = ...
-            (sim.N(:,end)+sum(sim.B(:,:,end),2)/rhoCN) - ...
-            (sim.N(:,1)+sum(sim.B(:,:,1),2)/rhoCN);
-        accumulation = sum( accumulation.*sim.dznom )/1000;
-        
-        dNdt = (accumulation + losses)/sim.t(end)*365; %gN/m2/yr
-        dNdt_per_N = (accumulation + losses) / (sum(sim.N(:,end).*sim.dznom)/1000);
-        
+        accumulation = sim.Ntot-sim.Ntot(1) - cumsum(sim.Nprod) + cumsum(sim.NlossHTL) + cumsum(sim.Nloss);
+
+        dNdt = (accumulation(end)-accumulation(1))/sim.t(end)*365; %gN/m2/yr
+        dNdt_per_N = dNdt/sim.Ntot(end);
+        lossHTL = cumsum(sim.NlossHTL)/sim.t(end)*365; %gN/m2/yr
+        lossHTL = lossHTL(end);
+        lossHTL_per_N = lossHTL/sim.Ntot(end);
+
     case 'global'
         losses = 0*sim.t;
+        lossHTL = losses;
         rates = getRates(p, p.u0, 100, 10 ); % Assume that HTL mortality does not vary!!
         load(sim.p.pathGrid,'dv');
         for iTime = 1:length(sim.t)
@@ -82,15 +85,20 @@ switch sim.p.nameModel
                             %    squeeze(sim.B(j,k,iDepth,:,iTime))' ];
                             %rates = getRates(p, u, sim.L(j,k,iDepth,iTime), sim.T(j,k,iDepth,iTime) );
                             % Losses from HTL:
-                            losses(iTime) = losses(iTime) + ...
+                            lossHTL(iTime) = lossHTL(iTime) + ...
                                 sum((1-reminHTL)*rates.mortHTL.*squeeze(sim.B(j,k,iDepth,:,iTime)))/rhoCN ...
                                 * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
-                        end  
+                            % Quadratic losses:
+                            losses(iTime) = losses(iTime) + ...
+                                (1-remin2)*sum(rates.mort2.*squeeze(sim.B(j,k,iDepth,:,iTime)))/rhoCN ...
+                                * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
+                        end
                     end
                 end
             end
         end
         losses = sum(losses);
+        lossHTL = sum(lossHTL);
         %
         % Calculate total budget:
         %
@@ -101,22 +109,26 @@ switch sim.p.nameModel
                 for k = 1:length(sim.y)
                     if ~isnan(sim.N(j,k,iDepth,iTime))
                         totN_0 = totN_0 + (sim.N(j,k,iDepth,1)  +sum(sim.B(j,k,iDepth,:,1),4)/rhoCN) * dv(j,k,iDepth)/1000;
-                        totN_end = totN_end + (sim.N(j,k,iDepth,end)  +sum(sim.B(j,k,iDepth,:,end),4)/rhoCN) * dv(j,k,iDepth)/1000;                        
+                        totN_end = totN_end + (sim.N(j,k,iDepth,end)  +sum(sim.B(j,k,iDepth,:,end),4)/rhoCN) * dv(j,k,iDepth)/1000;
                     end
                 end
             end
         end
         accumulation = sum( totN_end - totN_0 );
-        
-        dNdt = (accumulation + losses)/3.6e14/sim.t(end)*365; %gN/m2/yr
-        dNdt_per_N = (accumulation + losses) / totN_end;
-        
+
+        dNdt = (accumulation + losses + lossHTL)/3.6e14/sim.t(end)*365; %gN/m2/yr
+        dNdt_per_N = (accumulation + losses + lossHTL) / totN_end;
+        lossHTL = lossHTL/3.6e14/sim.t(end)*365; %gN/m2/yr
+        lossHTL_per_N = lossHTL/sim.Ntot(end);
+
 end
 %
 % Print result:
 %
 if bVerbose
     fprintf("N balance:\n");
-    fprintf("  absolute: %f gN/m2/yr\n", dNdt);
-    fprintf("  relative: %f 1/yr\n", dNdt_per_N);
+    fprintf("  loss to HTL: %f gN/m2/yr\n", lossHTL);
+    fprintf("  relative HTL loss: %f 1/yr\n", lossHTL_per_N);
+    fprintf("  absolute balance: %f gN/m2/yr\n", dNdt);
+    fprintf("  relative balance: %f 1/yr\n", dNdt_per_N);
 end

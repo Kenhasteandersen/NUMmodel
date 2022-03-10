@@ -202,6 +202,7 @@ sim.B = zeros(length(idx.z), p.n-p.idxB+1, nSave);
 sim.L = sim.N;
 sim.T = sim.N;
 sim.Nloss = zeros(1,nSave);
+sim.NlossHTL = sim.Nloss;
 tSave = [];
 %
 % Matrices for annual averages:
@@ -272,18 +273,11 @@ for i = 1:simtime
     % Bottom BC for nutrients:
     u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
         p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
-
-    %
-    % Remin all POM at bottom:
-    %
-    %u(end,p.idxN) = u(end,p.idxN) + sum( u(end,p.ixStart(2):p.ixEnd(2)) )/5.68;
-    %u(end,p.ixStart(2):p.ixEnd(2)) = 0;
-
     %
     % Enforce minimum concentraion
     %
     for k = 1:nGrid
-      u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+        u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
     end
     %
     % Save timeseries in grid format
@@ -300,14 +294,18 @@ for i = 1:simtime
         end
         sim.L(:,iSave) = L;
         sim.T(:,iSave) = T;
-        % Loss to HTL:
+        % Loss to HTL and remin2:
         for j = 1:length(nGrid)
             rates = getRates(p,u(j,:),L(j),T(j));
             % Note: half of the HTL loss is routed directly back to N if we
             % don't have POM:
+            remin2 = 0.5;
+            reminHTL = 0.5;
+            rhoCN=5.68;
             if ~sum(ismember(p.typeGroups,100))
-                sim.Nloss(iSave) = sim.Nloss(iSave) + ...
-                    0.5*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j); % Loss gN/m2/day
+                sim.NlossHTL(iSave) = sim.NlossHTL(iSave) + ...
+                    reminHTL*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % % HTL losses:gN/m2/day
+                sim.Nloss(iSave) = sim.Nloss(iSave) + remin2*sum(rates.mort2.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % remin2 losses
             end
         end
 

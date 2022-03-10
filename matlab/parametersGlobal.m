@@ -43,7 +43,7 @@ if (nargin==1 || nargin==0 || nTMmodel == 1)
     p.pathInit      = strcat(sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0)));
     
     p.dt = 0.1; % For Euler time stepping
-    p.dtTransport = 0.5; % The TM time step
+    p.dtTransport = 0.5; % The TM time step (in units of days)
 elseif nTMmodel == 2
     p.TMname = 'MITgcm_ECCO';
     p.pathMatrix = strcat(path,'/../TMs/MITgcm_ECCO/Matrix1/TMs/matrix_nocorrection_');
@@ -55,7 +55,7 @@ elseif nTMmodel == 2
     p.pathInit = strcat(sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0)));
     
     p.dt = 0.1; % For Euler time stepping
-    p.dtTransport = 0.5; % The TM time step
+    p.dtTransport = 0.5; % The TM time step (in units of days)
 elseif nTMmodel == 3
     % Experimental
      p.TMname = 'UVicOSUpicdefault';
@@ -67,7 +67,7 @@ elseif nTMmodel == 3
     p.pathN0    = strcat(path,'/../TMs/UVicOSUpicdefault_N0');
     p.pathInit = strcat(sprintf('Transport matrix/globalInitUVicOSUpicdefault_%02i',length(p.u0)));
     
-    p.dt = 0.1; % For Euler time stepping
+    p.dt = 0.1; % For Euler time stepping (in units of days)
 end
 %
 % Test that the TMs are available:
@@ -87,7 +87,19 @@ check(p.pathTemp);
 p.tEnd = 365; % In days
 p.tSave = 365/12; % How often to save results (monthly)
 p.bTransport = true;
-p.umin = 1e-5*p.mDelta(3)/p.m(3); % Minimum B concentration
+%
+% Set minimum concentrations:
+%
+p.umin = 0*p.u0;
+for iGroup = 1:p.nGroups
+    ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+    if p.typeGroups(iGroup) < 10
+        p.umin(ix) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Minimum B concentration for unicellular groups
+    end
+    if p.typeGroups(iGroup)>=10 && p.typeGroups(iGroup)<100
+        p.umin(ix(1)) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Send in some nauplii in copepod groups
+    end
+end
 %
 % Light environment:
 %
@@ -96,7 +108,7 @@ p.bUse_parday_light = false; % Using the parday file includes changes in cloud c
 % Parameters used to calculate light if not using parday:
 p.EinConv = 4.57; % conversion factor from W m^-2 to \mu mol s^-1 m^-2 (Thimijan & Heins 1983)
 p.PARfrac = 0.4; % Fraction of light available as PAR. Source unknown
-p.kw = 0.05; % m^-1
+p.kw = 0.05; % Damping of light by water; m^-1
 
 
 

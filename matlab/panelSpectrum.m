@@ -27,7 +27,7 @@ for iGroup = 1:p.nGroups
         patch([m, m(end:-1:1)], [Blower, Bupper(end:-1:1)] , ...
             p.colGroup{iGroup},...
             'edgecolor','none', 'facealpha',0.15);
-        [mc, Bc] = calcCommunitySpectrum(sim.p, exp(mean(log(sim.B(ixAve,:)))));
+        [mc, Bc] = calcCommunitySpectrum(sim.p, exp(mean(log(sim.B(ixAve,:)),1)));
     else
         [mc, Bc] = calcCommunitySpectrum(sim.p, sim.B);
     end

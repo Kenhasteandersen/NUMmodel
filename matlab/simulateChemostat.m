@@ -70,6 +70,7 @@ for iGroup = 1:p.nGroups
 end
 sim.L = L;
 sim.T = T;
+sim.bUnicellularloss = options.bUnicellularloss;
 %Bpnm = calcPicoNanoMicro(sim.B(end,:), sim.p.pGeneralists);
 %sim.Bpico = Bpnm(1);
 %sim.Bnano = Bpnm(2);

@@ -97,7 +97,7 @@ contains
        !
        ! Mortality:
        !this%mortHTL(i) = this%mortHTL(i)*u(i)
-       this%mort(i) = this%mortpred(i) + this%mortHTL(i) + this%mortStarve(i)
+       this%mort(i) = this%mortpred(i) + this%mortStarve(i) + this%mortHTL(i)
        ! Flux:
        if ( this%g(i) .ne. 0.) then
          this%gamma(i) = (this%g(i)-this%mort(i)) / (1 - this%z(i)**(1-this%mort(i)/this%g(i)))

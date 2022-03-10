@@ -48,7 +48,7 @@ module POM
 
     dudt = dudt - fTemp2*remin*u - this%mortpred*u
     dNdt = dNdt + fTemp2*remin*sum(u)/rhoCN
-    dDOCdt = dDOCdt + fTemp2*sum(remin*u)
+    dDOCdt = dDOCdt + fTemp2*remin*sum(u)
   end subroutine calcDerivativesPOM
 
   subroutine printRatesPOM(this)

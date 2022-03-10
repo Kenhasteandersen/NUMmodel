@@ -40,8 +40,8 @@ module generalists
   ! Biogeo:
   !
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
-  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to DOC
-  real(dp), parameter:: reminF = 0.1d0
+  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
+  real(dp), parameter:: reminF = 0.1d0 ! fraction of feeding losses to DOC
   !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
@@ -179,13 +179,13 @@ contains
     class(spectrumGeneralists), intent(inout):: this
     real(dp), intent(in):: u(this%n)
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
-    real(dp):: mortloss
+    !real(dp):: mortloss
     integer:: i
     !
     ! To make mass balance check:
     !
     this%mort2 = this%mort2constant*u
-    this%jPOM = 0*(1-remin2)*this%mort2 ! non-remineralized mort2 => POM
+    this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
     do i = 1, this%n
       !mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
@@ -197,7 +197,7 @@ contains
            +  this%JlossPassive(i) &
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) &
-           +  this%mort2(i) & 
+           +  remin2*this%mort2(i) & 
            !+ reminHTL*this%mortHTL(i)&
            ) * u(i)/rhoCN
       !

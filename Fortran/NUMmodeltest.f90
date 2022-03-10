@@ -13,7 +13,7 @@ program NUMmodeltest
 
   !call setupGeneralistsCopepod()
   !call setupGeneralistsOnly(5)
-  call setupGeneralistsPOM(25,5)
+  call setupGeneralistsPOM(10,5)
   !call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /) )
 
   allocate(u0(nGrid))
@@ -39,7 +39,7 @@ program NUMmodeltest
   !write(*,*) u00
   
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
-  !call calcDerivatives(u00, 20.d0, 10.d0, 0.1d0, dudt)
+  call calcDerivatives(u00, 20.d0, 10.d0, 0.1d0, dudt)
   !write(*,*) 'dudt:',dudt
   !write(*,*) 'u',u00
   !call printRates()

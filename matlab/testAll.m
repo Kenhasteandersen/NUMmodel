@@ -1,11 +1,11 @@
 loadNUMmodelLibrary
 
-testSetup('setupGeneralistsOnly', 1174);
-testSetup('setupGeneralistsDiatoms_simple', 1576);
-testSetup('setupGeneralistsDiatoms', 4817);
-testSetup('setupDiatoms_simpleOnly', 369);
-testSetup('setupGeneralists_cspOnly', 1366);
-testSetup('setupGeneric', 958);
+testSetup('setupGeneralistsOnly', 1215);
+testSetup('setupGeneralistsDiatoms_simple', 1659);
+testSetup('setupGeneralistsDiatoms', 4900);
+testSetup('setupDiatoms_simpleOnly', 411);
+testSetup('setupGeneralists_cspOnly', 1372);
+testSetup('setupGeneric', 1049);
 
 testFunction('testChemostat');
 testFunction('testChemostatEuler');
