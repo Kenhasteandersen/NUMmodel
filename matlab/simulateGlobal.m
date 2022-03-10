@@ -185,8 +185,8 @@ for i=1:simtime
         load(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
         %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
 
-        Aexp=function_convert_TM_positive(Aexp);
-        Aimp=function_convert_TM_positive(Aimp);
+        Aexp = function_convert_TM_positive(Aexp);
+        Aimp = function_convert_TM_positive(Aimp);
 
         % Preparing for timestepping. 43200s.
         load(p.pathGrid,'deltaT')
