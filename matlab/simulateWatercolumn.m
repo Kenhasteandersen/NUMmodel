@@ -108,7 +108,7 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
         % Preparing for timestepping. 43200s.
         temp = load(p.pathGrid,'deltaT');
         %AexpM(month,:,:) = Ix(idxGrid,idxGrid) + squeeze((12*60*60)*AexpM(month,:,:));
-        AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(12*60*60/temp.deltaT);
+        AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(p.dtTransport*24*60*60/temp.deltaT);
         fprintf('.');
     end
     %
@@ -204,6 +204,7 @@ sim.DOC = sim.N;
 sim.B = zeros(length(idx.z), p.n-p.idxB+1, nSave);
 sim.L = sim.N;
 sim.T = sim.N;
+sim.Nloss = zeros(1,nSave);
 tSave = [];
 %
 % Matrices for annual averages:
@@ -273,7 +274,7 @@ for i = 1:simtime
     end
     % Bottom BC for nutrients:
     u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
-       p.DiffBottom/sim.dznom(nGrid)^2*(p.u0(p.idxN)-u(end,p.idxN));
+       p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
     %
     % Enforce minimum concentraion
     %
@@ -293,6 +294,13 @@ for i = 1:simtime
         end
         sim.L(:,iSave) = L;
         sim.T(:,iSave) = T;
+        % Loss to HTL:
+        for j = 1:length(nGrid)
+          rates = getRates(p,u(j,:),L(j),T(j));
+          % Note: half of the HTL loss is routed directly back to N
+          sim.Nloss(iSave) = sim.Nloss(iSave) + 0.5*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j); % Loss gN/m2/day
+        end
+        
         tSave = [tSave, i*p.dtTransport];
     end
     %
@@ -326,9 +334,9 @@ sim.DOC(sim.DOC<0) = 0.;
 sim.z = sim.z(1:length(idx.z));
 sim.dznom = sim.dznom(1:length(idx.z));
 
-sim.Ntot = sum(sim.N.*(sim.dznom*ones(1,length(sim.t)))) + ... % N/m2 in dissolved phase
-    sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68; % N/m2 in biomass
-sim.Nprod = p.DiffBottom/sim.dznom(nGrid)^2*(p.u0(p.idxN)-sim.N(end,:)); % Diffusion in from the bottom
+sim.Ntot = (sum(sim.N.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
+    sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68)/1000; % gN/m2 in biomass
+sim.Nprod = p.DiffBottom*(p.u0(p.idxN)-sim.N(end,:))/1000; % Diffusion in from the bottom; gN/m2/day
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
 %     sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
