@@ -376,7 +376,7 @@ contains
       real(dp):: res, s
 
       if (beta .eq. 0.d0) then
-         res = 0.d0 ! If beta = 0 it is interpreted as if the group is not feeding
+         res = 0.d0 ! beta = 0 is interpreted as if the group is not feeding
       else
          s = 2*sigma*sigma
          res = max(0.d0, &
@@ -566,15 +566,11 @@ contains
                   dudt(j) = dudt(j) &
                     + group(iGroup)%spec%jPOM(i)*u(ixStart(iGroup)+i-1) 
                end if
+               ! Throw a fraction of HTL production into the largest POM group:
+               dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
+               fracHTL_to_POM * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )
             end do
          end if
-      end do
-      !
-      ! Throw a fraction of HTL production into the largest POM group:
-      !
-      do iGroup = 1, nGroups
-         dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
-             fracHTL_to_POM * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )
       end do
       !
       ! Update POM
@@ -753,7 +749,6 @@ contains
 
    subroutine printRates()
       integer :: iGroup
-      99 format (a10, 20f10.6)
 
       do iGroup = 1, nGroups
          call group(iGroup)%spec%printRates()
