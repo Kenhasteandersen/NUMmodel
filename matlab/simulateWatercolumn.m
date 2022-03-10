@@ -29,7 +29,7 @@ arguments
     sim struct = [];
     options.bExtractcolumn logical = false; % Extract the watercolumn even though a saved one exists
     options.bRecalcLight logical = false; % Recalc the light (different from the extracted watercolumn)
-    options.dayFixed double = 0; 
+    options.dayFixed double = 0;
 end
 %
 % Get the watercolumn parameters if they are not already set:
@@ -152,9 +152,6 @@ if options.bRecalcLight
 end
 % Get sinking matrix:
 [Asink,p] = calcSinkingMatrix(p, sim, nGrid);
-for i = 1:p.n
-    Asink(i,end,end) = 1; % No sinking into the bottom
-end
 % ---------------------------------------
 % Initialize run:
 % ---------------------------------------
@@ -235,7 +232,7 @@ for i = 1:simtime
     %
     % Test for time to change monthly temperature
     %
-    if (ismember(mod(iTime,365/p.dtTransport), 1+2*cumsum(mon)) || i==1) 
+    if (ismember(mod(iTime,365/p.dtTransport), 1+2*cumsum(mon)) || i==1)
         %fprintf('t = %u days\n',floor(i/2))
         % Set monthly mean temperature
         month = find(1+2*cumsum(mon) >= mod(iTime,365/p.dtTransport),1);
@@ -267,18 +264,27 @@ for i = 1:simtime
     %
     % Transport
     %
-    u =  squeeze(AimpM(month,:,:)) * u; % Vertical advection & diffusion
+    u =  squeeze(AimpM(month,:,:)) * u; % Vertical diffusion
     % Sinking:
     for j = p.idxSinking
-       u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); 
+        u(:,j) = squeeze(Asink(j,:,:)) * u(:,j);
     end
     % Bottom BC for nutrients:
     u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
-       p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+
+    %
+    % Remin all POM at bottom:
+    %
+    %u(end,p.idxN) = u(end,p.idxN) + sum( u(end,p.ixStart(2):p.ixEnd(2)) )/5.68;
+    %u(end,p.ixStart(2):p.ixEnd(2)) = 0;
+
     %
     % Enforce minimum concentraion
     %
-    u(u<p.umin) = p.umin;
+    for k = 1:nGrid
+      u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+    end
     %
     % Save timeseries in grid format
     %
@@ -296,11 +302,15 @@ for i = 1:simtime
         sim.T(:,iSave) = T;
         % Loss to HTL:
         for j = 1:length(nGrid)
-          rates = getRates(p,u(j,:),L(j),T(j));
-          % Note: half of the HTL loss is routed directly back to N
-          sim.Nloss(iSave) = sim.Nloss(iSave) + 0.5*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j); % Loss gN/m2/day
+            rates = getRates(p,u(j,:),L(j),T(j));
+            % Note: half of the HTL loss is routed directly back to N if we
+            % don't have POM:
+            if ~sum(ismember(p.typeGroups,100))
+                sim.Nloss(iSave) = sim.Nloss(iSave) + ...
+                    0.5*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j); % Loss gN/m2/day
+            end
         end
-        
+
         tSave = [tSave, i*p.dtTransport];
     end
     %
