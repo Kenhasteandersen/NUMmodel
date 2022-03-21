@@ -28,7 +28,7 @@ module copepods
   real(dp), parameter:: p = 0.75 ! Exponent for respiration
   real(dp), parameter:: AdultOffspring = 100.
   real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-  real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
+  !real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
 
   type, extends(spectrumMulticellular) :: spectrumCopepod
     real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:), JrespFactor(:)
@@ -87,7 +87,7 @@ contains
        ! Basal and SDA respiration:
        this%Jresp(i) = this%JrespFactor(i) * (fTemp2*kBasal + kSDA*this%JF(i)/(fTemp2*this%JFmax(i)))
        ! Available energy:
-       nu = epsilonF*this%JF(i) - this%Jresp(i)
+       nu = this%JF(i) - this%Jresp(i)
        ! Production of POM:
        this%jPOM = (1-epsilonF)*this%JF(i)/this%m(i)
        ! Available energy rate (1/day):
