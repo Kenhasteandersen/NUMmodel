@@ -596,7 +596,7 @@ contains
                      L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
       type is (spectrumDiatoms)
          call calcRatesDiatoms(spec, &
-                     L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
+                     L, upositive(idxN), upositive(idxSi), gammaN, gammaSi, gammaDOC)
       type is (spectrumGeneralists_csp)
          call calcRatesGeneralists_csp(spec, &
                      L, upositive(idxN), F( ixStart(iGroup):ixEnd(iGroup) ), gammaN)
@@ -639,7 +639,7 @@ contains
       type is (spectrumDiatoms)
          call calcDerivativesDiatoms(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
-              dudt(idxN), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
+              dudt(idxN), dudt(idxDOC),dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
       type is (spectrumGeneralists_csp)
          call calcDerivativesGeneralists_csp(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
@@ -856,6 +856,17 @@ contains
          Cbalance = spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) )) 
+  end select
+
+  iGroup=3   
+  select type ( spec => group(iGroup)%spec )
+        type is (spectrumDiatoms)
+            Nbalance = spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
+                    u(ixStart(iGroup):ixEnd(iGroup) ), &
+                    dudt( ixStart(iGroup):ixEnd(iGroup) ))
+            Cbalance = spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
+                    u(ixStart(iGroup):ixEnd(iGroup) ), &
+                    dudt( ixStart(iGroup):ixEnd(iGroup) )) 
   end select
    end subroutine getBalance
    
