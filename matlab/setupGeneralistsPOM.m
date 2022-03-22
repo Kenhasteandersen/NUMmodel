@@ -1,8 +1,9 @@
 %
-% Sets up a spectrum of generalists.
+% Sets up a spectrum of generalists with POM..
 %
 % In:
-%  n - number of size classes
+%  n - number of size classes for generalists
+%  nPOM number of size classes for POM
 %  bParallel - Whether to prepare parallel execution (for global runs)
 %
 function p = setupGeneralistsPOM(n, nPOM, bParallel)

@@ -62,6 +62,8 @@ addpath(strcat(path,'/Transport matrix'));
 % ---------------------------------------
 if isempty(sim)
     sim = load(p.pathGrid,'x','y','z','dznom','bathy'); % Load grid
+    %sim.x = lon;
+    %sim.y = lat;
 end
 load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
 idx = calcGlobalWatercolumn(lat, lon, sim); % Find the indices into matrix
@@ -245,6 +247,7 @@ for i = 1:simtime
     %
     L = L0(:,mod(iTime,365*2)+1);
     dt = p.dt;
+    dtTransport = p.dtTransport;
     n = p.n;
     %if ~isempty(gcp('nocreate'))
     %    parfor k = 1:nGrid
@@ -254,7 +257,7 @@ for i = 1:simtime
     %else
     for k = 1:nGrid
         u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-            u(k,:),L(k), T(k), p.dtTransport, dt);
+            u(k,:),L(k), T(k), dtTransport, dt);
     end
     %end
 

@@ -3,7 +3,7 @@ function bSuccess = testChemostat
 sim = baserunChemostat(1.0);
 
 sumB = sum(sim.B(:));
-if ( sumB > 1.5e7 && sumB < 1.6e7 )
+if ( sumB > 1.27e7 && sumB < 1.28e7 )
     bSuccess = true;
 else
     bSuccess = false;
