@@ -44,7 +44,7 @@ switch sim.p.nameModel
             end
 
             % Losses from diffusion:
-            loss = loss + sim.bUnicellularloss*p.d*sum(sim.B(iTime,sim.p.ixStart(1):sim.p.ixEnd(1)))/rhoCN * dt(iTime);
+            loss = loss + sim.bUnicellularloss*p.d*sum(sim.B(iTime,(sim.p.ixStart(1):sim.p.ixEnd(1))-sim.p.idxB+1))/rhoCN * dt(iTime);
 
             % Gains from diffusion:
             gains = gains + p.d*(p.u0(1)-sim.N(iTime)) * dt(iTime);
