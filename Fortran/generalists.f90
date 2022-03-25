@@ -108,6 +108,9 @@ contains
        !
        ! Uptakes
        !
+
+       this%JF(i) = this%epsilonF * this%JF(i) 
+
        this%JN(i) =   gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
        this%JDOC(i) = gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting

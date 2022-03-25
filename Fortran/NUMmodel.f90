@@ -633,7 +633,7 @@ contains
                if (F(j) .gt. 0.d0) then
                  group(iGroup)%spec%mortpred(ixi) = group(iGroup)%spec%mortpred(ixi) &
                     + theta(j,i) * group(jGroup)%spec%JF(ixj)*upositive(j) &
-                    / (group(jGroup)%spec%epsilonF*group(jGroup)%spec%m(ixj)*F(j))
+                    / group(jGroup)%spec%m(ixj)*F(j))
                end if
             end do
          end do
@@ -898,8 +898,8 @@ contains
       i1 = ixStart(iGroup)-nNutrients
       i2 = ixEnd(iGroup)-nNutrients
       ! Extract common fields:
-      jF( i1:i2 ) = group(iGroup)%spec%flvl * group(iGroup)%spec%JFmax / group(iGroup)%spec%m
-      jFreal( i1:i2 ) = group(iGroup)%spec%JF / group(iGroup)%spec%m
+      jF( i1:i2 ) = group(iGroup)%spec%epsilonF * group(iGroup)%spec%flvl * group(iGroup)%spec%JFmax / group(iGroup)%spec%m
+      jFreal( i1:i2 ) = group(iGroup)%spec%epsilonF * group(iGroup)%spec%JF / group(iGroup)%spec%m
       jFmax( i1:i2 ) = fTemp2 * group(iGroup)%spec%JFmax / group(iGroup)%spec%m
       Jtot( i1:i2 ) = group(iGroup)%spec%Jtot / group(iGroup)%spec%m
       mortpred( i1:i2 ) = group(iGroup)%spec%mortpred
