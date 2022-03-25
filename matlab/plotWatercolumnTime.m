@@ -68,14 +68,16 @@ B(:,1,:) = B(:,2,:);
 
 if options.bNewPlot
     clf
-    tiledlayout(2+isfield(sim,'Si')+sim.p.nGroups,1,'tilespacing','compact','padding','compact')
+    tiledlayout(2+isfield(sim,'Si')+sim.p.nGroups,1,'tilespacing','tight','padding','tight')
 end
 
 if isempty(options.depthMax)
     options.depthMax = max(z);
 end
 ylimit = [-options.depthMax, 0];
-
+%
+% Nitrogen:
+%
 nexttile
 %z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
 %panelField([t t(end)], -z, N');
@@ -89,6 +91,7 @@ axis tight
 colorbar('ticks',-2:3)
 %caxis([-1 2])
 ylim(ylimit)
+set(gca,'XTickLabel','')
 
 if isfield(sim,'Si')
     nexttile
@@ -102,6 +105,7 @@ if isfield(sim,'Si')
     colorbar('ticks',-2:3)
     %caxis([0.1 1000])
     ylim(ylimit)
+    set(gca,'XTickLabel','')
 end
 
 nexttile
@@ -117,6 +121,7 @@ axis tight
 colorbar
 %caxis([0.1,2])
 ylim(ylimit)
+set(gca,'XTickLabel','')
 
 for i = 1:sim.p.nGroups
     nexttile
@@ -125,7 +130,6 @@ for i = 1:sim.p.nGroups
     contourf(t,-z,log10(squeeze(B(i,:,:))),[linspace(-2,3,options.nLevels)],'LineStyle','none')
     title(sim.p.nameGroup(i))
     ylabel('Depth (m)')
-    xlabel('Time (days)')
     %set(gca,'ColorScale','log')
     %shading interp
     axis tight
@@ -133,6 +137,11 @@ for i = 1:sim.p.nGroups
     %caxis([0.1 100])
     colorbar('ticks',-2:3,'limits',[-2 3])
     ylim(ylimit)
+    if i ~= sim.p.nGroups
+        set(gca,'XTickLabel','')
+    else
+        xlabel('Time (days)')
+    end
 end
 
 end
