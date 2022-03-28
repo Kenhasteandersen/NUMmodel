@@ -9,6 +9,7 @@
 % Optional named arguments:
 %  bNewplot - boolean that decides whether to setup the plot
 %  depthMax - mx depth for ylimit.
+%  bOnlyLastYear - boolean deciding whether to only plot the last year
 %
 function plotWatercolumnTime(sim, lat, lon, options)
 
@@ -16,8 +17,9 @@ arguments
     sim struct;
     lat double = [];
     lon double = [];
-    options.bNewPlot logical = true
+    options.bNewPlot logical = true;
     options.depthMax {mustBePositive} = [];
+    options.bOnlyLastYear = false;
     options.nLevels = 20;
 end
 
@@ -45,6 +47,8 @@ switch sim.p.nameModel
             B(i,:,:) = squeeze(sum(sim.B(:,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:),2));
         end
         z = sim.z + 0.5*sim.dznom;
+        lat = sim.lat;
+        lon = sim.lon;
     otherwise
         fprintf('Model type %s not supported.\n', sim.p.nameModel) 
 end
@@ -75,6 +79,10 @@ if isempty(options.depthMax)
     options.depthMax = max(z);
 end
 ylimit = [-options.depthMax, 0];
+xlimit = [sim.t(1) sim.t(end)];
+if options.bOnlyLastYear
+    xlimit(1) = sim.t(end)-365;
+end
 %
 % Nitrogen:
 %
@@ -91,6 +99,7 @@ axis tight
 colorbar('ticks',-2:3)
 %caxis([-1 2])
 ylim(ylimit)
+xlim(xlimit)
 set(gca,'XTickLabel','')
 
 if isfield(sim,'Si')
@@ -105,6 +114,7 @@ if isfield(sim,'Si')
     colorbar('ticks',-2:3)
     %caxis([0.1 1000])
     ylim(ylimit)
+    xlim(xlimit)
     set(gca,'XTickLabel','')
 end
 
@@ -121,6 +131,7 @@ axis tight
 colorbar
 %caxis([0.1,2])
 ylim(ylimit)
+xlim(xlimit)
 set(gca,'XTickLabel','')
 
 for i = 1:sim.p.nGroups
@@ -137,6 +148,7 @@ for i = 1:sim.p.nGroups
     %caxis([0.1 100])
     colorbar('ticks',-2:3,'limits',[-2 3])
     ylim(ylimit)
+    xlim(xlimit)
     if i ~= sim.p.nGroups
         set(gca,'XTickLabel','')
     else

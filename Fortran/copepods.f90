@@ -13,22 +13,21 @@ module copepods
   real(dp), parameter:: rhoCN = 5.68
   real(dp), parameter:: epsilonF = 0.67 ! Assimilation efficiency
   real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency
-  real(dp), parameter:: beta = 10000.d0
-  real(dp), parameter:: sigma = 1.5d0
-  real(dp), parameter:: alphaF = 0.011 ! Clearance rate coefficient
-  real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
-  real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
+  real(dp), parameter:: beta = 10000.d0 ! Predator-prey mass ratio for active copepods
+  real(dp), parameter:: sigma = 1.5d0   ! Width of size selection function
+  real(dp), parameter:: alphaF = 0.011  ! Clearance rate coefficient
+  real(dp), parameter:: q = 0.75        ! Exponent of clearance rate
+  real(dp), parameter:: h = 1.37        ! Factor for maximum ingestion rate
   real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
-  real(dp), parameter:: kBasal = 0.006! 0.006 ! Factor for basal metabolism. This value represents basal
-                                       ! metabolism at starvation. Following Kiørboe (1985)
-                                       ! the starvation metabolism is approx 0.2*0.18=0.036 times 
-                                       ! the maximum metabolism (kSDA). Increased to 0.01 to avoid too long transients.
-  real(dp), parameter:: kSDA = 0.16 ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
-                                    ! data in Kiørboe and Hirst (2014) are for fully fed copepods.
-  real(dp), parameter:: p = 0.75 ! Exponent for respiration
+  real(dp), parameter:: kBasal = 0.01   ! 0.006 ! Factor for basal metabolism. This value represents basal
+                                        ! metabolism at starvation. Following Kiørboe (1985)
+                                        ! the starvation metabolism is approx 0.2*0.18=0.036 times 
+                                        ! the maximum metabolism (kSDA). Increased to 0.01 to avoid too long transients.
+  real(dp), parameter:: kSDA = 0.16     ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
+                                        ! data in Kiørboe and Hirst (2014) are for fully fed copepods.
+  real(dp), parameter:: p = 0.75        ! Exponent for respiration
   real(dp), parameter:: AdultOffspring = 100.
-  real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-  !real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
+  real(dp), parameter:: remin = 0.0     ! fraction of mortality losses reminerilized to N and DOC
 
   type, extends(spectrumMulticellular) :: spectrumCopepod
     real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:), JrespFactor(:)
@@ -64,8 +63,7 @@ contains
     this%epsilonF = epsilonF
     this%AF = alphaF*this%m**q
     this%JFmax = h*this%m**hExponent
-    !this%Jresp = Kappa*this%m**p
-    this%JrespFactor = epsilonF*h*this%m**hExponent
+    this%JrespFactor = epsilonF*this%JFmax
     this%mort2constant = 0.d0 ! No quadratic mortality
     this%mort2 = 0.d0
 
