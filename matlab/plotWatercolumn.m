@@ -64,16 +64,30 @@ end
 
 B(B<0) = 0;
 %
-% Calclulate trophic strategy:
+% Calclulate trophic strategy and feeding level:
 %
 colStrategy = zeros(length(u)-sim.p.idxB+1, length(z)-1, 3);
+colFeeding = colStrategy;
 for i = 1:length(z)-1
     rates = getRates(sim.p, u(i,:), L(i), T(i));
     for j=1:size(u,2)-sim.p.idxB+1
+        % Trophic strategy:
         colStrategy(j,i,:) = ...
             [min(1, max(0, 6*(rates.jFreal(j)))), ...
              min(1, max(0, 3*(rates.jLreal(j)))), ...
              min(1, max(0, 3*(rates.jDOC(j))))];
+        % Feeding level:
+        f(j,i) = rates.jFreal(j)./rates.jFmaxx(j);
+        if isnan(f(j,i))
+            colFeeding(j,i,:) = [0 0 0];
+        else
+            fc = rates.jR/rates.jMax; % Critical feeding level
+            if f(j,i) < fc
+                colFeeding(j,i,:) = [0, 0, f(j,i)/fc]; % Below critical feeding level
+            else
+                colFeeding(j,i,:) = [f(j,i), 0, 0]; % Above critical feeding level
+            end
+        end
     end
 end
 %
@@ -127,13 +141,21 @@ for iGroup = 1:sim.p.nGroups
         %'ticks',[0.01,0.1,1,10,100],'ticklabels',{'0.01','0.1','1','10','100'})
     end
     %
-    % Trophic strategy:
+    % Trophic strategy or feeding level:
     %
     nexttile
     
-    panelField(m,-z,colStrategy(ix-sim.p.idxB+1,:,:));
+    %if (sim.p.typeGroups < 10) ! Unicellular
+        panelField(m,-z,colStrategy(ix-sim.p.idxB+1,:,:));
+    %else
+        %panelField(m,-z,)
+    %end
     set(gca,'xscale','log')
-    set(gca,'xtick',10.^(-9:2:2))
+    if (sim.p.typeGroups(iGroup) < 10) | (sim.p.typeGroups(iGroup) >=100) % Unicellular
+        set(gca,'xtick',10.^(-9:2:5))
+    else
+        set(gca,'xtick',10.^(-9:1:5))
+    end
     xlabel('Cell mass (\mugC)')
     if (iGroup==1)
         ylabel('Depth (m)')
