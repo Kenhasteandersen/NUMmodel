@@ -4,45 +4,69 @@
 module generalists
   use globals
   use spectrum
+  use input
   implicit none
 
   private 
 
-  real(dp), parameter:: rhoCN = 5.68 ! SHOULD BE MOVED TO GLOBALS
+  real(dp) :: rhoCN ! SHOULD BE MOVED TO GLOBALS
+  !real(dp), parameter:: rhoCN = 5.68 ! SHOULD BE MOVED TO GLOBALS
   !
   ! Light uptake:
   !
-  real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
-  real(dp), parameter:: alphaL = 0.13 ! 0.206
-  real(dp), parameter:: rLstar = 7.5 !8.25
+  real(dp) :: epsilonL  ! Light uptake efficiency
+  real(dp) :: alphaL  ! 0.206
+  real(dp) :: rLstar  !8.25
+  !real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
+  !real(dp), parameter:: alphaL = 0.13 ! 0.206
+  !real(dp), parameter:: rLstar = 7.5 !8.25
+
   !
   ! Dissolved nutrient uptake:
   !
-  real(dp), parameter:: alphaN = 0.972 !0.682 ! L/d/mugC/mum^2
-  real(dp), parameter:: rNstar = 2 ! mum
+
+  real(dp) :: alphaN !0.682 ! L/d/mugC/mum^2
+  real(dp) :: rNstar ! mum
+  !real(dp), parameter:: alphaN = 0.972 !0.682 ! L/d/mugC/mum^2
+  !real(dp), parameter:: rNstar = 2 ! mum
   !
   ! Phagotrophy:
   !
-  real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
-  real(dp), parameter:: alphaF = 0.018 
-  real(dp), parameter:: cF = 30.
-  real(dp), parameter:: beta = 500.d0
-  real(dp), parameter:: sigma = 1.3d0
+
+  real(dp) :: epsilonF ! Assimilation efficiency
+  real(dp) :: alphaF 
+  real(dp) :: cF 
+  real(dp) :: beta 
+  real(dp) :: sigma 
+  !real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
+  !real(dp), parameter:: alphaF = 0.018 
+  !real(dp), parameter:: cF = 30.
+  !real(dp), parameter:: beta = 500.d0
+  !real(dp), parameter:: sigma = 1.3d0
   !
   ! Metabolism
   !
-  real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
-  real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
+  real(dp) :: cLeakage  ! passive leakage of C and N
+  real(dp) :: delta     ! Thickness of cell wall in mum
+  real(dp) :: alphaJ    ! Constant for jmax.  per day
+  real(dp) :: cR 
+  !real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
+  !real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
             !The constant is increased a bit to limit the lower cell size
-  real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
-  real(dp), parameter:: cR = 0.1
+  !real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
+  !real(dp), parameter:: cR = 0.1
   !
   ! Biogeo:
   !
-  real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
-  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
-  real(dp), parameter:: reminF = 0.1d0 ! fraction of feeding losses to DOC
+  real(dp) :: remin ! fraction of mortality losses reminerilized to DOC
+  real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
+  real(dp) :: reminF ! fraction of feeding losses to DOC
+  !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
+  !real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
+  !real(dp), parameter:: reminF = 0.1d0 ! fraction of feeding losses to DOC
   !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
+
+  real(dp) :: mMinGeneralist
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
@@ -62,14 +86,30 @@ module generalists
 
 contains
 
+  subroutine read_namelist()
+    integer :: file_unit,io_err
+
+    namelist /input_generalists / rhoCN, epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
+             & alphaF, cF, beta, sigma, cLeakage, delta, alphaJ, cR, &
+             & remin, remin2, reminF, mMinGeneralist
+
+    call open_inputfile(file_unit, io_err)
+        read(file_unit, nml=input_generalists, iostat=io_err)
+        call close_inputfile(file_unit, io_err)
+
+  end subroutine read_namelist
+
   subroutine initGeneralists(this, n, mMax)
     class(spectrumGeneralists):: this
     real(dp), intent(in):: mMax
     integer, intent(in):: n
     integer:: i
-    real(dp), parameter:: mMin = 3.1623d-9
+    real(dp) :: mMin
+    !real(dp), parameter:: mMin = 3.1623d-9
     real(dp), parameter:: rho = 0.4*1d6*1d-12
 
+    call read_namelist()
+    mMin=mMinGeneralist
     call this%initUnicellular(n, mMin, mMax)
     allocate(this%JFreal(n))
 
