@@ -13,10 +13,12 @@ switch sim.p.nameModel
     
     case 'chemostat'
         s.B = sim.B';
+        sTitle = "Sheldon spectrum";
     
     case 'watercolumn'
         % Extract from a single water column:
         s.B = squeeze(sim.B(iDepth,:,:));
+        sTitle = sprintf("Sheldon spectrum at %3.0f m", sim.z(iDepth));
     
     case 'global'
     if isempty(lat)
@@ -26,6 +28,7 @@ switch sim.p.nameModel
         % Extract from global run:
         idx = calcGlobalWatercolumn(lat,lon,sim);
         s.B = squeeze(sim.B(idx.x, idx.y, iDepth, :, :));
+        sTitle = sprintf("Sheldon spectrum at %3.0f m", sim.z(iDepth));
     end
 
     otherwise
@@ -45,7 +48,9 @@ shading flat
 axis tight
 caxis([-5,2])
 set(gca,'xscale','log')
-colorbar
+c = colorbar;
+c.Label.String = "log_{10}({\mu}g_C/L)";
+title(sTitle)
 xlabel('mass')
 ylabel('Time (days)')
 
