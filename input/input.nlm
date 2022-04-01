@@ -1,0 +1,110 @@
+!                                                                       !           
+! ======================================================================!
+! Input parameters for NUM model generalists                            !
+! ======================================================================!
+! This file contains the input parameters for the NUM Model.            !
+! The parameters are read in in the different initialization            !
+! routines with a call to read_namelist(). The file contains several    !
+! different namelists initialized by                                    !
+!       &input_namelist                                                 !
+!and ended by                                                           !
+!       /                                                               !   
+! Comments can be added with an exclamation mark (!)                    !
+! A descrition of each parameter is provided alongside the parameter    !
+! along with the units in square brackets ([unit]). A glossary is found !
+! at the end of the file where standard values for each parameter is    !
+! given in curly brackets ({standard value}).                           !
+!                                                                       !
+!***********************************************************************!
+
+
+! Generalists
+! ===========
+&input_generalists
+! This is the input parameters for the generalists. They are read
+! in in the initGeneralists subroutine in generalists.f90
+
+!
+! General
+!
+      rhoCN = 5.68                  ! C:N ratio of cell [ ]
+      mMinGeneralist = 3.1623d-9    ! Description [mum C]
+!
+! Light uptake
+!
+      epsilonL = 0.8                ! Light uptake efficiency []
+      alphaL = 0.13                 ! Scaling factor for light [unit]
+      rLstar = 7.5                  ! Description [unit]
+!
+! Dissolved nutrient uptake:
+      alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
+      rNstar = 2                    ! Description [mum]
+!
+! Phagotrophy
+!
+      epsilonF = 0.8                ! Food Assimilation efficiency [unit]
+      alphaF = 0.018                ! Food affinity scaling factor [L mug C-1 d-1]
+      cF = 30.
+      beta = 500.d0
+      sigma = 1.3d0
+!
+! Metabolism
+!
+      cLeakage = 0.03               ! Passive leakage of C and N
+      delta = 0.05                  ! Thickness of cell wall [mum]
+      alphaJ = 1.5                  ! Constant for jmax. [day-1]
+      cR = 0.1                
+!
+! Biogeo:
+!
+      remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
+      remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
+      reminF = 0.1d0
+
+/
+
+!
+! Copepods
+! ========
+&input_copepods
+
+      rhoCN = 5.68                  ! C:N ratio [ ]
+      epsilonF = 0.67               ! Assimilation efficiency
+      epsilonR = 0.25               ! Reproductive efficiency
+      beta = 10000.d0               ! Description [unit]
+      sigma = 1.5d0                 ! Description [unit]
+      alphaF = 0.011                ! Clearance rate coefficient
+      q = 0.75                      ! Exponent of clerance rate
+      h = 1.37                      ! Factor for maximum ingestion rate
+      hExponent = 0.75              ! Exponent for maximum ingestions rate
+      kBasal = 0.01! 0.006         ! Factor for basal metabolism. This value represents basal
+      kSDA = 0.16                   ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
+      p = 0.75                      ! Exponent for respiration
+      AdultOffspring = 100.
+      remin = 0.0                   ! fraction of mortality losses reminerilized to N and DOC
+
+                                                                       
+! ======================================================================!
+! Parameter glossary                                                    !
+! ======================================================================!
+
+! Generalists
+! ===========
+
+! Light uptake
+!      epsilonL = Light uptake efficiency [] {0.8}
+
+! Metabolism
+!      delta: The constant is increased a bit to limit the lower cell size
+
+!
+! Copepods
+! ========
+!      kBasal = Factor for basal metabolism {0.006}. This value represents basal metabolism at 
+!               starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
+!               0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid 
+!               too long transients. 
+
+!      kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
+!             data in Kiørboe and Hirst (2014) are for fully fed copepods.
+/

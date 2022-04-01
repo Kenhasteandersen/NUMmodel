@@ -6,28 +6,44 @@
 module copepods
   use globals
   use spectrum
+  use input
   implicit none
 
   private
-  
-  real(dp), parameter:: rhoCN = 5.68
-  real(dp), parameter:: epsilonF = 0.67 ! Assimilation efficiency
-  real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency
-  real(dp), parameter:: beta = 10000.d0 ! Predator-prey mass ratio for active copepods
-  real(dp), parameter:: sigma = 1.5d0   ! Width of size selection function
-  real(dp), parameter:: alphaF = 0.011  ! Clearance rate coefficient
-  real(dp), parameter:: q = 0.75        ! Exponent of clearance rate
-  real(dp), parameter:: h = 1.37        ! Factor for maximum ingestion rate
-  real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
-  real(dp), parameter:: kBasal = 0.01   ! 0.006 ! Factor for basal metabolism. This value represents basal
-                                        ! metabolism at starvation. Following Kiørboe (1985)
-                                        ! the starvation metabolism is approx 0.2*0.18=0.036 times 
-                                        ! the maximum metabolism (kSDA). Increased to 0.01 to avoid too long transients.
-  real(dp), parameter:: kSDA = 0.16     ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
-                                        ! data in Kiørboe and Hirst (2014) are for fully fed copepods.
-  real(dp), parameter:: p = 0.75        ! Exponent for respiration
-  real(dp), parameter:: AdultOffspring = 100.
-  real(dp), parameter:: remin = 0.0     ! fraction of mortality losses reminerilized to N and DOC
+
+  real(dp) :: rhoCN
+  real(dp) :: epsilonF  ! Assimilation efficiency
+  real(dp) :: epsilonR  ! Reproductive efficiency
+  real(dp) :: beta
+  real(dp) :: sigma 
+  real(dp) :: alphaF  ! Clearance rate coefficient
+  real(dp) :: q  ! Exponent of clerance rate
+  real(dp) :: h  ! Factor for maximum ingestion rate
+  real(dp) :: hExponent  ! Exponent for maximum ingestions rate
+  real(dp) :: kBasal ! 0.006 ! Factor for basal metabolism.This value represents basal
+  real(dp) :: kSDA  ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
+  real(dp) :: p  ! Exponent for respiration
+  real(dp) :: AdultOffspring 
+  real(dp) :: remin! fraction of mortality losses reminerilized to N and DOC
+  !real(dp), parameter:: rhoCN = 5.68
+  !real(dp), parameter:: epsilonF = 0.67 ! Assimilation efficiency
+  !real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency
+  !real(dp), parameter:: beta = 10000.d0
+  !real(dp), parameter:: sigma = 1.5d0
+  !real(dp), parameter:: alphaF = 0.011 ! Clearance rate coefficient
+  !real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
+  !real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
+  !real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
+  !real(dp), parameter:: kBasal = 0.006! 0.006 ! Factor for basal metabolism. This value represents basal
+                                       ! metabolism at starvation. Following Kiørboe (1985)
+                                       ! the starvation metabolism is approx 0.2*0.18=0.036 times 
+                                       ! the maximum metabolism (kSDA). Increased to 0.01 to avoid too long transients.
+  !real(dp), parameter:: kSDA = 0.16 ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
+                                    ! data in Kiørboe and Hirst (2014) are for fully fed copepods.
+  !real(dp), parameter:: p = 0.75 ! Exponent for respiration
+  !real(dp), parameter:: AdultOffspring = 100.
+  !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
+  !real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
 
   type, extends(spectrumMulticellular) :: spectrumCopepod
     real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:), JrespFactor(:)
@@ -40,11 +56,25 @@ module copepods
   public spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod
 contains
 
+  subroutine read_namelist()
+    integer :: file_unit,io_err
+
+    namelist /input_copepods / rhoCN, epsilonF, epsilonR, beta, sigma, alphaF,q, &
+             & h, hExponent, kBasal, kSDA, p, AdultOffspring, remin
+
+    call open_inputfile(file_unit, io_err)
+    read(file_unit, nml=input_copepods, iostat=io_err)
+    call close_inputfile(file_unit, io_err)
+
+  end subroutine read_namelist
+
   subroutine initCopepod(this, n, mAdult)
     class(spectrumCopepod), intent(inout):: this
     integer, intent(in):: n
     real(dp), intent(in):: mAdult
     real(dp):: lnDelta, mMin
+
+    call read_namelist()
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
