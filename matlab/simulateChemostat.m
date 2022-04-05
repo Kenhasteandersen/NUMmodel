@@ -18,7 +18,7 @@ arguments
     p struct = parametersChemostat(setupGeneralistsOnly);
     L double = 100;
     T double = 10;
-    options.bUnicellularloss logical = false;
+    options.bUnicellularloss logical = true;
 end
 %
 % Get the chemostat parameters if they are not already set:
