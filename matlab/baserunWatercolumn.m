@@ -14,7 +14,9 @@ arguments
     lon double = -10;
 end
 
-p = setupGeneralistsOnly(25);
+% p = setupGeneralistsOnly(25);
+p = setupDiatoms_simpleOnly(10);
+% p = setupDiatomsOnly;
 p = parametersWatercolumn(p);
 p.tEnd = 2*365;
 

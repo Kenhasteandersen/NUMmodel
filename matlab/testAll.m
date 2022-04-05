@@ -4,6 +4,7 @@ testSetup('setupGeneralistsOnly', 1174);
 testSetup('setupGeneralistsDiatoms_simple', 1576);
 testSetup('setupGeneralistsDiatoms', 4817);
 testSetup('setupDiatoms_simpleOnly', 369);
+testSetup('setupDiatomsOnly', 3619);% ???
 testSetup('setupGeneralists_cspOnly', 1366);
 testSetup('setupGeneric', 958);
 

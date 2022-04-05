@@ -16,7 +16,10 @@ end
 %
 % Set parameters:
 %
-p = setupGeneric(mAdult);
+% p = setupGeneric(mAdult);
+%  p = setupGeneralistsOnly;
+% p = setupDiatoms_simpleOnly;
+p = setupDiatomsOnly;
 p = parametersChemostat(p);
 p.tEnd = 365;
 %

@@ -38,8 +38,8 @@ endif
 # gfortran:
 #
 FORT=gfortran
-#FLAGS=-g3
-FLAGS= -fPIC -O2
+FLAGS= -fPIC -g
+#FLAGS= -fPIC -O2
 #LINK=
 #
 # nag fortran

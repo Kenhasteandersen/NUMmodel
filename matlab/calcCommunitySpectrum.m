@@ -11,7 +11,7 @@
 %
 function [m, Bc] = calcCommunitySpectrum(p,B)
 
-[m, idx] = sort(p.m(3:end));
+[m, idx] = sort(p.m(p.idxB:end));
 Bcumm = cumsum(B(idx));
 Bc = gradient(Bcumm);
 

@@ -596,7 +596,7 @@ contains
                      L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
       type is (spectrumDiatoms)
          call calcRatesDiatoms(spec, &
-                     L, upositive(idxN), upositive(idxSi), gammaN, gammaSi, gammaDOC)
+                     L, upositive(idxN), upositive(idxSi), upositive(idxDOC),gammaN, gammaSi, gammaDOC)
       type is (spectrumGeneralists_csp)
          call calcRatesGeneralists_csp(spec, &
                      L, upositive(idxN), F( ixStart(iGroup):ixEnd(iGroup) ), gammaN)

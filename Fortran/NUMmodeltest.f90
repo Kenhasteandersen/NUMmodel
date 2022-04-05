@@ -26,7 +26,7 @@ program NUMmodeltest
   allocate(u0(nGrid))
   allocate(u00(nGrid))
   allocate(dudt(nGrid))
-  u00(idxN) = 150.d0
+  u00(idxN) = 50.d0
   u00(idxDOC) = 10.d0
   u00(idxSi) = 10.d0
   do i = idxB, nGrid
@@ -37,8 +37,8 @@ program NUMmodeltest
   !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
   call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:3), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
-
-  !call calcDerivatives(u00, 20.d0, 10.d0, 0.1d0, dudt)
+  !                     u  ,  L  ,   T  ,   dt , dudt
+  call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
 
   ProdGross = 0
   ProdNet = 0

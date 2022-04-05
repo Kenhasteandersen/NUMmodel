@@ -31,6 +31,10 @@ switch sim.p.nameModel
     case 'chemostat'
         for iTime = 1:length(sim.t)
             u = [ sim.N(iTime) sim.DOC(iTime), sim.B(iTime,:) ];
+           if isfield(p, 'idxSi')
+            u = [ sim.N(iTime) sim.DOC(iTime), sim.Si(iTime),sim.B(iTime,:) ];
+           end
+%             rates = sim.rates;
             rates = getRates(p, u, sim.L, sim.T );
             % Losses from HTL:
             losses = losses + ...
@@ -51,6 +55,10 @@ switch sim.p.nameModel
             for iDepth = 1:length(sim.z)
                 u = [sim.N(iDepth,iTime) sim.DOC(iDepth,iTime), ...
                     sim.B(iDepth,:,iTime) ];
+               if isfield(p, 'idxSi')
+                u = [sim.N(iDepth,iTime) sim.DOC(iDepth,iTime) sim.Si(iDepth,iTime), ...
+                sim.B(iDepth,:,iTime) ];
+               end
                 rates = getRates(p, u, sim.L(iDepth,iTime), sim.T(iDepth,iTime) );
                 % Losses from HTL:
                 losses = losses + ...

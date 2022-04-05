@@ -38,7 +38,7 @@ module diatoms
      real(dp), parameter :: bL=0.08 ! cost of light harvesting mugC(mugC)^-1
      real(dp), parameter :: bN=0.45 ! cost of N uptake mugC(mugN)^-1
      real(dp), parameter :: bSi=0.45 ! cost of Si uptake mugC(mugSi)^-1
-     real(dp), parameter :: bg=0.1 ! cost of biosynthsesis -- parameter from literature pending
+     real(dp), parameter :: bg=0.4 ! cost of biosynthsesis -- parameter from literature pending
      !
      ! Dissolved nutrient uptake:
      !
@@ -114,7 +114,7 @@ module diatoms
 
      end subroutine initDiatoms
   
-     subroutine calcRatesDiatoms(this, L, N, Si,DOC, gammaN, gammaSi,gammaDOC)
+     subroutine calcRatesDiatoms(this, L, N, Si,DOC, gammaN, gammaSi, gammaDOC)
        class(spectrumDiatoms), intent(inout):: this
        real(dp), intent(in):: gammaN, gammaSi, gammaDOC
        real(dp), intent(in):: L, N, Si, DOC
@@ -130,7 +130,7 @@ module diatoms
           ! Uptakes
           !
           this%JN(i) =  ftemp15* gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-          this%JDOC(i) = ftemp15*gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
+          this%JDOC(i) = 0.d0!ftemp15*gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
           this%JSi(i) = ftemp15* gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
           this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
           JmaxT = fTemp2*this%Jmax(i)
@@ -175,24 +175,28 @@ module diatoms
               dL=0
               dDOC =min(1., 1./(this%JDOC(i)*(1-bN))*(jlim*(1+bg+bSi+bN)+this%Jresp(i)))
            end if
-           !write(*,*) 'dL=', i ,':', dL(i)
-           write(*,*) 'dN=', i ,':', dN
-           write(*,*) 'dSi=', i ,':', dSi
+           !write(*,*) 'dL=', i ,':', dL
+           !write(*,*) 'dN=', i ,':', dN
+           !write(*,*) 'dSi=', i ,':', dSi
 
           !
-          ! Down-regulated fluxes:
+          ! Down-regulated fluxes: the uptake flux JX is multiplied by the reduction factor dX , X= N, DOC, Si or L
           !
-          this%JN(i) = dN * this%JN(i) 
-          this%JDOC(i) = dDOC * this%JDOC(i)
+          !this%JN(i) = dN * this%JN(i) 
+          !this%JDOC(i) = dDOC * this%JDOC(i)
           this%JLreal(i) = dL * this%JL(i)
-          this%JSi(i) = dSi * this%JSi(i)
-           !Jnetp  = this%JL(i)*(1-bL)+this%jDOC(i)*(1-bN)-this%Jresp(i)   
+          !this%JSi(i) = dSi * this%JSi(i)
+
+           !Jnetp  = this%JLreal(i)*(1-bL)+this%jDOC(i)*(1-bN)-this%Jresp(i)   
            !Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*this%JN(i)+bSi*this%JSi(i)))) 
           !
           ! update jnetp with delta's
           !
-          Jnetp  = dL*this%JL(i)*(1-bL)+dDOC*this%jDOC(i)*(1-bN)-this%Jresp(i)   
+          Jnetp  = this%JL(i)*(1-bL)+dDOC*this%jDOC(i)*(1-bN)-this%Jresp(i)   
           Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*dN*this%JN(i)+bSi*dSi*this%JSi(i)))) 
+          !
+          ! Saturation of net growth
+          !
           f = (Jnet - this%JlossPassive(i))/(Jnet - this%JlossPassive(i) + JmaxT)
           this%Jtot(i)= f * JmaxT
           !
@@ -225,7 +229,7 @@ module diatoms
          ! Update nitrogen:
          !
          dNdt = dNdt  &
-         + ((-this%JN(i) + (this%JN(i)- this%JlossPassive(i) -this%Jtot(i)) &
+         + ((-this%JN(i) &!+ (this%JN(i)- this%JlossPassive(i) -this%Jtot(i)) &
          +  this%JlossPassive(i))/this%m(i) &
          + this%mort2(i) &
          + reminHTL*this%mortHTL(i)) * u(i)/rhoCN
