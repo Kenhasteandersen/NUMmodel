@@ -5,13 +5,18 @@ ifeq '$(findstring ;,$(PATH))' ';'
     UNAME := Windows
 else
     UNAME := $(shell uname 2>/dev/null || echo Unknown)
-    ifeq ($(UNAME), Unknown)
+    ifeq ($(UNAME), Unknown) 
         UNAME := Windows # Assuming windows if we cannot find a uname
         $(warning    Cannot determine system; assuming Windows)
     endif
 endif
 
 $(info    System is $(UNAME))
+# Check for other windows name
+ifeq ($(findstring NT-5.1,$(UNAME)),NT-5.1)
+    # Found
+    UNAME=Windows
+endif
 
 ifeq ($(UNAME), Darwin)
  libMatlab = ../lib/libNUMmodel_matlab.dylib
