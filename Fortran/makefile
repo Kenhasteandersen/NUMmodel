@@ -1,5 +1,5 @@
 #
-# Define lib-names depending on the system
+# Try to determine the operating system:
 #
 ifeq '$(findstring ;,$(PATH))' ';'
     UNAME := Windows
@@ -12,12 +12,15 @@ else
 endif
 
 $(info    System is $(UNAME))
+
 # Check for other windows name
 ifeq ($(findstring NT-5.1,$(UNAME)),NT-5.1)
     # Found
     UNAME=Windows
 endif
-
+#
+# Define lib-names depending on the system:
+#
 ifeq ($(UNAME), Darwin)
  libMatlab = ../lib/libNUMmodel_matlab.dylib
  libR = ../lib/libNUMmodel_R.dylib
