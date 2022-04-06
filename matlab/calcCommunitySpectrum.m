@@ -25,7 +25,7 @@ for iGroup = 1:p.nGroups
     
     vq1(isnan(vq1)) = 0;
     Bc = Bc + vq1;
-    end
+end
 
 end
 
