@@ -2,7 +2,7 @@
 % Calculate the community size spectrum from all groups.
 %
 
-function [m, Bc] = calcCommunitySpectrum(p,B)
+function [mc, Bc] = calcCommunitySpectrum(sim)
 
 p = sim.p;
 mX = p.m;
