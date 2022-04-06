@@ -21,16 +21,12 @@ for iGroup = 1:p.nGroups
     % Plot background to show oscillations over the last half of the simulation:
     %
     ixAve = find( sim.t > sim.t(end)/2 );
-    if (length(sim.t) > 1)
-        Blower = min( sim.B(ixAve,ixB) )./ log(Delta);
-        Bupper = max( sim.B(ixAve,ixB) )./ log(Delta);
-        patch([m, m(end:-1:1)], [Blower, Bupper(end:-1:1)] , ...
-            p.colGroup{iGroup},...
-            'edgecolor','none', 'facealpha',0.15);
-        [mc, Bc] = calcCommunitySpectrum(sim.p, exp(mean(log(sim.B(ixAve,:)),1)));
-    else
-        [mc, Bc] = calcCommunitySpectrum(sim.p, sim.B);
-    end
+    Blower = min( sim.B(ixAve,ixB) )./ log(Delta);
+    Bupper = max( sim.B(ixAve,ixB) )./ log(Delta);
+    patch([m, m(end:-1:1)], [Blower, Bupper(end:-1:1)] , ...
+        p.colGroup{iGroup},...
+        'edgecolor','none', 'facealpha',0.15);
+        
     set(gca,'xscale','log','yscale','log')
     hold on
 end
@@ -38,6 +34,7 @@ end
 % Community spectrum:
 %
 
+[mc, Bc] = calcCommunitySpectrum(sim);
 loglog(mc, Bc, 'linewidth',2,'color',[0.7, 0.7, 0.7])
 %
 % Group spectra:
