@@ -416,7 +416,7 @@ contains
                                         ! B/z = 1/l )
     logical, intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
     logical, intent(in):: boolDecliningHTL ! Whether the mortality declines with size
-    real(dp), parameter:: mRef = .1d0 ! Reference mass (in ugC)
+    !real(dp), parameter:: mRef = .1d0 ! Reference mass (in ugC)
     !real(dp), parameter:: betaHTL = 500.
     integer:: iGroup
  
@@ -430,7 +430,7 @@ contains
           (1 / (1+(group(iGroup)%spec%m/mHTL)**(-2))) ! The size selectivity switch around mHTL
       if (boolDecliningHTL) then
          pHTL( ixStart(iGroup):ixEnd(iGroup) ) = pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
-             * (group(iGroup)%spec%m/mRef)**(-0.25)
+             * (group(iGroup)%spec%m/mHTL)**(-0.25)
       end if
     enddo
 
