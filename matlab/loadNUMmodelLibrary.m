@@ -4,10 +4,18 @@
 %
 function sLibname = loadNUMmodelLibrary(bParallel)
 
-arguments
-    bParallel logical = false;
+if nargin==0
+    bParallel = false;
 end
-
+%
+% Check matlab version:
+%
+if verLessThan('Matlab','9.1')
+    error('Needs Matlab version 9.1 or higher.\n');
+end
+%
+% Find the correct library for the OS:
+%
 switch computer('arch')
     case {'maci','maci64'}
         sLibname = 'libNUMmodel_matlab';
