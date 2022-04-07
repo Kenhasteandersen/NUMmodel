@@ -117,7 +117,7 @@ contains
        ! Available energy:
        nu = this%JF(i) - this%Jresp(i)
        ! Production of POM:
-       this%jPOM = (1-epsilonF)*this%JF(i)/this%m(i)
+       this%jPOM = (1-epsilonF)*this%JF(i)/(this%m(i) * epsilonF)
        ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
        ! Starvation:
