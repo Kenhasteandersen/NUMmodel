@@ -430,7 +430,7 @@ contains
           (1 / (1+(group(iGroup)%spec%m/mHTL)**(-2))) ! The size selectivity switch around mHTL
       if (boolDecliningHTL) then
          pHTL( ixStart(iGroup):ixEnd(iGroup) ) = pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
-             * (group(iGroup)%spec%m/mRef)**(-0.25)
+             * (group(iGroup)%spec%m/mHTL)**(-0.25)
       end if
     enddo
 
