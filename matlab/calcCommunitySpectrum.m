@@ -1,5 +1,5 @@
 %
-% Calculate the community size spectrum from all groups.
+% Calculate the community size spectrum from all groups using interplotation.
 %
 
 function Bc = calcCommunitySpectrum(sim, mc)
