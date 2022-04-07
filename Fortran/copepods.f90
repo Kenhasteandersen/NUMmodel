@@ -113,7 +113,7 @@ contains
        !
 
        ! Basal and SDA respiration:
-       this%Jresp(i) = this%JrespFactor(i) * (fTemp2*kBasal + kSDA*this%JF(i)/(fTemp2*this%JFmax(i)))
+       this%Jresp(i) = this%JrespFactor(i) * kBasal * fTemp2 +  kSDA * this%JF(i)
        ! Available energy:
        nu = this%JF(i) - this%Jresp(i)
        ! Production of POM:
