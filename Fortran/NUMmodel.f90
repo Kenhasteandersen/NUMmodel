@@ -67,7 +67,7 @@ contains
   subroutine setupGeneralistsOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+    call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
@@ -77,8 +77,8 @@ contains
   subroutine setupGeneralistsPOM(n, nPOM)
    integer, intent(in):: n, nPOM
    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
-   call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
-   call parametersAddGroup(typePOM, nPOM, 1.d0) ! POM with nPOM size classes and max size 1 ugC
+   call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
+   call parametersAddGroup(typePOM, nPOM, 1.0d0) ! POM with nPOM size classes and max size 1 ugC
    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
  end subroutine setupGeneralistsPOM
 
@@ -117,7 +117,7 @@ contains
    subroutine setupGeneralistsDiatoms(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms
@@ -125,7 +125,7 @@ contains
    subroutine setupGeneralistsDiatoms_simple(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(0.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms_simple
@@ -135,7 +135,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsCopepod()
     call parametersInit(2, 20, 2)
-    call parametersAddGroup(typeGeneralist, 10, 0.1d0)
+    call parametersAddGroup(typeGeneralist, 10, 0.0d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
   end subroutine setupGeneralistsCopepod
@@ -149,7 +149,7 @@ contains
     integer:: iCopepod
 
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-    call parametersAddGroup(typeGeneralist, n, 0.1d0)
+    call parametersAddGroup(typeGeneralist, n, 0.0d0)
     if ( size(mAdult) .eq. 0) then
        call parametersFinalize(0.1d0, .true., .true.)
     else
@@ -168,7 +168,7 @@ contains
    integer:: iCopepod
  
    call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
-   call parametersAddGroup(typeGeneralist, n, 0.1d0)
+   call parametersAddGroup(typeGeneralist, n, 0.0d0)
 
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
@@ -277,7 +277,7 @@ contains
     !
     select case (typeGroup)
     case (typeGeneralist)
-      call initGeneralists(specGeneralists, n, mMax)
+      call initGeneralists(specGeneralists, n)
       allocate( group( iCurrentGroup )%spec, source=specGeneralists )
     case (typeDiatom_simple)
       call initDiatoms_simple(specDiatoms_simple, n, mMax)

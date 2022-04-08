@@ -39,6 +39,7 @@
 ! General
 !
       mMinGeneralist = 3.1623d-9    ! Description [mum C]
+	  mMaxGeneralist = 1.0		    ! Description [mum C]
 !
 ! Light uptake
 !
