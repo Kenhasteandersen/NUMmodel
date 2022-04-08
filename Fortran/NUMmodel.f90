@@ -25,12 +25,7 @@ module NUMmodel
    integer, parameter :: typeDiatom_simple = 4  
    integer, parameter :: typeCopepod = 10
    integer, parameter :: typePOM = 100
-   !
-   ! Specification of what to do with HTL losses:
-   !
-   real(dp), parameter :: fracHTL_to_N = 0.5 ! Half becomes urine that is routed back to N
-   real(dp), parameter :: fracHTL_to_POM = 0.5 ! Another half is fecal pellets that are routed back to the largest POM size class
-   real(dp), parameter :: rhoCN = 5.68
+
 
   !
   ! Variables that contain the size spectrum groups
@@ -216,6 +211,8 @@ contains
     !
     ! Set groups:
     !
+	call read_namelist_general()
+	
     nGroups = nnGroups
     iCurrentGroup = 0
     nNutrients = nnNutrients

@@ -1,5 +1,4 @@
 module input
-  use globals
   implicit none
   
   

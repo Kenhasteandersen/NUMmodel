@@ -9,7 +9,7 @@ module generalists
 
   private 
 
-  real(dp) :: rhoCN ! SHOULD BE MOVED TO GLOBALS
+  !real(dp) :: rhoCN ! SHOULD BE MOVED TO GLOBALS
   !real(dp), parameter:: rhoCN = 5.68 ! SHOULD BE MOVED TO GLOBALS
   !
   ! Light uptake:
@@ -89,7 +89,7 @@ contains
   subroutine read_namelist()
     integer :: file_unit,io_err
 
-    namelist /input_generalists / rhoCN, epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
+    namelist /input_generalists / epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
              & alphaF, cF, beta, sigma, cLeakage, delta, alphaJ, cR, &
              & remin, remin2, reminF, mMinGeneralist
 

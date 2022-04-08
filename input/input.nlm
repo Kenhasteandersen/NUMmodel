@@ -16,8 +16,19 @@
 ! given in curly brackets ({standard value}).                           !
 !                                                                       !
 !***********************************************************************!
+!
+! General parameters
+! ==================
+&input_general
+!
+      rhoCN = 5.68                  ! C:N ratio of cell [ ]
 
+! Variables for HTL mortalities:
 
+	  fracHTL_to_N = 0.5            ! Half becomes urine that is routed back to N
+	  fracHTL_to_POM = 0.5          ! Another half is fecal pellets that are routed back to the largest POM size class
+/
+!
 ! Generalists
 ! ===========
 &input_generalists
@@ -27,7 +38,6 @@
 !
 ! General
 !
-      rhoCN = 5.68                  ! C:N ratio of cell [ ]
       mMinGeneralist = 3.1623d-9    ! Description [mum C]
 !
 ! Light uptake
@@ -68,7 +78,6 @@
 ! ========
 &input_copepods
 
-      rhoCN = 5.68                  ! C:N ratio [ ]
       epsilonF = 0.67               ! Assimilation efficiency
       epsilonR = 0.25               ! Reproductive efficiency
       beta = 10000.d0               ! Description [unit]

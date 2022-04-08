@@ -11,7 +11,7 @@ module copepods
 
   private
 
-  real(dp) :: rhoCN
+  !real(dp) :: rhoCN
   real(dp) :: epsilonF  ! Assimilation efficiency
   real(dp) :: epsilonR  ! Reproductive efficiency
   real(dp) :: beta
@@ -59,7 +59,7 @@ contains
   subroutine read_namelist()
     integer :: file_unit,io_err
 
-    namelist /input_copepods / rhoCN, epsilonF, epsilonR, beta, sigma, alphaF,q, &
+    namelist /input_copepods / epsilonF, epsilonR, beta, sigma, alphaF,q, &
              & h, hExponent, kBasal, kSDA, p, AdultOffspring, remin
 
     call open_inputfile(file_unit, io_err)
