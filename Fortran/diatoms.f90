@@ -185,6 +185,21 @@ module diatoms
           this%JLreal(i) = dL(i) * this%JL(i)
           !this%JSi(i) = dSi * this%JSi(i)
 
+<<<<<<< Updated upstream
+=======
+           !Jnetp  = this%JLreal(i)*(1-bL)+this%jDOC(i)*(1-bN)-this%Jresp(i)   
+           !Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*this%JN(i)+bSi*this%JSi(i)))) 
+          !
+          ! update jnetp with delta's
+          !
+          Jnetp  = this%JL(i)*(1-bL)+dDOC*this%jDOC(i)*(1-bN)-this%Jresp(i)   
+          Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*dN*this%JN(i)+bSi*dSi*this%JSi(i)))) 
+          if (dSi<1 .and. dN<1) then
+           jlim=Jnet
+           dN=jlim/this%JN(i)
+           dSi=jlim/this%JSi(i)
+          end if
+>>>>>>> Stashed changes
           !
           ! Saturation of net growth
           !
