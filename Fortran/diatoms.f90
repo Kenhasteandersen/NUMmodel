@@ -120,7 +120,7 @@ module diatoms
        real(dp), intent(in):: L, N, Si, DOC
        real(dp):: f, JmaxT
        !real(dp):: dL(this%n)
-       real(dp) :: dL, dN, dDOC, dSi, Jnetp, Jnet,Jlim
+       real(dp):: dL(this%n), dN(this%n), dDOC(this%n), dSi(this%n), Jnetp(this%n), Jnet(this%n),Jlim(this%n)
        integer:: i
 
     
@@ -130,51 +130,49 @@ module diatoms
           ! Uptakes
           !
           this%JN(i) =  ftemp15* gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-          this%JDOC(i) = 0.d0!ftemp15*gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
+          this%JDOC(i) = ftemp15*gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
           this%JSi(i) = ftemp15* gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
           this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
           JmaxT = fTemp2*this%Jmax(i)
           !
           ! Potential net uptake
-          Jnetp=this%JL(i)*(1-bL)+this%JDOC(i)*(1-bN)-this%Jresp(i)
+          Jnetp(i)=this%JL(i)*(1-bL)+this%JDOC(i)*(1-bN)-this%Jresp(i)
           !
           ! Calculation of down-regulation factors for
           ! N-uptake
-          dN = max(0.,min(1., 1./this%JN(i)*Jnetp/(1+bg +bN+bSi)))
+          dN(i) = max(0.,min(1., 1./this%JN(i)*Jnetp(i)/(1+bg +bN+bSi)))
           ! Si-uptake
-          dSi = max(0.,min(1., 1./this%JSi(i)*Jnetp/(1+bg +bN+bSi)))
+          dSi(i) = max(0.,min(1., 1./this%JSi(i)*Jnetp(i)/(1+bg +bN+bSi)))
           !
-           if (dN==1 .and. dSi==1) then
+           if (dN(i)==1 .and. dSi(i)==1) then
              if ( this%JN(i)<this%JSi(i) ) then
-                 jlim=this%JN(i)
-                 dSi= jlim/this%JSi(i)
+                 jlim(i)=this%JN(i)
+                 dSi(i)= jlim(i)/this%JSi(i)
              else if ( this%JSi(i)<this%JN(i) ) then
-                 jlim= this%JSi(i)
-                 dN= jlim/this%JN(i) 
+                 jlim(i)= this%JSi(i)
+                 dN(i)= jlim(i)/this%JN(i) 
              end if
            end if   
            
-           if  ( dSi==1 .and. dN<1 ) then
-              jlim=this%JSi(i)
-              dN= jlim/this%jN(i)
-           else if ( dN==1 .and. dSi<1 ) then
-              jlim=this%JN(i)
-              dSi= jlim/this%JSi(i)
+           if  ( dSi(i)==1 .and. dN(i)<1 ) then
+              jlim(i)=this%JSi(i)
+              dN(i)= jlim(i)/this%jN(i)
+           else if ( dN(i)==1 .and. dSi(i)<1 ) then
+              jlim(i)=this%JN(i)
+              dSi(i)= jlim(i)/this%JSi(i)
            end if
-
-           if ( dSi<1 .and. dN<1 ) then
-              dL = 1 ;
-           else
-              dL  = min(1., 1./(this%JL(i)*(1-bL))*(jlim*(1+bg + bSi + bN ) &
-              + this%Jresp(i) - (1-bN)*this%jDOC(i)) ) 
-
-              !write(*,*) 'dL:', dL
-           end if
-                          
-           if ( dL<0 ) then
-              dL=0
-              dDOC =min(1., 1./(this%JDOC(i)*(1-bN))*(jlim*(1+bg+bSi+bN)+this%Jresp(i)))
-           end if
+             dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)+this%Jresp(i) - (1-bN)*this%JDOC(i)) )
+             if (dL(i)<0) then
+              dL(i) = 0
+              dDOC(i) = min(1., 1./(this%JDOC(i)*(1-bN))*(Jlim(i)*(1+bg+bSi+bN) + this%Jresp(i)))  
+             end if
+             Jnetp(i) = dL(i)*this%jL(i)*(1-bL)+dDOC(i)*this%JDOC(i)*(1-bN)-this%Jresp(i)
+             Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
+             if ( dSi(i)<1 .and. dN(i)<1 ) then
+              jlim(i)=Jnet(i)
+              dN(i)=jlim(i)/this%JN(i)
+              dSi(i)=jlim(i)/this%JSi(i)
+             end if
            !write(*,*) 'dL=', i ,':', dL
            !write(*,*) 'dN=', i ,':', dN
            !write(*,*) 'dSi=', i ,':', dSi
@@ -184,20 +182,13 @@ module diatoms
           !
           !this%JN(i) = dN * this%JN(i) 
           !this%JDOC(i) = dDOC * this%JDOC(i)
-          this%JLreal(i) = dL * this%JL(i)
+          this%JLreal(i) = dL(i) * this%JL(i)
           !this%JSi(i) = dSi * this%JSi(i)
 
-           !Jnetp  = this%JLreal(i)*(1-bL)+this%jDOC(i)*(1-bN)-this%Jresp(i)   
-           !Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*this%JN(i)+bSi*this%JSi(i)))) 
-          !
-          ! update jnetp with delta's
-          !
-          Jnetp  = this%JL(i)*(1-bL)+dDOC*this%jDOC(i)*(1-bN)-this%Jresp(i)   
-          Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*dN*this%JN(i)+bSi*dSi*this%JSi(i)))) 
           !
           ! Saturation of net growth
           !
-          f = (Jnet - this%JlossPassive(i))/(Jnet - this%JlossPassive(i) + JmaxT)
+          f = (Jnet(i) - this%JlossPassive(i))/(Jnet(i) - this%JlossPassive(i) + JmaxT)
           this%Jtot(i)= f * JmaxT
           !
           !                                                        add this back to N pool    

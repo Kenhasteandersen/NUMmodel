@@ -19,8 +19,9 @@ program NUMmodeltest
   !call parametersFinalize(0.d0, .false.)
   
   !call setupGeneralistsDiatoms(10)
-  !call setupDiatoms_simpleOnly(10)
-  call setupDiatomsOnly(10)
+  !call setupGeneralistsDiatoms_simple(10)
+  call setupDiatoms_simpleOnly(10)
+  !call setupDiatomsOnly(10)
   !call setupDiatoms_simpleOnly(10)
 
   allocate(u0(nGrid))
