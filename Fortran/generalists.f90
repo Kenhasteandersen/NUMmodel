@@ -136,7 +136,6 @@ contains
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
     this%Jresp = cR*alphaJ*this%m
 
-    this%AL = this%AL * (1.d0 - this%nu)
   end subroutine initGeneralists
 
   subroutine calcRatesGeneralists(this, L, N, DOC, gammaN, gammaDOC)
