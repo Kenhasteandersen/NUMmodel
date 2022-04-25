@@ -1,4 +1,4 @@
-%
+% θ
 % Make a basic run of the chemostat model
 % In:
 %  mAdult is the adult sizes of copepods (can be left empty to simulate only
@@ -12,13 +12,15 @@ function sim = baserunChemostat(mAdult)
 arguments
     mAdult double = []
 end
+
+mAdult = logspace(log10(0.2), log10(1000), 10);
     
 %
 % Set parameters:
 %
 p = setupGeneric(mAdult);
 p = parametersChemostat(p);
-p.tEnd = 365;
+p.tEnd = 2000;
 %
 % Set to "normal" HTL mortality if there are no copepods:
 %
