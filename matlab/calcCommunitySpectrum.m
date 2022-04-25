@@ -1,4 +1,4 @@
-%
+%θ
 % Calculate the community size spectrum from all groups using interplotation.
 %
 
@@ -41,6 +41,17 @@ for iGroup = 1:p.nGroups
         vq1(isnan(vq1)) = 0; % get rid of the NAs
         Bc = Bc + vq1;
     end
+
+% Check interpolation (SOS! Only with marker!!!)
+% figure
+% 
+% loglog(m, exp(log_k), '*')
+% hold on 
+% 
+% loglog(mc, vq1)
+% xlim([0, max(m)])
+
+
 end
 
 end
