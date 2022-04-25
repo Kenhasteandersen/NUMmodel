@@ -16,8 +16,8 @@ if strcmp(sim.p.nameModel, 'global')
 
 else
     % Extract data from water column simulation:
-    z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
-    B = squeeze(double(sim.B(:, :, iTime))); % B(depth, grid)
+        z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
+        B = squeeze(double(sim.B(:, :, iTime))); % B(depth, grid)
 
 end
 
@@ -40,7 +40,6 @@ end
 nDepth = length(B(:,1));
 
 for iDepth = 1:nDepth
-
 
     [mc, BB(iDepth,:)] = calcCommunitySpectrumWaterCol(B(iDepth,:), sim);
 
