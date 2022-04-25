@@ -10,7 +10,7 @@
 function sim = baserunChemostat(mAdult)
 
 arguments
-    mAdult double = []
+    mAdult double = [];
 end
     
 %

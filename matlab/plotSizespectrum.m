@@ -24,7 +24,7 @@ switch sim.p.nameModel
         else
             u = [sim.N(iTime), sim.DOC(iTime), squeeze(sim.B(iTime,:))];
         end
-        s.L = sim.L;
+        s.L = mean(sim.L);
         s.T = sim.T;
         
     case 'watercolumn'
