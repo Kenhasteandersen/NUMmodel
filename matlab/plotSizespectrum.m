@@ -91,3 +91,9 @@ nexttile
 panelLosses(sim.p, sim.rates);
 
 s.rates = sim.rates;
+
+if strcmp(sim.p.nameModel, 'watercolumn')
+
+sgtitle(['Day = ', num2str(time), ', lat = ', num2str(sim.lat), char(176), ', lon = ', num2str(sim.lon), char(176), ', depth of maximum biomass: ', num2str(iDepth), ' m']) 
+
+end

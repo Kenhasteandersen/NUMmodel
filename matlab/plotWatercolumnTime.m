@@ -50,7 +50,7 @@ switch sim.p.nameModel
         lat = sim.lat;
         lon = sim.lon;
     otherwise
-        fprintf('Model type %s not supported.\n', sim.p.nameModel) 
+        fprintf('Model type %s not supported.\n', sim.p.nameModel)
 end
 N(N<=0) = 1e-8;
 DOC(DOC<=0) = 1e-8;
@@ -91,7 +91,7 @@ nexttile
 %panelField([t t(end)], -z, N');
 %surface(t,-z, N)
 contourf(t,-z,log10(N),linspace(-2,3,options.nLevels),'LineStyle','none')
-title(['Nitrogen, lat ', num2str(lat),', lon ', num2str(lon)])
+title('Nitrogen')
 ylabel('Depth (m)')
 %set(gca,'ColorScale','log')
 %shading interp
@@ -106,7 +106,8 @@ if isfield(sim,'Si')
     nexttile
     %surface(t,-z, Si)
     contourf(t,-z,log10(Si),linspace(-2,3,options.nLevels),'LineStyle','none')
-    title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
+    % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
+    title('Silicate')
     ylabel('Depth (m)')
     %set(gca,'ColorScale','log')
     %shading interp
@@ -121,7 +122,7 @@ end
 nexttile
 contourf(t,-z,log10(DOC),options.nLevels,'LineStyle','none')
 %surface(t,-z, DOC)
-title(['DOC, lat ', num2str(lat),', lon ', num2str(lon)])
+title('DOC')
 ylabel('Depth (m)')
 %xlabel('Concentration (\mugC l^{-1})')
 %set(gca,'colorscale','log')
@@ -155,5 +156,11 @@ for i = 1:sim.p.nGroups
         xlabel('Time (days)')
     end
 end
+
+
+if strcmp(sim.p.nameModel, 'watercolumn')
+    sgtitle(['Nitrogen & DOC concentration/ Total biomass of each group ({\mu}gC/l) at: lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
+end
+
 
 end

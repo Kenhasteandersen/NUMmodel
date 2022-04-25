@@ -34,10 +34,7 @@ function panelSpectrum(sim, ixTime)
     %
     % Community spectrum:
     %
-    nPoints = 100000;
-    mc = logspace(log10(p.m(3)), log10(p.m(end)), nPoints);
-    
-    Bc = calcCommunitySpectrum(sim,mc);
+    [mc, Bc] = calcCommunitySpectrum(sim.B, sim);
     legendentries(1) = loglog(mc, Bc, 'linewidth', 4.5,'color',[0.7, 0.7, 0.7]);
     sLegend{1} = 'Community spectrum';
     
