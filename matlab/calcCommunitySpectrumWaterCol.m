@@ -1,8 +1,9 @@
-function [mc, Bc] = calcCommunitySpectrumWaterCol(B, sim)
-
+function [mc, Bc] = calcCommunitySpectrumWaterCol(B, sim,time)
+% θ
 arguments
     B;
     sim struct;
+    time = NaN;
 end
 
 p = sim.p;
@@ -10,6 +11,7 @@ p = sim.p;
 nPoints = 1000;
 mc = logspace(log10(sim.p.m(3)), log10(sim.p.m(end)), nPoints);
 Bc = zeros(1, nPoints);
+ixAve = find( sim.t > sim.t(end)/2 );
 
 for iGroup = 1:p.nGroups
 
@@ -18,16 +20,26 @@ for iGroup = 1:p.nGroups
     Delta = p.mUpper(ix)./p.mLower(ix);
     ixB = ix-p.idxB+1;
 
+
+    if isnan(time)
     % Interpolation
-    log_k = mean( log(B(ixB)./log(Delta)),1);
+    log_k = mean( log(B(ixB, ixAve)'./log(Delta)),1);
     vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
 
     vq1(isnan(vq1)) = 0; % get rid of the NAs
     Bc = Bc + vq1;
+
+    else 
+
+    log_k = mean( log(B(ixB)'./log(Delta)),1);
+    vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
+
+    vq1(isnan(vq1)) = 0; % get rid of the NAs
+    Bc = Bc + vq1;
+
+    end
 end
 end
-
-
 
 
 % function Bc = calcCommunitySpectrum(sim, mc)
