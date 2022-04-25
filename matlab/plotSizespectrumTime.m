@@ -1,5 +1,5 @@
 function s = plotSizespectrumTime(sim,iDepth,lat,lon)
-
+% θ
 arguments
     sim struct;
     iDepth {mustBeInteger} = 1;
@@ -18,7 +18,7 @@ switch sim.p.nameModel
     case 'watercolumn'
         % Extract from a single water column:
         s.B = squeeze(sim.B(iDepth,:,:))';
-        sTitle = sprintf("Comminity sheldon spectrum at depth of max biomass: %3.0f m", sim.z(iDepth));
+        sTitle = sprintf("Community sheldon spectrum at depth of max biomass: %3.0f m", sim.z(iDepth));
     
     case 'global'
     if isempty(lat)
