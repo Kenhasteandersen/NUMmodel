@@ -18,7 +18,7 @@ arguments
 
 end
 
-mAdults = logspace(log10(0.2), log10(1000), 10);
+mAdults = logspace(log10(0.2), log10(1000), 9);
 
 
 % p = setupGeneralistsOnly(25);
@@ -27,7 +27,7 @@ p = parametersWatercolumn(p);
 % p.tEnd = 2*365;
 p.tEnd = 1000;
 
-setHTL(0.1, 10, true, true);
+setHTL(0.1, 1, true, true);
 
 sim = simulateWatercolumn(p, lat,lon);
 
