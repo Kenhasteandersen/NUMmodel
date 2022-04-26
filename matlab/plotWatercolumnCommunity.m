@@ -69,7 +69,7 @@ ylabel('Depth (m)')
 ylim([-200 0])
 
 set(gca,'xscale','log','colorscale','log')
-set(gca,'xtick',10.^(-9:2), 'XTickLabel',[])
+% set(gca,'xtick',10.^(-9:2), 'XTickLabel',[])
 
 cbar = colorbar;
 cbar.Label.String  = 'Biomass (\mug C l^{-1})';
@@ -80,5 +80,5 @@ cbar.Label.String  = 'Biomass (\mug C l^{-1})';
 if strcmp(sim.p.nameModel, 'watercolumn') && isnan(time)
     sgtitle(['Community Sheldon biomass ({\mu}gC/l) for the last ', num2str(sim.p.tEnd/2), ' days, ', 'lat = ', num2str(sim.lat), char(176), ', lon = ', num2str(sim.lon), char(176)])
 elseif strcmp(sim.p.nameModel, 'watercolumn') && ~isnan(time)
-    sgtitle(['Community Sheldon biomass ({\mu}gC/l) at day: ', num2str(time), ' days, ', 'lat = ', num2str(sim.lat), char(176), ', lon = ', num2str(sim.lon), char(176)])
+    sgtitle(['Community Sheldon biomass ({\mu}gC/l) at day: ', num2str(time), ', lat = ', num2str(sim.lat), char(176), ', lon = ', num2str(sim.lon), char(176)])
 end
