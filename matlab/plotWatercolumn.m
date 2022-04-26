@@ -110,13 +110,17 @@ ylimit = [-options.depthMax, 0];
 %
 % Run over all groups.
 %
+
+Zmax = -inf;
+Zmin = inf;
+
 for iGroup = 1:sim.p.nGroups
     ix = sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup);
     m = [sim.p.mLower(ix), sim.p.mLower(ix(end))+sim.p.mDelta(ix(end))];
     %
     % Biomass spectrum:
     %
-    nexttile
+    h(iGroup) = nexttile;
     %     BB = B(:,ix-sim.p.idxB+1);
     %     BB = [BB(1,:); BB]; % Add dummy layer on top
     %     BB( BB<0.01 ) = 0.01;
@@ -149,11 +153,23 @@ for iGroup = 1:sim.p.nGroups
     end
     ylim(ylimit)
 
+
+    if max(max(BB(:,:))) > Zmax
+
+        Zmax = max(max(BB(:,:)));
+    end
+
+    if min(min(BB(:,:))) < Zmin
+
+        Zmin = min(min(BB(:,:)));
+    end
+
     if (iGroup == sim.p.nGroups)
         cbar = colorbar;
-        cbar.Label.String  = 'biomass (\mug C l^{-1})';
-        %set(cbar,'limits',[0.01, 100], ...
-        %'ticks',[0.01,0.1,1,10,100],'ticklabels',{'0.01','0.1','1','10','100'})
+        cbar.Label.String  = 'Sheldon biomass (\mug C l^{-1})';
+%         set(cbar,'limits',[0.01, 100], ...
+%         'ticks',[0.01,0.1,1,10,100],'ticklabels',{'0.01','0.1','1','10','100'})
+        set(h, 'Colormap', jet, 'CLim', [Zmin Zmax])
     end
     %
     % Trophic strategy or feeding level:
