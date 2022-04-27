@@ -87,7 +87,7 @@
       q = 0.75                      ! Exponent of clerance rate
       h = 1.37                      ! Factor for maximum ingestion rate
       hExponent = 0.75              ! Exponent for maximum ingestions rate
-      kBasal = 0.01! 0.006         ! Factor for basal metabolism. This value represents basal
+      kBasal = 0.01! 0.006          ! Factor for basal metabolism. This value represents basal
       kSDA = 0.16                   ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
       p = 0.75                      ! Exponent for respiration
       AdultOffspring = 100.
