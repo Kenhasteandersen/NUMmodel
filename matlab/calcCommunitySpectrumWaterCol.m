@@ -22,20 +22,21 @@ for iGroup = 1:p.nGroups
 
 
     if isnan(time)
-    % Interpolation
-    log_k = mean( log(B(ixB, ixAve)'./log(Delta)),1);
-    vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
+        % Interpolation
+        log_k = mean( log(B(ixB, ixAve)'./log(Delta)),1);
+        vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
 
-    vq1(isnan(vq1)) = 0; % get rid of the NAs
-    Bc = Bc + vq1;
+        vq1(isnan(vq1)) = 0; % get rid of the NAs
+        Bc = Bc + vq1;
 
-    else 
+    else
 
-    log_k = mean( log(B(ixB)'./log(Delta)),1);
-    vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
+        log_k = mean( log(B(ixB)'./log(Delta)),1);
+        vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
 
-    vq1(isnan(vq1)) = 0; % get rid of the NAs
-    Bc = Bc + vq1;
+        vq1(isnan(vq1)) = 0; % get rid of the NAs
+        Bc = Bc + vq1;
+
 
     end
 end
