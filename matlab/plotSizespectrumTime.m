@@ -45,14 +45,25 @@ for iTime = 1:length(sim.t)
     %s.B(:,iTime) = s.B(:,iTime) ./ sim.p.mDelta(sim.p.idxB:end)' .* m';
 end
 
-s.Bc(imag(s.Bc) ~=0) = 0.000001;
+s.Bc(imag(s.Bc) ~=0) = 0.01;
+s.Bc(s.Bc < 0.01) = 0.01;
 
 clf
-surface(mc, sim.t, log10(s.Bc)')
-shading flat
+% surface(mc, sim.t, log10(s.Bc)')
+
+% s.Bc( s.Bc < 0.01 ) = 0.01;
+% BB(imag(BB) ~= 0) = 0.0001;
+
+contourf( mc, sim.t, s.Bc', ...
+    10.^linspace(-2,2,100),'linestyle','none')
+
+% surface(mc, sim.t, s.Bc')
+% shading flat
 axis tight
-caxis([-5,2])
+% caxis([-2,2])
 set(gca,'xscale','log')
+set(gca, 'colorscale','log')
+
 c = colorbar;
 c.Label.String = "log_{10}({\mu}g_C/L)";
 title(sTitle)
