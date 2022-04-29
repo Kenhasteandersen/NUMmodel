@@ -61,11 +61,6 @@ BB( BB < 0.01 ) = 0.01;
 contourf( mc, -z, BB, ...
     10.^linspace(-2,2,100),'linestyle','none')
 
-% contourf( mc, -z, BB,'linestyle','none')
-
-% contourf( mc, -z, BB, 'linestyle','none')
-
-
 % set(gca,'xscale','log','colorscale','log')
 
 xlabel('Mass (\mugC)')
@@ -79,7 +74,7 @@ set(gca,'xscale','log','colorscale','log')
 cbar = colorbar;
 cbar.Label.String  = 'Biomass (\mug C l^{-1})';
 
-% caxis([-5 2])
+caxis([0.01 100])
 
 
 
