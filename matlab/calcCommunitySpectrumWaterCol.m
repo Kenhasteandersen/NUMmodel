@@ -31,7 +31,7 @@ for iGroup = 1:p.nGroups
 
     else
 
-        log_k = mean( log(B(ixB)'./log(Delta)),1);
+        log_k = mean( log(B(ixB)./log(Delta)),1);
         vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
 
         vq1(isnan(vq1)) = 0; % get rid of the NAs
