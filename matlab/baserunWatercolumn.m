@@ -7,23 +7,27 @@
 % Out:
 %  As simulation structure
 %
-function sim = baserunWatercolumn(lat,lon)
+function sim = baserunWatercolumn(mAdult, lat, lon)
 
 arguments
+    mAdult double = []
     lat double = 60;
     lon double = -10;
 end
 
-mAdults = logspace(log10(0.2), log10(1000), 9);
-
-
 % p = setupGeneralistsOnly(25);
-p = setupGeneric(mAdults);
+p = setupGeneric(mAdult);
 p = parametersWatercolumn(p);
-% p.tEnd = 2*365;
 p.tEnd = 1000;
 
-setHTL(0.1, 1, true, true);
+%
+% Set to "normal" HTL mortality if there are no copepods:
+%
+if isempty(mAdult)
+    setHTL(0.1, 1/500^1.5, false, false);
+else 
+    setHTL(0.1, 1, true, true);
+end
 
 sim = simulateWatercolumn(p, lat,lon);
 
