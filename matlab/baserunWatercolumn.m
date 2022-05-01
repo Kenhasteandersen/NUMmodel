@@ -12,10 +12,6 @@ function sim = baserunWatercolumn(lat,lon)
 arguments
     lat double = 60;
     lon double = -10;
-
-%     lat double = 0;
-%     lon double = -23;
-
 end
 
 mAdults = logspace(log10(0.2), log10(1000), 9);
