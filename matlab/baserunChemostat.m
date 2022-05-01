@@ -11,21 +11,21 @@ function sim = baserunChemostat(mAdult)
 
 arguments
     mAdult double = []
-end
-
-mAdult = logspace(log10(0.2), log10(1000), 10);
-    
+end    
 %
 % Set parameters:
 %
 p = setupGeneric(mAdult);
 p = parametersChemostat(p);
 p.tEnd = 2000;
+p.d = 0.1;
 %
 % Set to "normal" HTL mortality if there are no copepods:
 %
 if isempty(mAdult)
-    setHTL(0.1, 1/500^1.5,false,false);
+    setHTL(0.1, 1/500^1.5, false, false);
+else 
+    setHTL(0.1, 1, true, true);
 end
 %
 % Simulate
@@ -37,5 +37,4 @@ toc
 % Plot
 %
 plotSimulation(sim);
-
 checkConservation(sim);
