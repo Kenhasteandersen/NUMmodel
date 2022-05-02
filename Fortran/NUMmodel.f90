@@ -455,6 +455,15 @@ contains
 
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
+
+  subroutine setMortHTL(mortHTL)
+   real(dp), intent(in):: mortHTL(nGrid-idxB+1)
+   integer:: iGroup
+
+   do iGroup = 1, nGroups
+      group(iGroup)%spec%mortHTL = mortHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) )
+   end do
+  end subroutine setMortHTL
   
   ! ======================================
   !  Calculate rates and derivatives:
@@ -864,7 +873,7 @@ contains
    real(dp), intent(out):: Nbalance, Cbalance
    integer:: iGroup
    
-   iGroup = 1 ! Do it only for the first group, whihc we assume are generalists
+   iGroup = 1 ! Do it only for the first group:
    select type ( spec => group(iGroup)%spec )
       type is (spectrumGeneralists)
          Nbalance = spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
@@ -920,6 +929,7 @@ contains
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumDiatoms_simple)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
+        jDOC( i1:i2 ) = 0.d0 ! Diatoms simple don't take up DOC
       class is (spectrumDiatoms)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       end select

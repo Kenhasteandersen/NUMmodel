@@ -1,7 +1,7 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int, c_bool
-  use NUMmodel, only:  nGrid, setupGeneralistsOnly,  &
-      setupGeneralistsPOM, setHTL, getRates, &         
+  use NUMmodel, only:  nGrid, idxB, setupGeneralistsOnly,  &
+      setupGeneralistsPOM, setHTL, setmortHTL, getRates, &         
        setupGeneralistsOnly_csp, &
        setupDiatomsOnly, &
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
@@ -83,6 +83,12 @@ contains
 
     call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
   end subroutine f_setHTL 
+
+  subroutine f_setMortHTL(mortHTL) bind(c)
+    real(c_double), intent(in):: mortHTL(nGrid-idxB+1)
+
+    call setMortHTL(mortHTL)
+  end subroutine f_setMortHTL
 
   subroutine test(x) bind(c)
     integer(c_int), intent(in), value:: x
