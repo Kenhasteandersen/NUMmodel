@@ -18,7 +18,7 @@ end
 % p = setupGeneralistsOnly(25);
 p = setupGeneric(mAdult);
 p = parametersWatercolumn(p);
-p.tEnd = 1000;
+p.tEnd = 1095;
 
 %
 % Set to "normal" HTL mortality if there are no copepods:
