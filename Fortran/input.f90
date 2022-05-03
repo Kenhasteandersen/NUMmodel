@@ -1,7 +1,8 @@
+!
+! Module to handle the reading of the input file
+!
 module input
-  use globals
   implicit none
-  
   
   contains
   
@@ -15,7 +16,7 @@ module input
   subroutine close_inputfile(file_unit, io_err)
     integer,  intent(in) :: file_unit, io_err
     call check_iostat(io_err, &
-        "Error on reading name-list, please correct file content")
+        "Error reading name-list, please correct file content")
     close (file_unit)
   end subroutine close_inputfile
 
