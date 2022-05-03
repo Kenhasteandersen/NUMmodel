@@ -81,7 +81,7 @@ sim.bUnicellularloss = options.bUnicellularloss;
     %
     % Function to assemble derivative for chemostat:
     %
-    function dudt = fDeriv(t,u)
+    function dudt = fDeriv(~,u)
         dudt = 0*u';
         [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
             u, L, T, 0.0, dudt);

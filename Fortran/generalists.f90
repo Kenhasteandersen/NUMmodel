@@ -9,7 +9,7 @@ module generalists
 
   private 
 
-  real(dp) :: rhoCN ! SHOULD BE MOVED TO GLOBALS
+  !real(dp) :: rhoCN ! SHOULD BE MOVED TO GLOBALS
   !real(dp), parameter:: rhoCN = 5.68 ! SHOULD BE MOVED TO GLOBALS
   !
   ! Light uptake:
@@ -67,6 +67,7 @@ module generalists
   !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
 
   real(dp) :: mMinGeneralist
+  real(dp) :: mMaxGeneralist
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
@@ -89,9 +90,9 @@ contains
   subroutine read_namelist()
     integer :: file_unit,io_err
 
-    namelist /input_generalists / rhoCN, epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
+    namelist /input_generalists / epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
              & alphaF, cF, beta, sigma, cLeakage, delta, alphaJ, cR, &
-             & remin, remin2, reminF, mMinGeneralist
+             & remin, remin2, reminF, mMinGeneralist, mMaxGeneralist
 
     call open_inputfile(file_unit, io_err)
         read(file_unit, nml=input_generalists, iostat=io_err)
@@ -99,17 +100,18 @@ contains
 
   end subroutine read_namelist
 
-  subroutine initGeneralists(this, n, mMax)
+  subroutine initGeneralists(this, n)
     class(spectrumGeneralists):: this
-    real(dp), intent(in):: mMax
+    !real(dp), intent(in):: mMax
     integer, intent(in):: n
     integer:: i
-    real(dp) :: mMin
+    real(dp) :: mMin, mMax
     !real(dp), parameter:: mMin = 3.1623d-9
     real(dp), parameter:: rho = 0.4*1d6*1d-12
 
     call read_namelist()
     mMin=mMinGeneralist
+	mMax=mMaxGeneralist
     call this%initUnicellular(n, mMin, mMax)
     allocate(this%JFreal(n))
 

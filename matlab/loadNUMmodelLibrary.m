@@ -29,7 +29,9 @@ switch computer('arch')
     otherwise
         error('Architecture %s not found.\n', computer('arch'));
 end
-
+%
+% Load library:
+%
 path = fileparts(mfilename('fullpath'));
 
 if bParallel

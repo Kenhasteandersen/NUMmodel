@@ -16,7 +16,7 @@ module diatoms_simple
     !
     ! Stoichiometry:
     !
-    real(dp), parameter:: rhoCN = 5.68
+    !real(dp), parameter:: rhoCN = 5.68
     real(dp), parameter:: rhoCSi = 3.4 
     !
     ! Cell properties

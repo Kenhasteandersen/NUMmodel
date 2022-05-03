@@ -11,7 +11,7 @@ module copepods
 
   private
 
-  real(dp) :: rhoCN
+  !real(dp) :: rhoCN
   real(dp) :: epsilonF  ! Assimilation efficiency
   real(dp) :: epsilonR  ! Reproductive efficiency
   real(dp) :: beta
@@ -59,7 +59,7 @@ contains
   subroutine read_namelist()
     integer :: file_unit,io_err
 
-    namelist /input_copepods / rhoCN, epsilonF, epsilonR, beta, sigma, alphaF,q, &
+    namelist /input_copepods / epsilonF, epsilonR, beta, sigma, alphaF,q, &
              & h, hExponent, kBasal, kSDA, p, AdultOffspring, remin
 
     call open_inputfile(file_unit, io_err)
@@ -113,11 +113,11 @@ contains
        !
 
        ! Basal and SDA respiration:
-       this%Jresp(i) = this%JrespFactor(i) * (fTemp2*kBasal + kSDA*this%JF(i)/(fTemp2*this%JFmax(i)))
+       this%Jresp(i) = this%JrespFactor(i) * kBasal * fTemp2 +  kSDA * this%JF(i)
        ! Available energy:
        nu = this%JF(i) - this%Jresp(i)
        ! Production of POM:
-       this%jPOM = (1-epsilonF)*this%JF(i)/this%m(i)
+       this%jPOM = (1-epsilonF)*this%JF(i)/(this%m(i) * epsilonF)
        ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
        ! Starvation:
@@ -125,6 +125,9 @@ contains
        !
        ! Mortality:
        !this%mortHTL(i) = this%mortHTL(i)*u(i)
+
+       !this%mortHTL(i) = this%mortHTL(i) * fTemp2     
+
        this%mort(i) = this%mortpred(i) + this%mortStarve(i) + this%mortHTL(i)
        ! Flux:
        if ( this%g(i) .ne. 0.) then

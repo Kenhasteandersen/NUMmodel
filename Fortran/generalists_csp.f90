@@ -12,7 +12,7 @@ module generalists_csp
   real(dp), parameter:: Q15corr = 1.5**(-0.5) ! Corrections because parameters are given at Tref = 15
   real(dp), parameter:: Q20corr = 2.5**(-0.5) ! wheras NUM uses Tref = 10
 
-  real(dp), parameter:: rhoCN = 5.68
+  !real(dp), parameter:: rhoCN = 5.68
   real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
   real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
   real(dp), parameter:: cLeakage = 0.00015 ! passive leakage of C and N

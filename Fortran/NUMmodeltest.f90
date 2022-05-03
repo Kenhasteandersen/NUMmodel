@@ -12,8 +12,8 @@ program NUMmodeltest
   !call setHTL(0.0001d0, 1.d0, .true.)
 
   !call setupGeneralistsCopepod()
-  !call setupGeneralistsOnly(5)
-  call setupGeneralistsPOM(10,5)
+  call setupGeneralistsOnly(5)
+  !call setupGeneralistsPOM(10,5)
   !call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /) )
 
   allocate(u0(nGrid))
@@ -29,7 +29,7 @@ program NUMmodeltest
   dudt = 0.d0
 
   write(*,*) group(1)%spec%velocity
-  write(*,*) group(2)%spec%velocity
+  !write(*,*) group(2)%spec%velocity
   !write(*,*) group(3)%spec%velocity
   !write(*,*) group(4)%spec%velocity
   !call getSinking(u00)

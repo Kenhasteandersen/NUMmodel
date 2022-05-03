@@ -1,7 +1,7 @@
 %
 % Plot a size spectrum at a given lat, lon, index of depth, and time
 % (day).
-%
+% θ
 function s = plotSizespectrum(sim, time, iDepth, lat, lon)
 arguments
     sim struct;
@@ -91,3 +91,9 @@ nexttile
 panelLosses(sim.p, sim.rates);
 
 s.rates = sim.rates;
+
+if strcmp(sim.p.nameModel, 'watercolumn')
+
+sgtitle(['Day = ', num2str(time), ', lat = ', num2str(sim.lat), char(176), ', lon = ', num2str(sim.lon), char(176), ', depth of maximum biomass: ', num2str(z(iDepth)), ' m']) 
+
+end

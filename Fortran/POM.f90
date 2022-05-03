@@ -14,7 +14,7 @@ module POM
   
     private 
   
-    real(dp), parameter:: rhoCN = 5.68
+    !real(dp), parameter:: rhoCN = 5.68
     real(dp), parameter:: remin = 0.07d0 ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
     real(dp), parameter:: mMin = 1e-9 ! Smallest POM mass
   

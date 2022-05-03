@@ -25,12 +25,7 @@ module NUMmodel
    integer, parameter :: typeDiatom_simple = 4  
    integer, parameter :: typeCopepod = 10
    integer, parameter :: typePOM = 100
-   !
-   ! Specification of what to do with HTL losses:
-   !
-   real(dp), parameter :: fracHTL_to_N = 0.5 ! Half becomes urine that is routed back to N
-   real(dp), parameter :: fracHTL_to_POM = 0.5 ! Another half is fecal pellets that are routed back to the largest POM size class
-   real(dp), parameter :: rhoCN = 5.68
+
 
   !
   ! Variables that contain the size spectrum groups
@@ -72,7 +67,7 @@ contains
   subroutine setupGeneralistsOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+    call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
@@ -82,8 +77,8 @@ contains
   subroutine setupGeneralistsPOM(n, nPOM)
    integer, intent(in):: n, nPOM
    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
-   call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
-   call parametersAddGroup(typePOM, nPOM, 1.d0) ! POM with nPOM size classes and max size 1 ugC
+   call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
+   call parametersAddGroup(typePOM, nPOM, 1.0d0) ! POM with nPOM size classes and max size 1 ugC
    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
  end subroutine setupGeneralistsPOM
 
@@ -122,7 +117,7 @@ contains
    subroutine setupGeneralistsDiatoms(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms
@@ -130,7 +125,7 @@ contains
    subroutine setupGeneralistsDiatoms_simple(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(0.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms_simple
@@ -140,7 +135,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsCopepod()
     call parametersInit(2, 20, 2)
-    call parametersAddGroup(typeGeneralist, 10, 0.1d0)
+    call parametersAddGroup(typeGeneralist, 10, 0.0d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
   end subroutine setupGeneralistsCopepod
@@ -154,7 +149,7 @@ contains
     integer:: iCopepod
 
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-    call parametersAddGroup(typeGeneralist, n, 0.1d0)
+    call parametersAddGroup(typeGeneralist, n, 0.0d0)
     if ( size(mAdult) .eq. 0) then
        call parametersFinalize(0.1d0, .true., .true.)
     else
@@ -173,7 +168,7 @@ contains
    integer:: iCopepod
  
    call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
-   call parametersAddGroup(typeGeneralist, n, 0.1d0)
+   call parametersAddGroup(typeGeneralist, n, 0.0d0)
 
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
@@ -216,6 +211,8 @@ contains
     !
     ! Set groups:
     !
+	call read_namelist_general()
+	
     nGroups = nnGroups
     iCurrentGroup = 0
     nNutrients = nnNutrients
@@ -280,7 +277,7 @@ contains
     !
     select case (typeGroup)
     case (typeGeneralist)
-      call initGeneralists(specGeneralists, n, mMax)
+      call initGeneralists(specGeneralists, n)
       allocate( group( iCurrentGroup )%spec, source=specGeneralists )
     case (typeDiatom_simple)
       call initDiatoms_simple(specDiatoms_simple, n, mMax)
@@ -430,7 +427,7 @@ contains
           (1 / (1+(group(iGroup)%spec%m/mHTL)**(-2))) ! The size selectivity switch around mHTL
       if (boolDecliningHTL) then
          pHTL( ixStart(iGroup):ixEnd(iGroup) ) = pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
-             * (group(iGroup)%spec%m/mRef)**(-0.25)
+             * (group(iGroup)%spec%m/mHTL)**(-0.25)
       end if
     enddo
 
