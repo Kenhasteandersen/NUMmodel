@@ -57,9 +57,20 @@ end
 BB = [BB(1,:); BB]; % Add dummy layer on top
 BB( BB < 0.01 ) = 0.01;
 % BB(imag(BB) ~= 0) = 0.0001;
+%
 
-contourf( mc, -z, BB, ...
-    10.^linspace(-2,2,100),'linestyle','none')
+if isnan(time)
+    contourf( mc, -z, BB, ...
+        10.^linspace(-2,0.5,100),'linestyle','none')
+    caxis([0.01 4])
+else
+    contourf( mc, -z, BB, ...
+        10.^linspace(-2,2,100),'linestyle','none')
+    caxis([0.01 100])
+end
+
+
+% contourf( mc, -z, BB,'linestyle','none')
 
 % set(gca,'xscale','log','colorscale','log')
 
@@ -74,9 +85,7 @@ set(gca,'xscale','log','colorscale','log')
 cbar = colorbar;
 cbar.Label.String  = 'Biomass (\mug C l^{-1})';
 
-caxis([0.01 100])
-
-
+% caxis([0.01 100])
 
 if strcmp(sim.p.nameModel, 'watercolumn') && isnan(time)
     sgtitle(['Community Sheldon biomass ({\mu}gC/l) for the last ', num2str(sim.p.tEnd/2), ' days, ', 'lat = ', num2str(sim.lat), char(176), ', lon = ', num2str(sim.lon), char(176)])
