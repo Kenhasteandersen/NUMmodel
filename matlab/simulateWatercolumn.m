@@ -47,7 +47,7 @@ if isfield(p,'idxSi')
     bSilicate = true;
 end
 ixB = p.idxB:p.n;
-
+ 
 %Tbc = [];
 
 disp('Preparing simulation')
