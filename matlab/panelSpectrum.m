@@ -49,6 +49,7 @@ function panelSpectrum(sim, ixTime)
         %
         % Plot the spectrum:
         %
+        sim.B(sim.B<=0) = 1e-100; % avoid negative values
         legendentries(iGroup+1) = ...
             loglog(m, exp( mean( log(sim.B(ixAve, ixB)./log(Delta)),1)), 'linewidth',2,...
             'color',p.colGroup{iGroup});

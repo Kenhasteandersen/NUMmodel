@@ -10,7 +10,7 @@ arguments
     iTime = NaN;
 end
 
-B(B<=0) = 1e-100; % just to avoid imaginary numbers during log transformation
+B()
 
 p = sim.p;
 
