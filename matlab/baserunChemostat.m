@@ -16,7 +16,7 @@ end
 %
 % Set parameters:
 %
-p = setupGeneric(mAdult);
+p = setupGeneric();
 p = parametersChemostat(p);
 p.tEnd = 365;
 %

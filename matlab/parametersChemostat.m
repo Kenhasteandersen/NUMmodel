@@ -5,6 +5,7 @@
 %  p - parameter structure from a call to a setupXX function
 %  seasonalOptions - parameter structure that choose if the chemostat will
 %                    have or not seasonalities. Several types are possible:
+%                    (author: Cécile Decker)
 %  seasonalOptions.constantValues - set to 0.5 and 100 by default (mixing
 %                                   rate and light are constant)
 %  seasonalOptions.lat_lon - set to NaN by default (mixing rate and light 
@@ -40,6 +41,20 @@ p.tEnd = 365;  % Time to run in days
 p.tSave = 1;
 
 p.uDeep = 50; % Nutrients of the layer below the chemostat layer
+
+%
+% Set minimum concentrations:
+%
+p.umin = 0*p.u0;
+for iGroup = 1:p.nGroups
+    ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+    if p.typeGroups(iGroup) < 10
+        p.umin(ix) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Minimum B concentration for unicellular groups
+    end
+    if p.typeGroups(iGroup)>=10 && p.typeGroups(iGroup)<100
+        p.umin(ix(1)) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Send in some nauplii in copepod groups
+    end
+end
 
 p.depthProductiveLayer = 50; % (meters)
 p.widthProductiveLayer = 20; % (meters) only used for calcFunctions
@@ -144,7 +159,6 @@ else
             fprintf('.');
         end
     end
-
     z = grid.z;
     epsilon = 15;
     idx_chemo = find(z<(p.depthProductiveLayer+epsilon) & z>(p.depthProductiveLayer-epsilon));
@@ -153,7 +167,7 @@ else
         A = squeeze(AimpM(iMonth,:,:));
         j = sum(mon(1:iMonth-1));
         for k=1:mon(iMonth)
-            d(k+j) = sum(A(idx_chemo,idx_chemo+1:end)); % sum all the layer below depth -100
+            d(k+j) = sum(A(idx_chemo,idx_chemo+1:end)); % sum all the layer below depth of the produtive layer
             %
             % Light function : we take 100m as the depth of the layer and a
             % layer of 20m width, because the chemostat is this all layer.

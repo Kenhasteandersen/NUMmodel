@@ -61,6 +61,13 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 sLibname = loadNUMmodelLibrary();
 [t,u] = ode23(@fDeriv, [0 p.tEnd], p.u0);
 %
+% Enforce minimum concentration
+%
+for k = 1:size(u,1)
+    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+end
+
+%
 % Assemble result:
 %
 sim.u=u;

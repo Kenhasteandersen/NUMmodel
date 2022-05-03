@@ -14,7 +14,7 @@ arguments
     lon double = -10;
 end
 
-p = setupGeneralistsOnly(25);
+p = setupGeneralistsOnly(20);
 p = parametersWatercolumn(p);
 p.tEnd = 2*365;
 

@@ -9,4 +9,5 @@ testSetup('setupGeneric', 1049);
 
 testFunction('testChemostat');
 testFunction('testChemostatEuler');
+testFunction('testChemostatSeasonal');
 testFunction('testGlobal');

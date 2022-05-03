@@ -277,7 +277,7 @@ for i = 1:simtime
     u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
         p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
     %
-    % Enforce minimum concentraion
+    % Enforce minimum concentration
     %
     for k = 1:nGrid
         u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
