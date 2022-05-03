@@ -14,7 +14,7 @@ end
 %
 % Show losses from chemostat
 %
-if strcmp(p.nameModel,'chemostat')
+if strcmp(p.nameModel,'chemostat') & (isnan(p.seasonalOptions.lat_lon) & p.seasonalOptions.seasonalAmplitude==0)
     semilogx(m, p.d*m./m,'--')
 end
 

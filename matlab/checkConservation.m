@@ -31,7 +31,7 @@ switch sim.p.nameModel
         loss = 0;
         for iTime = 1:length(sim.t)
             u = [ sim.N(iTime) sim.DOC(iTime), sim.B(iTime,:) ];
-            rates = getRates(p, u, sim.L, sim.T );
+            rates = getRates(p, u, mean(sim.L), sim.T );
             if ~sum(ismember(p.typeGroups,100))
                 % Losses from HTL:
                 lossHTL = lossHTL + ...

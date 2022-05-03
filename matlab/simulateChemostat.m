@@ -24,8 +24,15 @@ end
 % Get the chemostat parameters if they are not already set:
 %
 if ~isfield(p,'nameModel')
-    p = parametersChemostat(p);
+    p = parametersChemostat(p, 'constantValues', [0.5 L]);
 end
+%
+% Light
+%
+if ~isnan(p.seasonalOptions.lat_lon) | p.seasonalOptions.seasonalAmplitude~=0
+    L = p.L;
+end
+sim.L = L;
 %
 % Concentrations in the deep layer:
 %
@@ -36,6 +43,7 @@ else
 end
 uDeep = p.u0;
 uDeep(p.idxB:end) = 0;
+uDeep(1) = p.uDeep; %Nutrients from the layer below the chemostat layer
 %
 % Check if there is POM:
 %
@@ -53,6 +61,13 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 sLibname = loadNUMmodelLibrary();
 [t,u] = ode23(@fDeriv, [0 p.tEnd], p.u0);
 %
+% Enforce minimum concentration
+%
+for k = 1:size(u,1)
+    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+end
+
+%
 % Assemble result:
 %
 sim.u=u;
@@ -64,11 +79,10 @@ if isfield(p, 'idxSi')
 end
 sim.B = u(:,p.idxB:end);
 sim.p = p;
-sim.rates = getRates(p, u(end,:), L, T);
+sim.rates = getRates(p, u(end,:), mean(sim.L), T);
 for iGroup = 1:p.nGroups
     sim.Bgroup(:,iGroup) = sum( u(:, p.ixStart(iGroup):p.ixEnd(iGroup)),2);
 end
-sim.L = L;
 sim.T = T;
 sim.bUnicellularloss = options.bUnicellularloss;
 %Bpnm = calcPicoNanoMicro(sim.B(end,:), sim.p.pGeneralists);
@@ -76,19 +90,32 @@ sim.bUnicellularloss = options.bUnicellularloss;
 %sim.Bnano = Bpnm(2);
 %sim.Bmicro = Bpnm(3);
 
-[sim.Nbalance, sim.Cbalance] = getBalance(sim.u, sim.L, sim.T); % in units per day
+[sim.Nbalance, sim.Cbalance] = getBalance(sim.u, mean(sim.L), sim.T); % in units per day
 
     %
     % Function to assemble derivative for chemostat:
     %
     function dudt = fDeriv(t,u)
         dudt = 0*u';
-        [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
-            u, L, T, 0.0, dudt);
-        %
-        % Chemostat dynamics for nutrients and unicellulars:
-        %
-        dudt(ix) = dudt(ix) + p.d*(uDeep(ix)-u(ix)');
+        if (isnan(p.seasonalOptions.lat_lon) & p.seasonalOptions.seasonalAmplitude==0)
+            [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
+                u, L, T, 0.0, dudt);
+            %
+            % Chemostat dynamics for nutrients and unicellulars:
+            %
+            dudt(ix) = dudt(ix) + p.d*(uDeep(ix)-u(ix)');
+        else % Incorporate the time dependancy if necessary
+            t_int = floor(mod(t,365))+1;
+            if t_int>365
+                t_int = 365;
+            end
+            [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
+                u, L(t_int), T, 0.0, dudt);
+            %
+            % Chemostat dynamics for nutrients and unicellulars:
+            %
+            dudt(ix) = dudt(ix) + p.d(t_int)*(uDeep(ix)-u(ix)');
+        end
         %
         % Sinking of POM:
         %

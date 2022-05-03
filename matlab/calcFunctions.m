@@ -31,13 +31,13 @@ switch sim.p.nameModel
             sim.Bpico, sim.Bnano, sim.Bmicro] = ...
             getFunctions(u, sim.L, sim.T);
         % Multiply by the assumed depth of the productive layer:
-        sim.ProdGross = sim.ProdGross * sim.p.depthProductiveLayer;
-        sim.ProdNet = sim.ProdNet * sim.p.depthProductiveLayer;
-        sim.ProdHTL = sim.ProdHTL * sim.p.depthProductiveLayer;
-        sim.ProdBact = sim.ProdBact * sim.p.depthProductiveLayer;
-        sim.Bpico = sim.Bpico * sim.p.depthProductiveLayer;
-        sim.Bnano = sim.Bnano * sim.p.depthProductiveLayer;
-        sim.Bmicro = sim.Bmicro * sim.p.depthProductiveLayer;
+        sim.ProdGross = sim.ProdGross * sim.p.widthProductiveLayer;
+        sim.ProdNet = sim.ProdNet * sim.p.widthProductiveLayer;
+        sim.ProdHTL = sim.ProdHTL * sim.p.widthProductiveLayer;
+        sim.ProdBact = sim.ProdBact * sim.p.widthProductiveLayer;
+        sim.Bpico = sim.Bpico * sim.p.widthProductiveLayer;
+        sim.Bnano = sim.Bnano * sim.p.widthProductiveLayer;
+        sim.Bmicro = sim.Bmicro * sim.p.widthProductiveLayer;
         
     case 'watercolumn'
         nTime = length(sim.t);
