@@ -126,7 +126,7 @@ contains
        ! Mortality:
        !this%mortHTL(i) = this%mortHTL(i)*u(i)
 
-       !this%mortHTL(i) = this%mortHTL(i) * fTemp2     
+       this%mortHTL(i) = this%mortHTL(i) * fTemp2     
 
        this%mort(i) = this%mortpred(i) + this%mortStarve(i) + this%mortHTL(i)
        ! Flux:
