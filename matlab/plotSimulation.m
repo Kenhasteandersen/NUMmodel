@@ -1,4 +1,4 @@
-%
+%θ
 % Make a set of basic plots of a simulation
 %
 function plotSimulation(sim)
@@ -19,8 +19,9 @@ switch sim.p.nameModel
         end
         
     case 'watercolumn'
-        day = sim.p.tEnd - 170;
-        iDepth = 4;
+        % day = sim.p.tEnd - 170;
+        day = 600;
+        % iDepth = 4;
         
         figure(1)
         clf
@@ -34,11 +35,19 @@ switch sim.p.nameModel
         % Find the depth of maximum biomass:
         Bdepth = sum(sum(sim.B,3),2);
         iDepth = find(Bdepth==max(Bdepth));
+         
         plotSizespectrum(sim,day,iDepth);
-        
+        % plotSizespectrum(sim,iDepth);
+
         figure(4)
         plotSizespectrumTime(sim,iDepth);
-        
+ 
+        figure(5)
+        plotWatercolumnCommunity(sim)
+
+        figure(6)
+        plotWatercolumnCommunity(sim, day)
+   
     case 'global'
         figure(1)
         clf

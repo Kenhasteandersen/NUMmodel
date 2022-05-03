@@ -1,7 +1,7 @@
 %
 % Plot Sheldon biomass spectrum. The biomasses are normalised by the log of
 % the ratio between upper and lower masses in each bin
-%
+% θ
 function panelSpectrum(sim, ixTime)
 
     arguments
@@ -34,9 +34,6 @@ function panelSpectrum(sim, ixTime)
     %
     % Community spectrum:
     %
-%     nPoints = 100000;
-%     mc = logspace(log10(p.m(3)), log10(p.m(end)), nPoints);
-    
     [mc, Bc] = calcCommunitySpectrum(sim.B, sim);
     legendentries(1) = loglog(mc, Bc, 'linewidth', 4.5,'color',[0.7, 0.7, 0.7]);
     sLegend{1} = 'Community spectrum';
@@ -52,6 +49,7 @@ function panelSpectrum(sim, ixTime)
         %
         % Plot the spectrum:
         %
+        sim.B(sim.B<=0) = 1e-100; % avoid negative values
         legendentries(iGroup+1) = ...
             loglog(m, exp( mean( log(sim.B(ixAve, ixB)./log(Delta)),1)), 'linewidth',2,...
             'color',p.colGroup{iGroup});
