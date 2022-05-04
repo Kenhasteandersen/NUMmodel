@@ -856,10 +856,10 @@ contains
          Cbalance = spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-  end select
+  !end select
 
-  iGroup=3   
-  select type ( spec => group(iGroup)%spec )
+  !iGroup=3   
+  !select type ( spec => group(iGroup)%spec )
         type is (spectrumDiatoms)
             Nbalance = spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
