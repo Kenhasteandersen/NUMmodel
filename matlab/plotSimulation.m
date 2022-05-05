@@ -12,6 +12,11 @@ switch sim.p.nameModel
         
         figure(2)
         plotGroupsTime(sim);
+
+        if ~isnan(sim.p.seasonalOptions.lat_lon) | sim.p.seasonalOptions.seasonalAmplitude ~= 0
+            figure(3)
+            plotSizespectrumTime(sim)
+        end
         
     case 'watercolumn'
         % day = sim.p.tEnd - 170;
