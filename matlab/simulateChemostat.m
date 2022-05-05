@@ -95,7 +95,7 @@ sim.bUnicellularloss = options.bUnicellularloss;
     %
     % Function to assemble derivative for chemostat:
     %
-    function dudt = fDeriv(~,u)
+    function dudt = fDeriv(t,u)
         dudt = 0*u';
         if (isnan(p.seasonalOptions.lat_lon) & p.seasonalOptions.seasonalAmplitude==0)
             [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
@@ -104,7 +104,7 @@ sim.bUnicellularloss = options.bUnicellularloss;
             % Chemostat dynamics for nutrients and unicellulars:
             %
             dudt(ix) = dudt(ix) + p.d*(uDeep(ix)-u(ix)');
-        else % Incorporate the time dependancy if necessary
+        else % Incorporate the time dependency if necessary
             t_int = floor(mod(t,365))+1;
             if t_int>365
                 t_int = 365;

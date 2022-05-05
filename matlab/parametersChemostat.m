@@ -77,9 +77,8 @@ if ~exist(path,'file')
 end
 
 % Mixing rate and light calculation regarding the option choose
-
+depthProductiveLayer = 50; % (meters) Depth of the productive layer. Used for seasonal calculations
 if isnan(seasonalOptions.lat_lon)
-    depthProductiveLayer = 50; % (meters) Depth of the productive layer. Used for seasonal calculations
     if seasonalOptions.seasonalAmplitude == 0
         p.d = 0.5;  % Mixing rate (1/days)
         p.L = 100; % constant default light
