@@ -54,9 +54,9 @@ switch sim.p.nameModel
         %
         accumulation = (sim.N(end)+sum(sim.B(end,:)/rhoCN)) - ...
             (sim.N(1)+sum(sim.B(1,:)/rhoCN));
-        dNdt = (accumulation - gains + lossHTL + loss)/1000*p.depthProductiveLayer/sim.t(end)*365; %gN/m2/yr
+        dNdt = (accumulation - gains + lossHTL + loss)/1000*p.widthProductiveLayer/sim.t(end)*365; %gN/m2/yr
         dNdt_per_N = (accumulation - gains + lossHTL+loss) / sim.N(end)/sim.t(end)*365; % Fraction per year
-        lossHTL = lossHTL/1000*p.depthProductiveLayer/sim.t(end)*365;
+        lossHTL = lossHTL/1000*p.widthProductiveLayer/sim.t(end)*365;
         lossHTL_per_N = lossHTL/sim.N(end);
 
     case 'watercolumn'
