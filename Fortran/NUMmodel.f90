@@ -452,6 +452,15 @@ contains
 
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
+
+  subroutine setMortHTL(mortHTL)
+   real(dp), intent(in):: mortHTL(nGrid-idxB+1)
+   integer:: iGroup
+
+   do iGroup = 1, nGroups
+      group(iGroup)%spec%mortHTL = mortHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) )
+   end do
+  end subroutine setMortHTL
   
   ! ======================================
   !  Calculate rates and derivatives:
