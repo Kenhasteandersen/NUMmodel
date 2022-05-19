@@ -215,14 +215,11 @@ end subroutine calcRatesGeneralists
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
     !real(dp):: mortloss
     integer:: i
-    !
-    ! To make mass balance check:
-    !
-    this%mort2 = this%mort2constant*u
+
+    this%mort2 = this%mort2constant*u ! "quadratic" mortality
     this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
     do i = 1, this%n
-      !mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
       !
       ! Update nitrogen:
       !
@@ -232,7 +229,7 @@ end subroutine calcRatesGeneralists
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) &
            +  remin2*this%mort2(i) & 
-           !+ reminHTL*this%mortHTL(i)&
+           !+ reminHTL*this%mortHTL(i)& ! Now done in NUMmodel.f90
            ) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -244,7 +241,7 @@ end subroutine calcRatesGeneralists
            +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
            +   remin2*this%mort2(i) & 
-           !+  reminHTL*this%mortHTL(i)&
+           !+  reminHTL*this%mortHTL(i)&  ! Now done in NUMmodel.f90
            ) * u(i)
       !
       ! Update the generalists:
@@ -270,11 +267,11 @@ end subroutine printRatesGeneralists
     class(spectrumGeneralists), intent(in):: this
     real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
 
-    Nbalance = (dNdt + sum( dudt &
-    !+ (1-reminHTL)*this%mortHTL*u &
-    + (1-remin2)*this%mort2*u & ! N remineralization of viral mortality
-    + (1-1)*this%JCloss_feeding/this%m * u &
-       )/rhoCN)/N ! full N remineralization of feeding losses
+    Nbalance = (dNdt + sum( dudt & ! Change in standing stock of N
+    + (1-fracHTL_to_N)*this%mortHTL*u & ! HTL not remineralized
+    + (1-remin2)*this%mort2*u & ! Viral mortality not remineralized
+    !+ (1-reminF)*this%JCloss_feeding/this%m * u & ! Feeding losses not remineralized
+       )/rhoCN)/N
   end function getNbalanceGeneralists 
 
   function getCbalanceGeneralists(this, DOC, dDOCdt, u, dudt) result(Cbalance)
@@ -283,7 +280,7 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: DOC, dDOCdt, u(this%n), dudt(this%n)
 
     Cbalance = (dDOCdt + sum(dudt &
-    !+ (1-reminHTL)*this%mortHTL*u &
+    + this%mortHTL*u &
     + (1-remin2)*this%mort2*u &
     - this%JLreal*u/this%m &
     - this%JCloss_photouptake*u/this%m &
