@@ -1,4 +1,4 @@
-function bSuccess = testChemostatSeasonal
+function bSuccess = testChemostatSeasonal(value)
 
 p = setupGeneric([]);
 
@@ -10,9 +10,9 @@ sim_bis = simulateChemostat(p_bis, 'bUnicellularloss', false);
 
 sumB = sum(sim.B(:));
 sumB_bis = sum(sim_bis.B(:));
-if ( sumB > 2e5 && sumB < 3e5 ) && ( sumB_bis > 9e4 && sumB_bis < 10e4 )
+if ( sumB > 4.4e5 && sumB < 4.5e5 ) && ( sumB_bis > 1.5e5 && sumB_bis < 1.6e5 )
     bSuccess = true;
 else
     bSuccess = false;
-    fprintf(2,"sum(B) = %f\n",sumB);
+    fprintf(2,"sum(B) = %f; sum(B_bis) = %f\n", [sumB, sumB_bis]);
 end
