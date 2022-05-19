@@ -102,17 +102,12 @@ contains
 
   subroutine initGeneralists(this, n)
     class(spectrumGeneralists):: this
-    !real(dp), intent(in):: mMax
     integer, intent(in):: n
     integer:: i
-    real(dp) :: mMin, mMax
-    !real(dp), parameter:: mMin = 3.1623d-9
     real(dp), parameter:: rho = 0.4*1d6*1d-12
 
     call read_namelist()
-    mMin=mMinGeneralist
-	mMax=mMaxGeneralist
-    call this%initUnicellular(n, mMin, mMax)
+    call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
 
     this%beta = beta
@@ -204,16 +199,15 @@ contains
             this%JClossLiebig(i) +&
             this%JlossPassive(i)
       this%JF(i) = this%JFreal(i)
-      !
-      ! Test for conservation budget. Should be close to zero:
-      !
-      !write(*,*) 'N budget', i,':',(this%JN(ix)+JFreal(i)-JlossPassive(i) &
-      !    - this%JNlossLiebig(ix)  - this%Jtot(ix))/this%m(i)
-      !write(*,*) 'C budget', i,':',(this%JLreal(ix) + this%JDOC(ix)+JFreal(i) &
-      !    -JlossPassive(i)-fTemp2*Jresp(i) &
-      !    - this%JClossLiebig(ix)  - this%Jtot(ix))/this%m(i)
     end do
-  end subroutine calcRatesGeneralists
+    !
+    ! Test for conservation budget. Should be close to zero:
+    !
+    !write(*,*) 'N budget:',(-this%Jtot+this%JN+this%JFreal & ! Gains
+    !  -this%JNlossLiebig-this%JlossPassive)/this%m           ! Losses
+    !write(*,*) 'C budget:',(-this%Jtot+this%JLreal+this%JDOC+this%JFreal & ! Gains
+    !  -fTemp2*this%Jresp - this%JClossLiebig - this%JlossPassive)/this%m   ! Losses
+end subroutine calcRatesGeneralists
 
   subroutine calcDerivativesGeneralists(this, u, dNdt, dDOCdt, dudt)
     class(spectrumGeneralists), intent(inout):: this
@@ -278,7 +272,7 @@ end subroutine printRatesGeneralists
 
     Nbalance = (dNdt + sum( dudt &
     !+ (1-reminHTL)*this%mortHTL*u &
-    + (1-1)*this%mort2*u & ! full N remineralization of viral mortality
+    + (1-remin2)*this%mort2*u & ! N remineralization of viral mortality
     + (1-1)*this%JCloss_feeding/this%m * u &
        )/rhoCN)/N ! full N remineralization of feeding losses
   end function getNbalanceGeneralists 
