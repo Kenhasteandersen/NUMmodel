@@ -10,7 +10,7 @@
 %         sim.ProdNet   - net primary production (gC/m2/yr)
 %         sim.ProdHTL   - amount of carbon extracted from the HTL mortality
 %         sim.Bpico, sim.Bnano, sim.Bmicro - pico, micro, and nano plankton
-%                         biomasses (gC/m2/yr)
+%                         biomasses (gC/m2)
 %
 %         For global simulations additional fields are:
 %         sim.Ntotal    - total dissolved N as a function of time (mugN)

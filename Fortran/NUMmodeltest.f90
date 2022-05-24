@@ -20,15 +20,15 @@ program NUMmodeltest
   allocate(u00(nGrid))
   allocate(dudt(nGrid))
   u00(idxN) = 150.d0
-  u00(idxDOC) = 0.d0
+  u00(idxDOC) = 10.d0
   !u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 10.0d0 !*(i-2)
+     u00(i) = 10 + 0.1*(i-2)
   end do
-  u00(17:22) = 0.d0 ! No POM
+  !u00(17:22) = 0.d0 ! No POM
   dudt = 0.d0
 
-  write(*,*) group(1)%spec%velocity
+  !write(*,*) group(1)%spec%velocity
   !write(*,*) group(2)%spec%velocity
   !write(*,*) group(3)%spec%velocity
   !write(*,*) group(4)%spec%velocity
@@ -39,7 +39,14 @@ program NUMmodeltest
   !write(*,*) u00
   
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
-  call calcDerivatives(u00, 20.d0, 10.d0, 0.1d0, dudt)
+  call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
+
+  select type (spec => group(1)%spec)
+      type is (spectrumGeneralists)
+        write(*,*) getNbalanceGeneralists(spec, u00(idxN), dudt(idxN), u00(idxB:nGrid), dudt(idxB:nGrid))    
+        write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
+  end select
+  
   !write(*,*) 'dudt:',dudt
   !write(*,*) 'u',u00
   !call printRates()
