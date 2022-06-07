@@ -168,7 +168,7 @@ for iGroup = 1:sim.p.nGroups
         cbar.Label.String  = 'Sheldon biomass (\mug C l^{-1})';
 %         set(cbar,'limits',[0.01, 100], ...
 %         'ticks',[0.01,0.1,1,10,100],'ticklabels',{'0.01','0.1','1','10','100'})
-        set(h, 'Colormap', jet, 'CLim', [Zmin Zmax])
+        set(h, 'CLim', [Zmin Zmax]) % , 'Colormap', jet
     end
     %
     % Trophic strategy or feeding level:
@@ -198,5 +198,6 @@ end
 
 
 if strcmp(sim.p.nameModel, 'watercolumn')
-    sgtitle(['Sheldon biomass ({\mu}gC/l) at day: ', num2str(time), ', lat = ', num2str(sim.lat), char(176), ', lon = ', num2str(sim.lon), char(176)])
+    sgtitle(['Day: ', num2str(time), ', lat = ', num2str(sim.lat), char(176), ', lon = ', num2str(sim.lon), char(176)])
+    % sgtitle(['Sheldon biomass ({\mu}gC/l) at day: ', num2str(time), ', lat = ', num2str(sim.lat), char(176), ', lon = ', num2str(sim.lon), char(176)])
 end
