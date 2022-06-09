@@ -36,21 +36,25 @@ switch sim.p.nameModel
     case 'chemostat'
 
         i = sim.p.ixPOM;
-        B_0 = sum(sim.B(sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:));
+        B_0 = sum(sim.B(:,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1),2);
         % need to sum the biomass of POM of NUMmodel of each size group and multiply by the distrib export flux ...
-        B_i0 = B_0*POM.distrib;
+        B_i0 = (B_0*POM.distrib).';
         
-        B_i = zeros(length(sim.z),length(sim.t));
+        Z = load('POM\Z.mat').Z;
+        POM.B_i = zeros(length(Z),length(POM.distrib),length(sim.t));
+        POM.JDOC = zeros(length(Z),length(sim.t));
+        POM.JDIC = zeros(length(Z),length(sim.t));
+        POM.JN = zeros(length(Z),length(sim.t));
         %calculation for each depth
-        for idx_z=1:length(sim.z)
-            z = sim.z(idx_z);
-            B_i(idx_z,:) = B_i0.*exp(-(POM.w/Gamma)*z);
+        for idx_z=1:length(Z)
+            z = Z(idx_z);
+            POM.B_i(idx_z,:,:) = exp(-(POM.w/Gamma)*z).'.*B_i0;
         
             %  Calculate the flux of Carbon and Nitrogen given from POM through depth
         
-            POM.JDOC(idx_z) = rho_DOC*Gamma*sum(B_i(idx_z,:));
-            POM.JDIC(idx_z) = rho_DIC*Gamma*sum(B_i(idx_z,:));
-            POM.JN(idx_z) = (1/rho_CN)*Gamma*sum(B_i(idx_z,:));
+            POM.JDOC(idx_z,:) = rho_DOC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
+            POM.JDIC(idx_z,:) = rho_DIC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
+            POM.JN(idx_z,:) = (1/rho_CN)*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
         
         end
 
@@ -64,17 +68,20 @@ switch sim.p.nameModel
         B_i0 = zeros(length(POM.distrib), length(B_0));
         B_i0 = (B_0*POM.distrib).';
         
-        B_i = zeros(length(sim.z),length(POM.distrib),length(sim.t));
+        POM.B_i = zeros(length(sim.z),length(POM.distrib),length(sim.t));
+        POM.JDOC = zeros(length(sim.z),length(sim.t));
+        POM.JDIC = zeros(length(sim.z),length(sim.t));
+        POM.JN = zeros(length(sim.z),length(sim.t));
         %calculation for each depth
         for idx_z=1:length(sim.z)
             z = sim.z(idx_z);
-            B_i(idx_z,:,:) = (exp(-(POM.w/Gamma)*z).'.*B_i0);
+            POM.B_i(idx_z,:,:) = (exp(-(POM.w/Gamma)*z).'.*B_i0);
         
             %  Calculate the flux of Carbon and Nitrogen given from POM through depth
         
-            POM.JDOC(idx_z) = rho_DOC*Gamma*sum(B_i(idx_z,:));
-            POM.JDIC(idx_z) = rho_DIC*Gamma*sum(B_i(idx_z,:));
-            POM.JN(idx_z) = (1/rho_CN)*Gamma*sum(B_i(idx_z,:));
+            POM.JDOC(idx_z,:) = rho_DOC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
+            POM.JDIC(idx_z,:) = rho_DIC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
+            POM.JN(idx_z,:) = (1/rho_CN)*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
         end
 
     case 'global'
@@ -82,21 +89,25 @@ switch sim.p.nameModel
         layer = 1; %for the moment we basicaly take the top layer
         %time = 150; %for the moment we simply take the 150th day of the simulation
         i = sim.p.ixPOM;
-        B_0 = sum(sim.B(:,:,layer,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:)); %the two first dimensions are lat and lon
+        B_0 = squeeze(sum(sim.B(layer,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:)));
         % need to sum the biomass of POM of NUMmodel of each size group and multiply by the distrib export flux ...
-        B_i0 = B_0*POM.distrib;
+        B_i0 = zeros(length(POM.distrib), length(B_0));
+        B_i0 = (B_0*POM.distrib).';
         
-        B_i = zeros(length(sim.z),length(sim.t));
+        POM.B_i = zeros(length(sim.z),length(POM.distrib),length(sim.t));
+        POM.JDOC = zeros(length(sim.z),length(sim.t));
+        POM.JDIC = zeros(length(sim.z),length(sim.t));
+        POM.JN = zeros(length(sim.z),length(sim.t));
         %calculation for each depth
         for idx_z=1:length(sim.z)
             z = sim.z(idx_z);
-            B_i(idx_z,:) = B_i0.*exp(-(POM.w/Gamma)*z);
+            POM.B_i(idx_z,:,:) = (exp(-(POM.w/Gamma)*z).'.*B_i0);
         
             %  Calculate the flux of Carbon and Nitrogen given from POM through depth
         
-            POM.JDOC(idx_z) = rho_DOC*Gamma*sum(B_i(idx_z,:));
-            POM.JDIC(idx_z) = rho_DIC*Gamma*sum(B_i(idx_z,:));
-            POM.JN(idx_z) = (1/rho_CN)*Gamma*sum(B_i(idx_z,:));
+            POM.JDOC(idx_z,:) = rho_DOC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
+            POM.JDIC(idx_z,:) = rho_DIC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
+            POM.JN(idx_z,:) = (1/rho_CN)*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
         end
 
 
