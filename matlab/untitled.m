@@ -1,0 +1,96 @@
+temp_new = linspace(0, 20, 1);
+% temp_new = [0 20];
+for i = 1:length(temp_new)
+    mAdult = logspace(log10(0.2), log10(1000), 5);
+    p = setupGeneric(mAdult);
+    p = parametersChemostat(p);
+    p.tEnd = 365 *10;
+    p.d = 0.1;
+    setHTL(0.2, 1, true, true);
+    sim = simulateChemostat(p, 100, temp_new(i));
+    % Generalists
+    BG = zeros(1, 1000);
+    mcG = logspace(log10(sim.p.m(3)), log10(sim.p.m(12)), 1000);
+    ixG = p.ixStart(1):p.ixEnd(1);
+    mG = p.m(ixG);
+    DeltaG = p.mUpper(ixG)./p.mLower(ixG);
+    ixBG = ixG-p.idxB+1;
+    ixAve = find(sim.t > sim.t(end) - 365);
+    % ixAve = find( sim.t > sim.t(end)/2 );
+    % Interpolation
+    log_kG = mean( log(sim.B( ixAve, ixBG)./log(DeltaG)),1);
+    vq1G = exp(interp1(log(mG), log_kG, log(mcG), 'linear'));
+    vq1G(isnan(vq1G)) = 0; % get rid of the NAs
+    BG = BG + vq1G;
+    BBG(i,:) = BG;
+    % Copepods
+    nPoints = 2000;
+    mc = logspace(log10(sim.p.m(13)), log10(sim.p.m(end)), nPoints);
+    Bc = zeros(1, nPoints);
+    Bc2 = zeros(1, nPoints);
+    B = sim.B;
+    for iGroup = 2:p.nGroups
+        ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+        m = p.m(ix);
+        Delta = p.mUpper(ix)./p.mLower(ix);
+        ixB = ix-p.idxB+1;
+        % ixAve = find( sim.t > sim.t(end)/2 );
+        % ixAve = find(sim.t > sim.t(end) - 365);
+        % Interpolation
+        log_k = mean( log(B( ixAve, ixB)./log(Delta)),1);
+        vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
+        vq1(isnan(vq1)) = 0; % get rid of the NAs
+        Bc = Bc + vq1;
+        % Interpolation 2
+        kk = mean(B( ixAve, ixB),1);
+        vq2 = interp1(m, kk, mc, 'linear');
+        vq2(isnan(vq2)) = 0; % get rid of the NAs
+        Bc2 = Bc2 + vq2;
+    end
+    Bc2(Bc2 <= 0) = 0.0001;
+    BBc(i,:) = Bc;
+    BBc2(i,:) = Bc2;
+    meanSize(i,:) = exp(sum(log(mc) .* log(Bc)) / log(sum(Bc)));
+    meanSize2(i,:) = exp(log(sum(mc .* Bc2)) / log(sum(Bc2)));
+    meanSize3(i,:) = exp(sum(log(mc) .* log(Bc2)) / sum(log(Bc2)));
+    meanSize4(i,:) = sum(mc .* Bc2) / sum(Bc2);
+    meanSize5(i,:) = mc(find(cumsum(BBc2)/ sum(BBc2) > 0.5, 1));
+    %
+    %     [mcFull, BcFull] = calcCommunitySpectrum_LAST_YEAR(sim.B, sim);
+    %
+    %     BBFull(i,:) = BcFull;
+end
+%%
+figure
+% colors = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560]};
+colors = {[0.3010 0.7450 0.9330], [0.6350 0.0780 0.1840], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560]};
+for j = 1:length(temp_new)
+    % loglog(mcG, BBG(j,:), '--', 'LineWidth', 1.2)
+    % hold on
+    % loglog(mc, BBc(j,:), 'LineWidth', 2, 'Color', colors{j})
+    size(BBc2(j,:))
+    loglog(mc, BBc2(j,:), 'LineWidth', 2)
+    % loglog(mcFull, BBFull(j,:), 'LineWidth', 2, 'Color', colors{j})
+    hold on
+end
+legend(['5', char(0176), 'C - Generalists'], ['5', char(0176), 'C - Copepod community'], ['25', char(0176), 'C - Generalists'], ['25', char(0176), 'C - Copepod community'])
+ylim([0.01 100])
+xlim(calcXlim(sim.p))
+xlabel('Mass ({\mu}gC)', 'FontSize', 12)
+ylabel('Sheldon biomass ({\mu}gC L^{-1})', 'FontSize', 12)
+%loglog(mc,cumsum(BBc2))
+
+%%
+mc(find(cumsum(BBc2)/sum(BBc2)>0.5,1))
+mc(find(cumsum(BBc2)/sum(BBc2)>0.75,1))
+exp(sum(log(mc) .* Bc2) / sum(Bc2))
+
+sqrt(sum(((mc) .* Bc2).^2) / sum(Bc2.^2))
+sqrt(sum(((mc) .* Bc2).^2)) / sqrt(sum(Bc2.^2))
+sqrt(sum(((mc).^2 .* Bc2)) / sum(Bc2))
+sqrt(sum(((mc).^2 .* Bc2))) / sum(Bc2)
+
+(sum(((mc).^0.5 .* Bc2)) / sum(Bc2))^2
+
+
+

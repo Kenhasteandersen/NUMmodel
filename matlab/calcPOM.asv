@@ -62,13 +62,13 @@ switch sim.p.nameModel
         B_0 = squeeze(sum(sim.B(layer,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:)));
         % need to sum the biomass of POM of NUMmodel of each size group and multiply by the distrib export flux ...
         B_i0 = zeros(length(POM.distrib), length(B_0));
-        B_i0 = (B_0*POM.distrib).';
+        B_i0 = POM.distrib*B_0.';
         
-        B_i = zeros(length(sim.z),length(POM.distrib),length(sim.t));
+        B_i = zeros(length(sim.z),length(sim.t));
         %calculation for each depth
         for idx_z=1:length(sim.z)
             z = sim.z(idx_z);
-            B_i(idx_z,:,:) = (exp(-(POM.w/Gamma)*z).'.*B_i0);
+            B_i(idx_z,:) = B_i0.*exp(-(POM.w/Gamma)*z);
         
             %  Calculate the flux of Carbon and Nitrogen given from POM through depth
         
