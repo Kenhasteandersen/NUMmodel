@@ -249,7 +249,8 @@ for i=1:simtime
     %
     % Save timeseries in grid format
     %
-    if ((mod(i/2,p.tSave) < mod((i-1)/2,p.tSave)) || (i==simtime))
+    if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
+    %if ((mod(i*p.dtTransport,p.tSave) < mod((i-1)*p.dtTransport,p.tSave)) || (i==simtime))
         fprintf('t = %u days',floor(i/2))
 
         if any(isnan(u))
