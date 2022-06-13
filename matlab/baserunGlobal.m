@@ -15,12 +15,7 @@ function sim = baserunGlobal(p)
 % Setup a basic run of the global model with only generalists
 %
 if (nargin==0)
-    mAdult = logspace(log10(0.2), log10(1000), 5);
-    n = 10;
-    nCopepods = 10;
-    nPOM = 10;
-    p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
-    %p = setupGeneralistsOnly(10, true); % Use 10 size groups and parallel execution
+    p = setupGeneralistsOnly(10, true); % Use 10 size groups and parallel execution
     p = parametersGlobal(p); % Use standard low-res model
     %p = parametersGlobal(10,2); % Use MITgcm_ECCO
     p.tEnd = 90;

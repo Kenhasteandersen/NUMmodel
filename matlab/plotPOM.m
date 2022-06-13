@@ -1,0 +1,97 @@
+mAdult = logspace(log10(0.2), log10(1000), 5);
+n = 10;
+nCopepods = 10;
+nPOM = 10;
+p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
+
+p = parametersWatercolumn(p);
+p.tEnd = 365*2;
+
+lat = 60;
+lon = -10;
+sim = simulateWatercolumn(p, lat,lon);
+sim = calcPOM(sim);
+
+POM = sim.POM;
+
+%figure(7)
+%plot(log10(POM.r),POM.distrib);
+%figure(8)
+%plot(log10(POM.r), POM.w);
+
+figure(9)
+t = sim.t;
+% Make a layer at z = 0 with the same value as in the first grid point:
+z = sim.z;
+N = POM.JN;
+DOC = POM.JDOC;
+DIC = POM.JDIC;
+B = squeeze(sum(POM.B_i,2));
+z = [0; z];
+N = [N(1,:); N];
+DOC = [DOC(1,:); DOC];
+DIC = [DIC(1,:); DIC];
+B = [B(1,:); B];
+options.nLevels = 20;
+options.depthMax = 200;
+ylimit = [-options.depthMax, 0];
+xlimit = [sim.t(1) sim.t(end)];
+lat = 60;
+lon = -10;
+% Nitrogen:
+nexttile
+contourf(t,-z,log10(N),'LineStyle','none') %linspace(-2,3,options.nLevels),
+title('Nitrogen')
+ylabel('Depth (m)')
+axis tight
+colorbar %('ticks',-2:3)
+ylim(ylimit)
+xlim(xlimit)
+set(gca,'XTickLabel','')
+% DOC
+nexttile
+contourf(t,-z,log10(DOC),'LineStyle','none') %,options.nLevels
+title('DOC')
+ylabel('Depth (m)')
+shading interp
+axis tight
+colorbar
+ylim(ylimit)
+xlim(xlimit)
+set(gca,'XTickLabel','')
+% DOC
+nexttile
+contourf(t,-z,log10(DIC),'LineStyle','none') %,options.nLevels
+title('DIC')
+ylabel('Depth (m)')
+shading interp
+axis tight
+colorbar
+ylim(ylimit)
+xlim(xlimit)
+set(gca,'XTickLabel','')
+% POM
+nexttile
+i = sim.p.ixPOM;
+B(B < 0.01) = 0.01; % Set low biomasses to the lower limit to avoid white space in plot
+contourf(t,-z,log10(B),'LineStyle','none') %,[linspace(-2,3,options.nLevels)]
+title(sim.p.nameGroup(i))
+ylabel('Depth (m)')
+axis tight
+colorbar
+%colorbar('ticks',-12:-2) %'limits',[-12 -2]
+ylim(ylimit)
+xlim(xlimit)
+if i ~= sim.p.nGroups
+    set(gca,'XTickLabel','')
+else
+    xlabel('Time (days)')
+end
+
+if strcmp(sim.p.nameModel, 'watercolumn')
+    sgtitle(['Nitrogen & DOC concentration/ Total biomass of each group ({\mu}gC/l) at: lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
+end
+
+%% day 600 biomasse as a function of size
+
+

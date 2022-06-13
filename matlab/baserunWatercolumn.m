@@ -16,12 +16,12 @@ arguments
 end
 
 % p = setupGeneralistsOnly(25);
-%p = setupGeneric(mAdult);
-mAdult = logspace(log10(0.2), log10(1000), 5);
-n = 10;
-nCopepods = 10;
-nPOM = 10;
-p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
+p = setupGeneric(mAdult);
+%mAdult = logspace(log10(0.2), log10(1000), 5);
+%n = 10;
+%nCopepods = 10;
+%nPOM = 10;
+%p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
 
 p = parametersWatercolumn(p);
 p.tEnd = 1095;
