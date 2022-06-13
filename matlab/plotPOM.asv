@@ -95,10 +95,10 @@ if strcmp(sim.p.nameModel, 'watercolumn')
     sgtitle(['Nitrogen & DOC concentration/ Total biomass of each group ({\mu}gC/l) at: lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
 end
 
-%% day 600 biomass as a function of size
+%% day 600 biomasse as a function of size
 
 figure(10)
-time = 600;
+time = 300;
 [~, iTime] = min(abs(sim.t-time));
 % Extract data from water column simulation:
 z = sim.z;
