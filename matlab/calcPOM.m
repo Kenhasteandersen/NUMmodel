@@ -4,15 +4,21 @@
 %  sim - The result of a Watercolumn simulation
 %
 % Options:
+%  options - for the global simulation, we need to choose a certain lat and
+%            lon where we want to see the POM flux. It can be changed after
+%            to be seen worldwide, bot one has to be careful on the tricky
+%            dimensions.
 %
 % Out:
 %  sim - simulation object with POM added but also matching sinking
 %        velocity and mass
 %
-function sim = calcPOM(sim)
+function sim = calcPOM(sim,options)
 
 arguments
     sim = simulateWatercolumn;
+    options.lat = 60;
+    options.lon = -20;
 end
 
 rho_DOC = 1/3;
@@ -89,7 +95,10 @@ switch sim.p.nameModel
         layer = 1; %for the moment we basicaly take the top layer
         %time = 150; %for the moment we simply take the 150th day of the simulation
         i = sim.p.ixPOM;
-        B_0 = squeeze(sum(sim.B(layer,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:)));
+        epsilon = 2;
+        lat = find(abs(sim.x-options.lat)<epsilon,1);
+        lon = find(abs(sim.y-options.lon)<epsilon,1);
+        B_0 = squeeze(sum(sim.B(lat,lon,layer,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:)));
         % need to sum the biomass of POM of NUMmodel of each size group and multiply by the distrib export flux ...
         B_i0 = zeros(length(POM.distrib), length(B_0));
         B_i0 = (B_0*POM.distrib).';
@@ -120,26 +129,3 @@ end
 
 % Maybe adding some basic plots
 sim.POM = POM;
-
-% Plots
-%figure(1)
-%clf
-%nexttile
-%plot(POM.JDOC', -sim.z,'linewidth', 2)%, '-')
-%title('flux of DOC, from the POM')
-%xlabel('DOC flux')
-%ylabel('depth')
-%nexttile
-%plot(POM.JDIC, -sim.z)
-%title('flux of DIC, from the POM')
-%xlabel('DIC flux')
-%ylabel('depth')
-%nexttile
-%plot(POM.JN, sim.z)
-%title('flux of Nitrogen, from the POM')
-%xlabel('Nitrogen flux')
-%ylabel('depth')
-
-%figure(2)
-%clf
-%nexttile
