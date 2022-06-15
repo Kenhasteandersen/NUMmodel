@@ -99,6 +99,7 @@ void f_getrates(
 		double *jLossPassive, 
 		double *jNloss,
 		double *jLreal, 
+		double *jPOM,
 		double *mortpred,
 		double *mortHTL,
 		double *mort2,

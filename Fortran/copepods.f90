@@ -173,4 +173,16 @@ contains
      write(*,99) "g:", this%g
   end subroutine printRatesCopepod
 
+  !function getNbalanceCopepods(this, N, dNdt, u, dudt) result(Nbalance)
+  !  real(dp):: Nbalance
+  !  class(spectrumCopepods), intent(in):: this
+  !  real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
+
+  !  Nbalance = (dNdt + sum( dudt & ! Change in standing stock of N
+  !    + (1-fracHTL_to_N)*this%mortHTL*u & ! HTL not remineralized
+  !    + (1-remin2)*this%mort2*u & ! Viral mortality not remineralized
+      !+ (1-reminF)*this%JCloss_feeding/this%m * u & ! Feeding losses not remineralized
+  !       )/rhoCN)/N
+  !end function getNbalanceCopepods
+
 end module copepods
