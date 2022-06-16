@@ -158,6 +158,16 @@ contains
     dNdt = dNdt + sum( this%Jresp*u/(this%m*rhoCN) )  &! All respiration of carbon results in a corresponding
                                     ! surplus of nutrients. This surplus (pee) is routed to nutrients
                 + (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  ! Should perhaps also go to DOC
+    !
+    ! Check balance: (should be zero)
+    !
+    !write(*,*) 'Copepod N balance:', &
+    !      + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
+    !      - sum(dudt)/rhoCN & ! Accumulation of biomass
+    !      - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
+    !      - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
+    !      - sum((this%mort)*u)/rhoCN  ! Mortality losses
+
   end subroutine calcDerivativesCopepod
 
   subroutine printRatesCopepod(this)
