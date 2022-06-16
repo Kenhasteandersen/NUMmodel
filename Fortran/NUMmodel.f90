@@ -485,7 +485,7 @@ contains
     real(dp), intent(in):: L, T, dt, u(nGrid)
     real(dp), intent(inout) :: dudt(nGrid)
     integer:: i, j, iGroup, ix
-    real(dp):: gammaN, gammaDOC, gammaSi
+    real(dp):: gammaN, gammaDOC, gammaSi, Nbalance
 
     dudt = 0.d0
     !
@@ -501,7 +501,6 @@ contains
     !
     ! Calc available food:
     !
-    !dudt(1) = F(1) ! ???
     do i = idxB, nGrid
        F(i) = 0.d0
        do j = idxB, nGrid
@@ -596,7 +595,17 @@ contains
             fracHTL_to_N * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
       end if
     end do
-    
+    !
+    ! Check: Should be close to zero
+    !
+    Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN
+    do iGroup = 1, nGroups
+      Nbalance = Nbalance  &
+        + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
+        + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
+    end do
+    write(*,*) 'N balance:', Nbalance
+
     contains
 
      !

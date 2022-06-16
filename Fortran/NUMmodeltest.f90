@@ -8,10 +8,11 @@ program NUMmodeltest
   integer:: i
 
 
-  !call setupGeneric( (/0.1d0, 1.0d0 /) )
+  call setupGeneric( (/0.1d0, 1.0d0 /) )
   !call setHTL(0.0001d0, 1.d0, .true.)
 
-  call setupGeneralistsCopepod()
+  !call setupGeneralistsCopepod()
+  call setHTL(0.1d0, 0.1d0, .false., .false.)
   !call setupGeneralistsOnly(5)
   !call setupGeneralistsPOM(10,5)
   !call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /) )
@@ -28,6 +29,7 @@ program NUMmodeltest
   !u00(17:22) = 0.d0 ! No POM
   dudt = 0.d0
 
+ 
   !write(*,*) group(1)%spec%velocity
   !write(*,*) group(2)%spec%velocity
   !write(*,*) group(3)%spec%velocity
@@ -40,6 +42,7 @@ program NUMmodeltest
   
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
   call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
+  !call printRates()
 
   !select type (spec => group(1)%spec)
   !    type is (spectrumGeneralists)

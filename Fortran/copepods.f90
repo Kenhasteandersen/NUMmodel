@@ -113,19 +113,16 @@ contains
        !
 
        ! Basal and SDA respiration:
-       this%Jresp(i) = this%JrespFactor(i) * kBasal * fTemp2 +  kSDA * this%JF(i)
+       this%Jresp(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i)
        ! Available energy:
        nu = this%JF(i) - this%Jresp(i)
-       ! Production of POM:
-       this%jPOM = (1-epsilonF)*this%JF(i)/(this%m(i) * epsilonF)
        ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
        ! Starvation:
        this%mortStarve(i) = -min(0.d0, nu)/this%m(i)
        !
        ! Mortality:
-       !this%mortHTL(i) = this%mortHTL(i)*u(i)
-
+       !
        this%mortHTL(i) = this%mortHTL(i) * fTemp2     
 
        this%mort(i) = this%mortpred(i) + this%mortStarve(i) + this%mortHTL(i)
@@ -138,6 +135,9 @@ contains
        this%Jtot(i) = nu
     end do
     b = epsilonR * this%g(this%n) ! Birth rate
+    ! Production of POM:
+    this%jPOM = (1-epsilonF)*this%JF/(this%m * epsilonF) ! From unassimilated feeding (fecal pellets)
+    this%jPOM(this%n) = this%jPOM(this%n) + (1.d0-epsilonR)*this%g(this%n) ! Lost reproductive flux
     !
     ! Assemble derivatives:
     !
@@ -155,9 +155,9 @@ contains
          this%gamma(this%n-1)*u(this%n-1) & ! growth into adult group
          - this%mort(this%n)*u(this%n); ! adult mortality
 
-    dNdt = dNdt + sum( this%Jresp*u/(this%m*rhoCN) )  &! All respiration of carbon results in a corresponding
+    dNdt = dNdt + sum( this%Jresp*u/this%m )/rhoCN  ! All respiration of carbon results in a corresponding
                                     ! surplus of nutrients. This surplus (pee) is routed to nutrients
-                + (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  ! Should perhaps also go to DOC
+                !+ (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  ! Should perhaps also go to DOC
     !
     ! Check balance: (should be zero)
     !
@@ -166,7 +166,7 @@ contains
     !      - sum(dudt)/rhoCN & ! Accumulation of biomass
     !      - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
     !      - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
-    !      - sum((this%mort)*u)/rhoCN  ! Mortality losses
+    !      - sum(this%mort*u)/rhoCN  ! Mortality losses
 
   end subroutine calcDerivativesCopepod
 
