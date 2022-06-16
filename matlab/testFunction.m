@@ -1,16 +1,16 @@
 %
 % Performs the testfunction in sEvaluation
 %
-function bSuccess = testFunction(sEvaluation, sDescription)
-if nargin()==1
-    sDescription = sEvaluation;
-end
+function bSuccess = testFunction(sEvaluation, value)
+%if nargin()==1
+sDescription = sEvaluation;
+%end
 
 
 fprintf('Testing %s ... ', sDescription);
 
 try
-    bSuccess = eval(sEvaluation);
+    bSuccess = eval(sprintf('%s(%f)',sEvaluation,value));
 catch ME
     fprintf('Error: %s\n', ME.identifier);
     bSuccess = false;

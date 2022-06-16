@@ -102,17 +102,12 @@ contains
 
   subroutine initGeneralists(this, n)
     class(spectrumGeneralists):: this
-    !real(dp), intent(in):: mMax
     integer, intent(in):: n
     integer:: i
-    real(dp) :: mMin, mMax
-    !real(dp), parameter:: mMin = 3.1623d-9
     real(dp), parameter:: rho = 0.4*1d6*1d-12
 
     call read_namelist()
-    mMin=mMinGeneralist
-	mMax=mMaxGeneralist
-    call this%initUnicellular(n, mMin, mMax)
+    call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
 
     this%beta = beta
@@ -135,7 +130,6 @@ contains
 
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
     this%Jresp = cR*alphaJ*this%m
-
   end subroutine initGeneralists
 
   subroutine calcRatesGeneralists(this, L, N, DOC, gammaN, gammaDOC)
@@ -205,16 +199,15 @@ contains
             this%JClossLiebig(i) +&
             this%JlossPassive(i)
       this%JF(i) = this%JFreal(i)
-      !
-      ! Test for conservation budget. Should be close to zero:
-      !
-      !write(*,*) 'N budget', i,':',(this%JN(ix)+JFreal(i)-JlossPassive(i) &
-      !    - this%JNlossLiebig(ix)  - this%Jtot(ix))/this%m(i)
-      !write(*,*) 'C budget', i,':',(this%JLreal(ix) + this%JDOC(ix)+JFreal(i) &
-      !    -JlossPassive(i)-fTemp2*Jresp(i) &
-      !    - this%JClossLiebig(ix)  - this%Jtot(ix))/this%m(i)
     end do
-  end subroutine calcRatesGeneralists
+    !
+    ! Test for conservation budget. Should be close to zero:
+    !
+    !write(*,*) 'N budget:',(-this%Jtot+this%JN+this%JFreal & ! Gains
+    !  -this%JNlossLiebig-this%JlossPassive)/this%m           ! Losses
+    !write(*,*) 'C budget:',(-this%Jtot+this%JLreal+this%JDOC+this%JFreal & ! Gains
+    !  -fTemp2*this%Jresp - this%JClossLiebig - this%JlossPassive)/this%m   ! Losses
+end subroutine calcRatesGeneralists
 
   subroutine calcDerivativesGeneralists(this, u, dNdt, dDOCdt, dudt)
     class(spectrumGeneralists), intent(inout):: this
@@ -222,14 +215,11 @@ contains
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
     !real(dp):: mortloss
     integer:: i
-    !
-    ! To make mass balance check:
-    !
-    this%mort2 = this%mort2constant*u
+
+    this%mort2 = this%mort2constant*u ! "quadratic" mortality
     this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
     do i = 1, this%n
-      !mortloss = u(i)*(remin2*this%mort2(i) + reminHTL*this%mortHTL(i))
       !
       ! Update nitrogen:
       !
@@ -239,7 +229,7 @@ contains
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) &
            +  remin2*this%mort2(i) & 
-           !+ reminHTL*this%mortHTL(i)&
+           !+ reminHTL*this%mortHTL(i)& ! Now done in NUMmodel.f90
            ) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -251,7 +241,7 @@ contains
            +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
            +   remin2*this%mort2(i) & 
-           !+  reminHTL*this%mortHTL(i)&
+           !+  reminHTL*this%mortHTL(i)&  ! Now done in NUMmodel.f90
            ) * u(i)
       !
       ! Update the generalists:
@@ -277,11 +267,11 @@ end subroutine printRatesGeneralists
     class(spectrumGeneralists), intent(in):: this
     real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
 
-    Nbalance = (dNdt + sum( dudt &
-    !+ (1-reminHTL)*this%mortHTL*u &
-    + (1-1)*this%mort2*u & ! full N remineralization of viral mortality
-    + (1-1)*this%JCloss_feeding/this%m * u &
-       )/rhoCN)/N ! full N remineralization of feeding losses
+    Nbalance = (dNdt + sum( dudt & ! Change in standing stock of N
+    + (1-fracHTL_to_N)*this%mortHTL*u & ! HTL not remineralized
+    + (1-remin2)*this%mort2*u & ! Viral mortality not remineralized
+    !+ (1-reminF)*this%JCloss_feeding/this%m * u & ! Feeding losses not remineralized
+       )/rhoCN)/N
   end function getNbalanceGeneralists 
 
   function getCbalanceGeneralists(this, DOC, dDOCdt, u, dudt) result(Cbalance)
@@ -290,7 +280,7 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: DOC, dDOCdt, u(this%n), dudt(this%n)
 
     Cbalance = (dDOCdt + sum(dudt &
-    !+ (1-reminHTL)*this%mortHTL*u &
+    + this%mortHTL*u &
     + (1-remin2)*this%mort2*u &
     - this%JLreal*u/this%m &
     - this%JCloss_photouptake*u/this%m &

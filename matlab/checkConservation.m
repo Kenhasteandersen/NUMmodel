@@ -4,8 +4,7 @@
 %
 % In:
 %  sim: simulation structure
-%  bVerbose: whether to print out the balance on the terminal (default true
-%           ).
+%  bVerbose: whether to print out the balance on the terminal (default true).
 %
 function [dNdt, dNdt_per_N] = checkConservation(sim, bVerbose)
 
@@ -16,47 +15,49 @@ end
 %
 % Constants:
 %
-reminHTL = 0.5;
+fracHTL_to_N = 0.5;
 rhoCN = 5.68;
 remin2 = 0.5;
 
 p = sim.p;
 gains = 0;
 lossHTL = 0;
-dt = gradient(sim.t);
+dt = diff(sim.t);
 
 switch sim.p.nameModel
 
     case 'chemostat'
         loss = 0;
-        for iTime = 1:length(sim.t)
+        for iTime = 1:(length(sim.t)-1)
             u = [ sim.N(iTime) sim.DOC(iTime), sim.B(iTime,:) ];
             rates = getRates(p, u, mean(sim.L), sim.T );
+            ixUni = findIxUnicellular(sim.p);
             if ~sum(ismember(p.typeGroups,100))
+                B = squeeze(0.5*sum(sim.B(iTime:iTime+1,:))); % Interpolate B
                 % Losses from HTL:
                 lossHTL = lossHTL + ...
-                    sum((1-reminHTL)*rates.mortHTL.*squeeze(sim.B(iTime,:)'))/rhoCN*dt(iTime);
+                    sum((1-fracHTL_to_N)*rates.mortHTL.*B')/rhoCN*dt(iTime);
                 % Losses from mort2:
-                loss = loss + sum(rates.mort2*(1-remin2).*sim.B(iTime,:)')/rhoCN*dt(iTime);
+                loss = loss + sum(rates.mort2*(1-remin2).*B')/rhoCN*dt(iTime);
             else
                 ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
                 loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);
             end
 
             % Losses from diffusion:
-            loss = loss + sim.bUnicellularloss*p.d*sum(sim.B(iTime,(sim.p.ixStart(1):sim.p.ixEnd(1))-sim.p.idxB+1))/rhoCN * dt(iTime);
+            loss = loss + sim.bUnicellularloss*p.d*sum(B(ixUni))/rhoCN * dt(iTime);
 
             % Gains from diffusion:
-            gains = gains + p.d*(p.u0(1)-sim.N(iTime)) * dt(iTime);
+            gains = gains + p.d*(p.uDeep-0.5*(sim.N(iTime)+sim.N(iTime+1))) * dt(iTime);
         end
         %
         % Calculate total budget:
         %
         accumulation = (sim.N(end)+sum(sim.B(end,:)/rhoCN)) - ...
             (sim.N(1)+sum(sim.B(1,:)/rhoCN));
-        dNdt = (accumulation - gains + lossHTL + loss)/1000*p.depthProductiveLayer/sim.t(end)*365; %gN/m2/yr
+        dNdt = (accumulation - gains + lossHTL + loss)/1000*p.widthProductiveLayer/sim.t(end)*365; %gN/m2/yr
         dNdt_per_N = (accumulation - gains + lossHTL+loss) / sim.N(end)/sim.t(end)*365; % Fraction per year
-        lossHTL = lossHTL/1000*p.depthProductiveLayer/sim.t(end)*365;
+        lossHTL = lossHTL/1000*p.widthProductiveLayer/sim.t(end)*365;
         lossHTL_per_N = lossHTL/sim.N(end);
 
     case 'watercolumn'
@@ -86,7 +87,7 @@ switch sim.p.nameModel
                             %rates = getRates(p, u, sim.L(j,k,iDepth,iTime), sim.T(j,k,iDepth,iTime) );
                             % Losses from HTL:
                             lossHTL(iTime) = lossHTL(iTime) + ...
-                                sum((1-reminHTL)*rates.mortHTL.*squeeze(sim.B(j,k,iDepth,:,iTime)))/rhoCN ...
+                                sum((1-fracHTL_to_N)*rates.mortHTL.*squeeze(sim.B(j,k,iDepth,:,iTime)))/rhoCN ...
                                 * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
                             % Quadratic losses:
                             losses(iTime) = losses(iTime) + ...

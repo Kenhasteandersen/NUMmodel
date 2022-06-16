@@ -1,3 +1,4 @@
+
 %
 % Sets the higher trophic level mortality. Already done by default in the 
 % setup function, so this function is only needed to override the defaults.

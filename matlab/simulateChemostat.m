@@ -104,7 +104,7 @@ sim.bUnicellularloss = options.bUnicellularloss;
             % Chemostat dynamics for nutrients and unicellulars:
             %
             dudt(ix) = dudt(ix) + p.d*(uDeep(ix)-u(ix)');
-        else % Incorporate the time dependancy if necessary
+        else % Incorporate the time dependency if necessary
             t_int = floor(mod(t,365))+1;
             if t_int>365
                 t_int = 365;

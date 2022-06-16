@@ -187,8 +187,8 @@ else
     end
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
     u = u(idxGrid,:); % Use only the specific water column
-    p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
 end
+p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
 %
 % Matrices for saving the solution:
 %
@@ -285,7 +285,7 @@ for i = 1:simtime
     %
     % Save timeseries in grid format
     %
-    if ((mod(i/2,p.tSave) < mod((i-1)/2,p.tSave)) || (i==simtime))
+    if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
         iSave = iSave + 1;
         sim.N(:,iSave) = u(:,ixN);
         sim.DOC(:,iSave) = u(:,ixDOC);

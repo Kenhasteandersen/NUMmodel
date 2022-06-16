@@ -160,8 +160,8 @@ contains
     class (typeSpectrum), intent(inout):: this
     real(dp), intent(in):: F(this%n)
 
-    this%flvl = this%epsilonF * this%AF*F / &
-      ((this%AF*F+eps) + fTemp2*this%JFmax)
+    this%flvl = this%epsilonF * this%AF*F / & ! Note: adding a small number in the
+      ((this%AF*F+eps) + fTemp2*this%JFmax)   ! demonominator to avoid negative values if F = JFmax = 0.
     this%JF = this%flvl * fTemp2*this%JFmax
   end subroutine calcFeeding
 

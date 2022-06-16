@@ -452,6 +452,15 @@ contains
 
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
+
+  subroutine setMortHTL(mortHTL)
+   real(dp), intent(in):: mortHTL(nGrid-idxB+1)
+   integer:: iGroup
+
+   do iGroup = 1, nGroups
+      group(iGroup)%spec%mortHTL = mortHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) )
+   end do
+  end subroutine setMortHTL
   
   ! ======================================
   !  Calculate rates and derivatives:
@@ -861,7 +870,7 @@ contains
    real(dp), intent(out):: Nbalance, Cbalance
    integer:: iGroup
    
-   iGroup = 1 ! Do it only for the first group, whihc we assume are generalists
+   iGroup = 1 ! Do it only for the first group:
    select type ( spec => group(iGroup)%spec )
       type is (spectrumGeneralists)
          Nbalance = spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
@@ -870,7 +879,7 @@ contains
          Cbalance = spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-  end select
+    end select
    end subroutine getBalance
    
 !   ! ---------------------------------------------------
@@ -878,7 +887,7 @@ contains
 !   ! ---------------------------------------------------
   subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmax, jR, jLossPassive, &
-    jNloss,jLreal, &
+    jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
     use globals
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
@@ -887,6 +896,7 @@ contains
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
    integer :: iGroup, i1, i2
@@ -904,6 +914,7 @@ contains
       mort2( i1:i2 ) = group(iGroup)%spec%mort2
       jNloss( i1:i2 ) = group(iGroup)%spec%JNloss / group(iGroup)%spec%m
       jR( i1:i2 ) = fTemp2 * group(iGroup)%spec%Jresp / group(iGroup)%spec%m
+      jPOM( i1:i2 ) = group(iGroup)%spec%jPOM
 
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumUnicellular)
@@ -917,6 +928,7 @@ contains
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumDiatoms_simple)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
+        jDOC( i1:i2 ) = 0.d0 ! Diatoms simple don't take up DOC
       class is (spectrumDiatoms)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       end select

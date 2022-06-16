@@ -37,10 +37,14 @@ end
 
 p.nameModel = 'chemostat';
 
+p.d = 0.1;  % Default mixing rate (1/days)
+
+p.widthProductiveLayer = 20; % (meters) only used for calcFunctions
 p.tEnd = 365;  % Time to run in days
 p.tSave = 1;
 
 p.uDeep = 50; % Nutrients of the layer below the chemostat layer
+p.u0(1) = 1; % Nitrogen concentration
 
 %
 % Set minimum concentrations:
@@ -56,8 +60,6 @@ for iGroup = 1:p.nGroups
     end
 end
 
-p.depthProductiveLayer = 50; % (meters)
-p.widthProductiveLayer = 20; % (meters) only used for calcFunctions
 
 %
 % Light environment:
@@ -76,7 +78,7 @@ if ~exist(path,'file')
 end
 
 % Mixing rate and light calculation regarding the option choose
-
+depthProductiveLayer = 50; % (meters) Depth of the productive layer. Used for seasonal calculations
 if isnan(seasonalOptions.lat_lon)
     if seasonalOptions.seasonalAmplitude == 0
         p.d = 0.5;  % Mixing rate (1/days)
@@ -161,7 +163,7 @@ else
     end
     z = grid.z;
     epsilon = 15;
-    idx_chemo = find(z<(p.depthProductiveLayer+epsilon) & z>(p.depthProductiveLayer-epsilon));
+    idx_chemo = find(z<(depthProductiveLayer+epsilon) & z>(depthProductiveLayer-epsilon));
     mon = [31 28 31 30 31 30 31 31 30 31 30 31];
     for iMonth = 1:12
         A = squeeze(AimpM(iMonth,:,:));
@@ -172,7 +174,7 @@ else
             % Light function : we take 100m as the depth of the layer and a
             % layer of 20m width, because the chemostat is this all layer.
             %
-            L(k+j) = (p.EinConv*p.PARfrac*daily_insolation(0,lat,k+j,1)*exp(-p.kw*p.depthProductiveLayer));%*(1-exp(-p.kw*p.widthProductiveLayer))/(p.kw*p.widthProductiveLayer);
+            L(k+j) = (p.EinConv*p.PARfrac*daily_insolation(0,lat,k+j,1)*exp(-p.kw*depthProductiveLayer));%*(1-exp(-p.kw*p.widthProductiveLayer))/(p.kw*p.widthProductiveLayer);
         end
     end
     p.d = d;

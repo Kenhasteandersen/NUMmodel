@@ -18,7 +18,7 @@ if (nargin==0)
     p = setupGeneralistsOnly(10, true); % Use 10 size groups and parallel execution
     p = parametersGlobal(p); % Use standard low-res model
     %p = parametersGlobal(10,2); % Use MITgcm_ECCO
-    p.tEnd = 90;
+    p.tEnd = 365;
 end
 %
 % Simulate

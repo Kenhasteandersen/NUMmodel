@@ -1,7 +1,7 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int, c_bool
-  use NUMmodel, only:  nGrid, setupGeneralistsOnly,  &
-      setupGeneralistsPOM, setHTL, getRates, &         
+  use NUMmodel, only:  nGrid, idxB, setupGeneralistsOnly,  &
+      setupGeneralistsPOM, setHTL, setmortHTL, getRates, &         
        setupGeneralistsOnly_csp, &
        setupDiatomsOnly, &
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
@@ -83,6 +83,12 @@ contains
 
     call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
   end subroutine f_setHTL 
+
+  subroutine f_setMortHTL(mortHTL) bind(c)
+    real(c_double), intent(in):: mortHTL(nGrid-idxB+1)
+
+    call setMortHTL(mortHTL)
+  end subroutine f_setMortHTL
 
   subroutine test(x) bind(c)
     integer(c_int), intent(in), value:: x
@@ -169,7 +175,7 @@ contains
 
   subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmax, jR, jLossPassive, &
-    jNloss,jLreal, &
+    jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
     use NUMmodel, only: nNutrients, getRates
@@ -179,12 +185,13 @@ contains
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
    call getRates(jN, jDOC, jL, jSi, jF, jFreal,&
    jTot, jMax, jFmax, jR, jLossPassive, &
-   jNloss,jLreal, &
+   jNloss,jLreal, jPOM, &
    mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates
   

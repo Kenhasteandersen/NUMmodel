@@ -1,5 +1,5 @@
 %
-% Get the nitrogen and carbon balance.
+% Get the nitrogen and carbon balance. Only works with setupGeneralistsOnly
 %
 % In:
 %  u - state variable vector (nutrients and biomasses of all groups).
