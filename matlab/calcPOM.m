@@ -45,6 +45,7 @@ switch sim.p.nameModel
     case 'chemostat'
 
         %i = sim.p.ixPOM;
+        % Part for generalists POM
         iStart = sim.p.ixStart(1) - sim.p.idxB +1;
         iEnd = sim.p.ixEnd(1) - sim.p.idxB +1;
         %B_0 = sum(sim.B(:,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1),2);
@@ -74,29 +75,39 @@ switch sim.p.nameModel
 
     case 'watercolumn'
 
-        layer = 1; %for the moment we basicaly take the top layer
+        %layer = 1; %for the moment we basicaly take the top layer
         %time = 150; %for the moment we simply take the 150th day of the simulation
-        i = sim.p.ixPOM;
-        B_0 = squeeze(sum(sim.B(layer,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:)));
+        %i = sim.p.ixPOM;
+        % Part for generalists POM
+        iStart = sim.p.ixStart(1) - sim.p.idxB +1;
+        iEnd = sim.p.ixEnd(1) - sim.p.idxB +1;
+        iZ = (find(sim.z<=depthProductiveLayer));
+        %B_0 = squeeze(sum(sim.B(layer,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:)));
         % need to sum the biomass of POM of NUMmodel of each size group and multiply by the distrib export flux ...
-        B_i0 = zeros(length(POM.distrib), length(B_0));
-        B_i0 = (B_0*POM.distrib).';
-        
-        POM.B_i = zeros(length(sim.z),length(POM.distrib),length(sim.t));
-        POM.JDOC = zeros(length(sim.z),length(sim.t));
-        POM.JDIC = zeros(length(sim.z),length(sim.t));
-        POM.JN = zeros(length(sim.z),length(sim.t));
+        %B_i0 = zeros(length(POM.distrib), length(B_0));
+        %B_i0 = (B_0*POM.distrib).';
+        B_i0 = squeeze(sum(sum((sim.B(iZ,iStart:iEnd,:).*sim.rates.jPOM(iZ,iStart:iEnd,:)))))*POM.distrib./POM.w;
+
+        Z = sim.z(find(options.Z>depthProductiveLayer));
+        POM.B_i = zeros(length(sim.t),length(Z),length(POM.distrib));
+        POM.JDOC = zeros(length(sim.t),length(Z));
+        POM.JDIC = zeros(length(sim.t),length(Z));
+        POM.JN = zeros(length(sim.t),length(Z));
         %calculation for each depth
-        for idx_z=1:length(sim.z)
+        for idx_z=1:length(Z)
             z = sim.z(idx_z);
-            POM.B_i(idx_z,:,:) = (exp(-(Gamma/POM.w)*z).'.*B_i0);
+            A = ones(length(POM.w),1)./POM.w.';
+            POM.B_i(:,idx_z,:) = exp(-(Gamma*z*A)).'.*B_i0;
         
-            %  Calculate the flux of Carbon and Nitrogen given from POM through depth
+            %  Calculate the flux of Carbon and Nitrogen given from POM
+            %  through depth
+
+            POM.JDOC(:,idx_z) = rho_DOC*Gamma*squeeze(sum(POM.B_i(:,idx_z,:),3));
+            POM.JDIC(:,idx_z) = rho_DIC*Gamma*squeeze(sum(POM.B_i(:,idx_z,:),3));
+            POM.JN(:,idx_z) = (1/rho_CN)*Gamma*squeeze(sum(POM.B_i(:,idx_z,:),3));
         
-            POM.JDOC(idx_z,:) = rho_DOC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
-            POM.JDIC(idx_z,:) = rho_DIC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
-            POM.JN(idx_z,:) = (1/rho_CN)*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
         end
+        POM.Z = Z;
 
     case 'global'
 
