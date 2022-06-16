@@ -37,8 +37,8 @@ switch sim.p.nameModel
                 % Losses from HTL:
                 lossHTL = lossHTL + ...
                     sum((1-fracHTL_to_N)*rates.mortHTL.*B')/rhoCN*dt(iTime);
-                % Losses from mort2:
-                loss = loss + sum(rates.mort2*(1-remin2).*B')/rhoCN*dt(iTime);
+                % Losses to POM:
+                loss = loss + sum(rates.jPOM.*B')/rhoCN*dt(iTime);%sum(rates.mort2*(1-remin2).*B')/rhoCN*dt(iTime);
             else
                 ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
                 loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);

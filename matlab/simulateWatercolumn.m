@@ -297,18 +297,19 @@ for i = 1:simtime
         end
         sim.L(:,iSave) = L;
         sim.T(:,iSave) = T;
-        % Loss to HTL and remin2:
+        % Loss to HTL and POM:
         for j = 1:length(nGrid)
             rates = getRates(p,u(j,:),L(j),T(j));
             % Note: half of the HTL loss is routed directly back to N if we
             % don't have POM:
-            remin2 = 0.5;
             reminHTL = 0.5;
             rhoCN=5.68;
             if ~sum(ismember(p.typeGroups,100))
                 sim.NlossHTL(iSave) = sim.NlossHTL(iSave) + ...
-                    reminHTL*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % % HTL losses:gN/m2/day
-                sim.Nloss(iSave) = sim.Nloss(iSave) + remin2*sum(rates.mort2.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % remin2 losses
+                    (1-reminHTL)*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % % HTL losses:gN/m2/day
+                sim.Nloss(iSave) = sim.Nloss(iSave) + ...
+                    sum(rates.jPOM.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN;
+                    %remin2*sum(rates.mort2.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % remin2 losses
             end
         end
 
