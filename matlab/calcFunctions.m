@@ -80,6 +80,7 @@ switch sim.p.nameModel
                         ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
                         ChlVolume(iTime,k) = ChlVolume(iTime,k) + sum(tmp);
                     end
+                    sim.rates.jPOM(k,:,iTime) = rates.jPOM;
                 end
             end
             sim.ProdGross(iTime) = ProdGross;
@@ -154,6 +155,7 @@ switch sim.p.nameModel
                                     ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp;
                                 end
                             end
+                            sim.rates.jPOM(nX,nY,k,:,iTime) = rates.jPOM;
                         end
                         sim.ProdGross(i,j,iTime) = ProdGross;
                         sim.ProdNet(i,j,iTime) = ProdNet;

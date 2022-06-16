@@ -26,7 +26,6 @@ rho_DOC = 1/3;
 rho_DIC = 1-rho_DOC;
 Gamma = 0.07; % remin rate (1/day) (Serra-Pompei 2022)
 rho_CN = 5.68;
-depthProductiveLayer = 50;
 
 %Loading the 3 vectors (distrib, sinking velocity and radius, from Anton's
 %studies (2D - density and size dependant POM) --> possible to change these ones easily
@@ -50,27 +49,25 @@ switch sim.p.nameModel
         %B_0 = sum(sim.B(:,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1),2);
         % need to sum the biomass of POM of NUMmodel of each size group and multiply by the distrib export flux ...
         %B_i0 = (B_0*POM.distrib).';
-        B_i0 = (sim.B(:,iStart:iEnd)*sim.rates.jPOM(iStart:iEnd)*POM.distrib)./POM.w;
+        B_i0 = (sum(sim.B(iStart:iEnd,:)*sim.rates.jPOM(iStart:iEnd,:))*POM.distrib)./POM.w;
         
-        Z = options.Z(find(options.Z>depthProductiveLayer));
-        POM.B_i = zeros(length(sim.t),length(Z),length(POM.distrib));
-        POM.JDOC = zeros(length(sim.t),length(Z));
-        POM.JDIC = zeros(length(sim.t),length(Z));
-        POM.JN = zeros(length(sim.t),length(Z));
+        Z = options.Z;
+        POM.B_i = zeros(length(Z),length(POM.distrib),length(sim.t));
+        POM.JDOC = zeros(length(Z),length(sim.t));
+        POM.JDIC = zeros(length(Z),length(sim.t));
+        POM.JN = zeros(length(Z),length(sim.t));
         %calculation for each depth
         for idx_z=1:length(Z)
             z = Z(idx_z);
-            A = ones(length(POM.w),1)./POM.w.';
-            POM.B_i(:,idx_z,:) = exp(-(Gamma*z*A)).'.*B_i0;
+            POM.B_i(idx_z,:,:) = exp(-(Gamma/POM.w)*z).'.*B_i0;
         
             %  Calculate the flux of Carbon and Nitrogen given from POM through depth
         
-            POM.JDOC(:,idx_z) = rho_DOC*Gamma*squeeze(sum(POM.B_i(:,idx_z,:),3));
-            POM.JDIC(:,idx_z) = rho_DIC*Gamma*squeeze(sum(POM.B_i(:,idx_z,:),3));
-            POM.JN(:,idx_z) = (1/rho_CN)*Gamma*squeeze(sum(POM.B_i(:,idx_z,:),3));
+            POM.JDOC(idx_z,:) = rho_DOC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
+            POM.JDIC(idx_z,:) = rho_DIC*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
+            POM.JN(idx_z,:) = (1/rho_CN)*Gamma*squeeze(sum(POM.B_i(idx_z,:,:)));
         
         end
-        POM.Z = Z;
 
     case 'watercolumn'
 
