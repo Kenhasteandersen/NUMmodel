@@ -18,6 +18,10 @@ arguments
     L double;
     T double;
 end
+
+if length(u) ~= p.n
+    error('Length of u is %f; should be %f\n', [length(u), p.n]);
+end
 %
 % First make a call to calc a derivative:
 %
