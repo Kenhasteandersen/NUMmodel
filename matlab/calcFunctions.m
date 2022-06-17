@@ -154,8 +154,8 @@ switch sim.p.nameModel
                                     ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
                                     ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp;
                                 end
+                                sim.rates.jPOM(nX,nY,k,:,iTime) = rates.jPOM;
                             end
-                            sim.rates.jPOM(nX,nY,k,:,iTime) = rates.jPOM;
                         end
                         sim.ProdGross(i,j,iTime) = ProdGross;
                         sim.ProdNet(i,j,iTime) = ProdNet;
