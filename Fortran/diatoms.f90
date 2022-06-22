@@ -38,7 +38,7 @@ module diatoms
      real(dp), parameter :: bL=0.08 ! cost of light harvesting mugC(mugC)^-1
      real(dp), parameter :: bN=0.45 ! cost of N uptake mugC(mugN)^-1
      real(dp), parameter :: bSi=0.45 ! cost of Si uptake mugC(mugSi)^-1
-     real(dp), parameter :: bg=0.4 ! cost of biosynthsesis -- parameter from literature pending
+     real(dp), parameter :: bg=0.2 ! cost of biosynthsesis -- parameter from literature pending
      !
      ! Dissolved nutrient uptake:
      !

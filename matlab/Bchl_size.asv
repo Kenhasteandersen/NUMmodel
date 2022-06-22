@@ -1,0 +1,3 @@
+        for i= 1:length(sim.p.n-sim.p.nNutrients)
+         Bchl = squeeze( sim.B(:,:,:,i,:) * sim.jLreal(:,:,:,i,:) )./sim.L; % in units of mu g Chl per l 
+        end

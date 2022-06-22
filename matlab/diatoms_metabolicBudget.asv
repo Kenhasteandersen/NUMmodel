@@ -1,0 +1,26 @@
+ixD=11:20;
+mD=sim.p.m(14:23); % diatom mass
+bL=0.08; bN=0.045; bg=0.02;
+bJx_tot=bL*sim.rates.jLreal(ixD)+bN*(sim.rates.jN(ixD)+sim.rates.jSi(ixD)+...
+    sim.rates.jDOC(ixD));
+for i=1:length(L)
+   for j= 
+    
+end
+
+
+figure(7)
+clf(7)
+% subplot(121)
+set(gca,'LineWidth',3)
+for i=1:length(L)
+hold on
+
+semilogx(L(i),simL(i).rates.jR(1),'md')
+semilogx(L(i),bg*simL(i).rates.jTot(1),'bd')
+semilogx(L(i),bJx_tot(1),'gd')
+xlabel('Light')
+ylabel('rates (/day)')
+axis tight
+legend('jR','bgJtot','\Sigma bJx')
+end
