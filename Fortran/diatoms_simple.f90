@@ -115,6 +115,7 @@ module diatoms_simple
          !this%JDOC(i) = gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
          this%JSi(i) = fTemp15 * gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
          this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
+         write(*,*) 'N=',N
          !
          ! Estimate the limiting growth nutrient (Liebig):
          !

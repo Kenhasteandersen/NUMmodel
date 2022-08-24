@@ -136,7 +136,7 @@ module diatoms
           JmaxT = fTemp2*this%Jmax(i)
           !
           ! Potential net uptake
-          Jnetp(i)=this%JL(i)*(1-bL)+this%JDOC(i)*(1-bN)-this%Jresp(i)
+          Jnetp(i)=this%JL(i)*(1-bL)+this%JDOC(i)*(1-bN)-ftemp2*this%Jresp(i)
           !
           ! Calculation of down-regulation factors for
           ! N-uptake
@@ -203,9 +203,11 @@ module diatoms
           f = (Jnet(i) - this%JlossPassive(i))/(Jnet(i) - this%JlossPassive(i) + JmaxT)
           this%Jtot(i)= f * JmaxT
           !
-          !                                                        add this back to N pool    
-          !write(*,*) 'N budget', i,':',(this%JN(i) - (this%JN(i)- this%JlossPassive(i) -this%Jtot(i)) &
-          !- this%Jtot(i) - this%JlossPassive(i))/this%m(i)
+          !write(*,*) 'N budget', i,':',(this%JN(i)-(1-f)*this%JlossPassive(i) &
+          !- this%Jtot(i))/this%m(i)
+               !
+          !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
+          !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
          !write(*,*) 'Si budget', i,':',(this%JSi(i)-this%JlossPassive(i) - (this%JSi(i)-this%JlossPassive(i)-this%Jtot(i)) &
          !- this%Jtot(i))/this%m(i)
          !write(*,*) 'C budget', i,':',(this%JLreal(i) + this%JDOC(i) -(this%JLreal(i) + this%JDOC(i) &

@@ -20,7 +20,7 @@ module spectrum
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width
      real(dp):: epsilonF ! Assimilation efficiency
-     real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:)
+     real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), f(:)
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
      real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp
@@ -52,7 +52,9 @@ module spectrum
     real(dp), dimension(:), allocatable:: JNtot, JLreal, JCtot 
     real(dp), dimension(:), allocatable:: JCloss_photouptake, JClossLiebig
 
-    real(dp), dimension(:), allocatable:: Jmax
+    real(dp), dimension(:), allocatable:: Jmax, Jresptot
+    real(dp), dimension(:), allocatable:: JNreal, JDOCreal
+
 
     contains
 
@@ -107,6 +109,9 @@ contains
     allocate(this%JNloss(n))
     allocate(this%JCloss(n))
 
+    allocate(this%f(n))
+
+
     allocate(this%mPOM(n))
     allocate(this%jPOM(n))
 
@@ -131,7 +136,7 @@ contains
     this%JNlossLiebig = 0.d0
     this%JNloss = 0.d0
     this%jCloss = 0.d0
-
+    this%f = 0.d0
     contains
 
       !
@@ -208,6 +213,10 @@ contains
     allocate(this%JClossLiebig(n))
 
     allocate(this%Jmax(n))
+    allocate(this%Jresptot(n))
+    allocate(this%JNreal(n))
+    allocate(this%JDOCreal(n))
+
 
     this%mPOM = this%m ! Assume that POM created by dead cells are 
                        !the same size as the cells
@@ -221,10 +230,10 @@ contains
     call this%printRatesSpectrum()
 
     write(*,'(a10, 20d10.3)') "r:", this%r
-    write(*,99) "jN:", this%JN / this%m
+    write(*,99) "jNreal:", this%JNreal / this%m
     write(*,99) "jL:", this%JL / this%m
     write(*,99) "jLreal:", this%JLreal / this%m
-    write(*,99) "jDOC:", this%JDOC / this%m
+    write(*,99) "jDOCreal:", this%JDOCreal / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m
   end subroutine printRatesUnicellular
 
