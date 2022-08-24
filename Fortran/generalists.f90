@@ -166,7 +166,6 @@ contains
         this%JFreal(i) = max(0.d0, this%JF(i))
        end if
       
-      
       this%JLreal(i) = this%JL(i) - max( 0.d0, &
             min((this%JCtot(i) - (this%JF(i)-this%JFreal(i))-this%Jtot(i)), this%JL(i)))
 
