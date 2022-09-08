@@ -185,9 +185,9 @@ contains
       !
        ! Apply saturation to uptake rates
        !
-       this%JNreal(i)=min(1.,dN(i)*(1-f))*this%JN(i)
-       this%JDOCreal(i)=min(1.,dDOC(i)*(1-f))*this%JDOC(i)
-       this%JLreal(i)=min(1.,dL(i)*(1-f))*this%JL(i)
+       this%JNreal(i)=dN(i)*(1-f)*this%JN(i)
+       this%JDOCreal(i)=dDOC(i)*(1-f)*this%JDOC(i)
+       this%JLreal(i)=dL(i)*(1-f)*this%JL(i)
        this%JFreal(i)=(1-f)*this%JF(i)
        this%Jtot(i)= f * JmaxT-(1-f)*this%JlossPassive(i)
       !        
@@ -203,11 +203,11 @@ contains
       this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
       this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+ &
-                        this%JF(i)*bF+bN*dN(i)*this%JN(i))+(1-f)*bg*Jnet(i)
+                        bN*dN(i)*this%JN(i))+(1-f)*bg*Jnet(i)
       !
       ! Test for conservation budget. Should be close to zero:
-      write(*,*) 'N budget', i,':',(this%JNreal(i)+this%JFreal(i)-this%JNlossLiebig(i)-(1-f)*this%JlossPassive(i) &
-      - this%Jtot(i))/this%m(i)
+      !write(*,*) 'N budget', i,':',(this%JNreal(i)+this%JFreal(i)-this%JNlossLiebig(i)-(1-f)*this%JlossPassive(i) &
+      !- this%Jtot(i))/this%m(i)
 
       write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
       - this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
