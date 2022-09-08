@@ -1,5 +1,13 @@
 {
     "configurations":[
+    {
+        "type": "gdb",
+        "request": "launch",
+        "name": "Launch Program",
+        "target": "NUMmodel",
+        "cwd": "${workspaceRoot}/Fortran",
+        "valuesFormatting": "parseText"
+    },
 
         {
             "name": "Run GDB",

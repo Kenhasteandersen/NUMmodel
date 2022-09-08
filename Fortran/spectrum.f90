@@ -53,7 +53,7 @@ module spectrum
     real(dp), dimension(:), allocatable:: JCloss_photouptake, JClossLiebig
 
     real(dp), dimension(:), allocatable:: Jmax, Jresptot
-    real(dp), dimension(:), allocatable:: JNreal, JDOCreal
+    real(dp), dimension(:), allocatable:: JNreal, JDOCreal, JSireal
 
 
     contains
@@ -216,6 +216,8 @@ contains
     allocate(this%Jresptot(n))
     allocate(this%JNreal(n))
     allocate(this%JDOCreal(n))
+    allocate(this%JSireal(n))
+
 
 
     this%mPOM = this%m ! Assume that POM created by dead cells are 
@@ -234,6 +236,7 @@ contains
     write(*,99) "jL:", this%JL / this%m
     write(*,99) "jLreal:", this%JLreal / this%m
     write(*,99) "jDOCreal:", this%JDOCreal / this%m
+    write(*,99) "jSireal:", this%JSireal / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m
   end subroutine printRatesUnicellular
 
