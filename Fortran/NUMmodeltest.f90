@@ -11,7 +11,7 @@ program NUMmodeltest
   !call setHTL(0.0001d0, 1.d0, .true.)
 
   !call setupGeneralistsCopepod()
-  call setupGeneralistsOnly(10)
+  !call setupGeneralistsOnly(10)
   !call setupGeneralistsOnly_csp()
  ! call setupGeneralistsOnly_csp()
   !call setupGeneralistsOnly_csp()
@@ -21,7 +21,7 @@ program NUMmodeltest
   !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
   !call setupDiatoms_simpleOnly(10)
-  !call setupDiatomsOnly(10)
+  call setupDiatomsOnly(10)
   !call setupDiatoms_simpleOnly(10)
 
   allocate(u0(nGrid))
@@ -29,7 +29,7 @@ program NUMmodeltest
   allocate(dudt(nGrid))
   u00(idxN) = 50.d0
   u00(idxDOC) = 10.d0
-  !u00(idxSi) = 10.d0
+  u00(idxSi) = 10.d0
   do i = idxB, nGrid
      u00(i) = 1.0d0 !*(i-2)
   end do
@@ -54,7 +54,7 @@ program NUMmodeltest
   !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
   !write(*,*) u00
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
-  call printRates()
+  !call printRates()
 !!$  u0=u00
 !!$  call simulateChemostatEuler(u0, 100.d0, 150.d0, 0.05d0, 300.d0, 0.01d0)
 !!$  call printU(u0)
