@@ -8,7 +8,7 @@ module generalists
 
   private 
 
-  real(dp), parameter:: rhoCN = 5.68
+  !real(dp), parameter:: rhoCN = 5.68
   !
   ! Light uptake:
   !

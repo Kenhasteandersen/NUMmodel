@@ -1,5 +1,7 @@
 void f_setupgeneralistsonly(const int n);
 
+void f_setupgeneralistssimpleonly(const int n);
+
 void f_setupgeneralistspom(const int n, const int nPOM);
 
 void f_setupgeneralistsonly_csp();
@@ -12,7 +14,7 @@ void f_setupgeneralistsdiatoms(const int n);
 
 void f_setupgeneralistsdiatoms_simple(const int n);
 
-void f_setupgeneralistscopepod();
+void f_setupgeneralistssimplecopepod();
 
 void f_setupgeneric(const int nCopepods, const double mAdult[]);
 

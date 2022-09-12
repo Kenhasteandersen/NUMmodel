@@ -1,12 +1,13 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int, c_bool
-  use NUMmodel, only:  nGrid, setupGeneralistsOnly,  &
-      setupGeneralistsPOM, setHTL, getRates, &         
+  use NUMmodel, only:  nGrid, setupGeneralistsSimpleOnly, setupGeneralistsSimplePOM, &
+       setupGeneralistsOnly,  &
+       setHTL, getRates, &         
        setupGeneralistsOnly_csp, &
        setupDiatomsOnly, &
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
-       setupGeneralistsCopepod, &
+       setupGeneralistsSimpleCopepod, &
        setupGeneric, setupNUMmodel, setupGeneric_csp, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
@@ -23,10 +24,15 @@ contains
     call setupGeneralistsOnly(n)
   end subroutine f_setupGeneralistsOnly
 
-  subroutine f_setupGeneralistsPOM(n, nPOM) bind(c)
+  subroutine f_setupGeneralistsSimplePOM(n, nPOM) bind(c)
     integer(c_int), intent(in), value:: n, nPOM
-    call setupGeneralistsPOM(n, nPOM)
-  end subroutine f_setupGeneralistsPOM
+    call setupGeneralistsSimplePOM(n, nPOM)
+  end subroutine f_setupGeneralistsSimplePOM
+
+  subroutine f_setupGeneralistsSimpleOnly(n) bind(c)
+    integer(c_int), intent(in), value:: n
+    call setupGeneralistsSimpleOnly(n)
+  end subroutine f_setupGeneralistsSimpleOnly
 
   subroutine f_setupGeneralistsOnly_csp() bind(c)
     call setupGeneralistsOnly_csp()
@@ -52,9 +58,9 @@ contains
     call setupGeneralistsDiatoms_simple(n)
   end subroutine f_setupGeneralistsDiatoms_simple
 
-  subroutine f_setupGeneralistsCopepod() bind(c)
-    call setupGeneralistsCopepod()
-  end subroutine f_setupGeneralistsCopepod
+  subroutine f_setupGeneralistsSimpleCopepod() bind(c)
+    call setupGeneralistsSimpleCopepod()
+  end subroutine f_setupGeneralistsSimpleCopepod
 
   subroutine f_setupGeneric(nCopepods, mAdult) bind(c)
     integer(c_int), intent(in), value:: nCopepods

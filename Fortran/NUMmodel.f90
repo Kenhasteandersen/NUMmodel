@@ -6,6 +6,7 @@ module NUMmodel
   use globals
   use spectrum
   use generalists
+  use generalists_simple
   use diatoms_simple
   use generalists_csp
   use copepods
@@ -19,10 +20,11 @@ module NUMmodel
   integer, parameter :: idxSi = 3
 
   ! Types of spectra:
-   integer, parameter :: typeGeneralist = 1
+   integer, parameter :: typeGeneralistSimple = 1
    integer, parameter :: typeGeneralist_csp = 2
    integer, parameter :: typeDiatom = 3
-   integer, parameter :: typeDiatom_simple = 4  
+   integer, parameter :: typeDiatom_simple = 4
+   integer, parameter :: typeGeneralist = 5  
    integer, parameter :: typeCopepod = 10
    integer, parameter :: typePOM = 100
   !
@@ -60,6 +62,16 @@ contains
   ! ======================================
 
   ! -----------------------------------------------
+  ! A basic setup with only simple generalists
+  ! -----------------------------------------------
+  subroutine setupGeneralistsSimpleOnly(n)
+    integer, intent(in):: n
+    call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
+    call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
+    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+  end subroutine setupGeneralistsSimpleOnly
+ 
+  ! -----------------------------------------------
   ! A basic setup with only generalists
   ! -----------------------------------------------
   subroutine setupGeneralistsOnly(n)
@@ -72,13 +84,13 @@ contains
   ! -----------------------------------------------
   ! A basic setup with generalists and POM
   ! -----------------------------------------------
-  subroutine setupGeneralistsPOM(n, nPOM)
+  subroutine setupGeneralistsSimplePOM(n, nPOM)
    integer, intent(in):: n, nPOM
    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
-   call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+   call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
    call parametersAddGroup(typePOM, nPOM, 1.d0) ! POM with nPOM size classes and max size 1 ugC
    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
- end subroutine setupGeneralistsPOM
+ end subroutine setupGeneralistsSimplePOM
 
   ! -----------------------------------------------
   ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
@@ -123,7 +135,7 @@ contains
    subroutine setupGeneralistsDiatoms_simple(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(0.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms_simple
@@ -131,12 +143,12 @@ contains
   ! -----------------------------------------------
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------
-  subroutine setupGeneralistsCopepod()
+  subroutine setupGeneralistsSimpleCopepod()
     call parametersInit(2, 20, 2)
-    call parametersAddGroup(typeGeneralist, 10, 0.1d0)
+    call parametersAddGroup(typeGeneralistSimple, 10, 0.1d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
-  end subroutine setupGeneralistsCopepod
+  end subroutine setupGeneralistsSimpleCopepod
 
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
@@ -252,6 +264,7 @@ contains
     real(dp), intent(in):: mMax
 
     type(spectrumGeneralists) :: specGeneralists
+    type(spectrumGeneralistsSimple) :: specGeneralistsSimple
     type(spectrumDiatoms_simple):: specDiatoms_simple
     type(spectrumDiatoms):: specDiatoms
     type(spectrumGeneralists_csp):: specGeneralists_csp
@@ -272,6 +285,9 @@ contains
     ! Add the group
     !
     select case (typeGroup)
+    case (typeGeneralistSimple)
+      call initGeneralistsSimple(specGeneralistsSimple, n)
+      allocate( group( iCurrentGroup )%spec, source=specGeneralistsSimple )
     case (typeGeneralist)
       call initGeneralists(specGeneralists, n, mMax)
       allocate( group( iCurrentGroup )%spec, source=specGeneralists )
@@ -511,7 +527,7 @@ contains
      end if
     !
     ! Calc derivatives of unicellular groups (predictor step)
-    !m
+    !
     gammaN = 1.d0
     gammaDOC = 1.d0
     gammaSi = 1.d0
@@ -588,6 +604,9 @@ contains
    !
    do iGroup = 1, nGroups
       select type (spec => group(iGroup)%spec)
+      type is (spectrumGeneralistsSimple)
+         call calcRatesGeneralistsSimple(spec, &
+                     L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
       type is (spectrumGeneralists)
          call calcRatesGeneralists(spec, &
                      L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
@@ -628,6 +647,10 @@ contains
    
    do iGroup = 1, nGroups
       select type (spec => group(iGroup)%spec)
+      type is (spectrumGeneralistsSimple)
+         call calcDerivativesGeneralistsSimple(spec, &
+              upositive(ixStart(iGroup):ixEnd(iGroup)), &
+              dudt(idxN), dudt(idxDOC), dudt(ixStart(iGroup):ixEnd(iGroup)))
       type is (spectrumGeneralists)
          call calcDerivativesGeneralists(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
@@ -849,6 +872,13 @@ contains
    
    iGroup = 1 ! Do it only for the first group, whihc we assume are generalists
    select type ( spec => group(iGroup)%spec )
+      type is (spectrumGeneralistsSimple)
+         Nbalance = spec%getNbalanceGeneralistsSimple(u(idxN), dudt(idxN), &
+                     u(ixStart(iGroup):ixEnd(iGroup) ), &
+                     dudt( ixStart(iGroup):ixEnd(iGroup) ))
+         Cbalance = spec%getCbalanceGeneralistsSimple(u(idxDOC), dudt(idxDOC), &
+                     u(ixStart(iGroup):ixEnd(iGroup) ), &
+                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
       type is (spectrumGeneralists)
          Nbalance = spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
@@ -856,19 +886,15 @@ contains
          Cbalance = spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-  !end select
-
-  !iGroup=3   
-  !select type ( spec => group(iGroup)%spec )
-        type is (spectrumDiatoms)
+      type is (spectrumDiatoms)
             Nbalance = spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) ))
             Cbalance = spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-  end select
-   end subroutine getBalance
+   end select
+  end subroutine getBalance
    
 !   ! ---------------------------------------------------
 !   ! Returns the rates calculated from last call to calcDerivatives

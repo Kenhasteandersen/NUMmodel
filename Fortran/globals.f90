@@ -1,4 +1,5 @@
 module globals
+  use input 
   implicit none
   integer, parameter :: dp=kind(0.d0) ! double precision
   !
@@ -18,8 +19,28 @@ module globals
   real(dp) :: fTemp2, fTemp15
   real(dp), parameter:: Tref = 10. ! Reference temperature
 
+  !
+  ! Specification of what to do with HTL losses:
+  !
+  real(dp) :: fracHTL_to_N ! Half becomes urine that is routed back to N
+  real(dp) :: fracHTL_to_POM ! Another half is fecal pellets that are routed back to the largest POM size class
+  real(dp) :: rhoCN 
   contains
+  
+  ! -----------------------------------------------
+  ! Read in general parameters
+  ! -----------------------------------------------
+  subroutine read_namelist_general()
+    integer :: file_unit,io_err
 
+    namelist /input_general / rhoCN, fracHTL_to_N, fracHTL_to_POM
+
+
+    call open_inputfile(file_unit, io_err)
+        read(file_unit, nml=input_general, iostat=io_err)
+        call close_inputfile(file_unit, io_err)
+
+  end subroutine read_namelist_general
   ! -----------------------------------------------
   ! Temperature Q10 function
   ! -----------------------------------------------

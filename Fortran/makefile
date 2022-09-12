@@ -48,7 +48,7 @@ FLAGS= -fPIC -g
 
 
 
-OBJ = input.o globals.o spectrum.o generalists.o diatoms_simple.o diatoms.o generalists_csp.o copepods.o POM.o NUMmodel.o 
+OBJ = input.o globals.o spectrum.o generalists_simple.o generalists.o diatoms_simple.o diatoms.o generalists_csp.o copepods.o POM.o NUMmodel.o 
 
 all: NUMmodel libMatlab libR
 

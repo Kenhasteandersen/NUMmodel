@@ -12,7 +12,7 @@ module diatoms
      !
      ! Stoichiometry:
      !
-     real(dp), parameter:: rhoCN = 5.68
+     !real(dp), parameter:: rhoCN = 5.68
      real(dp), parameter:: rhoCSi = 3.4 
      !cell properties
      !real(dp), parameter:: cm = 6d-7 ! rhoCmem 6*d.-7 ! Carbon content in cell membrane mugC(mum^-3)
