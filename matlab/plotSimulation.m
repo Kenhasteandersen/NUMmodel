@@ -19,10 +19,8 @@ switch sim.p.nameModel
         end
         
     case 'watercolumn'
-        % day = sim.p.tEnd - 170;
-        day = 600;
-        % iDepth = 4;
-        
+        day = sim.p.tEnd - 170;
+                
         figure(1)
         clf
         plotWatercolumnTime(sim,'depthMax',200);

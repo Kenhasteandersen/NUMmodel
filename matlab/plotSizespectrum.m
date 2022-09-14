@@ -1,7 +1,7 @@
 %
 % Plot a size spectrum at a given lat, lon, index of depth, and time
 % (day).
-% θ
+% 
 function s = plotSizespectrum(sim, time, iDepth, lat, lon)
 arguments
     sim struct;
