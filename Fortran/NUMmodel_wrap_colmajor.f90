@@ -175,7 +175,7 @@ contains
 
   subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmax, jR, jLossPassive, &
-    jNloss,jLreal, &
+    jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
     use NUMmodel, only: nNutrients, getRates
@@ -185,12 +185,13 @@ contains
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
    call getRates(jN, jDOC, jL, jSi, jF, jFreal,&
    jTot, jMax, jFmax, jR, jLossPassive, &
-   jNloss,jLreal, &
+   jNloss,jLreal, jPOM, &
    mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates
   

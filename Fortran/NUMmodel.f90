@@ -127,7 +127,7 @@ contains
    subroutine setupGeneralistsDiatoms(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralist, n, 0.1d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms
@@ -145,7 +145,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsSimpleCopepod()
     call parametersInit(2, 20, 2)
-    call parametersAddGroup(typeGeneralistSimple, 10, 0.1d0)
+    call parametersAddGroup(typeGeneralistSimple, 10, 1.0d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
   end subroutine setupGeneralistsSimpleCopepod
@@ -221,6 +221,8 @@ contains
     !
     ! Set groups:
     !
+    	call read_namelist_general()
+
     nGroups = nnGroups
     iCurrentGroup = 0
     nNutrients = nnNutrients
@@ -439,7 +441,7 @@ contains
           (1 / (1+(group(iGroup)%spec%m/mHTL)**(-2))) ! The size selectivity switch around mHTL
       if (boolDecliningHTL) then
          pHTL( ixStart(iGroup):ixEnd(iGroup) ) = pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
-             * (group(iGroup)%spec%m/mRef)**(-0.25)
+             * (group(iGroup)%spec%m/mHTL)**(-0.25)
       end if
     enddo
 
@@ -465,6 +467,15 @@ contains
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
   
+    subroutine setMortHTL(mortHTL)
+   real(dp), intent(in):: mortHTL(nGrid-idxB+1)
+   integer:: iGroup
+
+   do iGroup = 1, nGroups
+      group(iGroup)%spec%mortHTL = mortHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) )
+   end do
+  end subroutine setMortHTL
+
   ! ======================================
   !  Calculate rates and derivatives:
   ! ======================================
@@ -488,7 +499,7 @@ contains
     real(dp), intent(in):: L, T, dt, u(nGrid)
     real(dp), intent(inout) :: dudt(nGrid)
     integer:: i, j, iGroup, ix
-    real(dp):: gammaN, gammaDOC, gammaSi
+    real(dp):: gammaN, gammaDOC, gammaSi, Nbalance
 
     dudt = 0.d0
     !
@@ -575,6 +586,9 @@ contains
                   dudt(j) = dudt(j) &
                     + group(iGroup)%spec%jPOM(i)*u(ixStart(iGroup)+i-1) 
                end if
+                ! Throw a fraction of HTL production into the largest POM group:
+               dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
+                 fracHTL_to_POM * u(ix) * group(iGroup)%spec%mortHTL(i)
             end do
          end if
       end do
@@ -588,6 +602,25 @@ contains
            dudt(idxN), dudt(idxDOC), dudt(ixStart(idxPOM):ixEnd(idxPOM)))
       end select
     end if
+    !
+    ! Some HTL mortality ends up as nutrients:
+    !
+    do iGroup = 1, nGroups
+      if (iGroup .ne. idxPOM) then
+        dudt(idxN) = dudt(idxN) + &
+            fracHTL_to_N * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
+      end if
+    end do
+    !
+    ! Check: Should be close to zero
+    !
+    Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN
+    do iGroup = 1, nGroups
+      Nbalance = Nbalance  &
+        + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
+        + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
+    end do
+    write(*,*) 'N balance:', Nbalance
     
     contains
 
@@ -901,7 +934,7 @@ contains
 !   ! ---------------------------------------------------
   subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmax, jR, jLossPassive, &
-    jNloss,jLreal, &
+    jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
     use globals
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
@@ -910,6 +943,7 @@ contains
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
    integer :: iGroup, i1, i2
@@ -927,6 +961,7 @@ contains
       mort2( i1:i2 ) = group(iGroup)%spec%mort2
       jNloss( i1:i2 ) = group(iGroup)%spec%JNloss / group(iGroup)%spec%m
       jR( i1:i2 ) = fTemp2 * group(iGroup)%spec%Jresp / group(iGroup)%spec%m
+      jPOM( i1:i2 ) = group(iGroup)%spec%jPOM
 
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumUnicellular)

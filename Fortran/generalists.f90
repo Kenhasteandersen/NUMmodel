@@ -12,14 +12,19 @@ module generalists
   !
   ! Light uptake:
   !
-  real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
-  real(dp), parameter:: alphaL = 0.13 ! 0.206
-  real(dp), parameter:: rLstar = 7.5 !8.25
+  real(dp) :: epsilonL  ! Light uptake efficiency
+  real(dp) :: alphaL  ! 0.206
+  real(dp) :: rLstar  !8.25
+  !real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
+  !real(dp), parameter:: alphaL = 0.13 ! 0.206
+  !real(dp), parameter:: rLstar = 7.5 !8.25
   !
   ! Dissolved nutrient uptake:
   !
-  real(dp), parameter:: alphaN = 0.972 !0.682 ! L/d/mugC/mum^2
-  real(dp), parameter:: rNstar = 2 ! mum
+  real(dp) :: alphaN !0.682 ! L/d/mugC/mum^2
+  real(dp) :: rNstar ! mum
+  !real(dp), parameter:: alphaN = 0.972 !0.682 ! L/d/mugC/mum^2
+  !real(dp), parameter:: rNstar = 2 ! mum
   !
   ! Phagotrophy:
   !

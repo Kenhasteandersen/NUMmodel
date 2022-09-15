@@ -5,7 +5,22 @@ ifeq '$(findstring ;,$(PATH))' ';'
     UNAME := Windows
 else
     UNAME := $(shell uname 2>/dev/null || echo Unknown)
+	  ifeq ($(UNAME), Unknown) 
+        UNAME := Windows # Assuming windows if we cannot find a uname
+        $(warning    Cannot determine system; assuming Windows)
+    endif
 endif
+
+$(info    System is $(UNAME))
+
+# Check for other windows name
+ifeq ($(findstring NT-,$(UNAME)),NT-)
+    # Found
+    UNAME=Windows
+endif
+#
+# Define lib-names depending on the system:
+#
 
 ifeq ($(UNAME), Darwin)
  libMatlab = ../lib/libNUMmodel_matlab.dylib
@@ -38,8 +53,8 @@ endif
 # gfortran:
 #
 FORT=gfortran
-FLAGS= -fPIC -g
-#FLAGS= -fPIC -O2
+#FLAGS= -fPIC -g
+FLAGS= -fPIC -O2
 #LINK=
 #
 # nag fortran
@@ -52,7 +67,8 @@ OBJ = input.o globals.o spectrum.o generalists_simple.o generalists.o diatoms_si
 
 all: NUMmodel libMatlab libR
 
-debugging: FLAGS=-fPIC -g -check all -fpe0 -warn -traceback -debug extended
+#debugging: FLAGS=-fPIC -g -check all -fpe0 -warn -traceback -debug extended
+debugging: FLAGS=-fPIC -g3 -fbacktrace#-debug extended # -check all -fpe0 -warn -traceback 
 
 debugging:  all
 
