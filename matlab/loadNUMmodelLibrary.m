@@ -4,10 +4,24 @@
 %
 function sLibname = loadNUMmodelLibrary(bParallel)
 
-arguments
-    bParallel logical = false;
+if nargin==0
+    bParallel = false;
 end
-
+%
+% Check matlab version:
+%
+if verLessThan('Matlab','9.1')
+    error('Needs Matlab version 9.1 or higher.');
+end
+%
+% Check that input files are available:
+%
+if ~exist('../input/input.nlm','file')
+    error('The input file ../input/input.nlm is not available.');
+end
+%
+% Find the correct library for the OS:
+%
 switch computer('arch')
     case {'maci','maci64'}
         sLibname = 'libNUMmodel_matlab';
@@ -21,7 +35,9 @@ switch computer('arch')
     otherwise
         error('Architecture %s not found.\n', computer('arch'));
 end
-
+%
+% Load library:
+%
 path = fileparts(mfilename('fullpath'));
 
 if bParallel
@@ -32,7 +48,7 @@ if bParallel
     end
 else
     if ~libisloaded(sLibname)
-        [notfound,warnings] = loadlibrary(...
+        [~,~] = loadlibrary(...
             strcat(path,'/../lib/',sLibname,sExtension), ...
             strcat(path,'/../Fortran/NUMmodel_wrap_colmajor4matlab.h'));
     end

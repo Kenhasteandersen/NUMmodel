@@ -29,7 +29,7 @@ arguments
     sim struct = [];
     options.bExtractcolumn logical = false; % Extract the watercolumn even though a saved one exists
     options.bRecalcLight logical = false; % Recalc the light (different from the extracted watercolumn)
-    options.dayFixed double = 0; 
+    options.dayFixed double = 0;
 end
 %
 % Get the watercolumn parameters if they are not already set:

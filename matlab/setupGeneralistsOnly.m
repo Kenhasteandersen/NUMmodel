@@ -27,9 +27,9 @@ end
 p = setupNutrients_N_DOC;
 
 % Generalists:
-p = parametersAddgroup(1,p,n);
+p = parametersAddgroup(5,p,n);
 
 p = getMass(p);
 
-p.u0(1:2) = [150, 0]; % Initial conditions (and deep layer concentrations)
+p.u0(1:2) = [150, 0]; % Initial conditions
 p.u0(p.idxB:p.n) = 1;

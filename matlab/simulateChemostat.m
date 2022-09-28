@@ -51,7 +51,7 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 % Simulate:
 %
 sLibname = loadNUMmodelLibrary();
-[t,u] = ode23(@fDeriv, [0 p.tEnd], p.u0);
+[t,u] = ode45(@fDeriv, [0 p.tEnd], p.u0);
 %
 % Assemble result:
 %

@@ -23,6 +23,15 @@ arguments
     options.sTitle string = '';
     options.sProjection string = 'fast';
 end
+%
+% Check that mapping toolbox is installed
+%
+if ~strcmp(options.sProjection,'fast')
+    v = ver;
+    if ~any(strcmp('Mapping Toolbox', {v.Name}))
+        error('Fancy projections require that the mapping toolbox is installed.\n');
+    end
+end
 
 colorLand = [0.3 0.4 0.3];
 

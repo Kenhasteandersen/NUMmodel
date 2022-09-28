@@ -1,8 +1,8 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int, c_bool
-  use NUMmodel, only:  nGrid, setupGeneralistsSimpleOnly, setupGeneralistsSimplePOM, &
+  use NUMmodel, only:  nGrid, idxB, setupGeneralistsSimpleOnly, setupGeneralistsSimplePOM, &
        setupGeneralistsOnly,  &
-       setHTL, getRates, &         
+       setHTL, setmortHTL, getRates, &         
        setupGeneralistsOnly_csp, &
        setupDiatomsOnly, &
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
@@ -90,6 +90,12 @@ contains
     call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
   end subroutine f_setHTL 
 
+  subroutine f_setMortHTL(mortHTL) bind(c)
+    real(c_double), intent(in):: mortHTL(nGrid-idxB+1)
+
+    call setMortHTL(mortHTL)
+  end subroutine f_setMortHTL
+
   subroutine test(x) bind(c)
     integer(c_int), intent(in), value:: x
    write(6,*) 'test'
@@ -141,7 +147,7 @@ contains
     call simulateEuler(u, L, T, tEnd, dt)
   end subroutine f_simulateEuler
 
-  subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
+    subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
     real(c_double), intent(in):: u(nGrid)
     real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
 
@@ -172,7 +178,7 @@ contains
 
     call getSinking(velocity)
   end subroutine f_getSinking
-
+   
   subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
     jTot, jMax, jFmax, jR, jLossPassive, &
     jNloss,jLreal, jPOM, &

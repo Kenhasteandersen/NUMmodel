@@ -50,7 +50,7 @@
 %         
 % end
 
-    function Bchl = calc(B,rates,L)
+    function Bchl = calcChl(B,rates,L)
         Bchl = sum( B .* rates.jLreal )/L; % in units of mu g Chl per l 
     end
 

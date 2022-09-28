@@ -1,8 +1,8 @@
 void f_setupgeneralistsonly(const int n);
 
-void f_setupgeneralistssimpleonly(const int n);
+void f_setupgeneralistssimplepom(const int n, const int nPOM);
 
-void f_setupgeneralistspom(const int n, const int nPOM);
+void f_setupgeneralistssimpleonly(const int n);
 
 void f_setupgeneralistsonly_csp();
 
@@ -23,6 +23,8 @@ void f_setupnummodel(const int n, const int nCopepod, const int nPOM, const int 
 void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
 
 void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
+
+void f_setmorthtl(const double mortHTL[]);
 
 void f_calcderivatives(
 		       const double u[],
@@ -99,6 +101,7 @@ void f_getrates(
 		double *jLossPassive, 
 		double *jNloss,
 		double *jLreal, 
+		double *jPOM,
 		double *mortpred,
 		double *mortHTL,
 		double *mort2,

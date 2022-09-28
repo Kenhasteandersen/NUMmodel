@@ -21,7 +21,7 @@ end
 p = setupNutrients_N_DOC_Si;
 
 % Generalists
-p = parametersAddgroup(1,p,n);
+p = parametersAddgroup(5,p,n);
 % Diatoms:
 p = parametersAddgroup(3,p,n);
 

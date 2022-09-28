@@ -159,7 +159,7 @@ contains
     integer:: iCopepod
 
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-    call parametersAddGroup(typeGeneralist, n, 0.1d0)
+    call parametersAddGroup(typeGeneralist, n, 1.d0)
     if ( size(mAdult) .eq. 0) then
        call parametersFinalize(0.1d0, .true., .true.)
     else
@@ -387,7 +387,7 @@ contains
       real(dp):: res, s
 
       if (beta .eq. 0.d0) then
-         res = 0.d0 ! If beta = 0 it is interpreted as if the group is not feeding
+         res = 0.d0 ! beta = 0 is interpreted as if the group is not feeding
       else
          s = 2*sigma*sigma
          res = max(0.d0, &
@@ -584,7 +584,7 @@ contains
                if (thetaPOM(ix) .ne. 0) then
                   j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
                   dudt(j) = dudt(j) &
-                    + group(iGroup)%spec%jPOM(i)*u(ixStart(iGroup)+i-1) 
+                    + group(iGroup)%spec%jPOM(i)*u(ix) 
                end if
                 ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
@@ -620,7 +620,7 @@ contains
         + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
         + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
     end do
-    write(*,*) 'N balance:', Nbalance
+    !write(*,*) 'N balance:', Nbalance
     
     contains
 

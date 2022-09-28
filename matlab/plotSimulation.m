@@ -12,26 +12,40 @@ switch sim.p.nameModel
         
         figure(2)
         plotGroupsTime(sim);
+
+        if ~isnan(sim.p.seasonalOptions.lat_lon) | sim.p.seasonalOptions.seasonalAmplitude ~= 0
+            figure(3)
+            plotSizespectrumTime(sim)
+        end
         
     case 'watercolumn'
         day = sim.p.tEnd - 170;
         iDepth = 4;
         
         figure(1)
+        clf
         plotWatercolumnTime(sim,'depthMax',200);
         
         figure(2)
+        clf
         plotWatercolumn(sim,day,'depthMax',200);
         
         figure(3)
         % Find the depth of maximum biomass:
         Bdepth = sum(sum(sim.B,3),2);
         iDepth = find(Bdepth==max(Bdepth));
-        plotSizespectrum(sim,day,iDepth);
-        
+
+        plotSizespectrum(sim,day,iDepth);     
+
         figure(4)
         plotSizespectrumTime(sim,iDepth);
-        
+         
+        figure(5)
+        plotWatercolumnCommunity(sim)
+
+        figure(6)
+        plotWatercolumnCommunity(sim, day)
+   
     case 'global'
         figure(1)
         clf

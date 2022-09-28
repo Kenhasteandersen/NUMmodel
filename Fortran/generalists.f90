@@ -4,6 +4,7 @@
 module generalists
   use globals
   use spectrum
+  !use input
   implicit none
 
   private 
@@ -28,11 +29,11 @@ module generalists
   !
   ! Phagotrophy:
   !
-  real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
-  real(dp), parameter:: alphaF = 0.018 
-  real(dp), parameter:: cF = 30.
-  real(dp), parameter:: beta = 500.d0
-  real(dp), parameter:: sigma = 1.3d0
+  real(dp) :: epsilonF ! Assimilation efficiency
+  real(dp) :: alphaF 
+  real(dp) :: cF 
+  real(dp) :: beta 
+  real(dp) :: sigma 
   !
   ! Costs
   !
@@ -44,18 +45,19 @@ module generalists
   !
   ! Metabolism
   !
-  real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
-  real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
-            !The constant is increased a bit to limit the lower cell size
-  real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
-  real(dp), parameter:: cR = 0.1
+  real(dp) :: cLeakage  ! passive leakage of C and N
+  real(dp) :: delta     ! Thickness of cell wall in mum
+  real(dp) :: alphaJ    ! Constant for jmax.  per day
+  real(dp) :: cR 
   !
   ! Biogeo:
   !
-  real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
-  real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to DOC
-  real(dp), parameter:: reminF = 0.1d0
-  real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
+  real(dp), parameter:: reminHTL = 0.d0 
+  real(dp) :: remin ! fraction of mortality losses reminerilized to DOC
+  real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
+  real(dp) :: reminF ! fraction of feeding losses to DOC
+  real(dp) :: mMinGeneralist
+  real(dp) :: mMaxGeneralist
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
@@ -74,6 +76,18 @@ module generalists
   public printRatesGeneralists, getNbalanceGeneralists, getCbalanceGeneralists
 
 contains
+  subroutine read_namelist()
+    integer :: file_unit,io_err
+
+    namelist /input_generalists_simple / epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
+             & alphaF, cF, beta, sigma, cLeakage, delta, alphaJ, cR, &
+             & remin, remin2, reminF, mMinGeneralist, mMaxGeneralist
+
+    call open_inputfile(file_unit, io_err)
+        read(file_unit, nml=input_generalists_simple, iostat=io_err)
+        call close_inputfile(file_unit, io_err)
+
+  end subroutine read_namelist
 
   subroutine initGeneralists(this, n, mMax)
     class(spectrumGeneralists):: this
@@ -83,6 +97,7 @@ contains
     real(dp), parameter:: mMin = 3.1623d-9 !2.78d-8!
     real(dp), parameter:: rho = 0.4*1d6*1d-12
 
+    call read_namelist()
     call this%initUnicellular(n, mMin, mMax)
     allocate(this%JFreal(n))
 
@@ -106,8 +121,6 @@ contains
 
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
     this%Jresp =cR*alphaJ*this%m
-
-   ! this%AL = this%AL * (1.d0 - this%nu)
   end subroutine initGeneralists
 
   subroutine calcRatesGeneralists(this, L, N, DOC, gammaN, gammaDOC)
@@ -127,6 +140,7 @@ contains
        this%JDOC(i) =gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        this%JL(i) =  epsilonL * this%AL(i)*L  ! Photoharvesting
        JmaxT = fTemp2*this%Jmax(i)
+       !write(*,*) this%JL(i)/this%m(i), L, this%AL(i)
        !this%JF(i)= 0.
        !
        ! Potential net uptake
@@ -182,7 +196,6 @@ contains
         f=0.
        end if
         this%JCtot(i) = & 
-        !
         (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i) + this%JF(i) )&
         - (1-f)*fTemp2*this%Jresp(i) &
         - ( (1-f)*(bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+ this%JF(i)*bF+bN*dN(i)*this%JN(i))&
@@ -214,8 +227,8 @@ contains
       !write(*,*) 'N budget', i,':',(this%JNreal(i)+this%JFreal(i)-this%JNlossLiebig(i)-(1-f)*this%JlossPassive(i) &
       !- this%Jtot(i))/this%m(i)
 
-      write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
-      - this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
+      !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
+      !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
 
       !write(*,*) 'C budget', i,':',((1-f)*Jnet(i)- (1-f)*this%JlossPassive(i)-this%Jtot(i))/this%m(i)
       this%f(i)=f
@@ -244,7 +257,8 @@ contains
            +  this%JNlossLiebig(i) &     ! N leakage due to excess food
            +  reminF*this%JCloss_feeding(i))/this%m(i) & !reminF
            +  remin2*this%mort2(i) & 
-           + reminHTL*this%mortHTL(i)) * u(i)/rhoCN
+           !+ reminHTL*this%mortHTL(i) &
+           ) * u(i)/rhoCN
       !
       ! Update DOC:
       !
@@ -254,7 +268,8 @@ contains
            +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
            +   remin2*this%mort2(i) & 
-           +  reminHTL*this%mortHTL(i)) * u(i)
+           !+  reminHTL*this%mortHTL(i) &
+           ) * u(i)
       !
       ! Update the generalists:
       !
@@ -263,7 +278,6 @@ contains
            - this%mortpred(i) &
            - this%mort2(i) &
            - this%mortHTL(i))*u(i)
-           !write(*,*) 'u',i,':', u(i)
    end do
   
  end subroutine calcDerivativesGeneralists

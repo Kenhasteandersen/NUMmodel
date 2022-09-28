@@ -127,7 +127,7 @@ for iGroup = 1:sim.p.nGroups
         %'ticks',[0.01,0.1,1,10,100],'ticklabels',{'0.01','0.1','1','10','100'})
     end
     %
-    % Trophic strategy:
+    % Trophic strategy :
     %
     nexttile
     

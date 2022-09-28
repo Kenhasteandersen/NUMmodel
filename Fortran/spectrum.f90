@@ -53,7 +53,7 @@ module spectrum
     real(dp), dimension(:), allocatable:: JCloss_photouptake, JClossLiebig
 
     real(dp), dimension(:), allocatable:: Jmax, Jresptot
-    real(dp), dimension(:), allocatable:: JNreal, JDOCreal, JSireal
+    real(dp), dimension(:), allocatable:: JNreal, JDOCreal, JSireal,JSi
 
 
     contains
@@ -217,6 +217,8 @@ contains
     allocate(this%JNreal(n))
     allocate(this%JDOCreal(n))
     allocate(this%JSireal(n))
+    allocate(this%JSi(n))
+
 
 
 

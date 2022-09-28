@@ -1,8 +1,9 @@
 %
-% Sets up a spectrum of generalists.
+% Sets up a spectrum of generalists with POM.
 %
 % In:
-%  n - number of size classes
+%  n - number of size classes for generalists
+%  nPOM number of size classes for POM
 %  bParallel - Whether to prepare parallel execution (for global runs)
 %
 function p = setupGeneralistsPOM(n, nPOM, bParallel)
@@ -29,11 +30,13 @@ p = setupNutrients_N_DOC;
 
 % Generalists:
 p = parametersAddgroup(1,p,n);
+p.u0(p.ixStart(1):p.ixEnd(1)) = 1; % Initial conditions
 
 % POM:
 p = parametersAddgroup(100, p, nPOM);
+p.u0(p.ixStart(2):p.ixEnd(2)) = 0; % Initial conditions
 
 p = getMass(p);
 
 p.u0(1:2) = [150, 0]; % Initial conditions (and deep layer concentrations)
-p.u0(p.idxB:p.n) = 1;
+%p.u0(p.idxB:p.n) = 1;

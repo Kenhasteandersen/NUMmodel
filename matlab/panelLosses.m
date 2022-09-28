@@ -11,7 +11,12 @@ for iGroup = 1:p.nGroups
 %    loglog(m, rates.mortStarve(ix), 'b-o','linewidth',2)
     loglog(m, rates.mortHTL(ix), 'm-','linewidth',2)
 end
-
+%
+% Show losses from chemostat
+%
+if strcmp(p.nameModel,'chemostat') & (isnan(p.seasonalOptions.lat_lon) & p.seasonalOptions.seasonalAmplitude==0)
+    semilogx(m, p.d*m./m,'--')
+end
 
 hold off
 xlim(calcXlim(p))

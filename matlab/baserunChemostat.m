@@ -17,18 +17,22 @@ end
 % Set parameters:
 %
 % p = setupGeneric(mAdult);
-%  p = setupGeneralistsOnly;
-p = setupGeneralistsDiatoms;
+% p = setupGeneralistsSimpleOnly;
+% p = setupGeneralistsOnly;
+% p = setupGeneralistsDiatoms;
 % p = setupGeneralistsDiatoms_simple;
 % p = setupDiatoms_simpleOnly;
-% p = setupDiatomsOnly;
+ p = setupDiatomsOnly;
 p = parametersChemostat(p);
 p.tEnd = 365;
+p.d = 0.1;
 %
 % Set to "normal" HTL mortality if there are no copepods:
 %
 if isempty(mAdult)
     setHTL(0.1, 1/500^1.5,false,false);
+else 
+    setHTL(0.1, 1, true, true);
 end
 %
 % Simulate
