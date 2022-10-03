@@ -10,7 +10,7 @@
 %  N balance, C balance in units 1/day
 
 %
-function [Nbalance, Cbalance] = getBalance(u, L, T)
+function [Nbalance, Cbalance,Sibalance] = getBalance(u, L, T)
 arguments
     u double;
     L double;
@@ -23,10 +23,10 @@ dudt = 0*u';
 %
 % Then extract balance:
 %
-Nbalance = 100;
-Cbalance = 100;
+Nbalance = 0;
+Cbalance = 0;
+Sibalance=0;
 
-
-[~, ~, Nbalance, Cbalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
-    u, dudt, Nbalance, Cbalance);
+[~, ~, Nbalance, Cbalance,Sibalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
+    u, dudt, Nbalance, Cbalance,Sibalance);
 

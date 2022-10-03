@@ -18,8 +18,8 @@ end
 %
 % p = setupGeneric(mAdult);
 % p = setupGeneralistsSimpleOnly;
-p = setupGeneralistsOnly;
-% p = setupGeneralistsDiatoms;
+% p = setupGeneralistsOnly;
+p = setupGeneralistsDiatoms;
 % p = setupGeneralistsDiatoms_simple;
 % p = setupDiatoms_simpleOnly;
 %  p = setupDiatomsOnly;
