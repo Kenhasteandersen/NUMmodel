@@ -21,7 +21,7 @@ module diatoms
      !
      ! Light uptake:
      !
-     real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
+     real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
      real(dp), parameter:: alphaL = 0.206
      real(dp), parameter:: rLstar = 8.25
      !real(dp), parameter :: cL=0.18 ! photosynthetic affinity constant
@@ -57,9 +57,8 @@ module diatoms
      ! Bio-geo:
      !
      real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-     real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
+     real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
      real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
-
      type, extends(spectrumUnicellular) :: spectrumDiatoms
       ! real(dp), dimension(:), allocatable:: JSi
 
@@ -131,6 +130,8 @@ module diatoms
           this%JSi(i) = ftemp15* gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
           this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
           JmaxT = fTemp2*this%Jmax(i)
+
+         ! write(*,*) this%JL(i)
           jlim(i)=0.0
           !
           ! Potential net uptake
@@ -167,8 +168,15 @@ module diatoms
               !write(*,*) i,'( dN(i)==1 .and. dSi(i)<1 )'
            end if
            !
+           if  ( dSi(i)<1 .and. dN(i)<1 ) then  ! this check might be redundant, but just to make sure
+              dL(i)=1
+           end if
            if (this%JL(i)>0.) then
-             dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)+ftemp2*this%Jresp(i)-(1-bDOC)*this%JDOC(i)) )
+             dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)-(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
+
+
+             !write(*,*) 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)-(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) 
+           
            else 
              dL(i)=-1.
            end if
@@ -216,13 +224,13 @@ module diatoms
         ! - ( (1-f)*(bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+bN*dN(i)*this%JN(i)+bN*dSi(i)*this%JSi(i))&
         ! + (1-f)*bg*Jnet(i) )
           (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)- fTemp2*this%Jresp(i) &
-         - bN*dN(i)*this%JN(i)-bN*dSi(i)*this%JSi(i) -bg*Jnet(i) -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
+         - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
              
           this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
           this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+ &
-                        bN*dN(i)*this%JN(i)+bN*dSi(i)*this%JSi(i))+(1-f)*bg*Jnet(i)
+                        bN*dN(i)*this%JN(i)+bSi*dSi(i)*this%JSi(i))+(1-f)*bg*Jnet(i)
           !
-          !write(*,*) this%JN(i)
+          write(*,*) jlim(i)
 
           !write(*,*) 'N budget', i,':',(this%JNreal(i)-(1-f)*this%JlossPassive(i) &
           !- this%Jtot(i))/this%m(i)
@@ -232,7 +240,7 @@ module diatoms
          !write(*,*) 'Si budget', i,':',(this%JSi(i)-this%JlossPassive(i) - (this%JSi(i)-this%JlossPassive(i)-this%Jtot(i)) &
          !- this%Jtot(i))/this%m(i)
          this%f(i)=f
-
+         !write(*,*) this%JCloss_photouptake(i), this%JLreal(i),dL(i)
         end do
      end subroutine calcRatesDiatoms
    
@@ -247,7 +255,7 @@ module diatoms
        this%jPOM = 0*(1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
        do i = 1, this%n
-         mortloss = u(i)*(remin2*this%mort2(i) +reminHTL* this%mortHTL(i))
+        ! mortloss = u(i)*(remin2*this%mort2(i) +reminHTL* this%mortHTL(i))
          !
          ! Update nitrogen:
          !
@@ -263,7 +271,7 @@ module diatoms
          dDOCdt = dDOCdt &
          + ((-this%JDOCreal(i) &
          +  (1-this%f(i))*this%JlossPassive(i) &
-         +   this%JCloss_photouptake(i))/this%m(i) &
+         +  this%JCloss_photouptake(i))/this%m(i) &
          +  remin2*this%mort2(i) &
          !+  reminHTL*this%mortHTL(i) &
          ) * u(i)
@@ -282,6 +290,9 @@ module diatoms
          - this%mortpred(i) &
          - this%mort2(i) &
          - this%mortHTL(i))*u(i)
+
+         ! write(*,*) this%mortpred(i)*u(i) 
+
 
          !write(*,*) 'Nbalance =',i, ':', (dNdt + sum( dudt &
          !+ (1-reminHTL)*this%mortHTL*u &
@@ -312,7 +323,7 @@ module diatoms
       real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
   
       Nbalance = (dNdt + sum( dudt &
-      + (1-reminHTL)*this%mortHTL*u &
+      + (1-fracHTL_to_N)*this%mortHTL*u &
       + (1-remin2)*this%mort2*u & ! full N remineralization of viral mortality
          )/rhoCN)/N 
     end function getNbalanceDiatoms 
@@ -323,8 +334,8 @@ module diatoms
       real(dp), intent(in):: Si,dSidt, u(this%n), dudt(this%n)
   
       Sibalance = (dSidt + sum( dudt &
-      + (1-reminHTL)*this%mortHTL*u &
-      + (1-1)*this%mort2*u & ! full Si remineralization of viral mortality
+      + this%mortHTL*u &
+      + (1-remin2)*this%mort2*u & ! full Si remineralization of viral mortality
       )/rhoCSi)/Si 
     end function getSibalanceDiatoms 
   
@@ -334,12 +345,11 @@ module diatoms
       real(dp), intent(in):: DOC, dDOCdt, u(this%n), dudt(this%n)
   
       Cbalance = (dDOCdt + sum(dudt &
-      + (1-reminHTL)*this%mortHTL*u &
+      + this%mortHTL*u &
       + (1-remin2)*this%mort2*u &
       - this%JLreal*u/this%m & ! ??
-      !- this%JCloss_photouptake*u/this%m &
-     ! + fTemp2*this%Jresp*u/this%m &
-       + this%Jresptot*u/this%m & !plus uptake costs
+      - this%JCloss_photouptake*u/this%m &
+      + this%Jresptot*u/this%m & !plus uptake costs
       )) / DOC
     end function getCbalanceDiatoms 
     

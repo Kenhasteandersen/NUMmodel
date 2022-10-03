@@ -620,7 +620,7 @@ contains
         + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
         + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
     end do
-    !write(*,*) 'N balance:', Nbalance
+    write(*,*) 'N balance:', Nbalance
     
     contains
 
@@ -898,9 +898,9 @@ contains
   ! ---------------------------------------------------
   ! Returns mass conservation calculated from last call to calcDerivatives
   ! ---------------------------------------------------
-  subroutine getBalance(u, dudt, Nbalance,Cbalance)
+  subroutine getBalance(u, dudt, Nbalance,Cbalance,Sibalance)
    real(dp), intent(in):: u(nGrid), dudt(nGrid)
-   real(dp), intent(out):: Nbalance, Cbalance
+   real(dp), intent(out):: Nbalance, Cbalance, Sibalance
    integer:: iGroup
    
    iGroup = 1 ! Do it only for the first group, whihc we assume are generalists
@@ -924,6 +924,9 @@ contains
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) ))
             Cbalance = spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
+                    u(ixStart(iGroup):ixEnd(iGroup) ), &
+                    dudt( ixStart(iGroup):ixEnd(iGroup) )) 
+            Sibalance = spec%getSibalanceDiatoms(u(idxSi), dudt(idxSi), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
    end select

@@ -6,7 +6,7 @@ program NUMmodeltest
   real(dp), allocatable:: u0(:), u00(:), dudt(:)
   real(dp):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
   integer:: i
-  real(dp):: Nbalance,Cbalance
+  real(dp):: Nbalance,Cbalance, Sibalance
 
   !call setupGeneric( (/0.1d0, 1.0d0 /) )
   !call setHTL(0.0001d0, 1.d0, .true.)
@@ -24,6 +24,7 @@ program NUMmodeltest
   !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
   !call setupGeneralistsOnly(10)
+  !call setupGeneralistssimpleOnly(10)
   !call setupDiatoms_simpleOnly(10)
   call setupDiatomsOnly(10)
   !call setupDiatoms_simpleOnly(10)
@@ -41,25 +42,11 @@ program NUMmodeltest
 
   !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
-  call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:3), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
- !                      u  ,  L  ,   T  ,   dt , dudt
-  !call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
-  write(*,*) u00
- 
- 
-  u00(idxN) = 50.d0
-  u00(idxDOC) = 10.d0
-  u00(idxSi) = 10.d0
-  do i = idxB, nGrid
-     u00(i) = 1.0d0 !*(i-2)
-  end do
-  dudt = 0.d0
-  !call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
+  !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:3), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
+  !                      u  ,  L  ,   T  ,   dt , dudt
+  call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
+  !write(*,*) u00
 
-  !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
-  call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:3), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
- write(*,*) u00
- 
   ProdGross = 0
   ProdNet = 0
   ProdHTL=0
@@ -73,19 +60,22 @@ program NUMmodeltest
   !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
   !write(*,*) u00
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
-  call printRates()
-!!$  u0=u00
-!!$  call printU(u0)
- ! call calcDerivatives(u00, 150.d0, 0.1d0)
+  !call printRates()
+  !!$  u0=u00
+  !!$  call printU(u0)
+  ! call calcDerivatives(u00, 150.d0, 0.1d0)
 
  ! write(6,*) theta(3:5, 3:5)
  ! 
- !call printRates()
+ call printRates()
  !
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
  !write(*,*) Bpico, Bnano, Bmicro
-   ! call getBalance(u00, dudt, Nbalance,Cbalance)
-   ! write(*,*) 'Nbalance:', Nbalance
-    !write(*,*) 'Cbalance:', Cbalance
+    call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
+    write(*,*) 'Nbalance:', Nbalance
+    write(*,*) 'Cbalance:', Cbalance
+    write(*,*) 'Sibalance:', Sibalance
+
   end program NUMmodeltest
+ 

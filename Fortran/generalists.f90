@@ -136,7 +136,7 @@ contains
        !
        ! Uptakes
        !
-       this%JN(i) =  gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
+       this%JN(i) = gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
        this%JDOC(i) =gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        this%JL(i) =  epsilonL * this%AL(i)*L  ! Photoharvesting
        JmaxT = fTemp2*this%Jmax(i)
@@ -174,7 +174,7 @@ contains
        else 
         dDOC(i)=1.
        end if
-
+       !write(*,*) dN(i)
        if (dN(i).lt.0) then ! check if N leaks out of the cell
         dN(i)=0.
         Jnet =  1./(1+bg)*(dDOC(i)*this%JDOC(i)*(1.-bDOC)+dL(i)*this%JL(i)*(1-bL) &
@@ -214,23 +214,27 @@ contains
       this%JNtot(i) = &
             this%JNreal(i) + &
             this%JFreal(i)
-      !write(*,*) f     
+      !write(*,*) dN(i) ,this%JN(i)-this%JNreal(i),f,Jnet(i)   
       !
       ! Losses:
       !
       this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
       this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+ &
-                        bN*dN(i)*this%JN(i))+(1-f)*bg*Jnet(i)
-      !
+                        bN*dN(i)*this%JN(i)+this%JF(i)*bF)+(1-f)*bg*Jnet(i)
+
+      !write(*,*) dN(i),this%JCloss_feeding(i), this%JNlossLiebig(i)                 
+      ! 
+      !-------------------------------------------------------
       ! Test for conservation budget. Should be close to zero:
+      !-------------------------------------------------------
       !write(*,*) 'N budget', i,':',(this%JNreal(i)+this%JFreal(i)-this%JNlossLiebig(i)-(1-f)*this%JlossPassive(i) &
       !- this%Jtot(i))/this%m(i)
 
       !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
       !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
+      this%JF(i) = this%JFreal(i)
 
-      !write(*,*) 'C budget', i,':',((1-f)*Jnet(i)- (1-f)*this%JlossPassive(i)-this%Jtot(i))/this%m(i)
       this%f(i)=f
     end do
   end subroutine calcRatesGeneralists
@@ -295,7 +299,8 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
 
     Nbalance = (dNdt + sum( dudt &
-    + (1-reminHTL)*this%mortHTL*u &
+   !+ (1-reminHTL)*this%mortHTL*u &
+    + (1-fracHTL_to_N)*this%mortHTL*u &
     + (1-remin2)*this%mort2*u & ! full N remineralization of viral mortality
     + (1-reminF)*this%JCloss_feeding/this%m * u &
        )/rhoCN)/N ! full N remineralization of feeding losses
@@ -307,7 +312,8 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: DOC, dDOCdt, u(this%n), dudt(this%n)
 
     Cbalance = (dDOCdt + sum(dudt &
-    + (1-reminHTL)*this%mortHTL*u &
+    !+ (1-reminHTL)*this%mortHTL*u &
+    + this%mortHTL*u &
     + (1-remin2)*this%mort2*u &
     - this%JLreal*u/this%m &
     - this%JCloss_photouptake*u/this%m & !saturation effect??

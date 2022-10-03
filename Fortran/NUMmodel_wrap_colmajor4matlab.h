@@ -85,7 +85,8 @@ void f_getbalance(
 	const double u[],
 	const double dudt[],
 	double *Nbalance,
-	double *Cbalance);
+	double *Cbalance,
+	double *Sibalance);
 				  
 void f_getrates(
 		double *jN,
