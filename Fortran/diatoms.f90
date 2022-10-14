@@ -128,7 +128,7 @@ module diatoms
           this%JN(i) =  ftemp15* gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
           this%JDOC(i) = ftemp15*gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
           this%JSi(i) = ftemp15* gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
-          this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
+          this%JL(i) =  epsilonL * this%AL(i)*L  ! Photoharvesting
           JmaxT = fTemp2*this%Jmax(i)
 
          ! write(*,*) this%JL(i)
@@ -146,6 +146,8 @@ module diatoms
           dDOC(i)=1.
           !------------ up to this point all good -----------------
           !
+          !write(*,*) dN(i),dSi(i)
+
            if (dN(i)==1 .and. dSi(i)==1) then
              if ( this%JN(i)<this%JSi(i) ) then
                  jlim(i)=this%JN(i)
@@ -165,11 +167,13 @@ module diatoms
            else if ( dN(i)==1 .and. dSi(i)<1 ) then   ! If N is the limiting resource
               jlim(i)=this%JN(i)
               dSi(i)= jlim(i)/this%JSi(i)
-              !write(*,*) i,'( dN(i)==1 .and. dSi(i)<1 )'
            end if
            !
            if  ( dSi(i)<1 .and. dN(i)<1 ) then  ! this check might be redundant, but just to make sure
               dL(i)=1
+             Jnetp(i) = dL(i)*this%jL(i)*(1-bL)+dDOC(i)*this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
+             Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
+            jlim(i)=Jnet(i)
            end if
            if (this%JL(i)>0.) then
              dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)-(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
@@ -180,19 +184,22 @@ module diatoms
            else 
              dL(i)=-1.
            end if
+           !write(*,*) jlim(i)/this%m(i),dL(i)
            !
            if (dL(i)<0.) then ! It means that there's is too much C taken up 
              dL(i) = 0       ! We set light uptake to 0 and downregulate DOC uptake
              dDOC(i) = min(1., 1./(this%JDOC(i)*(1-bDOC))*(Jlim(i)*(1+bg+bSi+bN) + ftemp2*this%Jresp(i)))  
            end if
              Jnetp(i) = dL(i)*this%jL(i)*(1-bL)+dDOC(i)*this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
-             Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
+             !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
+             Jnet(i)  = 1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i)))
 
+             !write(*,*) i, Jnetp(i)/this%m(i),dL(i)
              if ( dSi(i)<1 .and. dN(i)<1 ) then
               jlim(i)=Jnet(i)
               dN(i)=jlim(i)/this%JN(i)
               dSi(i)=jlim(i)/this%JSi(i)
-              !write(*,*) i,'( dSi(i)<1 .and. dN(i)<1 )'
+              write(*,*) i,Jlim(i), dN(i),dSi(i),dL(i), Jnetp(i)/this%m(i)
               !write(*,*) i,':', Jnet(i)/this%m(i),Jlim(i)/this%m(i)
              end if
           !
@@ -230,13 +237,14 @@ module diatoms
           this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+ &
                         bN*dN(i)*this%JN(i)+bSi*dSi(i)*this%JSi(i))+(1-f)*bg*Jnet(i)
           !
-          write(*,*) jlim(i)
+          !write(*,*) jlim(i),dN(i),dSi(i)
 
           !write(*,*) 'N budget', i,':',(this%JNreal(i)-(1-f)*this%JlossPassive(i) &
           !- this%Jtot(i))/this%m(i)
           !
           !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
           !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
+
          !write(*,*) 'Si budget', i,':',(this%JSi(i)-this%JlossPassive(i) - (this%JSi(i)-this%JlossPassive(i)-this%Jtot(i)) &
          !- this%Jtot(i))/this%m(i)
          this%f(i)=f
@@ -315,6 +323,7 @@ module diatoms
       99 format (a10, 20f10.6)
   
       write(*,99) "jSi:", this%JSi / this%m
+
     end subroutine printRatesDiatoms
 
     function getNbalanceDiatoms(this, N, dNdt, u, dudt) result(Nbalance)

@@ -9,18 +9,19 @@
 % Out:
 %   Total mass of ChlA in mg Chl/m3 and mg Chl/m2
 %
+
 % function [ChlVolume, ChlArea] = calcChl(sim)
-% 
+%
 % switch sim.p.nameModel
-%     
+%
 %     case 'chemostat'
 %         ChlVolume = calculateChl(  sim.B(end,:), sim.rates.jLreal, sim.L );
-%         ChlArea = ChlVolume * sim.p.depthProductiveLayer; 
-%         
+%         ChlArea = ChlVolume * sim.p.depthProductiveLayer;
+%
 %     case 'global'
 %         ChlArea = zeros(length(sim.x), length(sim.y));
 %         ChlVolume = zeros(length(sim.x), length(sim.y), length(sim.z));
-%         
+%
 %         for i = 1:length(sim.x)
 %             for j = 1:length(sim.y)
 %                 for l = 1:length(sim.z)
@@ -47,11 +48,11 @@
 %         %
 %         ChlArea = ChlArea/length(sim.t);
 %         ChlVolume = ChlVolume/length(sim.t);
-%         
+% 
 % end
 
-    function Bchl = calc(B,rates,L)
-        Bchl = sum( B .* rates.jLreal )/L; % in units of mu g Chl per l 
-    end
+function Bchl = calcChl(B,rates,L) 
+   Bchl = sum( B .* rates.jLreal )/L; % in units of mu g Chl per l  
+end 
 
 %end

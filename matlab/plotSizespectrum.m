@@ -1,7 +1,7 @@
 %
 % Plot a size spectrum at a given lat, lon, index of depth, and time
 % (day).
-%
+% 
 function s = plotSizespectrum(sim, time, iDepth, lat, lon)
 arguments
     sim struct;
@@ -24,7 +24,7 @@ switch sim.p.nameModel
         else
             u = [sim.N(iTime), sim.DOC(iTime), squeeze(sim.B(iTime,:))];
         end
-        s.L = sim.L;
+        s.L = mean(sim.L);
         s.T = sim.T;
         
     case 'watercolumn'
@@ -32,10 +32,8 @@ switch sim.p.nameModel
         z = sim.z;
         s.B = squeeze(sim.B(iDepth,:,:))';
         if isfield(sim,'Si')
-%             u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iTime,:), ...
-%                 squeeze(s.B(:,iTime))'];
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iDepth,iTime), ...
-                squeeze(s.B(iTime,:))];
+            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iTime,:), ...
+                squeeze(s.B(:,iTime))'];
         else
             u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), squeeze(s.B(iTime,:))];
         end

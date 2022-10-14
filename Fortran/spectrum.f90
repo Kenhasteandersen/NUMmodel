@@ -234,9 +234,11 @@ contains
     call this%printRatesSpectrum()
 
     write(*,'(a10, 20d10.3)') "r:", this%r
+    write(*,99) "jN:", this%JN / this%m
     write(*,99) "jNreal:", this%JNreal / this%m
     write(*,99) "jL:", this%JL / this%m
     write(*,99) "jLreal:", this%JLreal / this%m
+    write(*,99) "jDOC:", this%JDOCreal / this%m
     write(*,99) "jDOCreal:", this%JDOCreal / this%m
     write(*,99) "jSireal:", this%JSireal / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m

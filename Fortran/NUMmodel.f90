@@ -88,7 +88,7 @@ contains
    integer, intent(in):: n, nPOM
    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
    call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
-   call parametersAddGroup(typePOM, nPOM, 1.d0) ! POM with nPOM size classes and max size 1 ugC
+   call parametersAddGroup(typePOM, nPOM, 1.0d0) ! POM with nPOM size classes and max size 1 ugC
    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
  end subroutine setupGeneralistsSimplePOM
 
@@ -583,8 +583,7 @@ contains
                ix = ixStart(iGroup)+i-1
                if (thetaPOM(ix) .ne. 0) then
                   j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
-                  dudt(j) = dudt(j) &
-                    + group(iGroup)%spec%jPOM(i)*u(ix) 
+                  dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*u(ix) 
                end if
                 ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &

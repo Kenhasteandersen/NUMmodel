@@ -130,7 +130,7 @@ contains
     real(dp):: f, JmaxT
     real(dp):: dL(this%n), dN(this%n), dDOC(this%n), Jnetp(this%n), Jnet(this%n),Jlim(this%n)
     integer:: i
-       !this%JF(10)= 0.02
+       this%JF(10)= 0.02
 
     do i = 1, this%n
        !
@@ -214,7 +214,8 @@ contains
       this%JNtot(i) = &
             this%JNreal(i) + &
             this%JFreal(i)
-      !write(*,*) dN(i) ,this%JN(i)-this%JNreal(i),f,Jnet(i)   
+      !write(*,*) f,1-f,Jnet(i)   
+      write(*,*) dN(i),dL(i),this%JNlossLiebig(i)
       !
       ! Losses:
       !
@@ -233,7 +234,7 @@ contains
 
       !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
       !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
-      this%JF(i) = this%JFreal(i)
+      !this%JF(i) = this%JFreal(i)
 
       this%f(i)=f
     end do
@@ -291,6 +292,10 @@ subroutine printRatesGeneralists(this)
 
   write(*,*) "Generalists with ", this%n, " size classes:"
   call this%printRatesUnicellular()
+
+  99 format (a10, 20f10.6)
+  
+  write(*,99) "jFreal:", this%JFreal / this%m
 end subroutine printRatesGeneralists
  
   function getNbalanceGeneralists(this, N, dNdt, u, dudt) result(Nbalance)

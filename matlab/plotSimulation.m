@@ -20,8 +20,7 @@ switch sim.p.nameModel
         
     case 'watercolumn'
         day = sim.p.tEnd - 170;
-        iDepth = 4;
-        
+
         figure(1)
         clf
         plotWatercolumnTime(sim,'depthMax',200);
@@ -36,6 +35,7 @@ switch sim.p.nameModel
         iDepth = find(Bdepth==max(Bdepth));
 
         plotSizespectrum(sim,day,iDepth);     
+        % plotSizespectrum(sim,iDepth);
 
         figure(4)
         plotSizespectrumTime(sim,iDepth);

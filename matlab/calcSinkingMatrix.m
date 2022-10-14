@@ -22,6 +22,8 @@ for i = 1:nGrid
 end
 %BottomBC: 
 Asink(end) = 1;
+
+
 %
 % Invert matrix to make it ready for use:
 %

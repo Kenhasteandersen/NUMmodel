@@ -20,6 +20,8 @@ for i = 1:nGrid
         Asink(:,i,i-1) = -k;
     end
 end
+%BottomBC: 
+Asink(end) = 1;
 %
 % Invert matrix to make it ready for use:
 %

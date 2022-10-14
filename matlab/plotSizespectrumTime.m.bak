@@ -25,7 +25,8 @@ switch sim.p.nameModel
     else
         % Extract from global run:
         idx = calcGlobalWatercolumn(lat,lon,sim);
-        s.B = squeeze(sim.B(idx.x, idx.y, iDepth, :, :));
+%       s.B = squeeze(sim.B(idx.x, idx.y, iDepth, :, :));
+        sTitle = sprintf("Sheldon spectrum at %3.0f m", sim.z(iDepth));
     end
 
     otherwise

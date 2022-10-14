@@ -4,8 +4,7 @@
 %
 % In:
 %  sim: simulation structure
-%  bVerbose: whether to print out the balance on the terminal (default true
-%           ).
+%  bVerbose: whether to print out the balance on the terminal (default true)
 %
 function [dNdt, dNdt_per_N] = checkConservation(sim, bVerbose)
 
@@ -16,10 +15,12 @@ end
 %
 % Constants:
 %
+fracHTL_to_N = 0.5;
 epsilonF = 0.8;
 reminHTL = 0;
 reminF = 0.1;
 rhoCN = 5.68;
+remin2 = 0.5;
 
 p = sim.p;
 gains = 0;

@@ -12,10 +12,15 @@ switch sim.p.nameModel
         
         figure(2)
         plotGroupsTime(sim);
+
+        if ~isnan(sim.p.seasonalOptions.lat_lon) | sim.p.seasonalOptions.seasonalAmplitude ~= 0
+            figure(3)
+            plotSizespectrumTime(sim)
+        end
         
     case 'watercolumn'
         day = sim.p.tEnd - 170;
-        iDepth = 4;
+
         
         figure(1)
         clf
@@ -31,6 +36,7 @@ switch sim.p.nameModel
         iDepth = find(Bdepth==max(Bdepth));
 
         plotSizespectrum(sim,day,iDepth);     
+        % plotSizespectrum(sim,iDepth);
 
         figure(4)
         plotSizespectrumTime(sim,iDepth);

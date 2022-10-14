@@ -174,6 +174,8 @@ end
 % ---------------------------------------
 disp('Starting simulation')
 sLibname = loadNUMmodelLibrary();
+dtTransport = p.dtTransport;
+n = p.n;
 
 tic
 for i=1:simtime
@@ -185,34 +187,44 @@ for i=1:simtime
         load(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
         %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
 
-        Aexp=function_convert_TM_positive(Aexp);
-        Aimp=function_convert_TM_positive(Aimp);
+        Aexp = function_convert_TM_positive(Aexp);
+        Aimp = function_convert_TM_positive(Aimp);
 
         % Preparing for timestepping. 43200s.
         load(p.pathGrid,'deltaT')
-        Aexp = Ix + (12*60*60)*Aexp;
-        Aimp = Aimp^(12*60*60/deltaT);
+        Aexp = Ix + (p.dtTransport*24*60*60)*Aexp;
+        Aimp = Aimp^(p.dtTransport*24*60*60/deltaT);
 
         % Set monthly mean temperature
         T = Tmat(:,month+1);
 
         month = mod(month + 1, 12);
     end
+
+    %
+    % Enforce minimum B concentration
+    %
+    for k = 1:n
+        u(u(:,k)<p.umin(k),k) = p.umin(k);
+    end
     %
     % Run Euler time step for half a day:
     %
     L = L0(:,mod(i,365*2)+1);
     dt = p.dt;
-    n = p.n;
+
     if ~isempty(gcp('nocreate'))
         parfor k = 1:nb
+            %
+            % Integrate ODEs:
+            %
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
-                u(k,:), L(k), T(k), p.dtTransport, dt);
+                u(k,:), L(k), T(k), dtTransport, dt);
         end
     else
         for k = 1:nb
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
-                u(k,:),L(k), T(k), p.dtTransport, dt);
+                u(k,:),L(k), T(k), dtTransport, dt);
             %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
             % If we use ode23:
             %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
@@ -232,15 +244,13 @@ for i=1:simtime
         %    u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); % Sinking
         %end
     end
-    %
-    % Enforce minimum B concentration
-    %
-    u(u<p.umin) = p.umin;
+
 
     %
     % Save timeseries in grid format
     %
-    if ((mod(i/2,p.tSave) < mod((i-1)/2,p.tSave)) || (i==simtime))
+    if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
+    %if ((mod(i*p.dtTransport,p.tSave) < mod((i-1)*p.dtTransport,p.tSave)) || (i==simtime))
         fprintf('t = %u days',floor(i/2))
 
         if any(isnan(u))

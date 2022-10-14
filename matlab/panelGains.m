@@ -6,23 +6,29 @@ for iGroup = 1:p.nGroups
     semilogx(m, rates.jF(ix), 'r-', 'linewidth',2)
     hold on
     % Rates for unicellulars:
-    if (p.typeGroups(iGroup)<10)
+    if ((p.typeGroups(iGroup)~=3) || (p.typeGroups(iGroup)~=4))
        semilogx(m, rates.jN(ix), 'b-','linewidth',2)
        semilogx(m, rates.jLreal(ix), 'g-','linewidth',2)
        semilogx(m, rates.jDOC(ix), 'color',[181 100 30]/256,'linewidth',2)
        semilogx(m, rates.jMax(ix), 'k:')       
-    end
-    
-    if ((p.typeGroups(iGroup)==3) || (p.typeGroups(iGroup)==4))
-        semilogx(m, rates.jSi(ix), 'color',[181 180 0]/256,'linewidth',2)
-    end
-    
-    % Total:
+           % Total:
     semilogx(m, rates.jTot(ix), 'k-', 'linewidth',2)
     % Rates for copepods:
     %if (p.typeGroups(iGroup)~=2)
     %    semilogx(m, p.jFmax(ix),'k:')
     %end
+    end
+    
+    if ((p.typeGroups(iGroup)==3) || (p.typeGroups(iGroup)==4))
+       semilogx(m, rates.jSi(ix), 'color',[181 180 0]/256,'linewidth',2)
+       semilogx(m, rates.jN(ix), 'b--','linewidth',2)
+       semilogx(m, rates.jLreal(ix), 'g--','linewidth',2)
+       semilogx(m, rates.jDOC(ix), 'color',[181 100 30]/256,'linewidth',2)
+       semilogx(m, rates.jMax(ix), 'k:') 
+       semilogx(m, rates.jTot(ix), 'k--', 'linewidth',2)
+    end
+    
+
 end
 
 hold off

@@ -23,10 +23,10 @@ program NUMmodeltest
   
   !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
-  !call setupGeneralistsOnly(10)
+  call setupGeneralistsOnly(10)
   !call setupGeneralistssimpleOnly(10)
   !call setupDiatoms_simpleOnly(10)
-  call setupDiatomsOnly(10)
+  !call setupDiatomsOnly(10)
   !call setupDiatoms_simpleOnly(10)
 
   allocate(u0(nGrid))
@@ -42,7 +42,7 @@ program NUMmodeltest
 
   !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
-  !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:3), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
+  !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
   call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
   !write(*,*) u00
@@ -75,7 +75,7 @@ program NUMmodeltest
     call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
     write(*,*) 'Nbalance:', Nbalance
     write(*,*) 'Cbalance:', Cbalance
-    write(*,*) 'Sibalance:', Sibalance
+    !write(*,*) 'Sibalance:', Sibalance
 
   end program NUMmodeltest
  

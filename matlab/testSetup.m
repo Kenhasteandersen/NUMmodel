@@ -8,10 +8,22 @@ arguments
     sDescription string = sSetup;
 end
 
-fprintf('Testing %s ... ', sDescription);
+fprintf('Testing %s ... \n', sDescription);
 
-try
-    p = eval( sSetup );
+try  
+    %
+    % First check that the derivative function respects conservation
+    % by making a short simulation
+    %
+    p = eval( sSetup ); % Initialize the setup
+    p = parametersChemostat(p);
+    p.tEnd = 1;
+    sim = simulateChemostat(p);
+    fprintf('N balance: %e\n', checkBalanceDerivative(sim));
+    %
+    % Then check the value of the derivative:
+    %
+    p = eval( sSetup ); % Initialize the setup
     u = p.u0;
     u(2) = 0.1;
     dudt = 0*u';

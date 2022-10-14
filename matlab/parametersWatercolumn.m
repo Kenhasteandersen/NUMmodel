@@ -2,7 +2,7 @@ function p = parametersWatercolumn(p, nTMmodel)
 
 arguments
     p struct
-    nTMmodel {mustBeInteger} = 2; % Use hi-res ecco model as default
+    nTMmodel {mustBeInteger} = 2; % Use low-res 2.8 model as default
 end
 
 p = parametersGlobal(p,nTMmodel);

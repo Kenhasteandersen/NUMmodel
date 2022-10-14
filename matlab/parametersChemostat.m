@@ -27,6 +27,7 @@
 %  p - parameter structure with chemostat fields added.
 %
 function p = parametersChemostat(p, seasonalOptions)
+
 arguments
     p struct = parametersChemostat(setupGeneralistsOnly);
     seasonalOptions.constantValues = [0.5 100]; % lower the mixing rate
@@ -36,7 +37,7 @@ end
 
 p.nameModel = 'chemostat';
 
-p.d = 0.1;  % Default Mixing rate (1/days)
+p.d = 0.1;  % Default mixing rate (1/days)
 
 p.widthProductiveLayer = 20; % (meters) only used for calcFunctions
 p.tEnd = 365;  % Time to run in days

@@ -106,7 +106,7 @@
 !
 ! Metabolism
 !
-      cLeakage = 0.03               ! Passive leakage of C and N
+      cLeakage = 0.003               ! Passive leakage of C and N
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
       cR = 0.1                

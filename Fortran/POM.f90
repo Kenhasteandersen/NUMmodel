@@ -15,7 +15,7 @@ module POM
     private 
   
     !real(dp), parameter:: rhoCN = 5.68
-    real(dp), parameter:: remin = 0.05d0 ! remineralisation rate (1/day)
+    real(dp), parameter:: remin = 0.07d0 ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
     real(dp), parameter:: mMin = 1e-9 ! Smallest POM mass
   
     type, extends(typeSpectrum) :: spectrumPOM
@@ -46,9 +46,9 @@ module POM
     real(dp), intent(in):: u(this%n)
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
 
-    dudt = dudt - remin*u - this%mortpred*u
-    dNdt = dNdt + sum(remin*u/rhoCN)
-    dDOCdt = dDOCdt + sum(remin*u)
+    dudt = dudt - fTemp2*remin*u - this%mortpred*u
+    dNdt = dNdt + fTemp2*remin*sum(u)/rhoCN
+    dDOCdt = dDOCdt + fTemp2*remin*sum(u)
   end subroutine calcDerivativesPOM
 
   subroutine printRatesPOM(this)

@@ -11,7 +11,7 @@
 function idx = calcGlobalWatercolumn(lat, lon, sim)
 
 arguments
-    lat, lon {mustBeInteger};
+    lat, lon;
     sim struct;
 end
 
