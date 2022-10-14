@@ -3,6 +3,8 @@
 resources/*
 matlab/fort.6
 .vs/NUMmodel/xs/UserPrefs.xml
+.vscode/launch.json
+.vscode/tasks.json
 Fortran/.DS_Store
 Fortran/f_calcderivatives__genmod.f90
 Fortran/f_getfunctions__genmod.f90
