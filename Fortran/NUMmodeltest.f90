@@ -34,7 +34,7 @@ program NUMmodeltest
   allocate(dudt(nGrid))
   u00(idxN) = 50.d0
   u00(idxDOC) = 10.d0
-  u00(idxSi) = 10.d0
+  !u00(idxSi) = 10.d0
   do i = idxB, nGrid
      u00(i) = 1.0d0 !*(i-2)
   end do
