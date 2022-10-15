@@ -79,12 +79,12 @@ contains
   subroutine read_namelist()
     integer :: file_unit,io_err
 
-    namelist /input_generalists_simple / epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
+    namelist /input_generalists / epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
              & alphaF, cF, beta, sigma, cLeakage, delta, alphaJ, cR, &
              & remin, remin2, reminF, mMinGeneralist, mMaxGeneralist
 
     call open_inputfile(file_unit, io_err)
-        read(file_unit, nml=input_generalists_simple, iostat=io_err)
+        read(file_unit, nml=input_generalists, iostat=io_err)
         call close_inputfile(file_unit, io_err)
 
   end subroutine read_namelist
@@ -117,7 +117,7 @@ contains
     this%AF = alphaF*this%m
     this%JFmax = cF/this%r * this%m
     
-    this%JlossPassive =cLeakage/this%r * this%m ! in units of C
+    this%JlossPassive = cLeakage/this%r * this%m ! in units of C
 
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
     this%Jresp =cR*alphaJ*this%m
@@ -130,7 +130,6 @@ contains
     real(dp):: f, JmaxT
     real(dp):: dL(this%n), dN(this%n), dDOC(this%n), Jnetp(this%n), Jnet(this%n),Jlim(this%n)
     integer:: i
-       this%JF(10)= 0.02
 
     do i = 1, this%n
        !
@@ -180,7 +179,10 @@ contains
         Jnet =  1./(1+bg)*(dDOC(i)*this%JDOC(i)*(1.-bDOC)+dL(i)*this%JL(i)*(1-bL) &
         + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*dN(i)*this%JN(i)) ! was with max(O.,..) 
         f = (Jnet(i) )/(Jnet(i) + JmaxT)
+        !if (f .gt. 0) then
+
         this%JNlossLiebig(i) = (1-f)*this%JF(i)-f*JmaxT!-1/(1+bg)*(bN*dN(i)*this%JN(i))!this%JF(i)-!this%JF(i)-Jnet(i)!f*JmaxT
+        !endif
        else 
         Jnet =  1./(1+bg)*(dDOC(i)*this%JDOC(i)*(1.-bDOC)+dL(i)*this%JL(i)*(1-bL) &
         + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*dN(i)*this%JN(i)) ! was with max(O.,..) 
@@ -215,7 +217,7 @@ contains
             this%JNreal(i) + &
             this%JFreal(i)
       !write(*,*) f,1-f,Jnet(i)   
-      write(*,*) dN(i),dL(i),this%JNlossLiebig(i)
+      !write(*,*) dN(i),dL(i),this%JNlossLiebig(i)
       !
       ! Losses:
       !
@@ -229,11 +231,11 @@ contains
       !-------------------------------------------------------
       ! Test for conservation budget. Should be close to zero:
       !-------------------------------------------------------
-      !write(*,*) 'N budget', i,':',(this%JNreal(i)+this%JFreal(i)-this%JNlossLiebig(i)-(1-f)*this%JlossPassive(i) &
-      !- this%Jtot(i))/this%m(i)
+      write(*,*) 'N budget', i,':',(this%JNreal(i)+this%JFreal(i)-this%JNlossLiebig(i)-(1-f)*this%JlossPassive(i) &
+      - this%Jtot(i))/this%m(i)
 
-      !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
-      !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
+      write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
+      - this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
       !this%JF(i) = this%JFreal(i)
 
       this%f(i)=f
