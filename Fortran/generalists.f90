@@ -239,6 +239,7 @@ contains
       !this%JF(i) = this%JFreal(i)
 
       this%f(i)=f
+      this%JF(i) = this%JFreal(i)
     end do
   end subroutine calcRatesGeneralists
 
