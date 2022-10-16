@@ -27,6 +27,8 @@ module NUMmodel
    integer, parameter :: typeGeneralist = 5  
    integer, parameter :: typeCopepod = 10
    integer, parameter :: typePOM = 100
+
+
   !
   ! Variables that contain the size spectrum groups
   !
@@ -77,7 +79,7 @@ contains
   subroutine setupGeneralistsOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+    call parametersAddGroup(typeGeneralist, n, 1.0d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
@@ -178,7 +180,7 @@ contains
    integer:: iCopepod
  
    call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
-   call parametersAddGroup(typeGeneralist, n, 0.1d0)
+   call parametersAddGroup(typeGeneralist, n, 0.0d0)
 
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
@@ -221,8 +223,8 @@ contains
     !
     ! Set groups:
     !
-    	call read_namelist_general()
-
+	call read_namelist_general()
+	
     nGroups = nnGroups
     iCurrentGroup = 0
     nNutrients = nnNutrients
@@ -466,8 +468,8 @@ contains
 
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
-  
-    subroutine setMortHTL(mortHTL)
+
+  subroutine setMortHTL(mortHTL)
    real(dp), intent(in):: mortHTL(nGrid-idxB+1)
    integer:: iGroup
 
@@ -515,7 +517,6 @@ contains
     !
     ! Calc available food:
     !
-    !dudt(1) = F(1) ! ???
     do i = idxB, nGrid
        F(i) = 0.d0
        do j = idxB, nGrid
@@ -585,15 +586,15 @@ contains
                   j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
                   dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*u(ix) 
                end if
-                ! Throw a fraction of HTL production into the largest POM group:
+               ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
                  fracHTL_to_POM * u(ix) * group(iGroup)%spec%mortHTL(i)
             end do
          end if
       end do
-     !
-     ! Update POM
-     ! 
+      !
+      ! Update POM
+      ! 
       select type (spec => group(idxPOM)%spec)
       type is (spectrumPOM)
          call calcDerivativesPOM(spec, &
@@ -620,10 +621,9 @@ contains
         + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
     end do
     write(*,*) 'N balance:', Nbalance
-    
     contains
 
-     !
+  !
   ! Calculate derivatives for unicellular groups
   ! In:
   !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
@@ -787,7 +787,6 @@ contains
 
    subroutine printRates()
       integer :: iGroup
-      99 format (a10, 20f10.6)
 
       do iGroup = 1, nGroups
          call group(iGroup)%spec%printRates()
@@ -902,7 +901,7 @@ contains
    real(dp), intent(out):: Nbalance, Cbalance, Sibalance
    integer:: iGroup
    
-   iGroup = 1 ! Do it only for the first group, whihc we assume are generalists
+   iGroup = 1 ! Do it only for the first group:
    select type ( spec => group(iGroup)%spec )
       type is (spectrumGeneralistsSimple)
          Nbalance = spec%getNbalanceGeneralistsSimple(u(idxN), dudt(idxN), &
@@ -977,6 +976,7 @@ contains
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumDiatoms_simple)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
+        jDOC( i1:i2 ) = 0.d0 ! Diatoms simple don't take up DOC
       class is (spectrumDiatoms)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       end select

@@ -5,7 +5,7 @@
 %  p - parameter structure from a call to a setupXX function
 %  seasonalOptions - parameter structure that choose if the chemostat will
 %                    have or not seasonalities. Several types are possible:
-%                    (author: Cécile Decker)
+%                    (author: CÃ©cile Decker)
 %  seasonalOptions.constantValues - set to 0.5 and 100 by default (mixing
 %                                   rate and light are constant)
 %  seasonalOptions.lat_lon - set to NaN by default (mixing rate and light 
@@ -42,8 +42,6 @@ p.d = 0.1;  % Default mixing rate (1/days)
 p.widthProductiveLayer = 20; % (meters) only used for calcFunctions
 p.tEnd = 365;  % Time to run in days
 p.tSave = 1;
-
-p.depthProductiveLayer = 20; % (meters) Only needed for calculation of functions
 p.uDeep = 50; % Nutrients of the layer below the chemostat layer
 p.u0(1) = 1; % Nitrogen concentration
 

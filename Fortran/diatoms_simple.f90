@@ -52,7 +52,7 @@ module diatoms_simple
     !
     real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
     real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
-    real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
+    !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
     
     type, extends(spectrumUnicellular) :: spectrumDiatoms_simple
 !      real(dp), dimension(:), allocatable:: JSi
@@ -144,7 +144,7 @@ module diatoms_simple
   
       this%mort2 = this%mort2constant*u
       do i = 1, this%n
-        mortloss = u(i)*(remin2*this%mort2(i) +reminHTL*this%mortHTL(i))
+        mortloss = u(i)*(remin2*this%mort2(i)) !+reminHTL*this%mortHTL(i))
         !
         ! Update nitrogen:
         !

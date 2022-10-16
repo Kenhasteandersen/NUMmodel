@@ -29,7 +29,11 @@ switch sim.p.nameModel
     case 'chemostat'
         loss = 0;
         for iTime = 1:(length(sim.t)-1)
-            u = [ sim.N(iTime) sim.DOC(iTime), sim.B(iTime,:) ];
+            if ~isfield(sim.p,'idxSi')
+                u = [ sim.N(iTime) sim.DOC(iTime), sim.B(iTime,:) ];
+            else
+                u = [ sim.N(iTime) sim.DOC(iTime), sim.Si(end), sim.B(iTime,:) ];
+            end
             rates = getRates(p, u, mean(sim.L), sim.T );
             ixUni = findIxUnicellular(sim.p);
             if ~sum(ismember(p.typeGroups,100))

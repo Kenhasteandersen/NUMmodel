@@ -1,5 +1,5 @@
 function s = plotSizespectrumTime(sim,iDepth,lat,lon)
-% ?
+
 arguments
     sim struct;
     iDepth {mustBeInteger} = 1;

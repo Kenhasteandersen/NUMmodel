@@ -1,11 +1,11 @@
 #
-# Define lib-names depending on the system
+# Try to determine the operating system:
 #
 ifeq '$(findstring ;,$(PATH))' ';'
     UNAME := Windows
 else
     UNAME := $(shell uname 2>/dev/null || echo Unknown)
-	  ifeq ($(UNAME), Unknown) 
+	ifeq ($(UNAME), Unknown) 
         UNAME := Windows # Assuming windows if we cannot find a uname
         $(warning    Cannot determine system; assuming Windows)
     endif
@@ -21,7 +21,6 @@ endif
 #
 # Define lib-names depending on the system:
 #
-
 ifeq ($(UNAME), Darwin)
  libMatlab = ../lib/libNUMmodel_matlab.dylib
  libR = ../lib/libNUMmodel_R.dylib
@@ -37,12 +36,6 @@ ifeq ($(UNAME), Windows)
  libR = ../lib/libNUMmodel_R.dll
 endif
 
-#
-# Compile from OSX -> windows
-#
-#FORT = /usr/local/Cellar/mingw-w64/9.0.0_2/toolchain-x86_64/bin/x86_64-w64-mingw32-gfortran
-#libMatlab = ../lib/libNUMmodel_matlab.dll
-#libR = ../lib/libNUMmodel_R.dll
 #
 # iFortran:
 #

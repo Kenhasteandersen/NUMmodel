@@ -1,4 +1,4 @@
-% ?
+% 
 % Plot a water column as a function of time at latitude `lat`
 % and longitude `lon`. If lat and lon are empty it is assumed that the
 % simulation is from "simulationWatercolumn".

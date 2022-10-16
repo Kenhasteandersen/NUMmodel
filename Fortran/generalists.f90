@@ -4,7 +4,7 @@
 module generalists
   use globals
   use spectrum
-  !use input
+  use input
   implicit none
 
   private 
@@ -86,13 +86,12 @@ contains
     call open_inputfile(file_unit, io_err)
         read(file_unit, nml=input_generalists, iostat=io_err)
         call close_inputfile(file_unit, io_err)
-
   end subroutine read_namelist
 
   subroutine initGeneralists(this, n, mMax)
     class(spectrumGeneralists):: this
-    real(dp), intent(in):: mMax
     integer, intent(in):: n
+    real(dp), intent(in):: mMax
     integer:: i
     real(dp), parameter:: mMin = 3.1623d-9 !2.78d-8!
     real(dp), parameter:: rho = 0.4*1d6*1d-12
@@ -231,29 +230,34 @@ contains
       !-------------------------------------------------------
       ! Test for conservation budget. Should be close to zero:
       !-------------------------------------------------------
-      write(*,*) 'N budget', i,':',(this%JNreal(i)+this%JFreal(i)-this%JNlossLiebig(i)-(1-f)*this%JlossPassive(i) &
-      - this%Jtot(i))/this%m(i)
+      !write(*,*) 'N budget', i,':',(this%JNreal(i)+this%JFreal(i)-this%JNlossLiebig(i)-(1-f)*this%JlossPassive(i) &
+      !- this%Jtot(i))/this%m(i)
 
-      write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
-      - this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
+      !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
+      !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
       !this%JF(i) = this%JFreal(i)
 
       this%f(i)=f
       this%JF(i) = this%JFreal(i)
     end do
-  end subroutine calcRatesGeneralists
+    !
+    ! Test for conservation budget. Should be close to zero:
+    !
+    !write(*,*) 'N budget:',(-this%Jtot+this%JN+this%JFreal & ! Gains
+    !  -this%JNlossLiebig-this%JlossPassive)/this%m           ! Losses
+    !write(*,*) 'C budget:',(-this%Jtot+this%JLreal+this%JDOC+this%JFreal & ! Gains
+    !  -fTemp2*this%Jresp - this%JClossLiebig - this%JlossPassive)/this%m   ! Losses
+end subroutine calcRatesGeneralists
 
   subroutine calcDerivativesGeneralists(this, u, dNdt, dDOCdt, dudt)
     class(spectrumGeneralists), intent(inout):: this
     real(dp), intent(in):: u(this%n)
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
-    real(dp):: mortloss
+    !real(dp):: mortloss
     integer:: i
-    !
-    ! To make mass balance check:
-    !
-    this%mort2 = this%mort2constant*u
-    this%jPOM = 0*(1-remin2)*this%mort2 ! non-remineralized mort2 => POM
+
+    this%mort2 = this%mort2constant*u ! "quadratic" mortality
+    this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
     do i = 1, this%n
       !

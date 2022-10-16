@@ -8,4 +8,8 @@ gfortran -c -fPIC -O2 POM.f90
 gfortran -c -fPIC -O2 *.f90
 
 gfortran -shared -fPIC -O2 *o -o libNUMmodel_matlab.dll
+<<<<<<< HEAD
 move libNUMmodel_matlab.dll ../lib/.
+=======
+mv libNUMmodel_matlab.dll ../lib/.
+>>>>>>> main

@@ -29,6 +29,7 @@
 	  fracHTL_to_POM = 0.5          ! Another half is fecal pellets that are routed back to the largest POM size class
 /
 !
+<<<<<<< HEAD
 ! Generalists simple
 ! ==================
 &input_generalists_simple
@@ -74,6 +75,8 @@
 
 /
 !
+=======
+>>>>>>> main
 ! Generalists
 ! ===========
 &input_generalists

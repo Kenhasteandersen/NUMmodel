@@ -1,4 +1,4 @@
-function bSuccess = testGlobal
+function bSuccess = testGlobal(value)
 
 p = setupGeneralistsOnly(10, true);
 p = parametersGlobal(p); % Use standard low-res model
@@ -8,7 +8,7 @@ p.tSave = 5;
 sim = simulateGlobal(p);
 
 sumB = sum(sim.B(~isnan(sim.B)));
-if ( sumB > 6.8e5 && sumB < 6.9e5 )
+if ( sumB > 0.99*value && sumB < 1.01*value )
     bSuccess = true;
 else
     bSuccess = false;

@@ -1,5 +1,5 @@
 %
-% Sets up a spectrum of generalists with POM.
+% Sets up a spectrum of generalists with POM..
 %
 % In:
 %  n - number of size classes for generalists
@@ -39,4 +39,3 @@ p.u0(p.ixStart(2):p.ixEnd(2)) = 0; % Initial conditions
 p = getMass(p);
 
 p.u0(1:2) = [150, 0]; % Initial conditions (and deep layer concentrations)
-%p.u0(p.idxB:p.n) = 1;

@@ -1,9 +1,9 @@
-function bSuccess = testChemostat
+function bSuccess = testChemostat(value)
 
-sim = baserunChemostat(1.0);
+sim = baserunChemostat([]);
 
 sumB = sum(sim.B(:));
-if ( sumB > 1.5e7 && sumB < 1.6e7 )
+if ( sumB > 0.99*value && sumB < 1.01*value )
     bSuccess = true;
 else
     bSuccess = false;

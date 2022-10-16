@@ -1,5 +1,7 @@
 del ..\lib\libNUMmodel_matlab.dll
+make clean
 del *.mod
+gfortran -c -fPIC input.f90
 gfortran -c -fPIC globals.f90
 gfortran -c -fPIC spectrum.f90
 gfortran -c -fPIC POM.f90

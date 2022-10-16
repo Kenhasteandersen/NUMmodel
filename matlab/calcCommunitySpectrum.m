@@ -1,4 +1,4 @@
-%?
+%
 % Calculate the community size spectrum from all groups using interplotation.
 %
 

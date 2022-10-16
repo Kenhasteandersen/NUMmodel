@@ -1,4 +1,4 @@
-%
+% θ
 % Make a basic run of the chemostat model
 % In:
 %  mAdult is the adult sizes of copepods (can be left empty to simulate only
@@ -45,4 +45,4 @@ toc
 % Plot
 %
 plotSimulation(sim);
-%checkConservation(sim);
+checkConservation(sim);

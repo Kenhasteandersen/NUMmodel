@@ -3,6 +3,8 @@
 resources/*
 matlab/fort.6
 .vs/NUMmodel/xs/UserPrefs.xml
+.vscode/launch.json
+.vscode/tasks.json
 Fortran/.DS_Store
 Fortran/f_calcderivatives__genmod.f90
 Fortran/f_getfunctions__genmod.f90
@@ -33,5 +35,3 @@ Fortran/debug.out
 Fortran/module spec.f90
 matlab/debug.out
 matlab/Global.mp4
-matlab/Watercolumn_MITgcm_2.8_lat060_lon-10.mat
-matlab/Watercolumn_MITgcm_ECCO_lat000_lon00.mat

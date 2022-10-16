@@ -1,4 +1,4 @@
-%
+%θ
 % Make a set of basic plots of a simulation
 %
 function plotSimulation(sim)
@@ -20,7 +20,6 @@ switch sim.p.nameModel
         
     case 'watercolumn'
         day = sim.p.tEnd - 170;
-
         figure(1)
         clf
         plotWatercolumnTime(sim,'depthMax',200);

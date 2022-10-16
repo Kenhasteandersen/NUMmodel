@@ -1,4 +1,4 @@
-% ?
+% 
 % Plot a water column from either a global or a water column simulation.
 %
 % Warning: the "setup" function needs to be called before this plot is

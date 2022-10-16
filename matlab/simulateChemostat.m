@@ -18,7 +18,7 @@ arguments
     p struct = parametersChemostat(setupGeneralistsOnly);
     L double = 100;
     T double = 10;
-    options.bUnicellularloss logical = true;%false;
+    options.bUnicellularloss logical = true;
 end
 %
 % Get the chemostat parameters if they are not already set:
@@ -67,6 +67,13 @@ for k = 1:size(u,1)
     u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
 end
 %
+% Enforce minimum concentration
+%
+for k = 1:size(u,1)
+    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+end
+
+%
 % Assemble result:
 %
 sim.u=u;
@@ -114,7 +121,8 @@ sim.bUnicellularloss = options.bUnicellularloss;
             % Chemostat dynamics for nutrients and unicellulars:
             %
             dudt(ix) = dudt(ix) + p.d(t_int)*(uDeep(ix)-u(ix)');
-        end        %
+        end
+        %
         % Sinking of POM:
         %
         dudt(ixPOM) = dudt(ixPOM) - p.velocity(ixPOM).*u(ixPOM)';
