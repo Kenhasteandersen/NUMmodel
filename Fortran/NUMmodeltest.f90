@@ -36,7 +36,7 @@ program NUMmodeltest
   u00(idxDOC) = 10.d0
   !u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 1.0d0 !*(i-2)
+     u00(i) = 10.0d0 !*(i-2)
   end do
   dudt = 0.d0
 
@@ -44,6 +44,9 @@ program NUMmodeltest
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
+  
+  
+  
   call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
   !write(*,*) u00
 
