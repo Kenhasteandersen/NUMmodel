@@ -254,7 +254,8 @@ contains
       this%f(i)=f
       this%JF(i) = this%JFreal(i)
     end do
-    this%jN = this%jNreal
+    this%jN = this%jNreal  ! Needed to get the the actual uptakes out with "getRates"
+    this%jDOC = this%jDOCreal
     !
     ! Test for conservation budget. Should be close to zero:
     !
