@@ -1,6 +1,12 @@
 
 function [parval] = search_namelist(filename,namelist,parameter)
+
 fulltext = fileread(filename);
+
+namelist = lower( strcat('input_',namelist) );
+namelist( regexp(namelist,' ')) = '_';
+
+
 TextAsCells = strip(regexp(fulltext, '\n', 'split'))';
 nml_start_idx = find(strcmp(TextAsCells, {['&',namelist]}'));
 

@@ -254,6 +254,7 @@ contains
       this%f(i)=f
       this%JF(i) = this%JFreal(i)
     end do
+    this%jN = this%jNreal
     !
     ! Test for conservation budget. Should be close to zero:
     !
