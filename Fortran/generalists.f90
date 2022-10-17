@@ -37,11 +37,11 @@ module generalists
   !
   ! Costs
   !
-  real(dp), parameter :: bL=0.08 ! cost of light harvesting mugC(mugC)^-1
-  real(dp), parameter :: bN=0.45 ! cost of N uptake mugC(mugN)^-1
-  real(dp), parameter :: bDOC=0.45 ! cost of DOC uptake mugC(mugN)^-1
-  real(dp), parameter :: bF=0.35 ! cost of food uptake mugC(mugSi)^-1
-  real(dp), parameter :: bg=0.2 ! cost of biosynthsesis -- parameter from literature pending
+  real(dp) :: bL ! cost of light harvesting mugC(mugC)^-1
+  real(dp) :: bN ! cost of N uptake mugC(mugN)^-1
+  real(dp) :: bDOC ! cost of DOC uptake mugC(mugN)^-1
+  real(dp) :: bF ! cost of food uptake mugC(mugSi)^-1
+  real(dp) :: bg ! cost of biosynthsesis -- parameter from literature pending
   !
   ! Metabolism
   !
@@ -79,8 +79,13 @@ contains
   subroutine read_namelist()
     integer :: file_unit,io_err
 
-    namelist /input_generalists / epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
-             & alphaF, cF, beta, sigma, cLeakage, delta, alphaJ, cR, &
+    namelist /input_generalists / &
+             & bDOC, &
+             & epsilonL, alphaL, rLstar, bL, &
+             & alphaN,rNstar, bN, &
+             & epsilonF, alphaF, cF, bF, beta, sigma, &
+             & bg, &
+             & cLeakage, delta, alphaJ, cR, &
              & remin, remin2, reminF, mMinGeneralist, mMaxGeneralist
 
     call open_inputfile(file_unit, io_err)

@@ -29,7 +29,6 @@
 	  fracHTL_to_POM = 0.5          ! Another half is fecal pellets that are routed back to the largest POM size class
 /
 !
-<<<<<<< HEAD
 ! Generalists simple
 ! ==================
 &input_generalists_simple
@@ -75,8 +74,6 @@
 
 /
 !
-=======
->>>>>>> main
 ! Generalists
 ! ===========
 &input_generalists
@@ -87,17 +84,20 @@
 ! General
 !
       mMinGeneralist = 3.1623d-9    ! Description [mug C]
-	  mMaxGeneralist = 1.0		    ! Description [mug C]
+	mMaxGeneralist = 1.0		    ! Description [mug C]
 !
 ! Light uptake
 !
       epsilonL = 0.8                ! Light uptake efficiency []
       alphaL = 0.13                 ! Scaling factor for light [unit]
       rLstar = 7.5                  ! Description [unit]
+      bL = 0.08                     ! Cost of light harvesting [mugC/mugC]
 !
 ! Dissolved nutrient uptake:
       alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
-      rNstar = 2.                    ! Description [mum]
+      rNstar = 2.                   ! Description [mum]
+      bN = 0.45                     ! cost of N uptake [mugC/mugN]
+      bDOC = 0.45                   ! cost of DOC uptake [mugC/mugC]
 !
 ! Phagotrophy
 !
@@ -106,13 +106,15 @@
       cF = 30.
       beta = 500.d0
       sigma = 1.3d0
+      bF = 0.35                     ! Cost of food uptake [mugC/mugC]
 !
 ! Metabolism
 !
       cLeakage = 0.003               ! Passive leakage of C and N
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
-      cR = 0.1                
+      cR = 0.1       
+      bg = 0.2                      ! Cost of biosynthsesis
 !
 ! Biogeo:
 !
