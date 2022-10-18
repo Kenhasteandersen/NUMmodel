@@ -250,8 +250,8 @@ module diatoms
          - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
              
           this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-          this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+ &
-                        bN*dN(i)*this%JN(i)+bSi*dSi(i)*this%JSi(i))+(1-f)*bg*Jnet(i)
+          this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*this%JDOCreal(i)+this%JLreal(i)*bL+ &
+                        bN*this%JNreal(i)+bSi*this%JSireal(i))+(1-f)*bg*Jnet(i)
           !
           !write(*,*) jlim(i),dN(i),dSi(i)
 

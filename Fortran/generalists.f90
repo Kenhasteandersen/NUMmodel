@@ -236,8 +236,8 @@ contains
       !
       this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-      this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i)*bL+ &
-                        bN*this%dN(i)*this%JN(i)+this%JF(i)*bF)+(1-f)*bg*Jnet(i)
+      this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*this%JDOCreal(i)+this%JLreal(i)*bL+ &
+                        bN*this%JNreal(i)+this%JFreal(i)*bF)+(1-f)*bg*Jnet(i)
 
       !write(*,*) dN(i),this%JCloss_feeding(i), this%JNlossLiebig(i)                 
       ! 
