@@ -96,7 +96,7 @@ sim.bUnicellularloss = options.bUnicellularloss;
 %sim.Bnano = Bpnm(2);
 %sim.Bmicro = Bpnm(3);
 
-[sim.Nbalance, sim.Cbalance,sim.Sibalance] = getBalance(sim.u, mean(sim.L), sim.T); % in units per day
+[sim.Nbalance, sim.Cbalance,sim.Sibalance] = getBalance(sim.u(end,:), mean(sim.L), sim.T); % in units per day
 
     %
     % Function to assemble derivative for chemostat:
