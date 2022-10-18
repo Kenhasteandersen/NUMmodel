@@ -13,17 +13,17 @@ module diatoms
      ! Stoichiometry:
      !
      !real(dp), parameter:: rhoCN = 5.68
-     real(dp), parameter:: rhoCSi = 3.4 
+     real(dp) :: rhoCSi
      !cell properties
      !real(dp), parameter:: cm = 6d-7 ! rhoCmem 6*d.-7 ! Carbon content in cell membrane mugC(mum^-3)
      !real(dp), parameter:: cb = 1.25d-7 ! rhoCcyt 1.25*d.-7 ! Carbon content in cell cytoplasm mugC(mum^-3)  
-     real(dp), parameter:: v=0.6 ! Vacuole fraction
+     real(dp) :: v=0.6 ! Vacuole fraction
      !
      ! Light uptake:
      !
-     real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
-     real(dp), parameter:: alphaL = 0.206
-     real(dp), parameter:: rLstar = 8.25
+     real(dp) :: epsilonL ! Light uptake efficiency
+     real(dp) :: alphaL
+     real(dp) :: rLstar
      !real(dp), parameter :: cL=0.18 ! photosynthetic affinity constant
      !
      ! Andy's eqs
@@ -35,30 +35,30 @@ module diatoms
      !
      ! Costs
      !
-     real(dp), parameter :: bL=0.08 ! cost of light harvesting mugC(mugC)^-1
-     real(dp), parameter :: bN=0.45 ! cost of N uptake mugC(mugN)^-1
-     real(dp), parameter :: bDOC=0.45 ! cost of DOC uptake mugC(mugN)^-1
-     real(dp), parameter :: bSi=0.45 ! cost of Si uptake mugC(mugSi)^-1
-     real(dp), parameter :: bg=0.3 ! cost of biosynthsesis -- parameter from literature pending
+     real(dp) :: bL ! cost of light harvesting mugC(mugC)^-1
+     real(dp) :: bN ! cost of N uptake mugC(mugN)^-1
+     real(dp) :: bDOC ! cost of DOC uptake mugC(mugN)^-1
+     real(dp) :: bSi ! cost of Si uptake mugC(mugSi)^-1
+     real(dp) :: bg ! cost of biosynthsesis -- parameter from literature pending
      !
      ! Dissolved nutrient uptake:
      !
-     real(dp), parameter:: alphaN = 0.682 ! L/d/mugC/mum^2
-     real(dp), parameter:: rNstar = 2 ! mum
+     real(dp) :: alphaN ! L/d/mugC/mum^2
+     real(dp) :: rNstar ! mum
      !
      ! Metabolism
      !
-     real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
-     real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
-     real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
-     real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
-     real(dp), parameter:: cR = 0.1
+     real(dp) :: cLeakage ! passive leakage of C and N
+     !real(dp) :: c ! Parameter for cell wall fraction of mass.
+     real(dp) :: delta ! Thickness of cell wall in mum
+     real(dp) :: alphaJ = 1.5 ! Constant for jmax.  per day
+     real(dp) :: cR
      !
      ! Bio-geo:
      !
-     real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-     real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
-     real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
+     real(dp) :: remin ! fraction of mortality losses reminerilized to N and DOC
+     real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
+     !real(dp) :: reminHTL ! fraction of HTL mortality remineralized
      type, extends(spectrumUnicellular) :: spectrumDiatoms
       ! real(dp), dimension(:), allocatable:: JSi
 
@@ -77,6 +77,23 @@ module diatoms
 
    contains
        
+     subroutine read_namelist()
+      integer :: file_unit,io_err
+
+      namelist /input_diatoms / &
+             & RhoCSi, v, &
+             & bDOC, &
+             & epsilonL, alphaL, rLstar, bL, &
+             & alphaN,rNstar, bN, &
+             & bSi, bg, &
+             & cLeakage, delta, alphaJ, cR, &
+             & remin, remin2
+
+        call open_inputfile(file_unit, io_err)
+        read(file_unit, nml=input_diatoms, iostat=io_err)
+        call close_inputfile(file_unit, io_err)
+     end subroutine read_namelist
+
      subroutine initDiatoms(this, n, mMax)
        class(spectrumDiatoms):: this
        real(dp), intent(in):: mMax
@@ -86,6 +103,7 @@ module diatoms
        real(dp), parameter:: rho = 0.57*1d-6
        !real(dp) :: fl
 
+       call read_namelist()
        call this%initUnicellular(n, mMin, mMax)
        !allocate(this%JSi(this%n))
        !
@@ -118,8 +136,6 @@ module diatoms
        real(dp):: f, JmaxT
        real(dp):: dL(this%n), dN(this%n), dDOC(this%n), dSi(this%n), Jnetp(this%n), Jnet(this%n),Jlim(this%n)
        integer:: i
-
-      
    
        do i = 1, this%n
           !
@@ -250,6 +266,9 @@ module diatoms
          this%f(i)=f
          !write(*,*) this%JCloss_photouptake(i), this%JLreal(i),dL(i)
         end do
+        this%jN = this%jNreal  ! Needed to get the the actual uptakes out with "getRates"
+        this%jDOC = this%jDOCreal
+        this%JSi = this%jSireal
      end subroutine calcRatesDiatoms
    
      subroutine calcDerivativesDiatoms(this, u, dNdt, dDOCdt, dSidt, dudt)

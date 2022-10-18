@@ -123,6 +123,47 @@
       reminF = 0.1d0
 
 /
+!
+! Diatoms
+! =======
+&input_diatoms
+!
+! General
+!
+      rhoCSi = 3.4                  ! Carbon:Si mass ratio
+      v  = 0.6                      ! Vacuole volume fraction
+!
+! Light uptake
+!
+      epsilonL = 0.8                ! Light uptake efficiency []
+      alphaL = 0.206                ! Scaling factor for light [unit]
+      rLstar = 8.25                 ! Description [unit]
+      bL = 0.08                     ! Cost of light harvesting [mugC/mugC]
+!
+! Dissolved nutrient uptake:
+      alphaN = 0.682                ! Description [L/d/mugC/mum^2] 
+      rNstar = 2.                   ! Description [mum]
+      bN = 0.45                     ! cost of N uptake [mugC/mugN]
+      bDOC = 0.45                   ! cost of DOC uptake [mugC/mugC]
+!
+! Silicate uptake
+!
+      bSi = 0.45                    ! Cost of food uptake [gC/gSi]
+!
+! Metabolism
+!
+      cLeakage = 0.003              ! Passive leakage of C and N
+ !     c = 0.0015                    ! Parameter for cell wall fraction of mass.
+      delta = 0.05                  ! Thickness of cell wall [mum]
+      alphaJ = 1.5                  ! Constant for jmax. [day-1]
+      cR = 0.1       
+      bg = 0.3                      ! Cost of biosynthsesis
+!
+! Biogeo:
+!
+      remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
+      remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
+/
 
 !
 ! Copepods

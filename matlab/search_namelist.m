@@ -1,4 +1,6 @@
-
+%
+% Search for a parameter value in the namelist
+%
 function [parval] = search_namelist(filename,namelist,parameter)
 
 fulltext = fileread(filename);

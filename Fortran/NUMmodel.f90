@@ -901,33 +901,46 @@ contains
    real(dp), intent(out):: Nbalance, Cbalance, Sibalance
    integer:: iGroup
    
-   iGroup = 1 ! Do it only for the first group:
+   Nbalance = 0.
+   Cbalance = 0.
+   SiBalance = 0.
+
+   do iGroup = 1, nGroups
+   !iGroup = 1 ! Do it only for the first group:
    select type ( spec => group(iGroup)%spec )
       type is (spectrumGeneralistsSimple)
-         Nbalance = spec%getNbalanceGeneralistsSimple(u(idxN), dudt(idxN), &
+         Nbalance = Nbalance + &
+                     spec%getNbalanceGeneralistsSimple(u(idxN), dudt(idxN), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) ))
-         Cbalance = spec%getCbalanceGeneralistsSimple(u(idxDOC), dudt(idxDOC), &
+         Cbalance = Cbalance + &
+                     spec%getCbalanceGeneralistsSimple(u(idxDOC), dudt(idxDOC), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) )) 
       type is (spectrumGeneralists)
-         Nbalance = spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
+         Nbalance = Nbalance + &
+                     spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) ))
-         Cbalance = spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
+         Cbalance = Cbalance + &
+                     spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) )) 
       type is (spectrumDiatoms)
-            Nbalance = spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
+            Nbalance = Nbalance + &
+                    spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) ))
-            Cbalance = spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
+            Cbalance = Cbalance + &
+                    spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-            Sibalance = spec%getSibalanceDiatoms(u(idxSi), dudt(idxSi), &
+            Sibalance = Sibalance + &
+                    spec%getSibalanceDiatoms(u(idxSi), dudt(idxSi), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-   end select
+     end select
+   end do
   end subroutine getBalance
    
 !   ! ---------------------------------------------------
