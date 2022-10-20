@@ -15,7 +15,7 @@ B(B<=0) = 1e-100; % just to avoid imaginary numbers during log transformation
 p = sim.p;
 
 nPoints = 1000;
-mc = logspace(log10(sim.p.m(3)), log10(sim.p.m(end)), nPoints);
+mc = logspace(log10(sim.p.m(sim.p.idxB)), log10(sim.p.m(end)), nPoints);
 Bc = zeros(1, nPoints);
 
 for iGroup = 1:p.nGroups
