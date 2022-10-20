@@ -237,7 +237,7 @@ module diatoms
           this%JDOCreal(i) = (1-f)*dDOC(i) * this%JDOC(i)
           this%JLreal(i) = (1-f)*dL(i) * this%JL(i)
           this%JSireal(i) = (1-f)*dSi(i) * this%JSi(i)
-          this%Jtot(i)= f * JmaxT - (1-f)*( this%JlossPassive(i) + fTemp2*this%Jresp(i))
+          this%Jtot(i)= f * JmaxT-(1-f)*this%JlossPassive(i)
 
 
          this%JCtot(i) = & 
@@ -250,12 +250,8 @@ module diatoms
          - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
              
           this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-          this%Jresptot(i)= fTemp2*this%Jresp(i) + &
-               (1-f)*(bDOC*dDOC(i)*this%JDOC(i) + &
-                      bL*dL(i)*this%JL(i) + &
-                      bN*dN(i)*this%JN(i) + &
-                      bSi*dSi(i)*this%JSi(i) + 
-                      bg*Jnet(i))
+          this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+ &
+                        bN*dN(i)*this%JN(i)+bSi*dSi(i)*this%JSi(i))+(1-f)*bg*Jnet(i)
           !
           !write(*,*) jlim(i),dN(i),dSi(i)
 
