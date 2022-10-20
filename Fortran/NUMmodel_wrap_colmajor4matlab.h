@@ -99,6 +99,7 @@ void f_getrates(
 		double *jMax,
 		double *jFmaxx,
 		double *jR,
+		double *jRespTot,
 		double *jLossPassive, 
 		double *jNloss,
 		double *jLreal, 

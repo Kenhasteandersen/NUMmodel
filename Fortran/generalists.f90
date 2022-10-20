@@ -223,7 +223,7 @@ contains
        this%JDOCreal(i)=this%dDOC(i)*(1-f)*this%JDOC(i)
        this%JLreal(i)=this%dL(i)*(1-f)*this%JL(i)
        this%JFreal(i)=(1-f)*this%JF(i)
-       this%Jtot(i)= f * JmaxT-(1-f)*( this%JlossPassive(i) + fTemp2*this%Jresp(i))
+       this%Jtot(i)= f * JmaxT-(1-f)*( this%JlossPassive(i))
       !        
       ! Actual uptakes:
       !
@@ -237,7 +237,7 @@ contains
       !
       this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-      this%Jresptot(i)= fTemp2*this%Jresp(i) + &
+      this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + &
             (1-f)*(bDOC*this%dDOC(i)*this%JDOC(i) + &
                    bL*this%dL(i)*this%JL(i) + &
                    bN*this%dN(i)*this%JN(i) + &

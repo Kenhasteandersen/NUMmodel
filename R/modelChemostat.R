@@ -351,6 +351,7 @@ getFrates = function(p) {
                    jMax = vector(length=nGrid, mode="numeric"),
                    jFmax = vector(length=nGrid, mode="numeric"),
                    jR = vector(length=nGrid, mode="numeric"),
+                   jRespTot = vector(length=nGrid, mode="numeric"),
                    jLossPassive = vector(length=nGrid, mode="numeric"),
                    jNloss = vector(length=nGrid, mode="numeric"),
                    jLreal = vector(length=nGrid, mode="numeric"),
