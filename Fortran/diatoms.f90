@@ -156,9 +156,17 @@ module diatoms
           !
           ! Calculation of down-regulation factors for
           ! N-uptake
-          dN(i) = min(1., 1./this%JN(i)*Jnetp(i)/(1+bg +bN+bSi))
+          if (this%JN(i).gt.0) then
+            dN(i) = min(1., 1./this%JN(i)*Jnetp(i)/(1+bg +bN+bSi))
+          else 
+            dN(i)=1.
+          end if  
           ! Si-uptake
-          dSi(i) = min(1., 1./this%JSi(i)*Jnetp(i)/(1+bg +bN+bSi))
+          if (this%JSi(i).gt.0.) then
+            dSi(i) = min(1., 1./this%JSi(i)*Jnetp(i)/(1+bg +bN+bSi))
+          else 
+            dSi(i)=1.
+          end if 
           dDOC(i)=1.
           !------------ up to this point all good -----------------
           !
@@ -167,22 +175,30 @@ module diatoms
            if (dN(i)==1 .and. dSi(i)==1) then
              if ( this%JN(i)<this%JSi(i) ) then
                  jlim(i)=this%JN(i)
+                if (this%JSi(i).gt.0.) then
                  dSi(i)= jlim(i)/this%JSi(i)
+                end if
                 ! write(*,*) i, 'if (dN(i)==1 .and. dSi(i)==1)'
              else if ( this%JSi(i)<=this%JN(i) ) then
                  jlim(i)= this%JSi(i)
+                if (this%JN(i).gt.0.) then
                  dN(i)= jlim(i)/this%JN(i) 
+                end if 
                !  write(*,*) i,'( this%JSi(i)<this%JN(i) )'
              end if
            end if   
            
            if  ( dSi(i)==1 .and. dN(i)<1 ) then       ! If Si is the limiting resource
               jlim(i)=this%JSi(i)
-              dN(i)= jlim(i)/this%jN(i)
+              if (this%JN(i).gt.0.) then
+               dN(i)= jlim(i)/this%jN(i)
+              end if
               !write(*,*) i,'( dSi(i)==1 .and. dN(i)<1 ) '
            else if ( dN(i)==1 .and. dSi(i)<1 ) then   ! If N is the limiting resource
               jlim(i)=this%JN(i)
-              dSi(i)= jlim(i)/this%JSi(i)
+              if (this%JSi(i).gt.0.) then
+               dSi(i)= jlim(i)/this%JSi(i)
+              end if
            end if
            !
            if  ( dSi(i)<1 .and. dN(i)<1 ) then  ! this check might be redundant, but just to make sure
@@ -213,10 +229,13 @@ module diatoms
              !write(*,*) i, Jnetp(i)/this%m(i),dL(i)
              if ( dSi(i)<1 .and. dN(i)<1 ) then
               jlim(i)=Jnet(i)
+              if (this%JN(i).gt.0.) then
               dN(i)=jlim(i)/this%JN(i)
+              end if
+              if (this%JSi(i).gt.0.) then
               dSi(i)=jlim(i)/this%JSi(i)
-              write(*,*) i,Jlim(i), dN(i),dSi(i),dL(i), Jnetp(i)/this%m(i)
-              !write(*,*) i,':', Jnet(i)/this%m(i),Jlim(i)/this%m(i)
+              end if
+
              end if
           !
           ! Down-regulated fluxes: the uptake flux JX is multiplied by the reduction factor dX , X= N, DOC, Si or L

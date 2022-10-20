@@ -18,10 +18,10 @@ end
 % p = setupGeneric(mAdult);
 % p = setupGeneralistsSimpleOnly;
 % p = setupGeneralistsOnly;
-p = setupGeneralistsDiatoms;
+% p = setupGeneralistsDiatoms;
 % p = setupGeneralistsDiatoms_simple;
 % p = setupDiatoms_simpleOnly;
-%  p = setupDiatomsOnly;
+ p = setupDiatomsOnly;
 p = parametersChemostat(p);
 p.tEnd = 2000;
 p.d = 0.1;
