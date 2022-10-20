@@ -32,8 +32,8 @@ switch sim.p.nameModel
         z = sim.z;
         s.B = squeeze(sim.B(iDepth,:,:))';
         if isfield(sim,'Si')
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iTime,:), ...
-                squeeze(s.B(:,iTime))'];
+            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iDepth, iTime), ...
+                squeeze(s.B(iTime,:))];
         else
             u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), squeeze(s.B(iTime,:))];
         end
