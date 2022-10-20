@@ -200,6 +200,7 @@ contains
         Jnet =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
         + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*this%dN(i)*this%JN(i)) ! was with max(O.,..) 
         f = (Jnet(i) )/(Jnet(i) + JmaxT)
+        this%JNlossLiebig(i) = 0.
         end if
        !Jnet =  1./(1+bg)*(dDOC(i)*this%JDOC(i)*(1.-bDOC)+dL(i)*this%JL(i)*(1-bL) &
        ! + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*dN(i)*this%JN(i)) ! was with max(O.,..) 
@@ -252,10 +253,11 @@ contains
       !this%JF(i) = this%JFreal(i)
 
       this%f(i)=f
-      this%JF(i) = this%JFreal(i)
+      
     end do
     this%jN = this%jNreal  ! Needed to get the the actual uptakes out with "getRates"
     this%jDOC = this%jDOCreal
+    this%JF = this%JFreal
     !
     ! Test for conservation budget. Should be close to zero:
     !
