@@ -12,7 +12,7 @@ program NUMmodeltest
   !call setHTL(0.0001d0, 1.d0, .true.)
 
   !call setupGeneralistsCopepod()
-  call setupGeneralistsOnly(10)
+  !call setupGeneralistsOnly(10)
   !call setupGeneralistsSimpleOnly(10)
 
   !call setupGeneralistsOnly_csp()
@@ -26,7 +26,7 @@ program NUMmodeltest
   !call setupGeneralistsOnly(10)
   !call setupGeneralistssimpleOnly(10)
   !call setupDiatoms_simpleOnly(10)
-  !call setupDiatomsOnly(10)
+  call setupDiatomsOnly(10)
   !call setupDiatoms_simpleOnly(10)
 
   allocate(u0(nGrid))
@@ -34,9 +34,9 @@ program NUMmodeltest
   allocate(dudt(nGrid))
   u00(idxN) = 50.d0
   u00(idxDOC) = 10.d0
-  !u00(idxSi) = 10.d0
+  u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 10 !+ 0.1*(i-2)
+     u00(i) = 10 + 0.1*(i-2)
   end do
   dudt = 0.d0
 
@@ -78,7 +78,7 @@ program NUMmodeltest
     call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
     write(*,*) 'Nbalance:', Nbalance
     write(*,*) 'Cbalance:', Cbalance
-    write(*,*) 'Sibalance:', Sibalance
+    !write(*,*) 'Sibalance:', Sibalance
 
   end program NUMmodeltest
  

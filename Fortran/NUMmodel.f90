@@ -947,15 +947,15 @@ contains
 !   ! Returns the rates calculated from last call to calcDerivatives
 !   ! ---------------------------------------------------
   subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-    jTot, jMax, jFmax, jR, jRespTot, jLossPassive, &
-    jNloss, jLreal, jPOM, &
+    jTot, jMax, jFmax, jR, jLossPassive, &
+    jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
     use globals
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
     real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
-    real(dp), intent(out):: jR(nGrid-nNutrients), jRespTot(nGrid-nNutrients)
+    real(dp), intent(out):: jR(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
     real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
@@ -975,7 +975,6 @@ contains
       mort2( i1:i2 ) = group(iGroup)%spec%mort2
       jNloss( i1:i2 ) = group(iGroup)%spec%JNloss / group(iGroup)%spec%m
       jR( i1:i2 ) = fTemp2 * group(iGroup)%spec%Jresp / group(iGroup)%spec%m
-      jRespTot( i1:i2 ) = jR( i1:i2 )
       jPOM( i1:i2 ) = group(iGroup)%spec%jPOM
 
       select type (spectrum => group(iGroup)%spec)
@@ -986,7 +985,6 @@ contains
         jMax( i1:i2 ) = fTemp2 * spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
-        jRespTot( i1:i2 ) = spectrum%jRespTot / spectrum%m
       end select
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumDiatoms_simple)
