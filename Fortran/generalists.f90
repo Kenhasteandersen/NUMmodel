@@ -223,7 +223,7 @@ contains
        this%JDOCreal(i)=this%dDOC(i)*(1-f)*this%JDOC(i)
        this%JLreal(i)=this%dL(i)*(1-f)*this%JL(i)
        this%JFreal(i)=(1-f)*this%JF(i)
-       this%Jtot(i)= f * JmaxT-(1-f)*this%JlossPassive(i)
+       this%Jtot(i)= f * JmaxT-(1-f)*( this%JlossPassive(i) + fTemp2*this%Jresp(i))
       !        
       ! Actual uptakes:
       !
@@ -237,8 +237,12 @@ contains
       !
       this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-      this%Jresptot(i)= (1-f)*(fTemp2*this%Jresp(i)+bDOC*this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i)*bL+ &
-                        bN*this%dN(i)*this%JN(i)+this%JF(i)*bF)+(1-f)*bg*Jnet(i)
+      this%Jresptot(i)= fTemp2*this%Jresp(i) + &
+            (1-f)*(bDOC*this%dDOC(i)*this%JDOC(i) + &
+                   bL*this%dL(i)*this%JL(i) + &
+                   bN*this%dN(i)*this%JN(i) + &
+                   bF*this%JF(i) + &
+                   bg*Jnet(i))
 
       !write(*,*) dN(i),this%JCloss_feeding(i), this%JNlossLiebig(i)                 
       ! 
@@ -253,10 +257,11 @@ contains
       !this%JF(i) = this%JFreal(i)
 
       this%f(i)=f
-      this%JF(i) = this%JFreal(i)
+      !this%JF(i) = this%JFreal(i)
     end do
     this%jN = this%jNreal  ! Needed to get the the actual uptakes out with "getRates"
     this%jDOC = this%jDOCreal
+    this%JF = this%JFreal
     !
     ! Test for conservation budget. Should be close to zero:
     !
