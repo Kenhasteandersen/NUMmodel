@@ -1,4 +1,4 @@
-% 
+% θ
 % Plot a water column from either a global or a water column simulation.
 %
 % Warning: the "setup" function needs to be called before this plot is
@@ -168,7 +168,10 @@ for iGroup = 1:sim.p.nGroups
         cbar.Label.String  = 'Sheldon biomass (\mug C l^{-1})';
 %         set(cbar,'limits',[0.01, 100], ...
 %         'ticks',[0.01,0.1,1,10,100],'ticklabels',{'0.01','0.1','1','10','100'})
-        set(h, 'Colormap', jet, 'CLim', [Zmin Zmax])
+if Zmin==Zmax
+    Zmax=Zmin+0.0001;
+end
+    set(h, 'Colormap', jet, 'CLim', [Zmin Zmax])
     end
     %
     % Trophic strategy or feeding level:
