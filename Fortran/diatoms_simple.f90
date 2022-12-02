@@ -55,7 +55,7 @@ module diatoms_simple
     !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
     
     type, extends(spectrumUnicellular) :: spectrumDiatoms_simple
-!      real(dp), dimension(:), allocatable:: JSi
+      real(dp), dimension(:), allocatable:: JSi
 
       contains
       procedure, pass :: initDiatoms_simple
@@ -76,7 +76,7 @@ module diatoms_simple
       real(dp), parameter:: rho = 0.4*1d6*1d-12
   
       call this%initUnicellular(n, mMin, mMax)
-      !allocate(this%JSi(this%n))
+      allocate(this%JSi(this%n))
       !
       ! Radius:
       !

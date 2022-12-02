@@ -153,7 +153,7 @@ k=1;%                           for k = 1:nZ
                                 Bmicro = Bmicro + Bmicro1*dz(i,j,k);
                                 % Chl:
                                 rates = getRates(sim.p, u, sim.L(i,j,k,iTime), sim.T(i,j,k,iTime));
-                                tmp =  calcChlSize( squeeze(sim.B(i,j,k,w,iTime)), rates, sim.L(i,j,k,iTime));
+                                tmp =  calcChl( squeeze(sim.B(i,j,k,w,iTime)), rates, sim.L(i,j,k,iTime));
 %                                 sim.BB(i,j,k,:,iTime) =  calcChl( sim.B(i,j,k,:,iTime), rates, sim.L(i,j,k,iTime)); 
 %                                 aRatio(i,j,k,:,iTime) = rates.jLreal./rates.jL;
                                 jL(iTime,i,j,k,:) = rates.jL;

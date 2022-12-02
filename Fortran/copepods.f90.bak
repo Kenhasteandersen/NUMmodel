@@ -6,29 +6,44 @@
 module copepods
   use globals
   use spectrum
+  use input
   implicit none
 
   private
-  
+
+  !real(dp) :: rhoCN
+  real(dp) :: epsilonF  ! Assimilation efficiency
+  real(dp) :: epsilonR  ! Reproductive efficiency
+  real(dp) :: beta
+  real(dp) :: sigma 
+  real(dp) :: alphaF  ! Clearance rate coefficient
+  real(dp) :: q  ! Exponent of clerance rate
+  real(dp) :: h  ! Factor for maximum ingestion rate
+  real(dp) :: hExponent  ! Exponent for maximum ingestions rate
+  real(dp) :: kBasal ! 0.006 ! Factor for basal metabolism.This value represents basal
+  real(dp) :: kSDA  ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
+  real(dp) :: p  ! Exponent for respiration
+  real(dp) :: AdultOffspring 
+  real(dp) :: remin! fraction of mortality losses reminerilized to N and DOC
   !real(dp), parameter:: rhoCN = 5.68
-  real(dp), parameter:: epsilonF = 0.67 ! Assimilation efficiency
-  real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency
-  real(dp), parameter:: beta = 10000.d0
-  real(dp), parameter:: sigma = 1.5d0
-  real(dp), parameter:: alphaF = 0.011 ! Clearance rate coefficient
-  real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
-  real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
-  real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
-  real(dp), parameter:: kBasal = 0.006! 0.006 ! Factor for basal metabolism. This value represents basal
+  !real(dp), parameter:: epsilonF = 0.67 ! Assimilation efficiency
+  !real(dp), parameter:: epsilonR = 0.25 ! Reproductive efficiency
+  !real(dp), parameter:: beta = 10000.d0
+  !real(dp), parameter:: sigma = 1.5d0
+  !real(dp), parameter:: alphaF = 0.011 ! Clearance rate coefficient
+  !real(dp), parameter:: q = 0.75 ! Exponent of clerance rate
+  !real(dp), parameter:: h = 1.37 ! Factor for maximum ingestion rate
+  !real(dp), parameter:: hExponent = 0.75 ! Exponent for maximum ingestions rate
+  !real(dp), parameter:: kBasal = 0.006! 0.006 ! Factor for basal metabolism. This value represents basal
                                        ! metabolism at starvation. Following Kiørboe (1985)
                                        ! the starvation metabolism is approx 0.2*0.18=0.036 times 
                                        ! the maximum metabolism (kSDA). Increased to 0.01 to avoid too long transients.
-  real(dp), parameter:: kSDA = 0.16 ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
+  !real(dp), parameter:: kSDA = 0.16 ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
                                     ! data in Kiørboe and Hirst (2014) are for fully fed copepods.
-  real(dp), parameter:: p = 0.75 ! Exponent for respiration
-  real(dp), parameter:: AdultOffspring = 100.
-  real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-  real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
+  !real(dp), parameter:: p = 0.75 ! Exponent for respiration
+  !real(dp), parameter:: AdultOffspring = 100.
+  !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
+  !real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
 
   type, extends(spectrumMulticellular) :: spectrumCopepod
     real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:), JrespFactor(:)
@@ -41,11 +56,25 @@ module copepods
   public spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod
 contains
 
+  subroutine read_namelist()
+    integer :: file_unit,io_err
+
+    namelist /input_copepods / epsilonF, epsilonR, beta, sigma, alphaF,q, &
+             & h, hExponent, kBasal, kSDA, p, AdultOffspring, remin
+
+    call open_inputfile(file_unit, io_err)
+    read(file_unit, nml=input_copepods, iostat=io_err)
+    call close_inputfile(file_unit, io_err)
+
+  end subroutine read_namelist
+
   subroutine initCopepod(this, n, mAdult)
     class(spectrumCopepod), intent(inout):: this
     integer, intent(in):: n
     real(dp), intent(in):: mAdult
     real(dp):: lnDelta, mMin
+
+    call read_namelist()
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
@@ -64,8 +93,7 @@ contains
     this%epsilonF = epsilonF
     this%AF = alphaF*this%m**q
     this%JFmax = h*this%m**hExponent
-    !this%Jresp = Kappa*this%m**p
-    this%JrespFactor = epsilonF*h*this%m**hExponent
+    this%JrespFactor = epsilonF*this%JFmax
     this%mort2constant = 0.d0 ! No quadratic mortality
     this%mort2 = 0.d0
 
@@ -85,19 +113,19 @@ contains
        !
 
        ! Basal and SDA respiration:
-       this%Jresp(i) = this%JrespFactor(i) * (fTemp2*kBasal + kSDA*this%JF(i)/(fTemp2*this%JFmax(i)))
+       this%Jresp(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i)
        ! Available energy:
-       nu = epsilonF*this%JF(i) - this%Jresp(i)
-       ! Production of POM:
-       this%jPOM = (1-epsilonF)*this%JF(i)/this%m(i)
+       nu = this%JF(i) - this%Jresp(i)
        ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
        ! Starvation:
        this%mortStarve(i) = -min(0.d0, nu)/this%m(i)
        !
        ! Mortality:
-       !this%mortHTL(i) = this%mortHTL(i)*u(i)
-       this%mort(i) = this%mortpred(i) + this%mortHTL(i) + this%mortStarve(i)
+       !
+       this%mortHTL(i) = this%mortHTL(i) * fTemp2     
+
+       this%mort(i) = this%mortpred(i) + this%mortStarve(i) + this%mortHTL(i)
        ! Flux:
        if ( this%g(i) .ne. 0.) then
          this%gamma(i) = (this%g(i)-this%mort(i)) / (1 - this%z(i)**(1-this%mort(i)/this%g(i)))
@@ -107,6 +135,13 @@ contains
        this%Jtot(i) = nu
     end do
     b = epsilonR * this%g(this%n) ! Birth rate
+    ! Production of POM:
+    this%jPOM = &
+          (1-epsilonF)*this%JF/(this%m * epsilonF) & ! Unassimilated food
+        + this%mortStarve*u                          ! Copepods dead from starvation
+    ! From unassimilated feeding (fecal pellets)
+    this%jPOM(this%n) = this%jPOM(this%n) + (1.d0-epsilonR)*this%g(this%n) ! Lost reproductive flux
+  
     !
     ! Assemble derivatives:
     !
@@ -124,9 +159,19 @@ contains
          this%gamma(this%n-1)*u(this%n-1) & ! growth into adult group
          - this%mort(this%n)*u(this%n); ! adult mortality
 
-    dNdt = dNdt + sum( this%Jresp*u/(this%m*rhoCN) )  &! All respiration of carbon results in a corresponding
+    dNdt = dNdt + sum( this%Jresp*u/this%m )/rhoCN  ! All respiration of carbon results in a corresponding
                                     ! surplus of nutrients. This surplus (pee) is routed to nutrients
-                + (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  ! Should perhaps also go to DOC
+                !+ (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  ! Should perhaps also go to DOC
+    !
+    ! Check balance: (should be zero)
+    !
+    !write(*,*) 'Copepod N balance:', &
+    !      + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
+    !      - sum(dudt)/rhoCN & ! Accumulation of biomass
+    !      - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
+    !      - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
+    !      - sum(this%mort*u)/rhoCN  ! Mortality losses
+
   end subroutine calcDerivativesCopepod
 
   subroutine printRatesCopepod(this)
@@ -141,5 +186,17 @@ contains
      write(*,99) "mortStarve:", this%mortStarve
      write(*,99) "g:", this%g
   end subroutine printRatesCopepod
+
+  !function getNbalanceCopepods(this, N, dNdt, u, dudt) result(Nbalance)
+  !  real(dp):: Nbalance
+  !  class(spectrumCopepods), intent(in):: this
+  !  real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
+
+  !  Nbalance = (dNdt + sum( dudt & ! Change in standing stock of N
+  !    + (1-fracHTL_to_N)*this%mortHTL*u & ! HTL not remineralized
+  !    + (1-remin2)*this%mort2*u & ! Viral mortality not remineralized
+      !+ (1-reminF)*this%JCloss_feeding/this%m * u & ! Feeding losses not remineralized
+  !       )/rhoCN)/N
+  !end function getNbalanceCopepods
 
 end module copepods

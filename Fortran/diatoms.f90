@@ -60,7 +60,7 @@ module diatoms
      real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
      !real(dp) :: reminHTL ! fraction of HTL mortality remineralized
      type, extends(spectrumUnicellular) :: spectrumDiatoms
-      ! real(dp), dimension(:), allocatable:: JSi
+     real(dp), dimension(:), allocatable:: JSi,JSireal
 
      contains
        procedure, pass :: initDiatoms
@@ -105,7 +105,9 @@ module diatoms
 
        call read_namelist()
        call this%initUnicellular(n, mMin, mMax)
-       !allocate(this%JSi(this%n))
+       allocate(this%JSi(this%n))
+       allocate(this%JSireal(this%n))
+
        !
        ! Radius:
        !
@@ -129,7 +131,7 @@ module diatoms
        this%palatability = 0.5d0 ! Lower risk of predation
      end subroutine initDiatoms
   
-     subroutine calcRatesDiatoms(this, L, N, Si,DOC, gammaN, gammaSi, gammaDOC)
+     subroutine calcRatesDiatoms(this, L, N,DOC, Si, gammaN, gammaDOC, gammaSi)
        class(spectrumDiatoms), intent(inout):: this
        real(dp), intent(in):: gammaN, gammaSi, gammaDOC
        real(dp), intent(in):: L, N, Si, DOC
@@ -269,7 +271,7 @@ module diatoms
          - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
              
           this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-          this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + &
+          this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + & !
                (1-f)*(bDOC*dDOC(i)*this%JDOC(i) + &
                       bL*dL(i)*this%JL(i) + &
                       bN*dN(i)*this%JN(i) + &
@@ -365,6 +367,8 @@ module diatoms
       99 format (a10, 20f10.6)
   
       write(*,99) "jSi:", this%JSi / this%m
+      write(*,99) "jSireal:", this%JSireal / this%m
+
 
     end subroutine printRatesDiatoms
 

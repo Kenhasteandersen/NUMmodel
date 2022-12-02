@@ -25,7 +25,7 @@ module globals
   real(dp) :: fracHTL_to_N ! Half becomes urine that is routed back to N
   real(dp) :: fracHTL_to_POM ! Another half is fecal pellets that are routed back to the largest POM size class
   real(dp) :: rhoCN 
-  
+
   contains
   
   ! -----------------------------------------------
@@ -42,6 +42,7 @@ module globals
         call close_inputfile(file_unit, io_err)
 
   end subroutine read_namelist_general
+
   ! -----------------------------------------------
   ! Temperature Q10 function
   ! -----------------------------------------------

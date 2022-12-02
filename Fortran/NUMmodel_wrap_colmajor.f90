@@ -8,7 +8,7 @@ module NUMmodel_wrap
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
        setupGeneralistsSimpleCopepod, &
-       setupGeneric, setupNUMmodel, setupGeneric_csp, &
+       setupGeneric, setupNUMmodel, setupGenDiatCope,setupGeneric_csp, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
        getBalance
@@ -75,6 +75,13 @@ contains
 
     call setupNUMmodel(n,nCopepod,nPOM,mAdult)
   end subroutine f_setupNUMmodel
+
+  subroutine f_setupGenDiatCope(n,nCopepod,nCopepods, mAdult) bind(c)
+    integer(c_int), intent(in), value:: n,nCopepod,nCopepods
+    real(c_double), intent(in):: mAdult(nCopepods)
+
+    call setupGenDiatCope(n,nCopepods,mAdult)
+  end subroutine f_setupGenDiatCope
 
   subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
     integer(c_int), intent(in), value:: nCopepods
@@ -147,7 +154,7 @@ contains
     call simulateEuler(u, L, T, tEnd, dt)
   end subroutine f_simulateEuler
 
-    subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
+   subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
     real(c_double), intent(in):: u(nGrid)
     real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
 

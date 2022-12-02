@@ -28,7 +28,7 @@ p.idxDOC = 2;
 p.idxB = 3; % We have two nutrient groups so biomass groups starts at index 3.
 
 p.n = 2;
-% Generalists:
+% Generalists :
 p = parametersAddgroup(1,p,n);
 
 for i = 1:length(mAdult)

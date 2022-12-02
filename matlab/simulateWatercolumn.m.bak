@@ -3,10 +3,10 @@
 % Conservation is enforced rather crudely.
 %
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
-% (choose MITgcm_ECCO_v4), and be put into the location 'NUMmodel/TMs'
+% (choose MITgcm_ECCO_v4), and be put into the location 'NUMmodel/TMs/'
 %
 % Input:
-%  p: parameter structure from parametersGlobal
+%  p: parameter structure
 %  lat, lon: latitude and longitude
 %  sim: (optional) simulation to use for initial conditions
 %
@@ -29,7 +29,7 @@ arguments
     sim struct = [];
     options.bExtractcolumn logical = false; % Extract the watercolumn even though a saved one exists
     options.bRecalcLight logical = false; % Recalc the light (different from the extracted watercolumn)
-    options.dayFixed double = 0; 
+    options.dayFixed double = 0;
 end
 %
 % Get the watercolumn parameters if they are not already set:
@@ -47,7 +47,7 @@ if isfield(p,'idxSi')
     bSilicate = true;
 end
 ixB = p.idxB:p.n;
-
+ 
 %Tbc = [];
 
 disp('Preparing simulation')
@@ -62,6 +62,8 @@ addpath(strcat(path,'/Transport matrix'));
 % ---------------------------------------
 if isempty(sim)
     sim = load(p.pathGrid,'x','y','z','dznom','bathy'); % Load grid
+    %sim.x = lon;
+    %sim.y = lat;
 end
 load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
 idx = calcGlobalWatercolumn(lat, lon, sim); % Find the indices into matrix
@@ -108,7 +110,7 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
         % Preparing for timestepping. 43200s.
         temp = load(p.pathGrid,'deltaT');
         %AexpM(month,:,:) = Ix(idxGrid,idxGrid) + squeeze((12*60*60)*AexpM(month,:,:));
-        AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(12*60*60/temp.deltaT);
+        AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(p.dtTransport*24*60*60/temp.deltaT);
         fprintf('.');
     end
     %
@@ -176,7 +178,6 @@ else
     if exist(strcat(p.pathN0,'.mat'),'file')
         load(p.pathN0, 'N');
         u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
-        p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
     else
         u(:, ixN) = p.u0(p.idxN)*ones(nb,1);
     end
@@ -187,6 +188,7 @@ else
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
     u = u(idxGrid,:); % Use only the specific water column
 end
+p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
 %
 % Matrices for saving the solution:
 %
@@ -201,6 +203,8 @@ sim.DOC = sim.N;
 sim.B = zeros(length(idx.z), p.n-p.idxB+1, nSave);
 sim.L = sim.N;
 sim.T = sim.N;
+sim.Nloss = zeros(1,nSave);
+sim.NlossHTL = sim.Nloss;
 tSave = [];
 %
 % Matrices for annual averages:
@@ -231,7 +235,7 @@ for i = 1:simtime
     %
     % Test for time to change monthly temperature
     %
-    if (ismember(mod(iTime,365/p.dtTransport), 1+2*cumsum(mon)) || i==1) 
+    if (ismember(mod(iTime,365/p.dtTransport), 1+2*cumsum(mon)) || i==1)
         %fprintf('t = %u days\n',floor(i/2))
         % Set monthly mean temperature
         month = find(1+2*cumsum(mon) >= mod(iTime,365/p.dtTransport),1);
@@ -243,6 +247,7 @@ for i = 1:simtime
     %
     L = L0(:,mod(iTime,365*2)+1);
     dt = p.dt;
+    dtTransport = p.dtTransport;
     n = p.n;
     %if ~isempty(gcp('nocreate'))
     %    parfor k = 1:nGrid
@@ -250,9 +255,10 @@ for i = 1:simtime
     %            int32(n), u(k,:), L(k), T(k), 0.5, dt);
     %    end
     %else
+  
     for k = 1:nGrid
         u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
-            u(k,:),L(k), T(k), p.dtTransport, dt);
+            u(k,:),L(k), T(k), dtTransport, dt);
     end
     %end
 
@@ -263,22 +269,24 @@ for i = 1:simtime
     %
     % Transport
     %
-    u =  squeeze(AimpM(month,:,:)) * u; % Vertical advection & diffusion
+    u =  squeeze(AimpM(month,:,:)) * u; % Vertical diffusion
     % Sinking:
     for j = p.idxSinking
-       u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); 
+        u(:,j) = squeeze(Asink(j,:,:)) * u(:,j);
     end
     % Bottom BC for nutrients:
     u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
-       p.DiffBottom/sim.dznom(nGrid)^2*(p.u0(p.idxN)-u(end,p.idxN));
+        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
     %
-    % Enforce minimum concentraion
+    % Enforce minimum concentration
     %
-    u(u<p.umin) = p.umin;
+    for k = 1:nGrid
+        u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+    end
     %
     % Save timeseries in grid format
     %
-    if ((mod(i/2,p.tSave) < mod((i-1)/2,p.tSave)) || (i==simtime))
+    if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
         iSave = iSave + 1;
         sim.N(:,iSave) = u(:,ixN);
         sim.DOC(:,iSave) = u(:,ixDOC);
@@ -290,6 +298,22 @@ for i = 1:simtime
         end
         sim.L(:,iSave) = L;
         sim.T(:,iSave) = T;
+        % Loss to HTL and POM:
+        for j = 1:length(nGrid)
+            rates = getRates(p,u(j,:),L(j),T(j));
+            % Note: half of the HTL loss is routed directly back to N if we
+            % don't have POM:
+            reminHTL = 0.5;
+            rhoCN=5.68;
+            if ~sum(ismember(p.typeGroups,100))
+                sim.NlossHTL(iSave) = sim.NlossHTL(iSave) + ...
+                    (1-reminHTL)*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % % HTL losses:gN/m2/day
+                sim.Nloss(iSave) = sim.Nloss(iSave) + ...
+                    sum(rates.jPOM.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN;
+                    %remin2*sum(rates.mort2.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % remin2 losses
+            end
+        end
+
         tSave = [tSave, i*p.dtTransport];
     end
     %
@@ -322,10 +346,12 @@ sim.B(sim.B<0) = 0.;
 sim.DOC(sim.DOC<0) = 0.;
 sim.z = sim.z(1:length(idx.z));
 sim.dznom = sim.dznom(1:length(idx.z));
+sim.lat = lat;
+sim.lon = lon;
 
-sim.Ntot = sum(sim.N.*(sim.dznom*ones(1,length(sim.t)))) + ... % N/m2 in dissolved phase
-    sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68; % N/m2 in biomass
-
+sim.Ntot = (sum(sim.N.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
+    sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68)/1000; % gN/m2 in biomass
+sim.Nprod = p.DiffBottom*(p.u0(p.idxN)-sim.N(end,:))/1000; % Diffusion in from the bottom; gN/m2/day
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
 %     sim.ProdGrossAnnual = squeeze(tmp(:,:,1));

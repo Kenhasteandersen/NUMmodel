@@ -24,9 +24,14 @@ program NUMmodeltest
   !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
   !call setupGeneralistsOnly(10)
+!   call setupGenDiatCope(3,3,(/0.1d0, 1.0d0 /))
+   call setupGenDiatCope(2,3,(/1.0d0 /))
+
+   !call setupGenDiatCope(3,3,(/0.1d0))
+
   !call setupGeneralistssimpleOnly(10)
   !call setupDiatoms_simpleOnly(10)
-  call setupDiatomsOnly(10)
+  !call setupDiatomsOnly(10)
   !call setupDiatoms_simpleOnly(10)
 
   allocate(u0(nGrid))
@@ -48,7 +53,7 @@ program NUMmodeltest
   
   
   call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
-  !write(*,*) u00
+  write(*,*) u00
 
   ProdGross = 0
   ProdNet = 0

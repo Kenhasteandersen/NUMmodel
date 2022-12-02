@@ -69,7 +69,7 @@ contains
   subroutine setupGeneralistsSimpleOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
+    call parametersAddGroup(typeGeneralistSimple, n, 0.d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimpleOnly
  
@@ -79,7 +79,7 @@ contains
   subroutine setupGeneralistsOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, n, 1.0d0) ! generalists with n size classes
+    call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
@@ -89,7 +89,7 @@ contains
   subroutine setupGeneralistsSimplePOM(n, nPOM)
    integer, intent(in):: n, nPOM
    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
-   call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
+   call parametersAddGroup(typeGeneralistSimple, n, 0.d0) ! generalists with n size classes
    call parametersAddGroup(typePOM, nPOM, 1.0d0) ! POM with nPOM size classes and max size 1 ugC
    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
  end subroutine setupGeneralistsSimplePOM
@@ -129,7 +129,7 @@ contains
    subroutine setupGeneralistsDiatoms(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 0.1d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms
@@ -137,7 +137,7 @@ contains
    subroutine setupGeneralistsDiatoms_simple(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralistSimple, n, 0.d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(0.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms_simple
@@ -147,7 +147,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsSimpleCopepod()
     call parametersInit(2, 20, 2)
-    call parametersAddGroup(typeGeneralistSimple, 10, 1.0d0)
+    call parametersAddGroup(typeGeneralistSimple, 10, 0.0d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
   end subroutine setupGeneralistsSimpleCopepod
@@ -161,7 +161,7 @@ contains
     integer:: iCopepod
 
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-    call parametersAddGroup(typeGeneralist, n, 1.d0)
+    call parametersAddGroup(typeGeneralist, n, 0.0d0)
     if ( size(mAdult) .eq. 0) then
        call parametersFinalize(0.1d0, .true., .true.)
     else
@@ -189,7 +189,28 @@ contains
    call parametersFinalize(0.001d0, .true., .true.)
 
   end subroutine setupNUMmodel
+  ! -------------------------------------------------------
+  ! A generic setup with generalists, diatoms and copepods
+  ! -------------------------------------------------------
+  subroutine setupGenDiatCope(n,nCopepod, mAdult)
+    integer, intent(in):: n, nCopepod
+    real(dp), intent(in):: mAdult(:)
 
+    !integer, parameter:: n = 10 ! number of size classes in each group
+    integer:: iCopepod
+
+    call parametersInit(size(mAdult)+2, 2*n + nCopepod*size(mAdult), 3)
+    call parametersAddGroup(typeGeneralist, n, 0.0d0)
+    call parametersAddGroup(typeDiatom, n, 0.0d0) ! diatoms with n size classes
+    if ( size(mAdult) .eq. 0) then
+       call parametersFinalize(0.1d0, .true., .true.)
+    else
+       do iCopepod = 1, size(mAdult)
+          call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
+       end do
+       call parametersFinalize(0.001d0, .true., .true.)
+    end if
+  end subroutine setupGenDiatCope
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
   ! -----------------------------------------------
@@ -293,7 +314,7 @@ contains
       call initGeneralistsSimple(specGeneralistsSimple, n)
       allocate( group( iCurrentGroup )%spec, source=specGeneralistsSimple )
     case (typeGeneralist)
-      call initGeneralists(specGeneralists, n, mMax)
+      call initGeneralists(specGeneralists, n)
       allocate( group( iCurrentGroup )%spec, source=specGeneralists )
     case (typeDiatom_simple)
       call initDiatoms_simple(specDiatoms_simple, n, mMax)
@@ -614,13 +635,13 @@ contains
     !
     ! Check: Should be close to zero
     !
-    !Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN
-    !do iGroup = 1, nGroups
-    !  Nbalance = Nbalance  &
-    !    + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
-    !    + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
-    !end do
-    !write(*,*) 'N balance:', Nbalance
+    !Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN 
+    !do iGroup = 1, nGroups 
+    !  Nbalance = Nbalance  & 
+    !    + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN & 
+    !    + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN 
+    !end do 
+    !write(*,*) 'N balance:', Nbalance 
     contains
 
   !
@@ -647,7 +668,7 @@ contains
                      L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
       type is (spectrumDiatoms)
          call calcRatesDiatoms(spec, &
-                     L, upositive(idxN), upositive(idxSi), upositive(idxDOC),gammaN, gammaSi, gammaDOC)
+                     L, upositive(idxN),  upositive(idxDOC), upositive(idxSi),gammaN, gammaDOC, gammaSi)
       type is (spectrumGeneralists_csp)
          call calcRatesGeneralists_csp(spec, &
                      L, upositive(idxN), F( ixStart(iGroup):ixEnd(iGroup) ), gammaN)
@@ -694,7 +715,7 @@ contains
       type is (spectrumDiatoms)
          call calcDerivativesDiatoms(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
-              dudt(idxN), dudt(idxDOC),dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
+              dudt(idxN), dudt(idxDOC), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
       type is (spectrumGeneralists_csp)
          call calcDerivativesGeneralists_csp(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
