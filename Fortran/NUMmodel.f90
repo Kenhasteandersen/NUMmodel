@@ -320,7 +320,7 @@ contains
       call initDiatoms_simple(specDiatoms_simple, n, mMax)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms_simple )
     case (typeDiatom)
-      call initDiatoms(specDiatoms, n, mMax)
+      call initDiatoms(specDiatoms, n)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms )
     case (typeGeneralist_csp)
       call initGeneralists_csp(specGeneralists_csp, n, mMax)
@@ -996,7 +996,6 @@ contains
       mort2( i1:i2 ) = group(iGroup)%spec%mort2
       jNloss( i1:i2 ) = group(iGroup)%spec%JNloss / group(iGroup)%spec%m
       jR( i1:i2 ) = fTemp2 * group(iGroup)%spec%Jresp / group(iGroup)%spec%m
-      jRespTot( i1:i2 ) = jR( i1:i2 ) ! May be overwritten later
       jPOM( i1:i2 ) = group(iGroup)%spec%jPOM
 
       select type (spectrum => group(iGroup)%spec)
@@ -1007,7 +1006,6 @@ contains
         jMax( i1:i2 ) = fTemp2 * spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
-        jRespTot( i1:i2 ) = spectrum%jRespTot / spectrum%m
       end select
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumDiatoms_simple)

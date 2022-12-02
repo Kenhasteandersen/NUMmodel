@@ -33,7 +33,7 @@
 ! ==================
 &input_generalists_simple
 ! This is the input parameters for the generalists. They are read
-! in in the initGeneralists subroutine in generalists_simple.f90
+! in in the initGeneralistsSimple subroutine in generalists_simple.f90
 
 !
 ! General
@@ -130,6 +130,9 @@
 !
 ! General
 !
+      mMinDiatom = 3.1623d-9    ! Description [mug C]
+	mMaxDiatom = 1.0		    ! Description [mug C]
+
       rhoCSi = 3.4                  ! Carbon:Si mass ratio
       v  = 0.6                      ! Vacuole volume fraction
 !

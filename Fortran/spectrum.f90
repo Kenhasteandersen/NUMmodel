@@ -52,7 +52,7 @@ module spectrum
     real(dp), dimension(:), allocatable:: JNtot, JLreal, JCtot 
     real(dp), dimension(:), allocatable:: JCloss_photouptake, JClossLiebig
 
-    real(dp), dimension(:), allocatable:: Jmax, Jresptot
+    real(dp), dimension(:), allocatable:: Jmax
     real(dp), dimension(:), allocatable:: JNreal, JDOCreal
 
     contains
@@ -212,7 +212,6 @@ contains
     allocate(this%JClossLiebig(n))
 
     allocate(this%Jmax(n))
-    allocate(this%Jresptot(n))
     allocate(this%JNreal(n))
     allocate(this%JDOCreal(n))
 
@@ -235,7 +234,6 @@ contains
     write(*,99) "jDOC:", this%JDOCreal / this%m
     write(*,99) "jDOCreal:", this%JDOCreal / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m
-    write(*,99) "jRespTot", this%JRespTot / this%m
   end subroutine printRatesUnicellular
 
   function getProdNet(this, u) result(ProdNet)

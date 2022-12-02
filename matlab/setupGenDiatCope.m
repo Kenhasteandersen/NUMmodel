@@ -1,12 +1,12 @@
 %
-% Setup with generalists and a number of copepods
+% Setup with downregulating generalists and diatoms,  and a number of copepods
 %
-function p = setupGenDiatCope(n,nCopepods,mAdult, bParallel)
+function p = setupGenDiatCope(mAdult,n,nCopepods, bParallel)
 
 arguments
+    mAdult (1,:) = [];
     n = 10;
     nCopepods = 10;
-    mAdult (1,:) = [];
     bParallel = false;
 end
 
@@ -27,7 +27,7 @@ p.idxDOC = 2;
 p.idxSi = 3;
 p.idxB = 4; % We have three nutrient groups so biomass groups starts at index 4.
 
-p.n = 4;
+p.n = 3;
 % Generalists
 p = parametersAddgroup(5,p,n);
 % Diatoms:
