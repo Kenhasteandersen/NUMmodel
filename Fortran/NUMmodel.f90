@@ -194,7 +194,7 @@ contains
   ! -------------------------------------------------------
   ! A generic setup with generalists, diatoms and copepods
   ! -------------------------------------------------------
-  subroutine setupGenDiatCope(n,nCopepod, nPOM, mAdult)
+  subroutine setupGenDiatCope(n, nCopepod, nPOM, mAdult)
    integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
    real(dp), intent(in):: mAdult(:)
    integer:: iCopepod

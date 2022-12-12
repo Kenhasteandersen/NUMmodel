@@ -80,7 +80,7 @@ contains
     integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
     real(c_double), intent(in):: mAdult(nCopepods)
 
-    call setupGenDiatCope(n,nCopepods,nPOM,mAdult)
+    call setupGenDiatCope(n,nCopepod,nPOM,mAdult)
   end subroutine f_setupGenDiatCope
 
   subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)

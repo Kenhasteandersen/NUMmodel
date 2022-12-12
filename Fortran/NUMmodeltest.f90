@@ -28,6 +28,8 @@ program NUMmodeltest
   !call setupGenDiatCope(3,5,1,(/0.1d0, 1.0d0 /))
    !               2 gens cop POM   mAdult     
    call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /))
+   !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /))
+
    !              gen-diat-cop      POM      mAdult    
    !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
