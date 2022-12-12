@@ -11,7 +11,7 @@ arguments
     bParallel = false;
 end
 
-loadNUMmodelLibrary();
+loadNUMmodelLibrary(bParallel);
 calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
     int32(n), int32(nCopepods), int32(nPOM),length(mAdult), mAdult );
 if bParallel
@@ -25,15 +25,11 @@ end
 
 p.idxN = 1;
 p.idxDOC = 2;
-p.idcSi= 3;
-p.idxB = 4; % We have two nutrient groups so biomass groups starts at index 3.
+p.idxB = 3; % We have two nutrient groups so biomass groups starts at index 3.
 
-p.n = 3;
+p.n = 2;
 % Generalists:
-p = parametersAddgroup(5,p,n);
-%Diatoms
-p = parametersAddgroup(3,p,n);
-
+p = parametersAddgroup(1,p,n);
 
 for i = 1:length(mAdult)
     p = parametersAddgroup(10,p,nCopepods, mAdult(i));
@@ -44,12 +40,9 @@ p = parametersAddgroup(100, p, nPOM);
 
 p = getMass(p);
 
-p.u0(1:3) = [150, 0, 200]; % Initial conditions (and deep layer concentrations)
+p.u0(1:2) = [150, 0]; % Initial conditions (and deep layer concentrations)
 % Initial condition at a Sheldon spectrum of "0.1":
-% ix = 4:2*p.n;
+ix = 3:p.n;
+p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix)); 
 
-p.u0(p.ixStart(1):p.ixEnd(end)) = 1;
-p.u0( p.ixStart(end):p.ixEnd(end) ) = 0;
-% p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix)); 
-
-% p.u0( p.ixStart(end):p.ixEnd(end) ) = 0; % No POM in initial conditions
+p.u0( p.ixStart(end):p.ixEnd(end) ) = 0; % No POM in initial conditions

@@ -25,7 +25,7 @@ p = parametersChemostat(p);
 %     p.tEnd = 365*10;
     setHTL(0.15, 1, true, true);
 % p = setupGeneric(mAdult);
-p.tEnd = 200;
+p.tEnd = 2000;
 p.d = 0.1;
 %
 % Set to "normal" HTL mortality if there are no copepods:

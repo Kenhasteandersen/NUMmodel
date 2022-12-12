@@ -179,9 +179,8 @@ contains
    real(dp), intent(in):: mAdult(:)
    integer:: iCopepod
  
-   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3)
+   call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
    call parametersAddGroup(typeGeneralist, n, 0.0d0)
-   call parametersAddGroup(typeDiatom, n, 0.0d0)
 
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
