@@ -107,8 +107,8 @@ switch sim.p.nameModel
             ix = ~isnan(sim.N(:,:,1,1)); % Find all relevant grid cells
             
             aRatio = zeros(length(sim.x), length(sim.y),1,sim.p.n-2,length(sim.t));
-            jLreal = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z));
-            jL = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z));
+            jLreal = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z),sim.p.n-2);
+            jL = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z),sim.p.n-2);
             sim.BB= zeros(length(sim.x), length(sim.y),1,sim.p.n-2,length(sim.t));
             sim.ProdGross = zeros(length(sim.x), length(sim.y), length(sim.t));
             sim.ProdNet = sim.ProdGross;
