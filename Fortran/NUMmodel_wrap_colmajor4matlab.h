@@ -20,7 +20,7 @@ void f_setupgeneric(const int nCopepods, const double mAdult[]);
 
 void f_setupnummodel(const int n, const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
 
-void f_setupgendiatcope(const int n,const int nCopepod, const int nCopepods, const double mAdult[]);
+void f_setupgendiatcope(const int n,const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
 
 void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
 

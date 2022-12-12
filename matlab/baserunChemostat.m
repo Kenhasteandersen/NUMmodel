@@ -15,13 +15,20 @@ end
 %
 % Set parameters:
 %
-% p = setupGeneric(mAdult);
+%     n = 10;
+%     nCopepods = 10;
+%     nPOM = 10;
+%     p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
+%     
+% p = setupNUMmodel();
+% p = setupGeneric(10);
 % p = setupGeneralistsSimpleOnly;
 % p = setupGeneralistsOnly;
-% p = setupGeneralistsDiatoms;
+p = setupGeneralistsDiatoms;
+% p = setupGenDiatCope(2,2,1);
 % p = setupGeneralistsDiatoms_simple;
 % p = setupDiatoms_simpleOnly;
- p = setupDiatomsOnly;
+%  p = setupDiatomsOnly;
 p = parametersChemostat(p);
 p.tEnd = 2000;
 p.d = 0.1;
@@ -36,7 +43,6 @@ end
 %
 % Simulate
 %
-p.tEnd =2000;
 % p.d=0.1;
 tic
 sim = simulateChemostat(p, 100);
@@ -44,5 +50,5 @@ toc
 %
 % Plot
 %
-plotSimulation(sim);
-checkConservation(sim);
+% plotSimulation(sim);
+% checkConservation(sim);

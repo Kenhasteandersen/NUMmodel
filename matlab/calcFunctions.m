@@ -28,7 +28,7 @@ switch sim.p.nameModel
     case 'chemostat'
         u = [sim.N(end), sim.DOC(end), sim.B(end,:)];
         [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
-            sim.Bpico, sim.Bnano, sim.Bmicro] = ...
+            sim.Bpico, sim.Bnano, sim.Bmicro] = ...=
             getFunctions(u, sim.L, sim.T);
         % Multiply by the assumed depth of the productive layer:
         sim.ProdGross = sim.ProdGross * sim.p.widthProductiveLayer;

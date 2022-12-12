@@ -24,10 +24,12 @@ program NUMmodeltest
   !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
   !call setupGeneralistsOnly(10)
-!   call setupGenDiatCope(3,3,(/0.1d0, 1.0d0 /))
-   call setupGenDiatCope(2,3,(/1.0d0 /))
-
-   !call setupGenDiatCope(3,3,(/0.1d0))
+  !call setupGenDiatCope(3,3,(/0.1d0, 1.0d0 /))
+  !call setupGenDiatCope(3,5,1,(/0.1d0, 1.0d0 /))
+   !               2 gens cop POM   mAdult     
+   call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /))
+   !              gen-diat-cop      POM      mAdult    
+   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
   !call setupGeneralistssimpleOnly(10)
   !call setupDiatoms_simpleOnly(10)
@@ -54,6 +56,11 @@ program NUMmodeltest
   
   call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
   write(*,*) u00
+  write(*,*) 'ngrid',nGrid
+  write(*,*) 'ngroups',nGroups
+  write(*,*) 'nbutrients',nNutrients
+
+
 
   ProdGross = 0
   ProdNet = 0

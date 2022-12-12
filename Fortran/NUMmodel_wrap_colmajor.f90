@@ -76,11 +76,11 @@ contains
     call setupNUMmodel(n,nCopepod,nPOM,mAdult)
   end subroutine f_setupNUMmodel
 
-  subroutine f_setupGenDiatCope(n,nCopepod,nCopepods, mAdult) bind(c)
-    integer(c_int), intent(in), value:: n,nCopepod,nCopepods
+  subroutine f_setupGenDiatCope(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
+    integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
     real(c_double), intent(in):: mAdult(nCopepods)
 
-    call setupGenDiatCope(n,nCopepods,mAdult)
+    call setupGenDiatCope(n,nCopepods,nPOM,mAdult)
   end subroutine f_setupGenDiatCope
 
   subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)

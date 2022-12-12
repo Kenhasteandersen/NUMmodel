@@ -17,9 +17,8 @@ end
 mAdult = logspace(log10(0.2), log10(1000), 3);
 
     n = 10;
-    nCopepods = 10;
-    nPOM = 10;
-    p = setupGenDiatCope(mAdult, n,nCopepods,nPOM);
+    nCopepods = 4;
+    p = setupGenDiatCope(mAdult, n,nCopepods,0);
     p = parametersChemostat(p);
 %     p.tEnd = 365*10;
     setHTL(0.15, 1, true, true);

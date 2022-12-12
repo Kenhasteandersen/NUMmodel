@@ -130,7 +130,7 @@ contains
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
       call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
-      call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
+      call parametersAddGroup(typeDiatom, n, 0.d0) ! diatoms with n size classes
       call parametersFinalize(.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms
  
@@ -174,13 +174,14 @@ contains
   ! -----------------------------------------------
   ! Full NUM model setup with generalists, copepods, and POM
   ! -----------------------------------------------
-  subroutine setupNUMmodel(n, nCopepod, nPOM, mAdult)
+    subroutine setupNUMmodel(n, nCopepod, nPOM, mAdult)
    integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
    real(dp), intent(in):: mAdult(:)
    integer:: iCopepod
  
-   call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
+   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3)
    call parametersAddGroup(typeGeneralist, n, 0.0d0)
+   call parametersAddGroup(typeDiatom, n, 0.0d0)
 
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
@@ -189,28 +190,27 @@ contains
    call parametersFinalize(0.001d0, .true., .true.)
 
   end subroutine setupNUMmodel
+  
   ! -------------------------------------------------------
   ! A generic setup with generalists, diatoms and copepods
   ! -------------------------------------------------------
-  subroutine setupGenDiatCope(n,nCopepod, mAdult)
-    integer, intent(in):: n, nCopepod
-    real(dp), intent(in):: mAdult(:)
+  subroutine setupGenDiatCope(n,nCopepod, nPOM, mAdult)
+   integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
+   real(dp), intent(in):: mAdult(:)
+   integer:: iCopepod
+ 
+   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3)
+   call parametersAddGroup(typeDiatom, n, 0.0d0)
+   call parametersAddGroup(typeGeneralist, n, 0.0d0)
 
-    !integer, parameter:: n = 10 ! number of size classes in each group
-    integer:: iCopepod
+   do iCopepod = 1, size(mAdult)
+      call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
+   end do
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM)) ! POM with nPOM size classes and max size 1 ugC
+   call parametersFinalize(0.001d0, .true., .true.)
 
-    call parametersInit(size(mAdult)+2, 2*n + nCopepod*size(mAdult), 3)
-    call parametersAddGroup(typeGeneralist, n, 0.0d0)
-    call parametersAddGroup(typeDiatom, n, 0.0d0) ! diatoms with n size classes
-    if ( size(mAdult) .eq. 0) then
-       call parametersFinalize(0.1d0, .true., .true.)
-    else
-       do iCopepod = 1, size(mAdult)
-          call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
-       end do
-       call parametersFinalize(0.001d0, .true., .true.)
-    end if
   end subroutine setupGenDiatCope
+
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
   ! -----------------------------------------------

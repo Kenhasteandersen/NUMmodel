@@ -15,10 +15,11 @@ arguments
     lon double = -40;
 end
 
-p = setupDiatomsOnly(10);
+% p = setupDiatomsOnly(10);
+p = setupGeneralistsDiatoms(10);
 % p = setupGeneric(mAdult);
 p = parametersWatercolumn(p);
-p.tEnd = 1095;
+p.tEnd = 365;
 
 %
 % Set to "normal" HTL mortality if there are no copepods:
