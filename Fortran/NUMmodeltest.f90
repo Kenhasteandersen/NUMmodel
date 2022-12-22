@@ -21,13 +21,13 @@ program NUMmodeltest
   !call setupGeneralistsOnly_csp()
   !call parametersFinalize(0.d0, .false.)
   
-  !call setupGeneralistsDiatoms(10)
+  call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
   !call setupGeneralistsOnly(10)
   !call setupGenDiatCope(3,3,(/0.1d0, 1.0d0 /))
   !call setupGenDiatCope(3,5,1,(/0.1d0, 1.0d0 /))
    !               2 gens cop POM   mAdult     
-   call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /))
+   !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /))
    !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /))
 
    !              gen-diat-cop      POM      mAdult    
@@ -73,8 +73,8 @@ program NUMmodeltest
   Bnano=0
   Bmicro=0
 
-  !call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
-  !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
+  call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
+  write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
   !write(*,*) u00
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()
@@ -84,7 +84,7 @@ program NUMmodeltest
 
  ! write(6,*) theta(3:5, 3:5)
  ! 
- call printRates()
+ !call printRates()
  !
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )

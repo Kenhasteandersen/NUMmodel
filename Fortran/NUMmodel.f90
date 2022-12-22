@@ -882,6 +882,8 @@ contains
                spec%getProdBact(u( ixStart(i):ixEnd(i) ))
        end select
     end do
+          
+
     !
     ! Make a rough estimate of pico-nano-micro plankton biomasses:
     !

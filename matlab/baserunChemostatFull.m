@@ -44,6 +44,8 @@ p.d = 0.1;
 % p.d=0.1;
 tic
 sim = simulateChemostat(p, 100);
+% sim = simulateChemostatEuler(p, 100);
+
 toc
 %
 % Plot

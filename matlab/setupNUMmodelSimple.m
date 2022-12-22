@@ -1,7 +1,7 @@
 %
 % Setup with generalists and a number of copepods
 %
-function p = setupNUMmodel(mAdult, n,nCopepods,nPOM, bParallel)
+function p = setupNUMmodelSimple(mAdult, n,nCopepods,nPOM, bParallel)
 
 arguments
     mAdult (1,:) = [];
@@ -28,8 +28,8 @@ p.idxDOC = 2;
 p.idxB = 3; % We have two nutrient groups so biomass groups starts at index 3.
 
 p.n = 2;
-% Generalists:
-p = parametersAddgroup(5,p,n);
+% Generalists simple:
+p = parametersAddgroup(1,p,n);
 
 for i = 1:length(mAdult)
     p = parametersAddgroup(10,p,nCopepods, mAdult(i));
