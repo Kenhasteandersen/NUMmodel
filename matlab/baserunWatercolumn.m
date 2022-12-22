@@ -17,10 +17,10 @@ end
 
 % p = setupDiatomsOnly(10);
 mAdult = logspace(log10(0.2), log10(1000), 3);
-    
-n = 10;
-        nCopepods = 10;
-    nPOM = 10;
+
+n = 5;
+nCopepods = 10;
+nPOM = 10;
 p = setupGenDiatCope(mAdult, n,nCopepods,nPOM);
 % p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
 
@@ -34,10 +34,10 @@ p.tEnd = 5*365;
 %
 % if isempty(mAdult)
 %     setHTL(0.1, 1/500^1.5, false, false);
-% else 
+% else
 %     setHTL(0.1, 1, true, true);
 % end
-    setHTL(0.15, 1, true, true);
+setHTL(0.15, 1, true, true);
 
 sim = simulateWatercolumn(p, lat,lon);
 
