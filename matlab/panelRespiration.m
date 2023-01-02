@@ -12,7 +12,7 @@ function panelRespiration(p,rates, iGroup)
 ix = (p.ixStart(iGroup):p.ixEnd(iGroup))-p.idxB+1;
 m = p.m(ix+p.idxB-1);
 
-jR = rates.jR;
+jR = rates.jR(ix);
 set(gca,'yscale','linear')
 fillbetweenlines(m, 0*jR, jR, [0 0 1]);
 hold on
@@ -29,11 +29,11 @@ switch p.nameGroup{iGroup}
         betaF = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bF');
         betaG = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bg');
 
-        jR_L = betaL*rates.jLreal;
-        jR_N = betaN*rates.jN;
-        jR_DOC = betaDOC*rates.jDOC;
-        jR_F = betaF*rates.jFreal;
-        jR_g = betaG*rates.jTot;
+        jR_L = betaL*rates.jLreal(ix);
+        jR_N = betaN*rates.jN(ix);
+        jR_DOC = betaDOC*rates.jDOC(ix);
+        jR_F = betaF*rates.jFreal(ix);
+        jR_g = betaG*rates.jTot(ix);
 
         fillbetweenlines(m, jR, jR+jR_DOC, [0 1 0]);
         fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]);
@@ -51,11 +51,11 @@ switch p.nameGroup{iGroup}
         betaSi = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bSi');
         betaG = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bg');
 
-        jR_L = betaL*rates.jLreal;
-        jR_N = betaN*rates.jN;
-        jR_DOC = betaDOC*rates.jDOC;
-        jR_Si = betaSi*rates.jSi;
-        jR_g = betaG*rates.jTot;
+        jR_L = betaL*rates.jLreal(ix);
+        jR_N = betaN*rates.jN(ix);
+        jR_DOC = betaDOC*rates.jDOC(ix);
+        jR_Si = betaSi*rates.jSi(ix);
+        jR_g = betaG*rates.jTot(ix);
 
         fillbetweenlines(m, jR, jR+jR_DOC, [0 1 0]);
         fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]);
