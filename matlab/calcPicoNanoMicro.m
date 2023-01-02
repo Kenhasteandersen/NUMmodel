@@ -4,12 +4,14 @@
 % Example: call calcPicoNanoMicro(sim.B(end,:), sim.p.pGeneralists);
 %
 function Bpnm = calcPicoNanoMicro(B,m)
-
+% Calc mass from radius
+rho = 0.4*1e6*1e-12; % mug/cm3 (Andersen et al 2016
+mass = @(r) 4*pi/3*rho*r^3;
+% Masses for pico, nano, and micro plankton
 m0 = min(m);
-m2 = 2.38761e-06;
-m20 = 0.00238761;
-m200 = 2.38761;
-
+m2 = mass(1);
+m20 = mass(10);
+m200 = mass(100);
 
 Bpico = calcBiomassRange(B, m, m0,m2);
 Bnano = calcBiomassRange(B, m, m2,m20);
