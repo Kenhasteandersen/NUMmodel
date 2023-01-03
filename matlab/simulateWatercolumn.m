@@ -298,7 +298,7 @@ for i = 1:simtime
         sim.L(:,iSave) = L;
         sim.T(:,iSave) = T;
         % Loss to HTL and POM:
-        for j = 1:length(nGrid)
+        for j = 1:nGrid
             rates = getRates(p,u(j,:),L(j),T(j));
             % Note: half of the HTL loss is routed directly back to N if we
             % don't have POM:
