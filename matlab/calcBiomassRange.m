@@ -5,13 +5,14 @@
 %
 function [Brange,f] = calcBiomassRange(B,m, m1, m2)
 B = reshape(B,1,length(B));
-m2 = min(max(m),m2);
+
 %
 % Find lower and upper cell boundaries:
 %
 Delta = m(2)/m(1);
 mLower = m/sqrt(Delta);
 mUpper = m*sqrt(Delta);
+m2 = min(max(mUpper),m2);
 %
 % Find affected size ranges:
 %
