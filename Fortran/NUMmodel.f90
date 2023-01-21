@@ -604,7 +604,7 @@ contains
         + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
         + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
     end do
-    write(*,*) 'N balance:', Nbalance
+    !write(*,*) 'N balance:', Nbalance
 
     contains
 

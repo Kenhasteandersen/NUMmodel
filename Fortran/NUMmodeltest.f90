@@ -42,7 +42,7 @@ program NUMmodeltest
   
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
   call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
-  !call printRates()
+  call printRates()
 
   !select type (spec => group(1)%spec)
   !    type is (spectrumGeneralists)
