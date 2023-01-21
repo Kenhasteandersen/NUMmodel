@@ -934,6 +934,7 @@ contains
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
       end select
+
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumDiatoms_simple)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
@@ -942,7 +943,7 @@ contains
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       end select
 
-      mort = 0 ! dummy
+      !mort = 0 ! For odd reasons this gives a segfault when called from R
 
    end do
   end subroutine getRates
