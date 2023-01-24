@@ -3,7 +3,7 @@ Reference implementation of the **Nutrient-Unicellular-Multicellular**
 modelling framework.  The model is described in: 
 * Unicellular plankton: Andersen and Visser: [From cell size and first principles to structure and function of unicellular plankton communities](https://www.biorxiv.org/content/10.1101/2022.05.16.492092v3)
 * Copepods: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities "Researchgate"). 
-* Application to biological pump: Progress in Oceanography (189) 102473 and Serra-Pompei et al: [Zooplankton trophic dynamics drive carbon export efficiency](https://www.biorxiv.org/content/10.1101/2021.03.08.434455v1 "BioRxiv").
+* Application to biological pump: Serra-Pompei et al (2022) Progress in Oceanography (189) 102473: [Zooplankton trophic dynamics drive carbon export efficiency](https://www.biorxiv.org/content/10.1101/2021.03.08.434455v1 "BioRxiv").
 
 Try the [online simulator of the unicellular model](http://oceanlife.dtuaqua.dk/Plankton/R/).
 
