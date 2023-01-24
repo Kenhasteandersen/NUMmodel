@@ -10,7 +10,7 @@ sim_bis = simulateChemostat(p_bis, 'bUnicellularloss', false);
 
 sumB = sum(sim.B(:));
 sumB_bis = sum(sim_bis.B(:));
-if ( sumB > 4.4e5 && sumB < 4.5e5 ) && ( sumB_bis > 1.5e5 && sumB_bis < 1.6e5 )
+if ( sumB > 3963924  && sumB < 3963925 ) && ( sumB_bis > 1423361 && sumB_bis < 1423500 )
     bSuccess = true;
 else
     bSuccess = false;

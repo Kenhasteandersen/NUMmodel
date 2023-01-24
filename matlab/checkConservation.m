@@ -23,6 +23,7 @@ p = sim.p;
 gains = 0;
 lossHTL = 0;
 dt = diff(sim.t);
+dt = [dt; dt(end)];
 
 switch sim.p.nameModel
 

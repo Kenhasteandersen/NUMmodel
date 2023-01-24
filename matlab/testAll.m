@@ -1,14 +1,14 @@
 
 loadNUMmodelLibrary
 
-testSetup('setupGeneralistsOnly', 1677);
-testSetup('setupGeneralistsDiatoms_simple', 2120);
-testSetup('setupGeneralistsDiatoms', 5361);
+testSetup('setupGeneralistsOnly', 948);
+testSetup('setupGeneralistsDiatoms_simple', 1389);
+testSetup('setupGeneralistsDiatoms', 4631);
 testSetup('setupDiatoms_simpleOnly', 411);
 testSetup('setupGeneralists_cspOnly', 1444);
-testSetup('setupGeneric', 2042);
+testSetup('setupGeneric', 1312);
 
-testFunction('testChemostat',3888716);
+testFunction('testChemostat',3837180);
 testFunction('testChemostatEuler',1);
 testFunction('testChemostatSeasonal',NaN);
-testFunction('testGlobal',699480);
+testFunction('testGlobal',713800);
