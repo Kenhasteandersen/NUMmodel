@@ -269,7 +269,7 @@ for i=1:simtime
         end
         sim.L(:,:,:,iSave) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
         sim.T(:,:,:,iSave) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
-        tSave = [tSave, i/p.dtTransport];
+        tSave = [tSave, i*p.dtTransport];
         fprintf('.\n');
     end
     %

@@ -1,4 +1,3 @@
-%θ
 % Make a set of basic plots of a simulation
 %
 function plotSimulation(sim)

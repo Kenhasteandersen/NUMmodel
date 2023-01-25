@@ -15,15 +15,12 @@ function sim = baserunGlobal(p)
 % Setup a basic run of the global model with only generalists
 %
 if (nargin==0)
-    %     p = setupGeneralistsDiatoms(10, true);
     mAdult = logspace(log10(0.2), log10(10000), 5);
     
     n = 10;
     nCopepods = 10;
     nPOM = 10;
-    p = setupGenDiatCope(mAdult, n,nCopepods,nPOM);
-    %     p = setupGeneralistsSimpleOnly(10, true); % Use 10 size groups and parallel execution
-    %     p = setupGeneralistsDiatoms(10); % Use 10 size groups and parallel execution
+    p = setupGeneralistsSimpleOnly(10, true); % Use 10 size groups and parallel execution
     p = parametersGlobal(p); % Use standard low-res model
     %p = parametersGlobal(10,2); % Use MITgcm_ECCO
     p.tEnd = 365;
@@ -41,15 +38,15 @@ else
     sim = simulateGlobal(p);%,sim); % Simulate
 end
 sim.B(sim.B<0)=0; % Get rid of negative biomasses
-%disp('Calculating functions')
-%sim = calcGlobalFunction(sim); % Calculate functions
+disp('Calculating functions')
+sim = calcGlobalFunction(sim); % Calculate functions
 %
 % Plots:
 %
-% disp('Plotting')
-%  plotSimulation(sim)
+disp('Plotting')
+ plotSimulation(sim)
 
-%checkConservation(sim);
+checkConservation(sim);
 %
 % CPU-heavy plots:
 %

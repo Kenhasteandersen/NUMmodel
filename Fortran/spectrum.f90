@@ -23,8 +23,8 @@ module spectrum
      real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), f(:)
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
-     real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp
-     real(dp), dimension(:), allocatable:: mPOM, jPOM ! mass and flux of POM created
+     real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp, Jresptot
+     real(dp), dimension(:), allocatable:: mPOM, jPOM! mass and flux of POM created
      ! Mortality:
      real(dp), dimension(:), allocatable:: mortpred, mortHTL, mort2
      real(dp) :: mort2constant
@@ -99,16 +99,18 @@ contains
     allocate(this%JFmax(n))
     allocate(this%flvl(n))
     allocate(this%JF(n))
+    allocate(this%f(n))
+
     !allocate(this%JFreal(n))
 
     allocate(this%Jtot(n))
     allocate(this%Jresp(n))
+    allocate(this%Jresptot(n))
     allocate(this%JCloss_feeding(n))
     allocate(this%JNlossLiebig(n))
     allocate(this%JNloss(n))
     allocate(this%JCloss(n))
 
-    allocate(this%f(n))
 
 
     allocate(this%mPOM(n))
@@ -124,18 +126,19 @@ contains
     this%JFmax = 0.d0
     this%flvl = 0.d0
     this%JF = 0.d0
+    this%f = 0.d0
     this%epsilonF = 1.d0 ! Probably overridden by the specific group, but must be >0.
     this%palatability = 1.d0 ! set to default
     this%mPOM = 0.d0
     this%jPOM = 0.d0
     this%velocity = 0.d0 ! Probably overridden by the specific group (POM at least)
     this%JResp = 0.d0
+    this%Jresptot = 0.d0
     this%Jtot = 0.d0
     this%JCloss_feeding = 0.d0
     this%JNlossLiebig = 0.d0
     this%JNloss = 0.d0
     this%jCloss = 0.d0
-    this%f = 0.d0
     contains
 
       !

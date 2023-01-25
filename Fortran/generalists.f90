@@ -58,7 +58,7 @@ module generalists
   real(dp) :: mMaxGeneralist
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
-    real(dp), allocatable :: JFreal(:),Jresptot(:)
+    real(dp), allocatable :: JFreal(:)
     !
     ! Regulation factors:
     !
@@ -104,7 +104,6 @@ contains
     call read_namelist()
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
-    allocate(this%Jresptot(this%n))
 
 
     this%beta = beta
@@ -126,7 +125,7 @@ contains
     this%JlossPassive = cLeakage/this%r * this%m ! in units of C
 
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
-    this%Jresp =cR*alphaJ*this%m
+    this%Jresp =0.3*cR*alphaJ*this%m ! decrease basal resp. according to Ken
 
     allocate(this%dL(n))
     allocate(this%dN(n))
@@ -242,7 +241,7 @@ contains
                    bF*this%JF(i) + &
                    bg*Jnet(i))
 
-      !write(*,*) dN(i),this%JCloss_feeding(i), this%JNlossLiebig(i)                 
+      !write(*,*) this%Jresptot(i)                 
       ! 
       !-------------------------------------------------------
       ! Test for conservation budget. Should be close to zero:
