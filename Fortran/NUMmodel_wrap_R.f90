@@ -6,6 +6,14 @@ subroutine f_setupGeneralistsOnly(n)
   call setupGeneralistsOnly(n)
 end subroutine f_setupGeneralistsOnly
 
+subroutine f_setupGeneric(nAdult, mAdult)
+  use NUMmodel, only:  setupGeneric
+  use globals
+  integer, intent(in):: nAdult
+  real(dp), intent(in):: mAdult(nAdult)
+  call setupGeneric(mAdult)
+end subroutine 
+
 !!$  subroutine f_setupGeneralistsCopepod()
 !!$    call setupGeneralistsCopepod()
 !!$  end subroutine f_setupGeneralistsCopepod

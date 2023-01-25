@@ -18,12 +18,12 @@ parametersChemostat = function(p=parameters()) {
   p$d = 0.05  # diffusion rate, m/day
   p$M = 20   # Thickness of the mixed layer, m
   p$T = 10   # Temperature
-  p$N0 = 150 # Deep nutrient levels
+  p$N0 = 50 # Deep nutrient levels
   
   #
   # Light:
   #
-  p$L = 60  # PAR, mu E/m2/s
+  p$L = 30  # PAR, mu E/m2/s
   p$latitude = 0 # amplitude of seasonal light variation in fractions of L
   
   p$tEnd = 365 # Simulation length (days)
@@ -175,10 +175,8 @@ simulateChemostatEuler = function(p=parametersChemostat(), bLosses=TRUE) {
   dummy = .Fortran("f_setupgeneralistsonly", as.integer(p$n))
   
   u0 = c(0.1*p$N0, p$DOC0, p$B0)
-  #uDeep = rep(0,p$n+2)
   uDeep = c(p$N0, 0)
   out = .Fortran("f_simulatechemostateuler",
-                 #nGrid=as.integer(length(u0)),
                  u = as.numeric(u0),
                  L=as.numeric(p$L), 
                  T=as.numeric(p$T),
@@ -212,7 +210,9 @@ simulateChemostatEuler = function(p=parametersChemostat(), bLosses=TRUE) {
   return(result)
 }
 
-simulateChemostat = function(p=parametersChemostat(), useC=FALSE, useF=TRUE) {
+simulateChemostat = function(p=parametersChemostat(), 
+                             useC=FALSE, useF=TRUE,
+                             sSetup="GeneralistsOnly") {
   
   # Get the version of sundialr:
   pkg = installed.packages(fields = "Built")
@@ -247,10 +247,23 @@ simulateChemostat = function(p=parametersChemostat(), useC=FALSE, useF=TRUE) {
   # else if (useF) {
     # Load library
     loadNUMmodel()
-    # Set parameters
-    dummy = .Fortran("f_setupgeneralistsonly", as.integer(p$n))
-    dummy = .Fortran("f_sethtl", as.double(p$mHTL), as.double(p$mortHTL), 
-                     as.logical(FALSE), as.logical(FALSE))
+    # Choose setup:
+    if (sSetup=="GeneralistsOnly") { 
+      dummy = .Fortran("f_setupgeneralistsonly", as.integer(p$n))
+      dummy = .Fortran("f_sethtl", as.double(p$mHTL), as.double(p$mortHTL), 
+                       as.logical(FALSE), as.logical(FALSE))
+    } 
+    else if (sSetup=="Generic") {
+      dummy = .Fortran("f_setupgeneric", as.integer(4), c(1,10,100,1000) )
+      p$n = p$n + 4*10
+      p$B0 = c(p$B0, rep(1,4*10))
+      #dummy = .Fortran("f_sethtl", as.double(p$mHTL), as.double(p$mortHTL), 
+      #                 as.logical(FALSE), as.logical(FALSE))
+    } else
+    {
+      cat('Setup ',sSetup,' no known\n')
+      keyboard()
+    }
     
     dudt = assign("dudt", rep(as.double(0),p$n+2), envir = .GlobalEnv) # Need a static global for speed
     
@@ -354,7 +367,6 @@ getFrates = function(p) {
                    jLossPassive = vector(length=nGrid, mode="numeric"),
                    jNloss = vector(length=nGrid, mode="numeric"),
                    jLreal = vector(length=nGrid, mode="numeric"),
-jPOM = vector(length=nGrid, mode="numeric"),  
                    mortpred = vector(length=nGrid, mode="numeric"),
                    mortHTL = vector(length=nGrid, mode="numeric"),
                    mort2 = vector(length=nGrid, mode="numeric"),
@@ -912,7 +924,7 @@ calcSheldonKappa = function(p) {
 #
 # Fitted kappa
 #
-calcSheldonFit = function(sim, bPlot=TRUE) {
+calcSheldonFit = function(sim, bPlot=TRUE, bXaxis=TRUE) {
   m = sim$p$m
   Delta = m[2]/m[1]
   B = sim$B/Delta
@@ -943,9 +955,14 @@ calcSheldonFit = function(sim, bPlot=TRUE) {
   
   if (bPlot) {
     #defaultplot()
+    if (bXaxis)
+      sXlab = "Carbon mass (${\\mu}$gC/l)"
+    else
+      sXlab = ""
+    
     loglogpanel(xlim=m, ylim=c(1e-3,400),
-                xlab="Carbon mass (${\\mu}$gC/l)",
-                ylab="Sheldon biomass ($\\mu$gC/l)")
+                xlab=sXlab,
+                ylab="Sheldon biomass ($\\mu$gC/l)", xaxis=bXaxis)
     B[B==Bmin]=1e-10
     lines(sim$p$m, B, lwd=3)
     #lines(m, rep(Bmean,sim$p$n),lwd=1)
@@ -983,7 +1000,7 @@ testSheldon = function(sim) {
 
 baserunChemostat = function(p = parametersChemostat(), useC=FALSE, useF=TRUE) {
   sim = simulateChemostat(p, useC, useF)
-  
+
   defaultplot(c(2,1))
   plotSpectrum(sim, bPlot=FALSE)
   plotRates(sim, bPlot=FALSE)
