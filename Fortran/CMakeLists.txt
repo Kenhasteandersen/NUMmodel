@@ -1,10 +1,11 @@
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Specify default build type for single-build-type systems (not VS)
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-   set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
-   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
+#if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+#   set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
+#   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+#endif()
+set(CMAKE_FORTRAN_FLAGS="-O3")
 
 set(RELEASE_FLAGS "-O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS")
 set(DEBUG_FLAGS "")
