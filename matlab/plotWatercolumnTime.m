@@ -90,13 +90,13 @@ nexttile
 %z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
 %panelField([t t(end)], -z, N');
 %surface(t,-z, N)
-contourf(t,-z,log10(N),linspace(-2,3,options.nLevels),'LineStyle','none')
+contourf(t,-z,log10(N),[-10 linspace(-4,3,options.nLevels)],'LineStyle','none')
 title('Nitrogen')
 ylabel('Depth (m)')
 %set(gca,'ColorScale','log')
 %shading interp
 axis tight
-colorbar('ticks',-2:3)
+colorbar('ticks',-3:3)
 %caxis([-1 2])
 ylim(ylimit)
 xlim(xlimit)
@@ -105,7 +105,7 @@ set(gca,'XTickLabel','')
 if isfield(sim,'Si')
     nexttile
     %surface(t,-z, Si)
-    contourf(t,-z,log10(Si),linspace(-2,3,options.nLevels),'LineStyle','none')
+    contourf(t,-z,log10(Si),[-10 linspace(-2,3,options.nLevels)],'LineStyle','none')
     % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
     title('Silicate')
     ylabel('Depth (m)')
@@ -120,7 +120,7 @@ if isfield(sim,'Si')
 end
 
 nexttile
-contourf(t,-z,log10(DOC),options.nLevels,'LineStyle','none')
+contourf(t,-z,log10(DOC),[-10 linspace(-1,1,options.nLevels)],'LineStyle','none')
 %surface(t,-z, DOC)
 title('DOC')
 ylabel('Depth (m)')
@@ -129,8 +129,8 @@ ylabel('Depth (m)')
 %set(gca,'ColorScale','log')
 shading interp
 axis tight
-colorbar
-%caxis([0.1,2])
+colorbar('ticks',-1:1)
+caxis([-1 1]);
 ylim(ylimit)
 xlim(xlimit)
 set(gca,'XTickLabel','')

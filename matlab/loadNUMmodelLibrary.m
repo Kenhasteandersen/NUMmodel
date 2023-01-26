@@ -27,7 +27,7 @@ switch computer('arch')
         sLibname = 'libNUMmodel_matlab';
         sExtension = '.dylib';
     case {'glnx86','glnxa64'}
-        sLibname = 'libNUMmodel_linux_matlab';
+        sLibname = 'libNUMmodel_matlab';
         sExtension = '.so';
     case {'win32','win64'}
         sLibname = 'libNUMmodel_matlab';
