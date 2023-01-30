@@ -161,7 +161,7 @@ contains
     integer:: iCopepod
 
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-    call parametersAddGroup(typeGeneralist, n, 0.0d0)
+    call parametersAddGroup(typeGeneralistSimple, n, 0.0d0)
     if ( size(mAdult) .eq. 0) then
        call parametersFinalize(0.1d0, .true., .true.)
     else
@@ -189,6 +189,25 @@ contains
    call parametersFinalize(0.001d0, .true., .true.)
 
   end subroutine setupNUMmodel
+
+    ! -----------------------------------------------
+  ! Full NUM model setup with generalistsSImple, copepods, and POM
+  ! -----------------------------------------------
+    subroutine setupNUMmodelSimple(n, nCopepod, nPOM, mAdult)
+   integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
+   real(dp), intent(in):: mAdult(:)
+   integer:: iCopepod
+ 
+   call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
+   call parametersAddGroup(typeGeneralistSimple, n, 0.0d0)
+
+   do iCopepod = 1, size(mAdult)
+      call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
+   end do
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM)) ! POM with nPOM size classes and max size 1 ugC
+   call parametersFinalize(0.001d0, .true., .true.)
+
+  end subroutine setupNUMmodelSimple
   
   ! -------------------------------------------------------
   ! A generic setup with generalists, diatoms and copepods
