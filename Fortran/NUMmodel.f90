@@ -211,7 +211,7 @@ contains
     !
     ! Set groups:
     !
-	call read_namelist_general()
+    call read_namelist_general()
 	
     nGroups = nnGroups
     iCurrentGroup = 0
