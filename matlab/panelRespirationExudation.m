@@ -6,8 +6,16 @@
 %  p - the parameter structure
 %  rates - rates
 %  iGroup - the group number to be plotted
+%  bScaled - flag to tell if the rates should be scaled by the total rates
 %
-function panelRespirationExudation(p,rates, iGroup)
+function panelRespirationExudation(p,rates, iGroup, bScaled)
+
+arguments
+    p struct;
+    rates;
+    iGroup;
+    bScaled logical = true;
+end
 
 ix = (p.ixStart(iGroup):p.ixEnd(iGroup))-p.idxB+1;
 m = p.m(ix+p.idxB-1);
@@ -15,7 +23,7 @@ m = p.m(ix+p.idxB-1);
 jR = rates.jR(ix);
 jLossPassive =(1-rates.f(ix)).* rates.jLossPassive(ix);
 set(gca,'yscale','linear')
-fillbetweenlines(m, 0*jR, jR, [0 0 1]);
+fillbetweenlines(m, 0*jR, jR, [0 0.2 0]);  % Basal
 hold on
 
 ymax = max(rates.jR);
@@ -40,23 +48,38 @@ switch p.nameGroup{iGroup}
         jTot = rates.jTot(ix);
         jCloss_L=(1-eL)/eL*rates.jLreal(ix);
         jCloss_F=(1-eF)/eF*rates.jFreal(ix);
-        
-        fillbetweenlines(m, jR, jR+jR_DOC, [0 1 0]);
-        fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L, jR+jR_DOC+jR_L+jR_N, [0 0.6 0]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N, jR+jR_DOC+jR_L+jR_N+jR_F, [0 0.4 0]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g, [0.6 0 0]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot, [0.8 0 0] )
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive, [0 0 0.1]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L, [0 0 0.6]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L+jCloss_F, [0 0 0.4]);
 
-        
+        if bScaledPlot
+            jTotal = jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L+jCloss_F;
+            jR_L = jR_L ./ jTotal;
+            jR_N = jR_N ./ jTotal;
+            jR_DOC = jR_DOC ./ jTotal;
+            jR_F = jR_F ./ jTotal;
+            jR_g = jR_g ./ jTotal;
+            jTot = jTot ./ jTotal;
+            jCloss_L = jCloss_L ./ jTotal;
+            jCloss_F = jCloss_F ./ jTotal;
+        end
+
+        % Respirations:
+        fillbetweenlines(m, jR, jR+jR_DOC, [0 1 0]); % DOC
+        fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]); % Light
+        fillbetweenlines(m, jR+jR_DOC+jR_L, jR+jR_DOC+jR_L+jR_N, [0 0.6 0]); % Nutrients
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N, jR+jR_DOC+jR_L+jR_N+jR_F, [0 0.4 0]); % Feeding
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g, [0 0.3 0]); % Growth
+        % Growth:
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot, [0.8 0 0] ) % Growth
+        % Exudations:
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive, [0 0 0.1]); % Passive
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L, [0 0 0.6]); % Light
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L+jCloss_F, [0 0 0.4]); % Feeding
+
+
         ymax = max(jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L+jCloss_F);
         legend({'Basal','DOC','Light','Nutrients','Feeding','Growth','Total growth',...
             'Passive losses','Photouptake losses','Feedig losses'})
     case 'Diatoms'
-        
+
         % Find beta and epsilon parameters from the input file:
         betaL = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bL');
         betaN = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bN');
@@ -69,17 +92,19 @@ switch p.nameGroup{iGroup}
         jR_N = betaN*rates.jN(ix);
         jR_DOC = betaDOC*rates.jDOC(ix);
         jR_Si = betaSi*rates.jSi(ix);
-%         jR_g = betaG*rates.jTot(ix);
+        %         jR_g = betaG*rates.jTot(ix);
         jR_g = betaG*rates.f(ix).*rates.jMax(ix);
         jTot = rates.jTot(ix);%rates.f(ix).*rates.jMax(ix);
         jCloss_L=(1-eL)/eL*rates.jLreal(ix);
 
         fillbetweenlines(m, jR, jR+jR_DOC, [0 1 0]);
-        fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]);
+        fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]); %
         fillbetweenlines(m, jR+jR_DOC+jR_L, jR+jR_DOC+jR_L+jR_N, [0 0.6 0]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N, jR+jR_DOC+jR_L+jR_N+jR_Si, [0 0.4 0]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_Si, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g, [0.6 0 0]);
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N, jR+jR_DOC+jR_L+jR_N+jR_Si, [0 0.4 0]); % Silcate uptake
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_Si, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g, [0 0.3 0]);
+
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot, [0.8 0 0] )
+
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot+jLossPassive, [0 0 0.1]);
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot+jLossPassive, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot+jLossPassive+jCloss_L, [0 0 0.6]);
 
@@ -135,7 +160,7 @@ hold off
 
     end
 %     time = datestr(clock,'YYYY_mm_dd_HH_MM_SS');
-% 
+%
 % saveas(gcf,['panelResp_',time,'.png'])
 % p.rand
 end
