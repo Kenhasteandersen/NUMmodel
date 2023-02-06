@@ -8,7 +8,7 @@ module NUMmodel_wrap
       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
        setupGeneralistsSimpleCopepod, &
-       setupGeneric, setupNUMmodel, setupGenDiatCope,setupGeneric_csp, &
+       setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope,setupGeneric_csp, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
        getBalance
@@ -75,6 +75,13 @@ contains
 
     call setupNUMmodel(n,nCopepod,nPOM,mAdult)
   end subroutine f_setupNUMmodel
+
+    subroutine f_setupNUMmodelSimple(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
+    integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
+    real(c_double), intent(in):: mAdult(nCopepods)
+
+    call setupNUMmodelSimple(n,nCopepod,nPOM,mAdult)
+  end subroutine f_setupNUMmodelSimple
 
   subroutine f_setupGenDiatCope(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
     integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
@@ -186,24 +193,24 @@ contains
     call getSinking(velocity)
   end subroutine f_getSinking
    
-  subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-    jTot, jMax, jFmax, jR, jRespTot, jLossPassive, &
+  subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
+    jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
     jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
     use NUMmodel, only: nNutrients, getRates
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
-    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
+    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
-    real(dp), intent(out):: jR(nGrid-nNutrients), jRespTot(nGrid-nNutrients)
+    real(dp), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
     real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
-   call getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-   jTot, jMax, jFmax, jR, jRespTot, jLossPassive, &
+   call getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
+   jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
    jNloss,jLreal, jPOM, &
    mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates

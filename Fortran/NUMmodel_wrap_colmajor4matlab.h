@@ -20,6 +20,8 @@ void f_setupgeneric(const int nCopepods, const double mAdult[]);
 
 void f_setupnummodel(const int n, const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
 
+void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
+
 void f_setupgendiatcope(const int n,const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
 
 void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
@@ -97,11 +99,12 @@ void f_getrates(
 		double *jSi,
 		double *jF,
 		double *jFreal,
+		double *f,
 		double *jTot,
 		double *jMax,
 		double *jFmaxx,
 		double *jR,
-		double *jRespTot,
+		double *jResptot,
 		double *jLossPassive, 
 		double *jNloss,
 		double *jLreal, 

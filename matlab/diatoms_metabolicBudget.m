@@ -4,6 +4,7 @@ bL=0.08; bN=0.045; bg=0.02;
 bJx_tot=bL*sim.rates.jLreal(ixD)+bN*(sim.rates.jN(ixD)+sim.rates.jSi(ixD)+...
     sim.rates.jDOC(ixD));
 %%
+L=linspace(100,500,6);
 for i=1:length(L)
    for j=ixD 
     jR(i,j)=simL(i).rates.jR(j);

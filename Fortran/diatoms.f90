@@ -56,7 +56,7 @@ module diatoms
      real(dp) :: mMaxDiatom
      
      type, extends(spectrumUnicellular) :: spectrumDiatoms
-     real(dp), dimension(:), allocatable:: JSi,JSireal,Jresptot
+     real(dp), dimension(:), allocatable:: JSi,JSireal
 
      contains
        procedure, pass :: initDiatoms
@@ -102,8 +102,6 @@ namelist /input_diatoms / &
        call this%initUnicellular(n, mMinDiatom, mMaxDiatom)
        allocate(this%JSi(this%n))
        allocate(this%JSireal(this%n))
-       allocate(this%Jresptot(this%n))
-
 
        !
        ! Radius:
@@ -122,7 +120,7 @@ namelist /input_diatoms / &
        this%JlossPassive = cLeakage/this%r * this%m ! in units of C
  
        this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
-       this%Jresp = cR*alphaJ*this%m
+       this%Jresp = 0.3*cR*alphaJ*this%m ! decrease suggested by Ken
    
        this%beta = 0.d0 ! No feeding
        this%palatability = 0.5d0 ! Lower risk of predation

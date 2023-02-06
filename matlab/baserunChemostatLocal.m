@@ -20,8 +20,13 @@ end
 %     nPOM = 10;
 %     p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
 %     
-p = setupGeneralistsSimpleOnly;
-
+% p = setupNUMmodel();
+% p = setupGeneric(10);
+% p = setupGeneralistsSimpleOnly;
+% p = setupGeneralistsOnly;
+p = setupGeneralistsDiatoms;
+% p = setupGenDiatCope(2,2,1);
+%  p = setupDiatomsOnly;
 p = parametersChemostat(p);
 p.tEnd = 2000;
 p.d = 0.1;
@@ -36,6 +41,7 @@ end
 %
 % Simulate
 %
+% p.d=0.1;
 tic
 sim = simulateChemostat(p, 100);
 toc

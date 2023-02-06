@@ -43,7 +43,7 @@ end subroutine f_setupGeneralistsOnly
   end subroutine f_calcDerivatives
 
 ! Returns the rates calculated from last call to calcDerivatives
-  subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
+  subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
     jTot, jMax, jFmaxx, jR, jRespTot, jLossPassive, &
     jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
@@ -51,7 +51,7 @@ end subroutine f_setupGeneralistsOnly
     use NUMmodel, only: getRates, nNutrients, nGrid
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
-    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
+    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmaxx(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients), jRespTot(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
@@ -59,7 +59,7 @@ end subroutine f_setupGeneralistsOnly
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
-    call getRates(jN, jDOC, jL, jSi, jF, jFreal,&
+    call getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
     jTot, jMax, jFmaxx, jR, jRespTot, jLossPassive, &
     jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
