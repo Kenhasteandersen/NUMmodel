@@ -1,1 +1,0 @@
-simGD_Fun_old=calcFunctions(simGD);

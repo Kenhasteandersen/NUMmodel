@@ -1,1 +1,0 @@
-sim=calcFunctions(ans)

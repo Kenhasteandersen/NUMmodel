@@ -1,0 +1,60 @@
+iGroup=2;
+[budg,Y] =resp_budget(p,simOl.rates,iGroup);
+
+%-------------------------------
+% MB = Metabolic budget array
+%-------------------------------
+% MB               = [g_mean; jLoss_mean; total_MC_mean]'; 
+MB = budg;
+growth=MB(1:10);
+exud=MB(11:20);
+respTot=MB(21:30);
+% total_MB         = g+jLoss+total_MC;
+total_MB         = MB(1:10)+MB(11:20)+MB(21:30);
+total_MB_mean    = mean(total_MB,1);
+
+% Y= [jLcost;jNcost;jSicost;jDOCcost; jNet_cost_mean; jR_mean]';
+% MBdetails = [g_mean ; jLoss_mean; Y']';
+%           [jLcost;    jNcost;   jSicost;    jDOCcost; jNet_cost_mean; jR_mean]
+costcolors= {'#b5fded',' #b5eded','#b5dded','#b5cded','#b5bded', ' #d7bde2'};
+newcolors = {'#b25781', '#66b9bb','#b5fded',' #b5eded','#b5dded','#b5cded','#b5bded', '#d7bde2'};
+
+m=p.m(4:13);
+%%
+% %
+figure(1)
+clf(1)
+
+subplot(121)
+bar(log10(m),MB./total_MB','stacked')
+legend('growth','Exud loss','Total respiration costs','Location','bestoutside')
+title('metabolic budget (%)')
+set(gca,'Xtick',-3:1); %// adjust manually; values in log scale
+set(gca,'Xticklabel',10.^get(gca,'Xtick')); %// use labels with linear values
+xlabel('size')
+axis tight
+colororder(newcolors);
+
+
+% Y= [jLcost;jNcost;jSicost;jDOCcost; jNet_cost_mean; jR_mean]';
+% barN=bar(log10(m),Y,'stacked');
+MBdetails = [growth ; exud; Y]';
+ZZ=MBdetails./total_MB_mean';
+subplot(122)
+z=bar(ZZ,'stacked');
+% bar(log10(m),MBdetails./total_MB_mean','stacked')
+if iGroup==2
+legend('growth','Passive loss','Lcost','Ncost','Sicost','DOC cost',...
+    'biosynthesis cost','jR','Location','bestoutside')
+end
+if iGroup==1
+legend('growth','Passive loss','Lcost','Ncost','Fcost','DOC cost',...
+    'biosynthesis cost','jR','Location','bestoutside')
+end
+title('metabolic budget (%)')
+colororder(newcolors);
+
+set(gca,'Xtick',-3:1);                      %// adjust manually; values in log scale
+set(gca,'Xticklabel',10.^get(gca,'Xtick')); %// use labels with linear values
+xlabel('size')
+axis tight

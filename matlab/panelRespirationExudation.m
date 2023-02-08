@@ -1,6 +1,7 @@
 %
 % Makes a panel of the various contributions to respiration for a group
 % with beta-factors (generalists or diatoms).
+% it does not work for setups with Generalists/Diatoms_simple
 %
 % In:
 %  p - the parameter structure
