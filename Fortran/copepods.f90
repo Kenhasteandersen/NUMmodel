@@ -51,9 +51,10 @@ module copepods
     procedure, pass :: initCopepod
     procedure :: calcDerivativesCopepod
     procedure :: printRates => printRatesCopepod
+    procedure :: getNbalanceCopepods
   end type spectrumCopepod
 
-  public spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod
+  public spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod, getNbalanceCopepods
 contains
 
   subroutine read_namelist()
@@ -165,12 +166,12 @@ contains
     !
     ! Check balance: (should be zero)
     !
-    !write(*,*) 'Copepod N balance:', &
-    !      + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
-    !      - sum(dudt)/rhoCN & ! Accumulation of biomass
-    !      - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
-    !      - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
-    !      - sum(this%mort*u)/rhoCN  ! Mortality losses
+    write(*,*) 'Copepod N balance:', &
+          + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
+          - sum(dudt)/rhoCN & ! Accumulation of biomass
+          - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
+          - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
+          - sum(this%mort*u)/rhoCN  ! Mortality losses
 
   end subroutine calcDerivativesCopepod
 
@@ -187,16 +188,17 @@ contains
      write(*,99) "g:", this%g
   end subroutine printRatesCopepod
 
-  !function getNbalanceCopepods(this, N, dNdt, u, dudt) result(Nbalance)
-  !  real(dp):: Nbalance
-  !  class(spectrumCopepods), intent(in):: this
-  !  real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
+  function getNbalanceCopepods(this, N, dNdt, u, dudt) result(Nbalance)
+    class(spectrumCopepod), intent(in):: this
+    real(dp):: Nbalance
+    real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
 
-  !  Nbalance = (dNdt + sum( dudt & ! Change in standing stock of N
-  !    + (1-fracHTL_to_N)*this%mortHTL*u & ! HTL not remineralized
-  !    + (1-remin2)*this%mort2*u & ! Viral mortality not remineralized
-      !+ (1-reminF)*this%JCloss_feeding/this%m * u & ! Feeding losses not remineralized
-  !       )/rhoCN)/N
-  !end function getNbalanceCopepods
+    Nbalance = & !(dNdt + sum( dudt & ! Change in standing stock of N
+          + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
+          - sum(dudt)/rhoCN & ! Accumulation of biomass
+          - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
+          - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
+          - sum(this%mort*u)/rhoCN  ! Mortality losses
+  end function getNbalanceCopepods
 
 end module copepods

@@ -980,6 +980,11 @@ contains
                     spec%getSibalanceDiatoms(u(idxSi), dudt(idxSi), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
+         type is (spectrumCopepod)
+            Nbalance = Nbalance + &
+                    spec%getNbalanceCopepods(u(idxN), dudt(idxN), &
+                    u(ixStart(iGroup):ixEnd(iGroup) ), &
+                    dudt( ixStart(iGroup):ixEnd(iGroup) ))
      end select
    end do
   end subroutine getBalance

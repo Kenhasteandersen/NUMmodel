@@ -96,8 +96,8 @@
 ! Dissolved nutrient uptake:
       alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
       rNstar = 2.                   ! Description [mum]
-      bN = 0.45                     ! cost of N uptake [mugC/mugN]
-      bDOC = 0.45                   ! cost of DOC uptake [mugC/mugC]
+      bN = 0.3                     ! cost of N uptake [mugC/mugN]
+      bDOC = 0.3                   ! cost of DOC uptake [mugC/mugC]
 !
 ! Phagotrophy
 !
@@ -106,7 +106,7 @@
       cF = 30.
       beta = 500.d0
       sigma = 1.3d0
-      bF = 0.35                     ! Cost of food uptake [mugC/mugC]
+      bF = 0.3                     ! Cost of food uptake [mugC/mugC]
 !
 ! Metabolism
 !

@@ -107,7 +107,9 @@ namelist /input_diatoms / &
        ! Radius:
        !
        this%r = (threequarters/pi * this%m/rho/(1-v))**onethird  ! Andy's approximation
-       this%nu = 3*delta/this%r
+      ! this%nu = 3*delta/this%r
+      this%nu = 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
+        (v**twothirds + (1.+v)**twothirds)
        do i = 1,this%n
         this%nu(i) = min(1.d0, this%nu(i))
        enddo
