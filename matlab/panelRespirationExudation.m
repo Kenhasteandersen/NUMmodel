@@ -24,8 +24,7 @@ m = p.m(ix+p.idxB-1);
 jR = rates.jR(ix);
 jLossPassive =(1-rates.f(ix)).* rates.jLossPassive(ix);
 set(gca,'yscale','linear')
-fillbetweenlines(m, 0*jR, jR, [0 0.2 0]);  % Basal
-hold on
+
 
 ymax = max(rates.jR);
 
@@ -52,6 +51,7 @@ switch p.nameGroup{iGroup}
 
         if bScaled
             jTotal = jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L+jCloss_F;
+            jR = jR ./ jTotal;
             jR_L = jR_L ./ jTotal;
             jR_N = jR_N ./ jTotal;
             jR_DOC = jR_DOC ./ jTotal;
@@ -63,6 +63,8 @@ switch p.nameGroup{iGroup}
         end
 
         % Respirations:
+        fillbetweenlines(m, 0*jR, jR, [0 0.2 0]);  % Basal
+        hold on
         fillbetweenlines(m, jR, jR+jR_DOC, [0 1 0]); % DOC
         fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]); % Light
         fillbetweenlines(m, jR+jR_DOC+jR_L, jR+jR_DOC+jR_L+jR_N, [0 0.6 0]); % Nutrients
@@ -100,6 +102,7 @@ switch p.nameGroup{iGroup}
 
          if bScaled
             jTotal = jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot+jLossPassive+jCloss_L;
+            jR = jR ./ jTotal;
             jR_L = jR_L ./ jTotal;
             jR_N = jR_N ./ jTotal;
             jR_DOC = jR_DOC ./ jTotal;
@@ -107,8 +110,10 @@ switch p.nameGroup{iGroup}
             jR_g = jR_g ./ jTotal;
             jTot = jTot ./ jTotal;
             jCloss_L = jCloss_L ./ jTotal;
-        end
+         end
         
+        fillbetweenlines(m, 0*jR, jR, [0 0.2 0]);  % Basal
+        hold on
         fillbetweenlines(m, jR, jR+jR_DOC, [0 1 0]);
         fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]); %
         fillbetweenlines(m, jR+jR_DOC+jR_L, jR+jR_DOC+jR_L+jR_N, [0 0.6 0]);
