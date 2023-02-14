@@ -52,37 +52,10 @@ if ~exist(p.pathBoxes,'file')
     error( sprintf('Error: Cannot find transport matrix file: %s',...
         p.pathBoxes));
 end
-% ---------------------------------
-% Load library:
-% ---------------------------------
-% if p.bParallel
-%     if isempty(gcp('nocreate'))
-%         parpool('AttachedFiles',...
-%             {'../Fortran/NUMmodel_matlab.so',...
-%              '../Fortran/NUMmodel_wrap_colmajor4matlab.h'});
-%     end
-%     %
-%     % Set parameters:
-%     %
-%     h = gcp('nocreate');
-%     poolsize = h.NumWorkers;
-%     parfor i=1:poolsize
-%         loadNUMmodelLibrary();
-%         %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-%         calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
-%     end
-% else
-%     loadNUMmodelLibrary();
-%     %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-%     calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
-% end
 % ---------------------------------------
 % Initialize run:
 % ---------------------------------------
 simtime = p.tEnd/p.dtTransport; %simulation time in half days
-% Load grid data:
-%load(p.pathGrid);
-%load(p.pathConfigData);
 load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
 
 % Preparing timestepping
@@ -92,7 +65,7 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 % Initial conditions:
 %
-if (nargin==2)
+if isempty(sim)
     disp('Starting from previous simulation.');
     u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
     u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
@@ -129,7 +102,7 @@ end
 if p.bUse_parday_light
     load 'Transport Matrix/parday';
 end
-L0 = zeros(nb,730);
+L0 = zeros(nb,365/p.dtTransport);
 for i = 1:730
     if p.bUse_parday_light
         L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox);
@@ -182,7 +155,7 @@ for i=1:simtime
     %
     % Test for time to change monthly transport matrix
     %
-    if ismember(mod(i,730), 1+2*cumsum(mon))
+    if ismember(mod(i,365/p.dtTransport), 1+cumsum(mon)/p.dtTransport)
         % Load TM
         load(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
         %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
@@ -208,9 +181,9 @@ for i=1:simtime
         u(u(:,k)<p.umin(k),k) = p.umin(k);
     end
     %
-    % Run Euler time step for half a day:
+    % Run Euler time step for dtTransport days:
     %
-    L = L0(:,mod(i,365*2)+1);
+    L = L0(:,mod(i,365/p.dtTransport)+1);
     dt = p.dt;
 
     if ~isempty(gcp('nocreate'))
@@ -235,9 +208,6 @@ for i=1:simtime
     % Transport
     %
     if p.bTransport
-        %for k = 1:p.n
-        %    u(:,k) =  Aimp * (Aexp * u(:,k));
-        %end
         u =  Aimp*(Aexp*u);
 
         %for j = p.idxSinking
@@ -250,7 +220,6 @@ for i=1:simtime
     % Save timeseries in grid format
     %
     if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
-    %if ((mod(i*p.dtTransport,p.tSave) < mod((i-1)*p.dtTransport,p.tSave)) || (i==simtime))
         fprintf('t = %u days',floor(i/2))
 
         if any(isnan(u))

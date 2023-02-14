@@ -78,44 +78,24 @@
 !
 ! Copepods
 ! ========
+! Values taken from Serra-Pompei et al (2020) for actively feeding copepods
 &input_copepods
 
       epsilonF = 0.67               ! Assimilation efficiency
       epsilonR = 0.25               ! Reproductive efficiency
-      beta = 10000.d0               ! Description [unit]
-      sigma = 1.5d0                 ! Description [unit]
+      beta = 10000.                 ! Preferred predator-prey mass ratio
+      sigma = 1.5                   ! Preferred predator-prey mass range
       alphaF = 0.011                ! Clearance rate coefficient
       q = 0.75                      ! Exponent of clerance rate
-      h = 1.37                      ! Factor for maximum ingestion rate
+      h = 1.37                      ! Coefficient for maximum ingestion rate
       hExponent = 0.75              ! Exponent for maximum ingestions rate
-      kBasal = 0.01! 0.006          ! Factor for basal metabolism. This value represents basal
-      kSDA = 0.16                   ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
+      kBasal = 0.01                 ! Factor for basal metabolism {0.006}. This value represents basal metabolism at 
+                                    !   starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
+                                    !   0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid 
+                                    !   too long transients. 
+      kSDA = 0.16                   !  kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
+                                    !   data in Kiørboe and Hirst (2014) are for fully fed copepods.
       p = 0.75                      ! Exponent for respiration
-      AdultOffspring = 100.
+      AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
       remin = 0.0                   ! fraction of mortality losses reminerilized to N and DOC
-
-                                                                       
-! ======================================================================!
-! Parameter glossary                                                    !
-! ======================================================================!
-
-! Generalists
-! ===========
-
-! Light uptake
-!      epsilonL = Light uptake efficiency [] {0.8}
-
-! Metabolism
-!      delta: The constant is increased a bit to limit the lower cell size
-
-!
-! Copepods
-! ========
-!      kBasal = Factor for basal metabolism {0.006}. This value represents basal metabolism at 
-!               starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
-!               0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid 
-!               too long transients. 
-
-!      kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
-!             data in Kiørboe and Hirst (2014) are for fully fed copepods.
 /
