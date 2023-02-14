@@ -245,7 +245,7 @@ for i = 1:simtime
     %
     % Run Euler time step for half a day:
     %
-    L = L0(:,mod(iTime,365/p.dtTransport)+1);
+    L = L0(:,mod(iTime,365/p.dtTransport)+1); 
     dt = p.dt;
     dtTransport = p.dtTransport;
     n = p.n;
