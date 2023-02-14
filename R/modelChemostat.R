@@ -367,6 +367,7 @@ getFrates = function(p) {
                    jLossPassive = vector(length=nGrid, mode="numeric"),
                    jNloss = vector(length=nGrid, mode="numeric"),
                    jLreal = vector(length=nGrid, mode="numeric"),
+                   jPOM = vector(length=nGrid, mode="numeric"),
                    mortpred = vector(length=nGrid, mode="numeric"),
                    mortHTL = vector(length=nGrid, mode="numeric"),
                    mort2 = vector(length=nGrid, mode="numeric"),
