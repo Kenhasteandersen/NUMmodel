@@ -102,7 +102,7 @@ end
 if p.bUse_parday_light
     load 'Transport Matrix/parday';
 end
-L0 = zeros(nb,365/p.dtTransport);
+L0 = zeros(nb,365/p.dtTransport );
 for i = 1:730
     if p.bUse_parday_light
         L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox);

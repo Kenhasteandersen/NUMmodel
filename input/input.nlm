@@ -1,6 +1,6 @@
 !                                                                       !           
 ! ======================================================================!
-! Input parameters for NUM model generalists                            !
+! Input parameters for NUM model                       !
 ! ======================================================================!
 ! This file contains the input parameters for the NUM Model.            !
 ! The parameters are read in in the different initialization            !
@@ -31,11 +31,11 @@
 !
 ! Generalists
 ! ===========
-&input_generalists
 ! This is the input parameters for the generalists. They are read
 ! in in the initGeneralists subroutine in generalists.f90
 ! All parameter values are given in Andersen and Visser (2023) unless noted
-
+!
+&input_generalists
 !
 ! General
 !
@@ -79,6 +79,7 @@
 ! Copepods
 ! ========
 ! Values taken from Serra-Pompei et al (2020) for actively feeding copepods
+!
 &input_copepods
 
       epsilonF = 0.67               ! Assimilation efficiency
@@ -86,7 +87,7 @@
       beta = 10000.                 ! Preferred predator-prey mass ratio
       sigma = 1.5                   ! Preferred predator-prey mass range
       alphaF = 0.011                ! Clearance rate coefficient
-      q = 0.75                      ! Exponent of clerance rate
+      q = 0.75                      ! Exponent of clearance rate
       h = 1.37                      ! Coefficient for maximum ingestion rate
       hExponent = 0.75              ! Exponent for maximum ingestions rate
       kBasal = 0.01                 ! Factor for basal metabolism {0.006}. This value represents basal metabolism at 
