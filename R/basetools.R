@@ -21,8 +21,8 @@ right <- 4
 
 ticklength <- 0.2 # tick mark length
 omargin <- 0.7 # outer margins
-cex <- 1#0.9
-cexaxis <- 1#0.8 # Scaling of size of numbers on axes
+cex <- 1.2#0.9
+cexaxis <- 1.2#0.8 # Scaling of size of numbers on axes
 axis.lwd <- 0.8
 
 iPlot <- 1 # Static variable used for labels on plots
