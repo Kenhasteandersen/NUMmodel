@@ -859,7 +859,7 @@ plotLeaks = function(sim, t=max(sim$t)) {
   lines(m, r$jNloss-r$jCloss_feeding, col="blue", lwd=4)
   lines(m, r$jCloss_feeding, col="red", lwd=4)
   lines(m, r$jCloss_photouptake, col="green", lwd=4)
-  lines(m, r$jloss_passive, col="darkgreen", lwd=4)
+  lines(m, r$jLossPassive, col="darkgreen", lwd=4)
   
   legend(x="topright", cex=cex,
          legend=c("Leaks:","N exudation", "C exudation",
