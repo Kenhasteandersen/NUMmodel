@@ -125,8 +125,8 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
     %
     % Calc Light:
     %
-    L0 = zeros(nGrid,730);
-    for i = 1:730
+    L0 = zeros(nGrid,365/p.dtTransport);
+    for i = 1:365/p.dtTransport
         zup = sim.z - 0.5*sim.dznom; % Top of a box
         zup = zup(1:length(idxGrid));
         dz = sim.dznom(1:length(idxGrid));
@@ -142,8 +142,8 @@ if options.bRecalcLight
     %
     % Calc Light:
     %
-    L0 = zeros(nGrid,730);
-    for i = 1:730
+    L0 = zeros(nGrid,365/p.dtTransport);
+    for i = 1:365/p.dtTransport
         zup = sim.z - 0.5*sim.dznom; % Top of a box
         zup = zup(1:length(idxGrid));
         dz = sim.dznom(1:length(idxGrid));
@@ -245,7 +245,7 @@ for i = 1:simtime
     %
     % Run Euler time step for half a day:
     %
-    L = L0(:,mod(iTime,365*2)+1);
+    L = L0(:,mod(iTime,365/p.dtTransport)+1);
     dt = p.dt;
     dtTransport = p.dtTransport;
     n = p.n;
