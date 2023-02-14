@@ -4,7 +4,7 @@
 function p = setupNUMmodel(mAdult, n,nCopepods,nPOM, bParallel)
 
 arguments
-    mAdult (1,:) = [];
+    mAdult (1,:) = 10.^(-1:3);
     n = 10;
     nCopepods = 10;
     nPOM = 10;
