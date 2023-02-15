@@ -65,7 +65,7 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 % Initial conditions:
 %
-if isempty(sim)
+if ~isempty(sim)
     disp('Starting from previous simulation.');
     u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
     u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
@@ -112,15 +112,58 @@ for i = 1:730
     end
 end
 %
-% Calculate sinking matrix:
+% Calculate sinking matrices:
 %
-%[Asink,p] = calcSinkingMatrix(p, sim, nGrid);
-%
+sim = load(p.pathGrid,'x','y','z','dznom','bathy');
+%% Get sinking velocities from libNUMmodel:
+%u = 0*u;
+
+p.velocity = 0*p.m;
+p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
+
+idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
+
+if ~isempty(idxSinking)
+    % Allocate sinking matrices:
+    Asink = {};
+    for l = 1:length(idxSinking)
+        Asink{l} = sparse(1,1,0,nb,nb,nb*2);
+    end
+    % Find the indices into the grid
+    xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid); 
+    idxLower = zeros(1,nb);
+    % Run through all latitudes and longitudes:
+    for i = 1:size(xx,1)
+        for j = 1:size(xx,2)
+            % Find the watercolumn indices:
+            idxGrid = squeeze(xx(i, j, :));
+            idxGrid = idxGrid( ~isnan(idxGrid));
+
+            if ~isempty(idxGrid)
+                % Run through all sinking state variables
+                for l = 1:length(idxSinking)
+                       % Top level only loses mass
+                       Asink{l}(idxGrid(1),idxGrid(1)) = 1-min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(1));
+                       for k = 2:length(idxGrid)
+                           flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(k));
+                           % Other levels loses mass:
+                           Asink{l}(idxGrid(k),idxGrid(k)) = 1-flx;
+                           % ... and receives mass
+                           Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
+                       end
+                end
+
+%                u(idxGrid(1),:) = 1;
+            end
+        end
+    end
+end
+
+%%
 % Matrices for saving the solution:
 %
 iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
-sim = load(p.pathGrid,'x','y','z','dznom','bathy');
 sim.N = single(zeros(length(sim.x), length(sim.y), length(sim.z),nSave));
 if bSilicate
     sim.Si = sim.N;
@@ -198,10 +241,18 @@ for i=1:simtime
         for k = 1:nb
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
                 u(k,:),L(k), T(k), dtTransport, dt);
-            %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
-            % If we use ode23:
-            %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
-            %u(k,:) = utmp(end,:);
+        %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
+        % If we use ode23:
+        %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
+        %u(k,:) = utmp(end,:);
+        end
+    end
+    %
+    % Sinking:
+    %
+    if ~isempty(idxSinking)
+        for l = 1:length(idxSinking)
+            u(:,idxSinking(l)) = Asink{l}*u(:,idxSinking(l));
         end
     end
     %
@@ -209,13 +260,7 @@ for i=1:simtime
     %
     if p.bTransport
         u =  Aimp*(Aexp*u);
-
-        %for j = p.idxSinking
-        %    u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); % Sinking
-        %end
     end
-
-
     %
     % Save timeseries in grid format
     %
@@ -285,3 +330,92 @@ if bCalcAnnualAverages
     sim.BmicroAnnualMean = squeeze(tmp(:,:,1));
 end
 end
+
+
+%
+% Setup matrix for sinking. Used internally by simulateWatercolumn and
+% simulateGlobal
+%
+function [Asink,p] = calcSinkingMatrix(p)
+%
+% Get sinking velocities from libNUMmodel:
+%
+p.velocity = 0*p.m;
+p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
+p.idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
+%
+% Set up the matrix:
+%
+load(p.pathGrid,'z','dznom');
+nGrid = length(z);
+Asink = zeros(p.n,nGrid,nGrid);
+for i = 1:nGrid
+    k = p.velocity/(dznom(i)*p.dtTransport);
+    Asink(:,i,i) = 1+k;
+    if (i ~= 1)
+        Asink(:,i,i-1) = -k;
+    end
+end
+% Bottom BC:
+Asink(end) = 1;
+%
+% Invert matrix to make it ready for use:
+%
+for i = 1:p.n
+    Asink(i,:,:) = inv(squeeze(Asink(i,:,:)));
+end
+%
+% Distribute matrices:
+%
+
+
+end
+
+
+% %
+% % Setup matrix for sinking
+% %
+% function [Asink,p] = calcSinkingMatrix(p, sim, nGrid)
+% %
+% % Get sinking velocities from libNUMmodel:
+% %
+% p.velocity = 0*p.m;
+% p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
+% p.idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
+%
+% if ~isempty(p.idxSinking)
+%     fprintf("Setting up sinking matrix\n")
+%     %
+%     % Set up the matrices for each sinking state variable:
+%     %
+%     load(p.pathGrid,'z','dznom');
+%
+%     sink = {};
+%     for i = 1:length(p.idxSinking)
+%         sink{i} = sparse(nb, nb);
+%     end
+%
+%     for i = 1:nb
+%         ixZ = find(Zbox(i)==z);
+%         dz(i) = dznom( ixZ );
+%     end
+%         for j = p.idxSinking
+%             k = p.velocity(j)/(dz*p.dtTransport); % Needs to be multiplied by the velocity
+%             sink{j}(i,i) = 1+k;
+%             if (ixZ ~= 1)
+%                 sink{j}(i,i-1) = -k;
+%             end
+%         end
+%         % Bottom BC:
+%         %Asink(end) = 1;
+%     end
+%
+%     %
+%     % Invert matrices to make them ready for use:
+%     %
+%     for j = p.idxSinking
+%         sink{j} = inv(sink{j});
+%     end
+% end
+%
+% end

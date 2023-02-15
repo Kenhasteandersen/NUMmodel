@@ -1,6 +1,6 @@
 %
 % Setup matrix for sinking. Used internally by simulateWatercolumn and
-% simulateGlobal.
+% simulateGlobal
 %
 function [Asink,p] = calcSinkingMatrix(p, sim, nGrid)
 %
@@ -20,13 +20,12 @@ for i = 1:nGrid
         Asink(:,i,i-1) = -k;
     end
 end
-%BottomBC: 
+% Bottom BC:
 Asink(end) = 1;
-
-
 %
 % Invert matrix to make it ready for use:
 %
 for i = 1:p.n
     Asink(i,:,:) = inv(squeeze(Asink(i,:,:)));
+end
 end

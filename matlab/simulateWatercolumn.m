@@ -47,7 +47,7 @@ if isfield(p,'idxSi')
     bSilicate = true;
 end
 ixB = p.idxB:p.n;
- 
+
 %Tbc = [];
 
 disp('Preparing simulation')
@@ -245,7 +245,7 @@ for i = 1:simtime
     %
     % Run Euler time step for half a day:
     %
-    L = L0(:,mod(iTime,365/p.dtTransport)+1); 
+    L = L0(:,mod(iTime,365/p.dtTransport)+1);
     dt = p.dt;
     dtTransport = p.dtTransport;
     n = p.n;
@@ -309,7 +309,7 @@ for i = 1:simtime
                     (1-reminHTL)*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % % HTL losses:gN/m2/day
                 sim.Nloss(iSave) = sim.Nloss(iSave) + ...
                     sum(rates.jPOM.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN;
-                    %remin2*sum(rates.mort2.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % remin2 losses
+                %remin2*sum(rates.mort2.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % remin2 losses
             end
         end
 
