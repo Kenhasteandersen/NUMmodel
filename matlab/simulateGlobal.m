@@ -148,7 +148,6 @@ if ~isempty(idxSinking)
                         Asink{l}(idxGrid(k),idxGrid(k)) = 1-flx;
                         % ... and receives mass from the level above
                         Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
-
                     end
                 end
             end
@@ -298,7 +297,6 @@ for i=1:simtime
             sim.BmicroAnnualMean(k) = sim.BmicroAnnualMean(k) + Bmicro1/(p.tEnd*2*365);
         end
     end
-
 end
 time = toc;
 fprintf('Solving time: %2u:%02u:%02u\n', ...
@@ -327,92 +325,3 @@ if bCalcAnnualAverages
     sim.BmicroAnnualMean = squeeze(tmp(:,:,1));
 end
 end
-
-
-%
-% Setup matrix for sinking. Used internally by simulateWatercolumn and
-% simulateGlobal
-%
-function [Asink,p] = calcSinkingMatrix(p)
-%
-% Get sinking velocities from libNUMmodel:
-%
-p.velocity = 0*p.m;
-p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
-p.idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
-%
-% Set up the matrix:
-%
-load(p.pathGrid,'z','dznom');
-nGrid = length(z);
-Asink = zeros(p.n,nGrid,nGrid);
-for i = 1:nGrid
-    k = p.velocity/(dznom(i)*p.dtTransport);
-    Asink(:,i,i) = 1+k;
-    if (i ~= 1)
-        Asink(:,i,i-1) = -k;
-    end
-end
-% Bottom BC:
-Asink(end) = 1;
-%
-% Invert matrix to make it ready for use:
-%
-for i = 1:p.n
-    Asink(i,:,:) = inv(squeeze(Asink(i,:,:)));
-end
-%
-% Distribute matrices:
-%
-
-
-end
-
-
-% %
-% % Setup matrix for sinking
-% %
-% function [Asink,p] = calcSinkingMatrix(p, sim, nGrid)
-% %
-% % Get sinking velocities from libNUMmodel:
-% %
-% p.velocity = 0*p.m;
-% p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
-% p.idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
-%
-% if ~isempty(p.idxSinking)
-%     fprintf("Setting up sinking matrix\n")
-%     %
-%     % Set up the matrices for each sinking state variable:
-%     %
-%     load(p.pathGrid,'z','dznom');
-%
-%     sink = {};
-%     for i = 1:length(p.idxSinking)
-%         sink{i} = sparse(nb, nb);
-%     end
-%
-%     for i = 1:nb
-%         ixZ = find(Zbox(i)==z);
-%         dz(i) = dznom( ixZ );
-%     end
-%         for j = p.idxSinking
-%             k = p.velocity(j)/(dz*p.dtTransport); % Needs to be multiplied by the velocity
-%             sink{j}(i,i) = 1+k;
-%             if (ixZ ~= 1)
-%                 sink{j}(i,i-1) = -k;
-%             end
-%         end
-%         % Bottom BC:
-%         %Asink(end) = 1;
-%     end
-%
-%     %
-%     % Invert matrices to make them ready for use:
-%     %
-%     for j = p.idxSinking
-%         sink{j} = inv(sink{j});
-%     end
-% end
-%
-% end
