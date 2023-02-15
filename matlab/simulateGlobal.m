@@ -115,13 +115,11 @@ end
 % Calculate sinking matrices:
 %
 sim = load(p.pathGrid,'x','y','z','dznom','bathy');
-%% Get sinking velocities from libNUMmodel:
-%u = 0*u;
-
+% Get sinking velocities from libNUMmodel:
 p.velocity = 0*p.m;
 p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
-
-idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
+% Find indices of groups with sinking
+idxSinking = find(p.velocity ~= 0);
 
 if ~isempty(idxSinking)
     % Allocate sinking matrices:
@@ -130,7 +128,7 @@ if ~isempty(idxSinking)
         Asink{l} = sparse(1,1,0,nb,nb,nb*2);
     end
     % Find the indices into the grid
-    xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid); 
+    xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid);
     idxLower = zeros(1,nb);
     % Run through all latitudes and longitudes:
     for i = 1:size(xx,1)
@@ -142,18 +140,17 @@ if ~isempty(idxSinking)
             if ~isempty(idxGrid)
                 % Run through all sinking state variables
                 for l = 1:length(idxSinking)
-                       % Top level only loses mass
-                       Asink{l}(idxGrid(1),idxGrid(1)) = 1-min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(1));
-                       for k = 2:length(idxGrid)
-                           flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(k));
-                           % Other levels loses mass:
-                           Asink{l}(idxGrid(k),idxGrid(k)) = 1-flx;
-                           % ... and receives mass
-                           Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
-                       end
-                end
+                    % Top level loses mass
+                    Asink{l}(idxGrid(1),idxGrid(1)) = 1-min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(1));
+                    for k = 2:length(idxGrid)
+                        flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(k));
+                        % Other levels loses mass:
+                        Asink{l}(idxGrid(k),idxGrid(k)) = 1-flx;
+                        % ... and receives mass from the level above
+                        Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
 
-%                u(idxGrid(1),:) = 1;
+                    end
+                end
             end
         end
     end
@@ -241,10 +238,10 @@ for i=1:simtime
         for k = 1:nb
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
                 u(k,:),L(k), T(k), dtTransport, dt);
-        %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
-        % If we use ode23:
-        %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
-        %u(k,:) = utmp(end,:);
+            %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
+            % If we use ode23:
+            %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
+            %u(k,:) = utmp(end,:);
         end
     end
     %
