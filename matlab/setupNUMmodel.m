@@ -34,6 +34,7 @@ p.n = 2;
 % Generalists:
 p = parametersAddgroup(1,p,n);
 
+% Copepods:
 for i = 1:length(mAdultPassive)
     p = parametersAddgroup(10,p, nCopepods, mAdultPassive(i));
 end
