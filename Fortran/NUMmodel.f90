@@ -166,8 +166,9 @@ contains
    real(dp), intent(in):: mAdultPassive(:), mAdultActive(:)
    integer:: iCopepod
  
-   call parametersInit(size(mAdultActive)+size(mAdultPassive)+2, n + nPOM + nCopepod*(size(mAdultPassive)+size(mAdultActive)), 2)
+   call parametersInit(size(mAdultActive)+size(mAdultPassive)+3, 2*n + nPOM + nCopepod*(size(mAdultPassive)+size(mAdultActive)), 3)
    call parametersAddGroup(typeGeneralist, n, 0.0d0)
+   call parametersAddGroup(typeDiatom_simple, n, 1.0d0)
 
    do iCopepod = 1, size(mAdultPassive)
       call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod)) ! add copepod
@@ -198,8 +199,6 @@ contains
    ! call parametersFinalize(0.003d0, .true., .true.)
   !end subroutine setupGeneric_csp
 
-
-
   ! ======================================
   !  Model initialization stuff:
   ! ======================================
@@ -215,9 +214,7 @@ contains
     !
     ! Set groups:
     !
-    write(*,*) '1'
     call read_namelist_general()
-   write(*,*) '2'
 
     nGroups = nnGroups
     iCurrentGroup = 0

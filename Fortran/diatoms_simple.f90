@@ -72,7 +72,7 @@ module diatoms_simple
       class(spectrumDiatoms_simple):: this
       real(dp), intent(in):: mMax
       integer, intent(in):: n
-      real(dp), parameter:: mMin = 3.1623d-9
+      real(dp), parameter:: mMin = 5.d-8
       real(dp), parameter:: rho = 0.4*1d6*1d-12
   
       call this%initUnicellular(n, mMin, mMax)
