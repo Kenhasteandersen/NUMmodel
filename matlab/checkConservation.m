@@ -15,9 +15,10 @@ end
 %
 % Constants:
 %
-fracHTL_to_N = 0.5;
-rhoCN = 5.68;
-remin2 = 0.5;
+S = inputRead;
+fracHTL_to_N = S.input_general.fracHTL_to_N;
+rhoCN = S.input_general.rhoCN;
+remin2 = S.input_generalists.remin2; % NOTE: only valid for generalists
 
 p = sim.p;
 gains = 0;
@@ -57,6 +58,7 @@ switch sim.p.nameModel
         %
         accumulation = (sim.N(end)+sum(sim.B(end,:)/rhoCN)) - ...
             (sim.N(1)+sum(sim.B(1,:)/rhoCN));
+        
         dNdt = (accumulation - gains + lossHTL + loss)/1000*p.widthProductiveLayer/sim.t(end)*365; %gN/m2/yr
         dNdt_per_N = (accumulation - gains + lossHTL+loss) / sim.N(end)/sim.t(end)*365; % Fraction per year
         lossHTL = lossHTL/1000*p.widthProductiveLayer/sim.t(end)*365;

@@ -9,7 +9,7 @@ end
 p = sim.p;
 
 nPoints = 1000;
-mc = logspace(log10(sim.p.m(3)), log10(sim.p.m(end)), nPoints);
+mc = logspace(log10(sim.p.m(p.idxB)), log10(sim.p.m(end)), nPoints);
 Bc = zeros(1, nPoints);
 ixAve = find( sim.t > sim.t(end)/2 );
 
