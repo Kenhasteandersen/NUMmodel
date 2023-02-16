@@ -25,20 +25,20 @@ module diatoms_simple
     !
     ! Light uptake:
     !
-    real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
-    real(dp), parameter:: alphaL = 0.13
+    real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
+    real(dp), parameter:: alphaL = 0.3
     real(dp), parameter:: rLstar = 7.5
     !
     ! Costs
     !
     real(dp), parameter :: bL = 0 !0.08 ! cost of light harvesting mugC(mugC)^-1
-    real(dp), parameter :: bN = 0.45 ! cost of N uptake mugC(mugN)^-1
-    real(dp), parameter :: bSi = 0.45 ! cost of Si uptake mugC(mugSi)^-1
+    real(dp), parameter :: bN = 0. ! cost of N uptake mugC(mugN)^-1
+    real(dp), parameter :: bSi = 0. ! cost of Si uptake mugC(mugSi)^-1
     !
     ! Dissolved nutrient uptake:
     !
-    real(dp), parameter:: alphaN = 0.682 / (1-v) ! L/d/mugC/mum^2
-    real(dp), parameter:: rNstar = 2 ! mum
+    real(dp), parameter:: alphaN = 0.972 / (1-v) ! L/d/mugC/mum^2
+    real(dp), parameter:: rNstar = 0.4 ! mum
     !
     ! Metabolism
     !
@@ -51,7 +51,7 @@ module diatoms_simple
     ! Bio-geo:
     !
     real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-    real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
+    real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
     !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
     
     type, extends(spectrumUnicellular) :: spectrumDiatoms_simple
