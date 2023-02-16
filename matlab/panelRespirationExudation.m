@@ -1,7 +1,6 @@
 %
 % Makes a panel of the various contributions to respiration for a group
 % with beta-factors (generalists or diatoms).
-% it does not work for setups with Generalists/Diatoms_simple
 %
 % In:
 %  p - the parameter structure
@@ -15,7 +14,7 @@ arguments
     p struct;
     rates;
     iGroup;
-    bScaled logical = true;
+    bScaled logical = false;
 end
 
 ix = (p.ixStart(iGroup):p.ixEnd(iGroup))-p.idxB+1;
@@ -24,7 +23,6 @@ m = p.m(ix+p.idxB-1);
 jR = rates.jR(ix);
 jLossPassive =(1-rates.f(ix)).* rates.jLossPassive(ix);
 set(gca,'yscale','linear')
-
 
 ymax = max(rates.jR);
 
@@ -61,7 +59,7 @@ switch p.nameGroup{iGroup}
             jCloss_L = jCloss_L ./ jTotal;
             jCloss_F = jCloss_F ./ jTotal;
         end
-
+        
         % Respirations:
         fillbetweenlines(m, 0*jR, jR, [0 0.2 0]);  % Basal
         hold on
@@ -76,7 +74,6 @@ switch p.nameGroup{iGroup}
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive, [0 0 0.1]); % Passive
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L, [0 0 0.6]); % Light
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L+jCloss_F, [0 0 0.4]); % Feeding
-
 
         ymax = max(jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot+jLossPassive+jCloss_L+jCloss_F);
         legend({'Basal','DOC','Light','Nutrients','Feeding','Growth','Total growth',...
@@ -100,20 +97,6 @@ switch p.nameGroup{iGroup}
         jTot = rates.jTot(ix);%rates.f(ix).*rates.jMax(ix);
         jCloss_L=(1-eL)/eL*rates.jLreal(ix);
 
-         if bScaled
-            jTotal = jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot+jLossPassive+jCloss_L;
-            jR = jR ./ jTotal;
-            jR_L = jR_L ./ jTotal;
-            jR_N = jR_N ./ jTotal;
-            jR_DOC = jR_DOC ./ jTotal;
-            jR_Si = jR_Si ./ jTotal;
-            jR_g = jR_g ./ jTotal;
-            jTot = jTot ./ jTotal;
-            jCloss_L = jCloss_L ./ jTotal;
-         end
-        
-        fillbetweenlines(m, 0*jR, jR, [0 0.2 0]);  % Basal
-        hold on
         fillbetweenlines(m, jR, jR+jR_DOC, [0 1 0]);
         fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]); %
         fillbetweenlines(m, jR+jR_DOC+jR_L, jR+jR_DOC+jR_L+jR_N, [0 0.6 0]);
@@ -128,12 +111,8 @@ switch p.nameGroup{iGroup}
         ymax = max(jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot+jLossPassive+jCloss_L);
         legend({'Basal','DOC','Light','Nutrients','Silicate','Growth','Total growth','Passive losses','Photouptake losses'})
 end
- if bScaled==true
-     scaling = ' scaled';
- else
-     scaling = ' ';
- end
-title(append('Respiration of ',lower(p.nameGroup{iGroup}),scaling))
+
+title(append('Respiration and exudation of ',lower(p.nameGroup{iGroup})))
 %semilogx(m, rates.jTot,'k-','linewidth',2);
 set(gca,'xscale','log')
 
@@ -141,7 +120,12 @@ xlim([min(m) max(m)])
 ylim([0 ymax])
 
 xlabel('Cell mass ({\mu}g_C)')
-ylabel('Respiration (day^{-1})')
+
+if bScaled
+    ylabel('Relative respiration or exudation')
+else
+    ylabel('Respiration or exudation (day^{-1})')
+end
 
 hold off
 %------------------------------------------------------------------
