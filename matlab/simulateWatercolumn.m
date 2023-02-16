@@ -278,6 +278,11 @@ for i = 1:simtime
     % Bottom BC for nutrients:
     u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
         p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+
+    if bSilicate
+        u(end, p.idxSi) = u(end, p.idxSi) +  p.dtTransport* ...
+        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxSi)-u(end,p.idxSi));
+    end
     %
     % Enforce minimum concentration
     %
