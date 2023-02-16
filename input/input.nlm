@@ -80,7 +80,7 @@
 ! ========
 ! Values taken from Serra-Pompei et al (2020) for actively feeding copepods
 !
-&input_copepods
+&input_copepods_active
 
       epsilonF = 0.67               ! Assimilation efficiency
       epsilonR = 0.25               ! Reproductive efficiency
@@ -96,7 +96,26 @@
                                     !   too long transients. 
       kSDA = 0.16                   !  kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
                                     !   data in Kiørboe and Hirst (2014) are for fully fed copepods.
-      p = 0.75                      ! Exponent for respiration
       AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
-      remin = 0.0                   ! fraction of mortality losses reminerilized to N and DOC
+      vulnerability = 1.            ! Active copepods have full risk of predation
+/
+
+&input_copepods_passive
+
+      epsilonF = 0.67               ! Assimilation efficiency
+      epsilonR = 0.25               ! Reproductive efficiency
+      beta = 100.                   ! Preferred predator-prey mass ratio
+      sigma = 1.                    ! Preferred predator-prey mass range
+      alphaF = 0.0052               ! Clearance rate coefficient
+      q = 0.75                      ! Exponent of clearance rate
+      h = 0.4                       ! Coefficient for maximum ingestion rate
+      hExponent = 0.75              ! Exponent for maximum ingestions rate
+      kBasal = 0.01                 ! Factor for basal metabolism {0.006}. This value represents basal metabolism at 
+                                    !   starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
+                                    !   0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid 
+                                    !   too long transients. 
+      kSDA = 0.16                   !  kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
+                                    !   data in Kiørboe and Hirst (2014) are for fully fed copepods.
+      AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
+      vulnerability = 0.2           ! Passive copepods have reduced risk of predation
 /

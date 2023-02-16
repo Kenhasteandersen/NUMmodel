@@ -9,8 +9,8 @@ module copepods
   use input
   implicit none
 
-  integer, parameter :: typeCopepodActive = 1
-  integer, parameter :: typeCopepodPassive = 2
+  integer, parameter :: passive = 1
+  integer, parameter :: active = 2
 
   private
 
@@ -24,41 +24,58 @@ module copepods
   real(dp) :: hExponent  ! Exponent for maximum ingestions rate
   real(dp) :: kBasal ! 0.006 ! Factor for basal metabolism.This value represents basal
   real(dp) :: kSDA  ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
-  real(dp) :: p  ! Exponent for respiration
-  real(dp) :: AdultOffspring 
-  real(dp) :: remin! fraction of mortality losses reminerilized to N and DOC
+  !real(dp) :: p  ! Exponent for respiration
+  real(dp) :: AdultOffspring
+  real(dp) :: vulnerability ! Passed to "palatability" in the parent spectrum class
+  !real(dp) :: remin! fraction of mortality losses reminerilized to N and DOC
 
   type, extends(spectrumMulticellular) :: spectrumCopepod
-    integer :: typeCopepod ! Whether the copepod is active or passive
+    integer :: feedingmode ! Active=1; Passive=2
     real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:), JrespFactor(:)
   contains
     procedure, pass :: initCopepod
     procedure :: calcDerivativesCopepod
     procedure :: printRates => printRatesCopepod
   end type spectrumCopepod
+  
+  public active, passive, spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod
 
-  public spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod
 contains
 
-  subroutine read_namelist()
+  subroutine read_namelist(feedingmode)
+    integer, intent(in) :: feedingmode
     integer :: file_unit,io_err
 
-    namelist /input_copepods / epsilonF, epsilonR, beta, sigma, alphaF,q, &
-             & h, hExponent, kBasal, kSDA, p, AdultOffspring, remin
-
+    namelist /input_copepods_passive / epsilonF, epsilonR, beta, sigma, alphaF,q, &
+             & h, hExponent, kBasal, kSDA, AdultOffspring, vulnerability
+    namelist /input_copepods_active /  epsilonF, epsilonR, beta, sigma, alphaF,q, &
+             & h, hExponent, kBasal, kSDA, AdultOffspring, vulnerability
+    
     call open_inputfile(file_unit, io_err)
-    read(file_unit, nml=input_copepods, iostat=io_err)
-    call close_inputfile(file_unit, io_err)
 
+    if (feedingmode .eq. active) then
+      read(file_unit, nml=input_copepods_active, iostat=io_err)
+    else
+      if (feedingmode .eq. passive) then
+        read(file_unit, nml=input_copepods_passive, iostat=io_err)
+      else
+        stop
+      endif
+    endif
+
+    call close_inputfile(file_unit, io_err)
   end subroutine read_namelist
 
-  subroutine initCopepod(this, n, mAdult, feedingmode)
+  subroutine initCopepod(this, feedingmode, n, mAdult)
     class(spectrumCopepod), intent(inout):: this
+    integer, intent(in) :: feedingmode ! Whether the copepods is active or passive
     integer, intent(in):: n
     real(dp), intent(in):: mAdult
     real(dp):: lnDelta, mMin
 
-    call read_namelist()
+    this%feedingmode = feedingmode
+
+    call read_namelist(this%feedingmode)
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
@@ -80,6 +97,7 @@ contains
     this%JrespFactor = epsilonF*this%JFmax
     this%mort2constant = 0.d0 ! No quadratic mortality
     this%mort2 = 0.d0
+    this%palatability = vulnerability
 
     this%mPOM = 3.5e-3*this%m ! Size of fecal pellets (Serra-Pompei 2022 approximated)
   end subroutine initCopepod
@@ -160,8 +178,15 @@ contains
 
   subroutine printRatesCopepod(this)
    class(spectrumCopepod), intent(in):: this
+   character(7) :: type
 
-   write(*,*) "Copepod with ", this%n, " size classes and adult size ", this%m(this%n), "ugC."
+   if (this%feedingmode .eq. passive) then
+      type = 'Passive'
+   else
+      type = 'Active'
+   endif
+
+   write(*,*) type, " copepod with ", this%n, " size classes and adult size ", this%m(this%n), "ugC."
      call this%printRatesSpectrum()
 
      99 format (a10, 20f10.6)

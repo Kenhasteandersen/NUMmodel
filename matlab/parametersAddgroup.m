@@ -29,8 +29,11 @@ switch p.typeGroups(p.nGroups)
         p.nameGroup{p.nGroups} = 'Diatoms simple';
         p.colGroup{p.nGroups} = [0 0.5 0];
     case 10
-        p.nameGroup{p.nGroups} = sprintf('Copepod %.1f {\\mu}g',mAdult);
-        p.colGroup{p.nGroups} = [0.75 0.0 0];
+        p.nameGroup{p.nGroups} = sprintf('Passive copepod %.1f {\\mu}g',mAdult);
+        p.colGroup{p.nGroups} = [0.6 0.0 0];
+    case 11
+        p.nameGroup{p.nGroups} = sprintf('Active copepod %.1f {\\mu}g',mAdult);
+        p.colGroup{p.nGroups} = [0.85 0.0 0];
     case 100
         p.nameGroup{p.nGroups} = 'POM';
         p.colGroup{p.nGroups} = [165 42 42]/256; % Brown

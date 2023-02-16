@@ -23,10 +23,9 @@ module NUMmodel
    integer, parameter :: typeGeneralist_csp = 2
    integer, parameter :: typeDiatom = 3
    integer, parameter :: typeDiatom_simple = 4  
-   integer, parameter :: typeCopepod = 10
+   integer, parameter :: typeCopepodActive = 10
+   integer, parameter :: typeCopepodPassive = 11
    integer, parameter :: typePOM = 100
-
-
   !
   ! Variables that contain the size spectrum groups
   !
@@ -85,11 +84,11 @@ contains
   ! -----------------------------------------------
   ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
   ! -----------------------------------------------
-   subroutine setupGeneralistsOnly_csp()
-     call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
-     call parametersAddGroup(typeGeneralist_csp, 10, 10.d0**(-1.3d0)) ! generalists with 10 size classes
-     call parametersFinalize(0.003d0, .true., .true.) ! Serra-Pompei (2020))
-   end subroutine setupGeneralistsOnly_csp
+   !subroutine setupGeneralistsOnly_csp()
+   !  call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
+   !  call parametersAddGroup(typeGeneralist_csp, 10, 10.d0**(-1.3d0)) ! generalists with 10 size classes
+   !  call parametersFinalize(0.003d0, .true., .true.) ! Serra-Pompei (2020))
+   !end subroutine setupGeneralistsOnly_csp
 
   ! -----------------------------------------------
   ! A basic setup with only diatoms:
@@ -136,7 +135,7 @@ contains
   subroutine setupGeneralistsCopepod()
     call parametersInit(2, 20, 2)
     call parametersAddGroup(typeGeneralist, 10, 0.0d0)
-    call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
+    call parametersAddGroup(typeCopepodActive, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
   end subroutine setupGeneralistsCopepod
 
@@ -154,7 +153,7 @@ contains
        call parametersFinalize(0.1d0, .true., .true.)
     else
        do iCopepod = 1, size(mAdult)
-          call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
+          call parametersAddGroup(typeCopepodActive, n, mAdult(iCopepod)) ! add copepod
        end do
        call parametersFinalize(0.001d0, .true., .true.)
     end if
@@ -162,17 +161,22 @@ contains
   ! -----------------------------------------------
   ! Full NUM model setup with generalists, copepods, and POM
   ! -----------------------------------------------
-  subroutine setupNUMmodel(n, nCopepod, nPOM, mAdult)
+  subroutine setupNUMmodel(n, nCopepod, nPOM, mAdultPassive, mAdultActive)
    integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
-   real(dp), intent(in):: mAdult(:)
+   real(dp), intent(in):: mAdultPassive(:), mAdultActive(:)
    integer:: iCopepod
  
-   call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
+   call parametersInit(size(mAdultActive)+size(mAdultPassive)+2, n + nPOM + nCopepod*(size(mAdultPassive)+size(mAdultActive)), 2)
    call parametersAddGroup(typeGeneralist, n, 0.0d0)
 
-   do iCopepod = 1, size(mAdult)
-      call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
+   do iCopepod = 1, size(mAdultPassive)
+      call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod)) ! add copepod
    end do
+   
+   do iCopepod = 1, size(mAdultActive)
+      call parametersAddGroup(typeCopepodActive, nCopepod, mAdultActive(iCopepod)) ! add copepod
+   end do
+   
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM)) ! POM with nPOM size classes and max size 1 ugC
    call parametersFinalize(0.001d0, .true., .true.)
 
@@ -181,18 +185,18 @@ contains
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
   ! -----------------------------------------------
-  subroutine setupGeneric_csp(mAdult)
-    real(dp), intent(in):: mAdult(:)
-    integer, parameter:: n = 10 ! number of size classes in each group
-    integer:: iCopepod
+  !subroutine setupGeneric_csp(mAdult)
+  !  real(dp), intent(in):: mAdult(:)
+  !  integer, parameter:: n = 10 ! number of size classes in each group
+  !  integer:: iCopepod
 
-    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-    call parametersAddGroup(typeGeneralist_csp, n, 0.1d0)
-    do iCopepod = 1, size(mAdult)
-       call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
-    end do
-    call parametersFinalize(0.003d0, .true., .true.)
-  end subroutine setupGeneric_csp
+   ! call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
+   ! call parametersAddGroup(typeGeneralist_csp, n, 0.1d0)
+   ! do iCopepod = 1, size(mAdult)
+   !    call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
+   ! end do
+   ! call parametersFinalize(0.003d0, .true., .true.)
+  !end subroutine setupGeneric_csp
 
 
 
@@ -211,8 +215,10 @@ contains
     !
     ! Set groups:
     !
+    write(*,*) '1'
     call read_namelist_general()
-	
+   write(*,*) '2'
+
     nGroups = nnGroups
     iCurrentGroup = 0
     nNutrients = nnNutrients
@@ -288,8 +294,11 @@ contains
     case (typeGeneralist_csp)
       call initGeneralists_csp(specGeneralists_csp, n, mMax)
       allocate( group ( iCurrentGroup )%spec, source=specGeneralists_csp )
-   case(typeCopepod)
-      call initCopepod(specCopepod, n, mMax)
+   case(typeCopepodPassive)
+      call initCopepod(specCopepod, passive, n, mMax)
+      allocate (group( iCurrentGroup )%spec, source=specCopepod)
+   case(typeCopepodActive)
+      call initCopepod(specCopepod, active, n, mMax)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
    case(typePOM)
       call initPOM(specPOM, n, mMax)
@@ -721,7 +730,7 @@ contains
        !
        if (bLosses) then
          do iGroup = 1, nGroups
-            if ( group(iGroup)%spec%type .ne. typeCopepod ) then
+            if ( (group(iGroup)%spec%type .ne. typeCopepodActive) .and. (group(iGroup)%spec%type .ne. typeCopepodPassive) ) then
                dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) + diff*(0.d0 - u(idxB:nGrid))
             end if
          end do

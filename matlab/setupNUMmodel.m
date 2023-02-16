@@ -1,10 +1,11 @@
 %
 % Setup with generalists and a number of copepods
 %
-function p = setupNUMmodel(mAdult, n,nCopepods,nPOM, bParallel)
+function p = setupNUMmodel(mAdultPassive, mAdultActive, n,nCopepods,nPOM, bParallel)
 
 arguments
-    mAdult (1,:) = 10.^(-1:3);
+    mAdultPassive (1,:) = [0.2 5];
+    mAdultActive (1,:) = [1 10 100 1000];
     n = 10;
     nCopepods = 10;
     nPOM = 10;
@@ -13,13 +14,15 @@ end
 
 loadNUMmodelLibrary(bParallel);
 calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
-    int32(n), int32(nCopepods), int32(nPOM),length(mAdult), mAdult );
+    int32(n), int32(nCopepods), int32(nPOM), ...
+    length(mAdultPassive), mAdultPassive, length(mAdultActive), mAdultActive );
 if bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
     parfor i=1:poolsize
         calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
-            int32(n), int32(nCopepods), int32(nPOM),length(mAdult), mAdult );
+            int32(n), int32(nCopepods), int32(nPOM),...
+            length(mAdultPassive), mAdultPassive, length(mAdultActive), mAdultActive );
     end
 end
 
@@ -31,8 +34,11 @@ p.n = 2;
 % Generalists:
 p = parametersAddgroup(1,p,n);
 
-for i = 1:length(mAdult)
-    p = parametersAddgroup(10,p,nCopepods, mAdult(i));
+for i = 1:length(mAdultPassive)
+    p = parametersAddgroup(10,p, nCopepods, mAdultPassive(i));
+end
+for i = 1:length(mAdultActive)
+    p = parametersAddgroup(11,p, nCopepods, mAdultActive(i));
 end
 
 % POM:

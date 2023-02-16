@@ -2,7 +2,7 @@ void f_setupgeneralistsonly(const int n);
 
 void f_setupgeneralistspom(const int n, const int nPOM);
 
-void f_setupgeneralistsonly_csp();
+//void f_setupgeneralistsonly_csp();
 
 void f_setupdiatomsonly(const int n);
 
@@ -16,9 +16,11 @@ void f_setupgeneralistscopepod();
 
 void f_setupgeneric(const int nCopepods, const double mAdult[]);
 
-void f_setupnummodel(const int n, const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
+void f_setupnummodel(const int n, const int nCopepod, const int nPOM, 
+					const int nCopepodsPassive, const double mAdultPassive[], 
+					const int nCopepodsActive, const double mAdultActive[]);
 
-void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
+//void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
 
 void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
 

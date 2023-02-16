@@ -8,14 +8,14 @@ program NUMmodeltest
   integer:: i
 
 
-  call setupGeneric( (/0.1d0, 1.0d0 /) )
+  !call setupGeneric( (/0.1d0, 1.0d0 /) )
   !call setHTL(0.0001d0, 1.d0, .true.)
 
   !call setupGeneralistsCopepod()
   !call setHTL(0.1d0, 0.1d0, .false., .false.)
   !call setupGeneralistsOnly(5)
   !call setupGeneralistsPOM(10,5)
-  !call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /) )
+  call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /), (/1.d0, 10.d0, 100.d0, 1000.d0/) )
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
