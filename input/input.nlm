@@ -70,7 +70,7 @@
 !
 ! Biogeo:
 !
-      remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
+      !remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
       remin2 = 0.5d0                ! Fraction of viral lysis remineralized to DOC
       reminF = 0.1d0                ! Fraction of feeding losses remineralized
 /
