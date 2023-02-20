@@ -17,7 +17,7 @@ function runBifurcation(p, sField, range)
 arguments
     p struct;
     sField char = 'd';
-    range double = logscale(-4, -1, 10);
+    range double = logspace(-5, 0, 10);
 end
 
 L = 30;
@@ -103,4 +103,4 @@ hold off
 legend(legendentries, sLegend, 'location','northwest','box','off')
 xlabel(sField)
 ylabel('Biomass ({\mu}g/l)')
-ylim([1e-10 1e10])
+ylim([1e-4 1e3])

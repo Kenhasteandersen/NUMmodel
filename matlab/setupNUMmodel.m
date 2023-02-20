@@ -1,7 +1,7 @@
 %
 % Setup with generalists and a number of copepods
 %
-function p = setupNUMmodel(mAdultPassive, mAdultActive, n,nCopepods,nPOM, bParallel)
+function p = setupNUMmodel(mAdultPassive, mAdultActive, n,nCopepods,nPOM, options)
 
 arguments
     mAdultPassive (1,:) = [0.2 5];
@@ -9,14 +9,14 @@ arguments
     n = 10;
     nCopepods = 10;
     nPOM = 10;
-    bParallel = false;
+    options.bParallel = false;
 end
 
-loadNUMmodelLibrary(bParallel);
+loadNUMmodelLibrary(options.bParallel);
 calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
     int32(n), int32(nCopepods), int32(nPOM), ...
     length(mAdultPassive), mAdultPassive, length(mAdultActive), mAdultActive );
-if bParallel
+if options.bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
     parfor i=1:poolsize
