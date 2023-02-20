@@ -130,7 +130,7 @@
 !
 ! General
 !
-      mMin = 3.1623d-8            ! Smallest size [mug C]
+      mMin = 8d-8            ! Smallest size [mug C]
       rhoCSi = 3.4                  ! Carbon:Si mass ratio
       v  = 0.6                      ! Vacuole volume fraction
 !
@@ -166,7 +166,7 @@
 !
 ! General
 !
-      mMinDiatom = 3.1623d-9    ! Description [mug C]
+      mMinDiatom = 8d-8    ! Description [mug C]
 	mMaxDiatom = 1.0		    ! Description [mug C]
 
       rhoCSi = 3.4                  ! Carbon:Si mass ratio
