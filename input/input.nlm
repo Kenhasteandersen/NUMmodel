@@ -91,15 +91,15 @@
 ! Light uptake
 !
       epsilonL = 0.8                ! Light uptake efficiency []
-      alphaL = 0.13                 ! Scaling factor for light [unit]
+      alphaL = 0.33                 ! Scaling factor for light [unit]
       rLstar = 7.5                  ! Description [unit]
       bL = 0.08                     ! Cost of light harvesting [mugC/mugC]
 !
 ! Dissolved nutrient uptake:
       alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
-      rNstar = 2.                   ! Description [mum]
-      bN = 0.3                     ! cost of N uptake [mugC/mugN]
-      bDOC = 0.3                   ! cost of DOC uptake [mugC/mugC]
+      rNstar = 0.4                  ! Description [mum]
+      bN = 0.3                      ! cost of N uptake [mugC/mugN]
+      bDOC = 0.3                    ! cost of DOC uptake [mugC/mugC]
 !
 ! Phagotrophy
 !
@@ -108,11 +108,11 @@
       cF = 30.
       beta = 500.d0
       sigma = 1.3d0
-      bF = 0.3                     ! Cost of food uptake [mugC/mugC]
+      bF = 0.3                      ! Cost of food uptake [mugC/mugC]
 !
 ! Metabolism
 !
-      cLeakage = 0.003               ! Passive leakage of C and N
+      cLeakage = 0.03               ! Passive leakage of C and N
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
       cR = 0.1       
@@ -151,8 +151,8 @@
 !
 ! Metabolism
 !
-      cLeakage = 0.003              ! Passive leakage of C and N
- !     c = 0.0015                    ! Parameter for cell wall fraction of mass.
+      cLeakage = 0.03              ! Passive leakage of C and N
+ !    c = 0.0015                    ! Parameter for cell wall fraction of mass.
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
       cR = 0.1       
@@ -191,7 +191,7 @@
 !
 ! Metabolism
 !
-      cLeakage = 0.003              ! Passive leakage of C and N
+      cLeakage = 0.03              ! Passive leakage of C and N
  !     c = 0.0015                    ! Parameter for cell wall fraction of mass.
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]

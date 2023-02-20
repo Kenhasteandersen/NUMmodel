@@ -180,7 +180,7 @@ contains
  
    call parametersInit(size(mAdultActive)+size(mAdultPassive)+3, 2*n + nPOM + nCopepod*(size(mAdultPassive)+size(mAdultActive)), 3)
    call parametersAddGroup(typeGeneralist, n, 0.0d0)
-   call parametersAddGroup(typeDiatom_simple, n, 1.0d0)
+   call parametersAddGroup(typeDiatom, n, 1.0d0)
 
    do iCopepod = 1, size(mAdultPassive)
       call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod)) ! add copepod
@@ -203,8 +203,9 @@ contains
    real(dp), intent(in):: mAdult(:)
    integer:: iCopepod
  
-   call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
+   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3)
    call parametersAddGroup(typeGeneralistSimple, n, 0.0d0)
+   call parametersAddGroup(typeDiatom_simple, n, 1.0d0)
 
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepodActive, nCopepod, mAdult(iCopepod)) ! add copepod
