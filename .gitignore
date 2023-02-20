@@ -29,9 +29,9 @@ matlab/tmp.mat
 matlab/watercolumns.pdf
 Fortran/diatoms_ke.f90
 .DS_Store
-TMs
 Fortran/a.out
 Fortran/debug.out
 Fortran/module spec.f90
 matlab/debug.out
 matlab/Global.mp4
+.Rproj.user

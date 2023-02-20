@@ -51,9 +51,12 @@ module generalists
   !
   ! Biogeo:
   !
-  real(dp) :: remin ! fraction of mortality losses reminerilized to DOC
+  !real(dp) :: remin ! fraction of mortality losses reminerilized to DOC
   real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
   real(dp) :: reminF ! fraction of feeding losses to DOC
+  !
+  ! Max and min sizes
+  !
   real(dp) :: mMinGeneralist
   real(dp) :: mMaxGeneralist
 
@@ -81,14 +84,12 @@ contains
   subroutine read_namelist()
     integer :: file_unit,io_err
 
- namelist /input_generalists / &
+    namelist /input_generalists / &
              & epsilonL, alphaL, rLstar, bL, &
              & alphaN,rNstar, bN, bDOC, &
              & epsilonF, alphaF, cF, beta, sigma, bF, &
              & cLeakage, delta, alphaJ, cR, bg, &
-             & remin, remin2, reminF, mMinGeneralist, mMaxGeneralist
-
-
+             & remin2, reminF, mMinGeneralist, mMaxGeneralist
     call open_inputfile(file_unit, io_err)
         read(file_unit, nml=input_generalists, iostat=io_err)
         call close_inputfile(file_unit, io_err)

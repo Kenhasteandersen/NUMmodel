@@ -87,7 +87,6 @@ ylabel('Respiration (day^{-1})')
 
 hold off
 %------------------------------------------------------------------
-% h = fillbetweenlines(x,y1,y2,color)
 %
 % Fill between y1 (lower) and y2 (upper).
 %

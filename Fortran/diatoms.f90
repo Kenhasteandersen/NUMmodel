@@ -49,7 +49,6 @@ module diatoms
      !
      ! Bio-geo:
      !
-     real(dp) :: remin ! fraction of mortality losses reminerilized to N and DOC
      real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
      !real(dp) :: reminHTL ! fraction of HTL mortality remineralized
      real(dp) :: mMinDiatom
@@ -74,15 +73,15 @@ module diatoms
    contains
        
      subroutine read_namelist()
-      integer :: file_unit,io_err
+        integer :: file_unit,io_err
 
-namelist /input_diatoms / &
+        namelist /input_diatoms / &
              & RhoCSi, v, &
              & epsilonL, alphaL, rLstar, bL, &
              & alphaN,rNstar, bN, bDOC, &
              & bSi, &
              & cLeakage, delta, alphaJ, cR, bg, &
-             & remin, remin2,mMinDiatom, mMaxDiatom
+             & remin2,mMinDiatom, mMaxDiatom
 
 
         call open_inputfile(file_unit, io_err)

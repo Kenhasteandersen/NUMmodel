@@ -31,13 +31,17 @@ arguments
     options.bRecalcLight logical = false; % Recalc the light (different from the extracted watercolumn)
     options.dayFixed double = 0;
 end
+disp('Preparing simulation')
+
 %
 % Get the watercolumn parameters if they are not already set:
 %
 if ~isfield(p,'nameModel')
     p = parametersWatercolumn(p);
 end
-
+%
+% Define some shorthands:
+%
 ixN = p.idxN;
 ixDOC = p.idxDOC;
 
@@ -47,10 +51,10 @@ if isfield(p,'idxSi')
     bSilicate = true;
 end
 ixB = p.idxB:p.n;
- 
-%Tbc = [];
 
-disp('Preparing simulation')
+S = inputRead;
+reminHTL = S.input_general.fracHTL_to_N;
+rhoCN = S.input_general.rhoCN;
 %
 % Set path:
 %
@@ -62,8 +66,6 @@ addpath(strcat(path,'/Transport matrix'));
 % ---------------------------------------
 if isempty(sim)
     sim = load(p.pathGrid,'x','y','z','dznom','bathy'); % Load grid
-    %sim.x = lon;
-    %sim.y = lat;
 end
 load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
 idx = calcGlobalWatercolumn(lat, lon, sim); % Find the indices into matrix
@@ -125,8 +127,8 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
     %
     % Calc Light:
     %
-    L0 = zeros(nGrid,730);
-    for i = 1:730
+    L0 = zeros(nGrid,365/p.dtTransport);
+    for i = 1:365/p.dtTransport
         zup = sim.z - 0.5*sim.dznom; % Top of a box
         zup = zup(1:length(idxGrid));
         dz = sim.dznom(1:length(idxGrid));
@@ -142,8 +144,8 @@ if options.bRecalcLight
     %
     % Calc Light:
     %
-    L0 = zeros(nGrid,730);
-    for i = 1:730
+    L0 = zeros(nGrid,365/p.dtTransport);
+    for i = 1:365/p.dtTransport
         zup = sim.z - 0.5*sim.dznom; % Top of a box
         zup = zup(1:length(idxGrid));
         dz = sim.dznom(1:length(idxGrid));
@@ -245,7 +247,7 @@ for i = 1:simtime
     %
     % Run Euler time step for half a day:
     %
-    L = L0(:,mod(iTime,365*2)+1);
+    L = L0(:,mod(iTime,365/p.dtTransport)+1);
     dt = p.dt;
     dtTransport = p.dtTransport;
     n = p.n;
@@ -277,6 +279,11 @@ for i = 1:simtime
     % Bottom BC for nutrients:
     u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
         p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+
+    if bSilicate
+        u(end, p.idxSi) = u(end, p.idxSi) +  p.dtTransport* ...
+        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxSi)-u(end,p.idxSi));
+    end
     %
     % Enforce minimum concentration
     %
@@ -303,14 +310,12 @@ for i = 1:simtime
             rates = getRates(p,u(j,:),L(j),T(j));
             % Note: half of the HTL loss is routed directly back to N if we
             % don't have POM:
-            reminHTL = 0.5;
-            rhoCN=5.68;
             if ~sum(ismember(p.typeGroups,100))
                 sim.NlossHTL(iSave) = sim.NlossHTL(iSave) + ...
                     (1-reminHTL)*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % % HTL losses:gN/m2/day
                 sim.Nloss(iSave) = sim.Nloss(iSave) + ...
                     sum(rates.jPOM.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN;
-                    %remin2*sum(rates.mort2.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % remin2 losses
+                %remin2*sum(rates.mort2.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % remin2 losses
             end
         end
 
@@ -367,3 +372,36 @@ sim.Nprod = p.DiffBottom*(p.u0(p.idxN)-sim.N(end,:))/1000; % Diffusion in from t
 %     sim.BmicroAnnualMean = squeeze(tmp(:,:,1));
 % end
 end
+
+
+%
+% Setup matrix for sinking
+%
+function [Asink,p] = calcSinkingMatrix(p, sim, nGrid)
+%
+% Get sinking velocities from libNUMmodel:
+%
+p.velocity = 0*p.m;
+p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
+p.idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
+%
+% Set up the matrix:
+%
+Asink = zeros(p.n,nGrid,nGrid);
+for i = 1:nGrid
+    k = p.velocity/(sim.dznom(i)*p.dtTransport);
+    Asink(:,i,i) = 1+k;
+    if (i ~= 1)
+        Asink(:,i,i-1) = -k;
+    end
+end
+% Bottom BC:
+Asink(end) = 1;
+%
+% Invert matrix to make it ready for use:
+%
+for i = 1:p.n
+    Asink(i,:,:) = inv(squeeze(Asink(i,:,:)));
+end
+end
+

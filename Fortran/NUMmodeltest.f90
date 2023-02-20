@@ -8,7 +8,7 @@ program NUMmodeltest
   integer:: i
   real(dp):: Nbalance,Cbalance, Sibalance
 
-  call setupGeneric( (/0.1d0, 1.0d0 /) )
+  !call setupGeneric( (/0.1d0, 1.0d0 /) )
   !call setHTL(0.0001d0, 1.d0, .true.)
 
   !call setupGeneralistsCopepod()
@@ -37,6 +37,10 @@ program NUMmodeltest
   !call setupDiatoms_simpleOnly(10)
   !call setupDiatomsOnly(10)
   !call setupDiatoms_simpleOnly(10)
+  !call setHTL(0.1d0, 0.1d0, .false., .false.)
+  !call setupGeneralistsOnly(5)
+  !call setupGeneralistsPOM(10,5)
+  call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /), (/1.d0, 10.d0, 100.d0, 1000.d0/) )
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -54,6 +58,15 @@ program NUMmodeltest
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
   
+  !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
+  call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
+  call printRates()
+
+  !select type (spec => group(1)%spec)
+  !    type is (spectrumGeneralists)
+  !      write(*,*) getNbalanceGeneralists(spec, u00(idxN), dudt(idxN), u00(idxB:nGrid), dudt(idxB:nGrid))    
+  !      write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
+  !end select
   
   
   call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)

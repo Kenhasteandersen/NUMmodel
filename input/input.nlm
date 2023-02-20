@@ -1,6 +1,6 @@
 !                                                                       !           
 ! ======================================================================!
-! Input parameters for NUM model generalists                            !
+! Input parameters for NUM model                       !
 ! ======================================================================!
 ! This file contains the input parameters for the NUM Model.            !
 ! The parameters are read in in the different initialization            !
@@ -21,61 +21,63 @@
 ! ==================
 &input_general
 !
-      rhoCN = 5.68                  ! C:N ratio of cell [ ]
+      rhoCN = 5.68                  ! C:N mass ratio of cell [gC/gN]
 
 ! Variables for HTL mortalities:
 
-	  fracHTL_to_N = 0.5            ! Half becomes urine that is routed back to N
-	  fracHTL_to_POM = 0.5          ! Another half is fecal pellets that are routed back to the largest POM size class
-/
-!
-! Generalists simple
-! ==================
-&input_generalists_simple
-! This is the input parameters for the generalists. They are read
-! in in the initGeneralistsSimple subroutine in generalists_simple.f90
-
-!
-! General
-!
-      mMinGeneralist = 3.1623d-9    ! Description [mug C]
-	  mMaxGeneralist = 1.0		    ! Description [mug C]
-!
-! Light uptake
-!
-      epsilonL = 0.8                ! Light uptake efficiency []
-      alphaL = 0.13                 ! Scaling factor for light [unit]
-      rLstar = 7.5                  ! Description [unit]
-!
-! Dissolved nutrient uptake:
-      alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
-      rNstar = 0.4                    ! Description [mum]
-!
-! Phagotrophy
-!
-      epsilonF = 0.8                ! Food Assimilation efficiency [unit]
-      alphaF = 0.018                ! Food affinity scaling factor [L mug C-1 d-1]
-      cF = 30.
-      beta = 500.d0
-      sigma = 1.3d0
-!
-! Metabolism
-!
-      cLeakage = 0.003               ! Passive leakage of C and N
-      delta = 0.05                  ! Thickness of cell wall [mum]
-      alphaJ = 1.5                  ! Constant for jmax. [day-1]
-      cR = 0.1                
-!
-! Biogeo:
-!
-      remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
-      remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
-      reminF = 0.1d0
-
+	fracHTL_to_N = 0.5            ! Half becomes urine that is routed back to N
+	fracHTL_to_POM = 0.5          ! Another half is fecal pellets that are routed back to the largest POM size class
 /
 !
 ! Generalists
 ! ===========
+! This is the input parameters for the generalists. They are read
+! in in the initGeneralists subroutine in generalists.f90
+! All parameter values are given in Andersen and Visser (2023) unless noted
+!
+&input_generalists_simple
+!
+! General
+!
+      mMinGeneralist = 3.1623d-9    ! Smallest cell size [mug C]
+	mMaxGeneralist = 1.0		! Largest cell size [mug C]
+!
+! Light uptake
+!
+      epsilonL = 0.8                ! Light uptake efficiency []
+      alphaL = 0.3                  ! Light affinity coef. [1/(uE/m2/s) 1/day um]
+      rLstar = 7.5                  ! Light affinity cross-over size [um]
+!
+! Dissolved nutrient and DOC uptake:
+!
+      alphaN = 0.972                ! Diffusive affinity coefficient [L/d/mugC/um^2] 
+      rNstar = 0.4                  ! Diffusive affinity cross-over size [um]
+!
+! Phagotrophy
+!
+      epsilonF = 0.8                ! Food assimilation efficiency [-]
+      alphaF = 0.018                ! Clearance rate [L/d/ug C]
+      cF = 30.                      ! Max phagotrophy coefficient [um/day]
+      beta = 500.d0                 ! Preferred predator-prey mass ratio
+      sigma = 1.3d0                 ! Preferred predator-prey mass range
+!
+! Metabolism
+!
+      cLeakage = 0.03               ! Passive leakage of C and N
+      delta = 0.05                  ! Thickness of cell wall [um]
+      alphaJ = 1.5                  ! Constant for jMax [day-1]
+      cR = 0.1                      ! Basal metabolism relative to jMax [-]
+!
+! Biogeo:
+!
+      !remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
+      remin2 = 0.5d0                ! Fraction of viral lysis remineralized to DOC
+      reminF = 0.1d0                ! Fraction of feeding losses remineralized
+/
+
+!
+! Generalists with explict metabolic costs
+! 
 &input_generalists
 ! This is the input parameters for the generalists. They are read
 ! in in the initGeneralists subroutine in generalists.f90
@@ -118,14 +120,48 @@
 !
 ! Biogeo:
 !
-      remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
       remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
       reminF = 0.1d0
-
 /
 !
 ! Diatoms
 ! =======
+&input_diatoms_simple
+!
+! General
+!
+      mMin = 3.1623d-8            ! Smallest size [mug C]
+      rhoCSi = 3.4                  ! Carbon:Si mass ratio
+      v  = 0.6                      ! Vacuole volume fraction
+!
+! Light uptake
+!
+      epsilonL = 0.8                ! Light uptake efficiency []
+      alphaL = 0.206                ! Scaling factor for light [unit]
+      rLstar = 8.25                 ! Description [unit]
+!
+! Dissolved nutrient uptake:
+      alphaN = 2.43                ! alphaN/(1-v)[L/d/mugC/mum^2] 
+      rNstar = 0.4                   ! Description [mum]
+      bN = 0.0                     ! cost of N uptake [mugC/mugN]
+!
+! Silicate uptake
+!
+      bSi = 0.0                    ! Cost of food uptake [gC/gSi]
+!
+! Metabolism
+!
+      cLeakage = 0.003              ! Passive leakage of C and N
+ !     c = 0.0015                    ! Parameter for cell wall fraction of mass.
+      delta = 0.05                  ! Thickness of cell wall [mum]
+      alphaJ = 1.5                  ! Constant for jmax. [day-1]
+      cR = 0.1       
+!
+! Biogeo:
+!
+      remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
+/
+
 &input_diatoms
 !
 ! General
@@ -164,51 +200,51 @@
 !
 ! Biogeo:
 !
-      remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
+ !     remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
       remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
 /
 
 !
 ! Copepods
 ! ========
-&input_copepods
+! Values taken from Serra-Pompei et al (2020) for actively feeding copepods
+!
+&input_copepods_active
 
       epsilonF = 0.67               ! Assimilation efficiency
       epsilonR = 0.25               ! Reproductive efficiency
-      beta = 10000.d0               ! Description [unit]
-      sigma = 1.5d0                 ! Description [unit]
+      beta = 10000.                 ! Preferred predator-prey mass ratio
+      sigma = 1.5                   ! Preferred predator-prey mass range
       alphaF = 0.011                ! Clearance rate coefficient
-      q = 0.75                      ! Exponent of clerance rate
-      h = 1.37                      ! Factor for maximum ingestion rate
+      q = 0.75                      ! Exponent of clearance rate
+      h = 1.37                      ! Coefficient for maximum ingestion rate
       hExponent = 0.75              ! Exponent for maximum ingestions rate
-      kBasal = 0.01! 0.006          ! Factor for basal metabolism. This value represents basal
-      kSDA = 0.16                   ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
-      p = 0.75                      ! Exponent for respiration
-      AdultOffspring = 100.
-      remin = 0.0                   ! fraction of mortality losses reminerilized to N and DOC
+      kBasal = 0.01                 ! Factor for basal metabolism {0.006}. This value represents basal metabolism at 
+                                    !   starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
+                                    !   0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid 
+                                    !   too long transients. 
+      kSDA = 0.16                   !  kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
+                                    !   data in Kiørboe and Hirst (2014) are for fully fed copepods.
+      AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
+      vulnerability = 1.            ! Active copepods have full risk of predation
+/
 
-                                                                       
-! ======================================================================!
-! Parameter glossary                                                    !
-! ======================================================================!
+&input_copepods_passive
 
-! Generalists
-! ===========
-
-! Light uptake
-!      epsilonL = Light uptake efficiency [] {0.8}
-
-! Metabolism
-!      delta: The constant is increased a bit to limit the lower cell size
-
-!
-! Copepods
-! ========
-!      kBasal = Factor for basal metabolism {0.006}. This value represents basal metabolism at 
-!               starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
-!               0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid 
-!               too long transients. 
-
-!      kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
-!             data in Kiørboe and Hirst (2014) are for fully fed copepods.
+      epsilonF = 0.67               ! Assimilation efficiency
+      epsilonR = 0.25               ! Reproductive efficiency
+      beta = 100.                   ! Preferred predator-prey mass ratio
+      sigma = 1.                    ! Preferred predator-prey mass range
+      alphaF = 0.0052               ! Clearance rate coefficient
+      q = 0.75                      ! Exponent of clearance rate
+      h = 0.4                       ! Coefficient for maximum ingestion rate
+      hExponent = 0.75              ! Exponent for maximum ingestions rate
+      kBasal = 0.01                 ! Factor for basal metabolism {0.006}. This value represents basal metabolism at 
+                                    !   starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
+                                    !   0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid 
+                                    !   too long transients. 
+      kSDA = 0.16                   !  kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
+                                    !   data in Kiørboe and Hirst (2014) are for fully fed copepods.
+      AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
+      vulnerability = 0.2           ! Passive copepods have reduced risk of predation
 /

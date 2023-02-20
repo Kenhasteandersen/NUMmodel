@@ -1,9 +1,9 @@
 #
 # Install app:
 #  ssh ken@oceanlife.dtuaqua.dk
-#  cd SizeBasedPlankton
+#  cd FirstPrinciplesPlankton
 #  update the git (git pull)
-#  sudo cp SizeBasedPlankton/R/*  /srv/shiny-server/Plankton
+#  sudo cp -R ~/FirstPrinciplesPlankton/*  /srv/shiny-server/Plankton2
 #  If using new packages install them by running R as root (sudo su; R; install.packages("XXX))
 #  sudo systemctl restart shiny-server
 # 
@@ -32,19 +32,24 @@ uiChemostat <- fluidPage(
   p('Simulate a plankton ecosystem in the upper part of a watercolumn. 
    Cell size is the only trait characterizing each plankton group.
     All groups are able to perform photoharvesting, taking up dissolve nutrients and carbon, and do phagotrophy.
-    The trophic strategy is an emergent property.'),
-  p('Documentation in: '),
-  p('Submitted version 1.0, February 2022.')
+    The trophic strategy (the background colours) is an emergent property.'),
+  p('Documentation in:',
+    a("Andersen and Visser (2023)",href="https://www.biorxiv.org/content/10.1101/2022.05.16.492092v2"),'.'),
+  p('Revised version 1.1, January 2023.')
   ,
   # Sidebar with a slider inputs
   sidebarLayout(
     sidebarPanel(
+      selectInput("setup", "Setup:",
+                  c("Unicellular" = "GeneralistsOnly",
+                    "Uni+multicellular" = "Generic"))
+      ,
       sliderInput("L",
                   "Light (PAR; uE/m2/s)",
                   min = 0,
                   max = 300,
                   step=1,
-                  value = parametersChemostat()$L)
+                  value = 60)
       ,
       sliderInput("d10",
                   "log10(Mixing rate) (1/day)",
@@ -154,6 +159,7 @@ serverChemostat <- function(input, output) {
   # Simulate the system when a parameter is changed:
   #
   sim <- eventReactive({
+    input$setup
     input$L
     input$latitude
     input$d10
@@ -182,7 +188,7 @@ serverChemostat <- function(input, output) {
     #  p$tEnd = 2*365
 
     # Simulate
-    return(simulateChemostat(p, bUseC, bUseF))   
+    return(simulateChemostat(p, bUseC, bUseF, input$setup))   
   })
   #
   # Plots:

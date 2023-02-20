@@ -15,13 +15,7 @@ arguments
     lon double = -40;
 end
 
-% p = setupDiatomsOnly(10);
-mAdult = logspace(log10(0.004), log10(10000), 6);
-
-n = 10;
-nCopepods = 10;
-nPOM = 10;
-p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
+p = setupNUMmodel();
 
 p = parametersWatercolumn(p);
 p.tEnd = 5*365;

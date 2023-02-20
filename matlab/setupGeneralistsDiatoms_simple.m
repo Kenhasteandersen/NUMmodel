@@ -3,7 +3,7 @@ function p = setupGeneralistsDiatoms_simple(n, bParallel, options)
 arguments
    n int32 {mustBeInteger, mustBePositive} = 10; % Number of grid points
    bParallel logical = false;
-   options.bTest = false;
+   options.bTest logical = false;
 end
 
 loadNUMmodelLibrary(bParallel);

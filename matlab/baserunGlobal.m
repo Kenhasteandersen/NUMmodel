@@ -38,8 +38,8 @@ else
     sim = simulateGlobal(p);%,sim); % Simulate
 end
 sim.B(sim.B<0)=0; % Get rid of negative biomasses
-disp('Calculating functions')
-sim = calcGlobalFunction(sim); % Calculate functions
+%disp('Calculating functions')
+%sim = calcFunction(sim); % Calculate functions
 %
 % Plots:
 %

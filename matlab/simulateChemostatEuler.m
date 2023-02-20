@@ -54,7 +54,7 @@ sim.DOC = u(p.idxDOC);
 if isfield(p, 'idxSi')
     sim.Si = u(p.idxSi);
 end
-sim.B = u(3:end);
+sim.B = u(p.idxB:end);
 sim.p = p;
 sim.rates = getRates(sim.p, u(end,:), L, T);
 for iGroup = 1:p.nGroups
