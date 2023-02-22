@@ -166,12 +166,12 @@ contains
     !
     ! Check balance: (should be zero)
     !
-    write(*,*) 'Copepod N balance:', &
-          + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
-          - sum(dudt)/rhoCN & ! Accumulation of biomass
-          - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
-          - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
-          - sum(this%mort*u)/rhoCN  ! Mortality losses
+    !write(*,*) 'Copepod N balance:', &
+    !      + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
+    !      - sum(dudt)/rhoCN & ! Accumulation of biomass
+    !      - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
+    !      - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
+    !      - sum(this%mort*u)/rhoCN  ! Mortality losses
 
   end subroutine calcDerivativesCopepod
 
