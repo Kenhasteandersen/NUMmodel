@@ -66,7 +66,7 @@
       cLeakage = 0.03               ! Passive leakage of C and N
       delta = 0.05                  ! Thickness of cell wall [um]
       alphaJ = 1.5                  ! Constant for jMax [day-1]
-      cR = 0.03                     ! Basal metabolism relative to jMax [-]
+      cR = 0.1                      ! Basal metabolism relative to jMax [-]
 !
 ! Biogeo:
 !
@@ -155,7 +155,7 @@
  !    c = 0.0015                    ! Parameter for cell wall fraction of mass.
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
-      cR = 0.1       
+      cR = 0.03                     ! Lower for diatoms because it only represents basal metabolism
 !
 ! Biogeo:
 !
