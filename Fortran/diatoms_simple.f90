@@ -45,6 +45,10 @@ module diatoms_simple
     real(dp) :: alphaJ ! Constant for jmax.  per day
     real(dp) :: cR
     !
+    ! Predation risk:
+    !
+    real(dp) :: palatability
+    !
     ! Bio-geo:
     !
     !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
@@ -74,6 +78,7 @@ module diatoms_simple
              & epsilonL, alphaL, rLstar, bN, bSi, &
              & alphaN,rNstar, &
              & cLeakage, delta, alphaJ, cR, &
+             & palatability, &
              & remin2, mMin
 
         call open_inputfile(file_unit, io_err)
@@ -110,7 +115,7 @@ module diatoms_simple
       this%Jresp = cR*alphaJ*this%m
   
       this%beta = 0.d0 ! No feeding
-      this%palatability = 0.5d0 ! Lower risk of predation
+      this%palatability = palatability ! Lower risk of predation
     end subroutine initDiatoms_simple
  
     subroutine calcRatesDiatoms_simple(this, L, N, Si, gammaN, gammaSi)

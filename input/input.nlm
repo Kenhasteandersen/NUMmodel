@@ -155,7 +155,11 @@
  !    c = 0.0015                    ! Parameter for cell wall fraction of mass.
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
-      cR = 0.03                     ! Lower for diatoms because it only represents basal metabolism
+      cR = 0.1                     ! 
+!
+! Predation risk:
+!
+      palatability = 0.5
 !
 ! Biogeo:
 !
@@ -195,8 +199,12 @@
  !     c = 0.0015                    ! Parameter for cell wall fraction of mass.
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
-      cR = 0.1       
+      cR = 0.03                     ! Lower than generalists because here it only represents basal metabolism       
       bg = 0.2                      ! Cost of biosynthsesis
+!
+! Predation risk:
+!
+      palatability = 0.5
 !
 ! Biogeo:
 !
