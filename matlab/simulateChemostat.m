@@ -37,7 +37,7 @@ sim.L = L;
 % Concentrations in the deep layer:
 %
 if options.bUnicellularloss
-    ix = 1:p.ixEnd(1); % Nutrients and first field (unicellulars) are lost to the deep layer
+    ix = 1:p.ixEnd(max(find(p.typeGroups<10))); % Nutrients and unicellulars are lost to the deep layer
 else
     ix = 1:(p.idxB-1); % Nutrients
 end
