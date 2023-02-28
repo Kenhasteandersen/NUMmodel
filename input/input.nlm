@@ -115,7 +115,7 @@
       cLeakage = 0.03               ! Passive leakage of C and N
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
-      cR = 0.1       
+      cR = 0.03       
       bg = 0.2                      ! Cost of biosynthsesis
 !
 ! Biogeo:
@@ -185,7 +185,7 @@
 !
 ! Dissolved nutrient uptake:
       alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
-      rNstar = 2.                   ! Description [mum]
+      rNstar = 0.4                  ! Description [mum]
       bN = 0.3                     ! cost of N uptake [mugC/mugN]
       bDOC = 0.3                   ! cost of DOC uptake [mugC/mugC]
 !
