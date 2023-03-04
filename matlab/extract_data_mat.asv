@@ -1,0 +1,18 @@
+% read and extract data from multiple .mat files
+
+files = dir('*.mat'); % get a list of all .mat files in the current directory
+for i = 1:length(files)
+    load(files(i).name); % load data from the current file
+    for j=length(sim.rates.jTot)
+        jtot(i,j) = sim.rates.jTot(j); % extract the data from each .mat file 
+        jresptot(i,j) = sim.rates.jRespTot(j);
+    end
+end
+
+%%
+for i = 1:length(files)
+        for j=length(sim.rates.jTot)
+
+        [~,idx_row] = min(abs(jre))
+        end
+end

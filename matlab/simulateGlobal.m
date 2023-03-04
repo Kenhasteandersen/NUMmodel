@@ -52,37 +52,10 @@ if ~exist(p.pathBoxes,'file')
     error( sprintf('Error: Cannot find transport matrix file: %s',...
         p.pathBoxes));
 end
-% ---------------------------------
-% Load library:
-% ---------------------------------
-% if p.bParallel
-%     if isempty(gcp('nocreate'))
-%         parpool('AttachedFiles',...
-%             {'../Fortran/NUMmodel_matlab.so',...
-%              '../Fortran/NUMmodel_wrap_colmajor4matlab.h'});
-%     end
-%     %
-%     % Set parameters:
-%     %
-%     h = gcp('nocreate');
-%     poolsize = h.NumWorkers;
-%     parfor i=1:poolsize
-%         loadNUMmodelLibrary();
-%         %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-%         calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
-%     end
-% else
-%     loadNUMmodelLibrary();
-%     %calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(p.mAdult)), p.mAdult);
-%     calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly',int32(10));
-% end
 % ---------------------------------------
 % Initialize run:
 % ---------------------------------------
 simtime = p.tEnd/p.dtTransport; %simulation time in half days
-% Load grid data:
-%load(p.pathGrid);
-%load(p.pathConfigData);
 load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
 
 % Preparing timestepping
@@ -92,7 +65,7 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 % Initial conditions:
 %
-if (nargin==2)
+if ~isempty(sim)
     disp('Starting from previous simulation.');
     u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
     u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
@@ -129,7 +102,7 @@ end
 if p.bUse_parday_light
     load 'Transport Matrix/parday';
 end
-L0 = zeros(nb,730);
+L0 = zeros(nb,365/p.dtTransport );
 for i = 1:730
     if p.bUse_parday_light
         L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox);
@@ -139,15 +112,54 @@ for i = 1:730
     end
 end
 %
-% Calculate sinking matrix:
+% Calculate sinking matrices:
 %
-%[Asink,p] = calcSinkingMatrix(p, sim, nGrid);
-%
+sim = load(p.pathGrid,'x','y','z','dznom','bathy');
+% Get sinking velocities from libNUMmodel:
+p.velocity = 0*p.m;
+p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
+% Find indices of groups with sinking
+idxSinking = find(p.velocity ~= 0);
+
+if ~isempty(idxSinking)
+    % Allocate sinking matrices:
+    Asink = {};
+    for l = 1:length(idxSinking)
+        Asink{l} = sparse(1,1,0,nb,nb,nb*2);
+    end
+    % Find the indices into the grid
+    xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid);
+    idxLower = zeros(1,nb);
+    % Run through all latitudes and longitudes:
+    for i = 1:size(xx,1)
+        for j = 1:size(xx,2)
+            % Find the watercolumn indices:
+            idxGrid = squeeze(xx(i, j, :));
+            idxGrid = idxGrid( ~isnan(idxGrid));
+
+            if ~isempty(idxGrid)
+                % Run through all sinking state variables
+                for l = 1:length(idxSinking)
+                    % Top level loses mass
+                    Asink{l}(idxGrid(1),idxGrid(1)) = 1-min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(1));
+                    for k = 2:length(idxGrid)
+                        flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(k));
+                        % Other levels loses mass:
+                        Asink{l}(idxGrid(k),idxGrid(k)) = 1-flx;
+                        % ... and receives mass from the level above
+                        Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
+                    end
+                end
+            end
+        end
+    end
+end
+
+%%
 % Matrices for saving the solution:
 %
 iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
-sim = load(p.pathGrid,'x','y','z','dznom','bathy');
 sim.N = single(zeros(length(sim.x), length(sim.y), length(sim.z),nSave));
 if bSilicate
     sim.Si = sim.N;
@@ -182,7 +194,7 @@ for i=1:simtime
     %
     % Test for time to change monthly transport matrix
     %
-    if ismember(mod(i,730), 1+2*cumsum(mon))
+    if ismember(mod(i,365/p.dtTransport), 1+cumsum(mon)/p.dtTransport)
         % Load TM
         load(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
         %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
@@ -208,9 +220,9 @@ for i=1:simtime
         u(u(:,k)<p.umin(k),k) = p.umin(k);
     end
     %
-    % Run Euler time step for half a day:
+    % Run Euler time step for dtTransport days:
     %
-    L = L0(:,mod(i,365*2)+1);
+    L = L0(:,mod(i,365/p.dtTransport)+1);
     dt = p.dt;
 
     if ~isempty(gcp('nocreate'))
@@ -232,25 +244,23 @@ for i=1:simtime
         end
     end
     %
+    % Sinking:
+    %
+    if ~isempty(idxSinking)
+        for l = 1:length(idxSinking)
+            u(:,idxSinking(l)) = Asink{l}*u(:,idxSinking(l));
+        end
+    end
+    %
     % Transport
     %
     if p.bTransport
-        %for k = 1:p.n
-        %    u(:,k) =  Aimp * (Aexp * u(:,k));
-        %end
         u =  Aimp*(Aexp*u);
-
-        %for j = p.idxSinking
-        %    u(:,j) = squeeze(Asink(j,:,:)) * u(:,j); % Sinking
-        %end
     end
-
-
     %
     % Save timeseries in grid format
     %
     if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
-    %if ((mod(i*p.dtTransport,p.tSave) < mod((i-1)*p.dtTransport,p.tSave)) || (i==simtime))
         fprintf('t = %u days',floor(i/2))
 
         if any(isnan(u))
@@ -269,7 +279,7 @@ for i=1:simtime
         end
         sim.L(:,:,:,iSave) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
         sim.T(:,:,:,iSave) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
-        tSave = [tSave, i/p.dtTransport];
+        tSave = [tSave, i*p.dtTransport];
         fprintf('.\n');
     end
     %
@@ -287,7 +297,6 @@ for i=1:simtime
             sim.BmicroAnnualMean(k) = sim.BmicroAnnualMean(k) + Bmicro1/(p.tEnd*2*365);
         end
     end
-
 end
 time = toc;
 fprintf('Solving time: %2u:%02u:%02u\n', ...

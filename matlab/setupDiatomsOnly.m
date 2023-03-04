@@ -7,17 +7,30 @@ end
 
 loadNUMmodelLibrary(bParallel);
 
+
+calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly', int32(n) );
 if bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
     parfor i=1:poolsize
         calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly',int32(n));
     end
-    p.bParallel = true;
-else
-    calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly', int32(n) );
-    p.bParallel = false;
 end
+%**************** previous version ********************
+%
+% if bParallel
+%     h = gcp('nocreate');
+%     poolsize = h.NumWorkers;
+%     parfor i=1:poolsize
+%         calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly',int32(n));
+%     end
+%     p.bParallel = true;
+% else
+%     calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly', int32(n) );
+%     p.bParallel = false;
+% end
+%
+%*************** end of prev version **************
 
 % Nutrients:
 p = setupNutrients_N_DOC_Si;

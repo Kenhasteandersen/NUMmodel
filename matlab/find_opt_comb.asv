@@ -1,0 +1,7 @@
+%%
+avg_ratio= zeros(1, length(jtot));
+for i = 1:length(jtot)
+%           [avg_ratio,idx_row] = min(abs(mean((jresptot(i,:)./jtot(i,:))-0.4));
+          avg_ratio(i) = mean(jresptot(i,2:end)./jtot(i,:));
+
+end

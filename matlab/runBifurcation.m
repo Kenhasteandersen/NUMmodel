@@ -12,12 +12,13 @@
 %  p = parametersChemostat( setupGeneric([0.1, 100], true));
 %  runBifurcation(p,'d',logspace(-4,-1,10));
 %
-function runBifurcation(p, sField, range)
+function runBifurcation(p, sField, range, options)
 
 arguments
     p struct;
     sField char = 'd';
-    range double = logscale(-4, -1, 10);
+    range double = logspace(-5, 0, 10);
+    options.bParallel = false;
 end
 
 L = 30;
@@ -28,42 +29,57 @@ n = length(range);
 %
 for i = 1:n
     pp(i) = p;
-    eval( strcat('pp(i).',sField, '= range(i);') );
+    if ~strcmp(sField, 'mortHTL')
+        eval( strcat('pp(i).',sField, '= range(i);') );
+    end
 end
 %
 % Do the simulations:
 %
+N = zeros(1,n);
+Nlower = N;
+Nupper = N;
 B = zeros(n, p.nGroups);
 Blower = B;
 Bupper = B;
 nGroups = p.nGroups;
-parfor i = 1:n
-    %
-    % Set up simulation:
-    %
-    ppp = pp(i);
-    ppp.tEnd = 1000;
-    %
-    % Simulate:
-    %
-    sim = simulateChemostat(ppp, L, T);
-    %
-    % Calc statistics:
-    %
-    ixAve = find(sim.t > sim.t(end)/2);
-    
-    N(i) = exp( mean( log(sim.N(ixAve))));
-    Nlower(i) = min(sim.N(ixAve));
-    Nupper(i) = max(sim.N(ixAve));
-    
-    for iGroup = 1:nGroups
-        ix = (ppp.ixStart(iGroup):ppp.ixEnd(iGroup)) - ppp.idxB + 1;
-        B(i,iGroup) = exp(mean(log(sum(sim.B(ixAve,ix),2))));
-        Blower(i,iGroup) = min(sum( sim.B(ixAve,ix),2 ));
-        Bupper(i,iGroup) = max(sum( sim.B(ixAve,ix),2 ));
+
+if options.bParallel
+    parfor i = 1:n
+        %
+        % Set up simulation:
+        %
+        ppp = pp(i);
+        ppp.tEnd = 1000;
+        %
+        % Simulate:
+        %
+        if strcmp(sField, 'mortHTL')
+            setHTL(range(i));
+        end
+        sim = simulateChemostat(ppp, L, T);
+        %
+        % Calc statistics:
+        %
+        ixAve = find(sim.t > sim.t(end)/2);
+
+        N(i) = exp( mean( log(sim.N(ixAve))));
+        Nlower(i) = min(sim.N(ixAve));
+        Nupper(i) = max(sim.N(ixAve));
+
+        for iGroup = 1:nGroups
+            ix = (ppp.ixStart(iGroup):ppp.ixEnd(iGroup)) - ppp.idxB + 1;
+            B(i,iGroup) = exp(mean(log(sum(sim.B(ixAve,ix),2))));
+            Blower(i,iGroup) = min(sum( sim.B(ixAve,ix),2 ));
+            Bupper(i,iGroup) = max(sum( sim.B(ixAve,ix),2 ));
+        end
+
+        %Bpnm(i,:) = calcPicoNanoMicro(sim);
     end
-    
-    %Bpnm(i,:) = calcPicoNanoMicro(sim);
+else
+    for i = 1:n
+        runSim(i)
+    end
 end
 %%
 % Plot
@@ -72,12 +88,12 @@ end
 %
 % Nutrients:
 %
-semilogy(range, N,'linewidth',2,'color','b');
+semilogy(range, N,'--','linewidth',2,'color',p.colNutrients{p.idxN});
 hold on
 patch([range range(end:-1:1)], [Nlower, Nupper(end:-1:1)], 0.75*[0,0,1], ...
     'edgecolor','none','facealpha',0.15)
 
-legendentries(1) = semilogy(range, N,'linewidth',2,'color','b');
+legendentries(1) = semilogy(range, N,'--','linewidth',2,'color',p.colNutrients{p.idxN});
 sLegend{1} = 'N';
 %
 % Biomass:
@@ -85,14 +101,14 @@ sLegend{1} = 'N';
 for iGroup = 1:nGroups
     patch([range range(end:-1:1)], [Blower(:,iGroup)', Bupper(end:-1:1,iGroup)'],...
         p.colGroup{iGroup}, 'edgecolor','none','facealpha',0.15)
-   
+
     lwd = 2;
     if (p.typeGroups(iGroup) == 10)
         lwd = 1 + (iGroup-2)*0.5;
     end
     legendentries(1+iGroup) = ...
         semilogy(range, B(:,iGroup),'color', p.colGroup{iGroup},'linewidth',lwd);
-    
+
     sLegend{iGroup+1} = p.nameGroup{iGroup};
 end
 set(gca,'xscale','log','yscale','log')
@@ -103,4 +119,37 @@ hold off
 legend(legendentries, sLegend, 'location','northwest','box','off')
 xlabel(sField)
 ylabel('Biomass ({\mu}g/l)')
-ylim([1e-10 1e10])
+ylim([1e-4 1e3])
+
+    function runSim(i)
+        %
+        % Set up simulation:
+        %
+        ppp = pp(i);
+        ppp.tEnd = 1000;
+        %
+        % Simulate:
+        %
+        if strcmp(sField, 'mortHTL')
+            setHTL(range(i));
+        end
+        sim = simulateChemostat(ppp, L, T);
+        %
+        % Calc statistics:
+        %
+        ixAve = find(sim.t > sim.t(end)/2);
+
+        N(i) = exp( mean( log(sim.N(ixAve))));
+        Nlower(i) = min(sim.N(ixAve));
+        Nupper(i) = max(sim.N(ixAve));
+
+        for iGroup = 1:nGroups
+            ix = (ppp.ixStart(iGroup):ppp.ixEnd(iGroup)) - ppp.idxB + 1;
+            B(i,iGroup) = exp(mean(log(sum(sim.B(ixAve,ix),2))));
+            Blower(i,iGroup) = min(sum( sim.B(ixAve,ix),2 ));
+            Bupper(i,iGroup) = max(sum( sim.B(ixAve,ix),2 ));
+        end
+
+        %Bpnm(i,:) = calcPicoNanoMicro(sim);
+    end
+end

@@ -21,8 +21,8 @@ right <- 4
 
 ticklength <- 0.2 # tick mark length
 omargin <- 0.7 # outer margins
-cex <- 1#0.9
-cexaxis <- 1#0.8 # Scaling of size of numbers on axes
+cex <- 1.2#0.9
+cexaxis <- 1.2#0.8 # Scaling of size of numbers on axes
 axis.lwd <- 0.8
 
 iPlot <- 1 # Static variable used for labels on plots
@@ -239,8 +239,8 @@ logaxes <- function(side = bottom,
   }
 } 
 
-makepanellabel <- function(line=-1.1) {
-  mtext(letters[iPlot], side=top, line=line, adj=0.05)
+makepanellabel <- function(line=-1.1, label=letters[iPlot]) {
+  mtext(label, side=top, line=line, adj=0.05)
   assign("iPlot", iPlot+1, envir = .GlobalEnv)
 }
 

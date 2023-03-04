@@ -19,7 +19,7 @@ end
 %
 % Get the functions:
 %
-sim = calcFunctions(sim);
+% sim = calcFunctions(sim);
 
 %%
 clf
@@ -31,13 +31,13 @@ cbar = panelGlobal(sim.x,sim.y,log10(sim.ProdNetAnnual(:,:,end)),[1,3],...
     sTitle='Net primary production', sProjection=sProjection);
 cbar.Label.String = 'log_{10}(gC m^{-2}yr^{-1})';
 %cbar.Visible='off';
-caxis([1,3])
+% caxis([1,3])
 
 nexttile
 cbar = panelGlobal(sim.x,sim.y,log10(sim.ProdHTLAnnual(:,:,end)),[1,3],...
     sTitle='HTL production', sProjection=sProjection);
 cbar.Label.String = 'log_{10}(gC m^{-2}yr^{-1})';
-caxis([1,3])
+% caxis([1,3])
 
 %cbar.Visible='off';
 %caxis([-3,2])

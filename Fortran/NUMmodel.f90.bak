@@ -27,6 +27,8 @@ module NUMmodel
    integer, parameter :: typeGeneralist = 5  
    integer, parameter :: typeCopepod = 10
    integer, parameter :: typePOM = 100
+
+
   !
   ! Variables that contain the size spectrum groups
   !
@@ -67,7 +69,7 @@ contains
   subroutine setupGeneralistsSimpleOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
+    call parametersAddGroup(typeGeneralistSimple, n, 0.d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimpleOnly
  
@@ -77,7 +79,7 @@ contains
   subroutine setupGeneralistsOnly(n)
     integer, intent(in):: n
     call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, n, 1.d0) ! generalists with n size classes
+    call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
@@ -87,8 +89,8 @@ contains
   subroutine setupGeneralistsSimplePOM(n, nPOM)
    integer, intent(in):: n, nPOM
    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
-   call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
-   call parametersAddGroup(typePOM, nPOM, 1.d0) ! POM with nPOM size classes and max size 1 ugC
+   call parametersAddGroup(typeGeneralistSimple, n, 0.d0) ! generalists with n size classes
+   call parametersAddGroup(typePOM, nPOM, 1.0d0) ! POM with nPOM size classes and max size 1 ugC
    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
  end subroutine setupGeneralistsSimplePOM
 
@@ -127,7 +129,7 @@ contains
    subroutine setupGeneralistsDiatoms(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 0.1d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms
@@ -135,7 +137,7 @@ contains
    subroutine setupGeneralistsDiatoms_simple(n)
       integer, intent(in):: n
       call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralistSimple, n, 1.d0) ! generalists with n size classes
+      call parametersAddGroup(typeGeneralistSimple, n, 0.d0) ! generalists with n size classes
       call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
       call parametersFinalize(0.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms_simple
@@ -145,7 +147,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsSimpleCopepod()
     call parametersInit(2, 20, 2)
-    call parametersAddGroup(typeGeneralistSimple, 10, 1.0d0)
+    call parametersAddGroup(typeGeneralistSimple, 10, 0.0d0)
     call parametersAddGroup(typeCopepod, 10, .1d0) ! add copepod with adult mass .1 mugC
     call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
   end subroutine setupGeneralistsSimpleCopepod
@@ -159,7 +161,7 @@ contains
     integer:: iCopepod
 
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-    call parametersAddGroup(typeGeneralist, n, 1.d0)
+    call parametersAddGroup(typeGeneralist, n, 0.0d0)
     if ( size(mAdult) .eq. 0) then
        call parametersFinalize(0.1d0, .true., .true.)
     else
@@ -178,7 +180,7 @@ contains
    integer:: iCopepod
  
    call parametersInit(size(mAdult)+2, n + nPOM + nCopepod*size(mAdult), 2)
-   call parametersAddGroup(typeGeneralist, n, 0.1d0)
+   call parametersAddGroup(typeGeneralist, n, 0.0d0)
 
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepod, nCopepod, mAdult(iCopepod)) ! add copepod
@@ -187,7 +189,28 @@ contains
    call parametersFinalize(0.001d0, .true., .true.)
 
   end subroutine setupNUMmodel
+  ! -------------------------------------------------------
+  ! A generic setup with generalists, diatoms and copepods
+  ! -------------------------------------------------------
+  subroutine setupGenDiatCope(n,nCopepod, mAdult)
+    integer, intent(in):: n, nCopepod
+    real(dp), intent(in):: mAdult(:)
 
+    !integer, parameter:: n = 10 ! number of size classes in each group
+    integer:: iCopepod
+
+    call parametersInit(size(mAdult)+2, 2*n + nCopepod*size(mAdult), 3)
+    call parametersAddGroup(typeGeneralist, n, 0.0d0)
+    call parametersAddGroup(typeDiatom, n, 0.0d0) ! diatoms with n size classes
+    if ( size(mAdult) .eq. 0) then
+       call parametersFinalize(0.1d0, .true., .true.)
+    else
+       do iCopepod = 1, size(mAdult)
+          call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
+       end do
+       call parametersFinalize(0.001d0, .true., .true.)
+    end if
+  end subroutine setupGenDiatCope
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
   ! -----------------------------------------------
@@ -221,8 +244,8 @@ contains
     !
     ! Set groups:
     !
-    	call read_namelist_general()
-
+	call read_namelist_general()
+	
     nGroups = nnGroups
     iCurrentGroup = 0
     nNutrients = nnNutrients
@@ -291,7 +314,7 @@ contains
       call initGeneralistsSimple(specGeneralistsSimple, n)
       allocate( group( iCurrentGroup )%spec, source=specGeneralistsSimple )
     case (typeGeneralist)
-      call initGeneralists(specGeneralists, n, mMax)
+      call initGeneralists(specGeneralists, n)
       allocate( group( iCurrentGroup )%spec, source=specGeneralists )
     case (typeDiatom_simple)
       call initDiatoms_simple(specDiatoms_simple, n, mMax)
@@ -466,8 +489,8 @@ contains
 
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
-  
-    subroutine setMortHTL(mortHTL)
+
+  subroutine setMortHTL(mortHTL)
    real(dp), intent(in):: mortHTL(nGrid-idxB+1)
    integer:: iGroup
 
@@ -515,7 +538,6 @@ contains
     !
     ! Calc available food:
     !
-    !dudt(1) = F(1) ! ???
     do i = idxB, nGrid
        F(i) = 0.d0
        do j = idxB, nGrid
@@ -583,18 +605,17 @@ contains
                ix = ixStart(iGroup)+i-1
                if (thetaPOM(ix) .ne. 0) then
                   j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
-                  dudt(j) = dudt(j) &
-                    + group(iGroup)%spec%jPOM(i)*u(ix) 
+                  dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*u(ix) 
                end if
-                ! Throw a fraction of HTL production into the largest POM group:
+               ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
                  fracHTL_to_POM * u(ix) * group(iGroup)%spec%mortHTL(i)
             end do
          end if
       end do
-     !
-     ! Update POM
-     ! 
+      !
+      ! Update POM
+      ! 
       select type (spec => group(idxPOM)%spec)
       type is (spectrumPOM)
          call calcDerivativesPOM(spec, &
@@ -614,17 +635,16 @@ contains
     !
     ! Check: Should be close to zero
     !
-    Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN
-    do iGroup = 1, nGroups
-      Nbalance = Nbalance  &
-        + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
-        + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
-    end do
-    write(*,*) 'N balance:', Nbalance
-    
+    !Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN 
+    !do iGroup = 1, nGroups 
+    !  Nbalance = Nbalance  & 
+    !    + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN & 
+    !    + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN 
+    !end do 
+    !write(*,*) 'N balance:', Nbalance 
     contains
 
-     !
+  !
   ! Calculate derivatives for unicellular groups
   ! In:
   !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
@@ -648,7 +668,7 @@ contains
                      L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
       type is (spectrumDiatoms)
          call calcRatesDiatoms(spec, &
-                     L, upositive(idxN), upositive(idxSi), upositive(idxDOC),gammaN, gammaSi, gammaDOC)
+                     L, upositive(idxN),  upositive(idxDOC), upositive(idxSi),gammaN, gammaDOC, gammaSi)
       type is (spectrumGeneralists_csp)
          call calcRatesGeneralists_csp(spec, &
                      L, upositive(idxN), F( ixStart(iGroup):ixEnd(iGroup) ), gammaN)
@@ -788,7 +808,6 @@ contains
 
    subroutine printRates()
       integer :: iGroup
-      99 format (a10, 20f10.6)
 
       do iGroup = 1, nGroups
          call group(iGroup)%spec%printRates()
@@ -903,40 +922,53 @@ contains
    real(dp), intent(out):: Nbalance, Cbalance, Sibalance
    integer:: iGroup
    
-   iGroup = 1 ! Do it only for the first group, whihc we assume are generalists
+   Nbalance = 0.
+   Cbalance = 0.
+   SiBalance = 0.
+
+   do iGroup = 1, nGroups
+   !iGroup = 1 ! Do it only for the first group:
    select type ( spec => group(iGroup)%spec )
       type is (spectrumGeneralistsSimple)
-         Nbalance = spec%getNbalanceGeneralistsSimple(u(idxN), dudt(idxN), &
+         Nbalance = Nbalance + &
+                     spec%getNbalanceGeneralistsSimple(u(idxN), dudt(idxN), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) ))
-         Cbalance = spec%getCbalanceGeneralistsSimple(u(idxDOC), dudt(idxDOC), &
+         Cbalance = Cbalance + &
+                     spec%getCbalanceGeneralistsSimple(u(idxDOC), dudt(idxDOC), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) )) 
       type is (spectrumGeneralists)
-         Nbalance = spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
+         Nbalance = Nbalance + &
+                     spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) ))
-         Cbalance = spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
+         Cbalance = Cbalance + &
+                     spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
                      u(ixStart(iGroup):ixEnd(iGroup) ), &
                      dudt( ixStart(iGroup):ixEnd(iGroup) )) 
       type is (spectrumDiatoms)
-            Nbalance = spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
+            Nbalance = Nbalance + &
+                    spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) ))
-            Cbalance = spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
+            Cbalance = Cbalance + &
+                    spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-            Sibalance = spec%getSibalanceDiatoms(u(idxSi), dudt(idxSi), &
+            Sibalance = Sibalance + &
+                    spec%getSibalanceDiatoms(u(idxSi), dudt(idxSi), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-   end select
+     end select
+   end do
   end subroutine getBalance
    
 !   ! ---------------------------------------------------
 !   ! Returns the rates calculated from last call to calcDerivatives
 !   ! ---------------------------------------------------
   subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-    jTot, jMax, jFmax, jR, jLossPassive, &
+    jTot, jMax, jFmax, jR, jRespTot, jLossPassive, &
     jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
     use globals
@@ -944,7 +976,7 @@ contains
     real(dp), intent(out):: jSi(nGrid-nNutrients)
     real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
-    real(dp), intent(out):: jR(nGrid-nNutrients)
+    real(dp), intent(out):: jR(nGrid-nNutrients), jRespTot(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
     real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
@@ -964,6 +996,7 @@ contains
       mort2( i1:i2 ) = group(iGroup)%spec%mort2
       jNloss( i1:i2 ) = group(iGroup)%spec%JNloss / group(iGroup)%spec%m
       jR( i1:i2 ) = fTemp2 * group(iGroup)%spec%Jresp / group(iGroup)%spec%m
+      jRespTot( i1:i2 ) = jR( i1:i2 ) ! May be overwritten later
       jPOM( i1:i2 ) = group(iGroup)%spec%jPOM
 
       select type (spectrum => group(iGroup)%spec)
@@ -974,10 +1007,12 @@ contains
         jMax( i1:i2 ) = fTemp2 * spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
+        jRespTot( i1:i2 ) = spectrum%jRespTot / spectrum%m
       end select
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumDiatoms_simple)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
+        jDOC( i1:i2 ) = 0.d0 ! Diatoms simple don't take up DOC
       class is (spectrumDiatoms)
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       end select

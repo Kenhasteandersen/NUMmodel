@@ -23,8 +23,8 @@ module spectrum
      real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), f(:)
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
-     real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp
-     real(dp), dimension(:), allocatable:: mPOM, jPOM ! mass and flux of POM created
+     real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp, Jresptot
+     real(dp), dimension(:), allocatable:: mPOM, jPOM! mass and flux of POM created
      ! Mortality:
      real(dp), dimension(:), allocatable:: mortpred, mortHTL, mort2
      real(dp) :: mort2constant
@@ -52,8 +52,8 @@ module spectrum
     real(dp), dimension(:), allocatable:: JNtot, JLreal, JCtot 
     real(dp), dimension(:), allocatable:: JCloss_photouptake, JClossLiebig
 
-    real(dp), dimension(:), allocatable:: Jmax, Jresptot
-    real(dp), dimension(:), allocatable:: JNreal, JDOCreal, JSireal,JSi
+    real(dp), dimension(:), allocatable:: Jmax
+    real(dp), dimension(:), allocatable:: JNreal, JDOCreal
 
     contains
 
@@ -99,16 +99,18 @@ contains
     allocate(this%JFmax(n))
     allocate(this%flvl(n))
     allocate(this%JF(n))
+    allocate(this%f(n))
+
     !allocate(this%JFreal(n))
 
     allocate(this%Jtot(n))
     allocate(this%Jresp(n))
+    allocate(this%Jresptot(n))
     allocate(this%JCloss_feeding(n))
     allocate(this%JNlossLiebig(n))
     allocate(this%JNloss(n))
     allocate(this%JCloss(n))
 
-    allocate(this%f(n))
 
 
     allocate(this%mPOM(n))
@@ -124,18 +126,19 @@ contains
     this%JFmax = 0.d0
     this%flvl = 0.d0
     this%JF = 0.d0
+    this%f = 0.d0
     this%epsilonF = 1.d0 ! Probably overridden by the specific group, but must be >0.
     this%palatability = 1.d0 ! set to default
     this%mPOM = 0.d0
     this%jPOM = 0.d0
     this%velocity = 0.d0 ! Probably overridden by the specific group (POM at least)
     this%JResp = 0.d0
+    this%Jresptot = 0.d0
     this%Jtot = 0.d0
     this%JCloss_feeding = 0.d0
     this%JNlossLiebig = 0.d0
     this%JNloss = 0.d0
     this%jCloss = 0.d0
-    this%f = 0.d0
     contains
 
       !
@@ -206,16 +209,14 @@ contains
     allocate(this%JNtot(n))
     allocate(this%JLreal(n))
 
+
     allocate(this%JCtot (n))
     allocate(this%JCloss_photouptake(n))
     allocate(this%JClossLiebig(n))
 
     allocate(this%Jmax(n))
-    allocate(this%Jresptot(n))
     allocate(this%JNreal(n))
     allocate(this%JDOCreal(n))
-    allocate(this%JSireal(n))
-    allocate(this%JSi(n))
 
     this%mPOM = this%m ! Assume that POM created by dead cells are 
                        !the same size as the cells
@@ -235,9 +236,7 @@ contains
     write(*,99) "jLreal:", this%JLreal / this%m
     write(*,99) "jDOC:", this%JDOCreal / this%m
     write(*,99) "jDOCreal:", this%JDOCreal / this%m
-    write(*,99) "jSireal:", this%JSireal / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m
-    write(*,99) "jRespTot", this%JRespTot / this%m
   end subroutine printRatesUnicellular
 
   function getProdNet(this, u) result(ProdNet)

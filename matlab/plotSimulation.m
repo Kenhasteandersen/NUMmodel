@@ -1,4 +1,3 @@
-%θ
 % Make a set of basic plots of a simulation
 %
 function plotSimulation(sim)
@@ -20,6 +19,7 @@ switch sim.p.nameModel
         
     case 'watercolumn'
         day = sim.p.tEnd - 170;
+
         figure(1)
         clf
         plotWatercolumnTime(sim,'depthMax',200);
@@ -33,12 +33,12 @@ switch sim.p.nameModel
         Bdepth = sum(sum(sim.B,3),2);
         iDepth = find(Bdepth==max(Bdepth));
 
-        plotSizespectrum(sim,day,iDepth);     
+        plotSizespectrum(sim,day,iDepth);
         % plotSizespectrum(sim,iDepth);
 
         figure(4)
         plotSizespectrumTime(sim,iDepth);
-         
+
         figure(5)
         plotWatercolumnCommunity(sim)
 

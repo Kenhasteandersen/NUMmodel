@@ -8,7 +8,7 @@ arguments
     bParallel = false;
 end
 
-loadNUMmodelLibrary();
+loadNUMmodelLibrary(bParallel);
 calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult );
 if bParallel
     h = gcp('nocreate');

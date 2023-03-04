@@ -1,7 +1,7 @@
 %
 % Plot Sheldon biomass spectrum. The biomasses are normalised by the log of
 % the ratio between upper and lower masses in each bin
-% 
+% ?
 function panelSpectrum(sim, ixTime)
 
     arguments
@@ -58,7 +58,7 @@ function panelSpectrum(sim, ixTime)
     
         sLegend{iGroup+1} = p.nameGroup{iGroup};
     end
-    ylim([0.1,500])
+    ylim([0.001,500])
     xlim(calcXlim(sim.p))
     hold off
     

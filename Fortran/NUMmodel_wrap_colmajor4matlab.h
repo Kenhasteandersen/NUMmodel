@@ -4,7 +4,7 @@ void f_setupgeneralistssimplepom(const int n, const int nPOM);
 
 void f_setupgeneralistssimpleonly(const int n);
 
-void f_setupgeneralistsonly_csp();
+//void f_setupgeneralistsonly_csp();
 
 void f_setupdiatomsonly(const int n);
 
@@ -18,9 +18,15 @@ void f_setupgeneralistssimplecopepod();
 
 void f_setupgeneric(const int nCopepods, const double mAdult[]);
 
-void f_setupnummodel(const int n, const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
+void f_setupnummodel(const int n, const int nCopepod, const int nPOM, 
+					const int nCopepodsPassive, const double mAdultPassive[], 
+					const int nCopepodsActive, const double mAdultActive[]);
 
-void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
+void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
+
+void f_setupgendiatcope(const int n,const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
+
+//void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
 
 void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
 
@@ -95,11 +101,12 @@ void f_getrates(
 		double *jSi,
 		double *jF,
 		double *jFreal,
+		double *f,
 		double *jTot,
 		double *jMax,
 		double *jFmaxx,
 		double *jR,
-		double *jRespTot,
+		double *jResptot,
 		double *jLossPassive, 
 		double *jNloss,
 		double *jLreal, 

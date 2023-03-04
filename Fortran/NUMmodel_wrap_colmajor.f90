@@ -3,12 +3,12 @@ module NUMmodel_wrap
   use NUMmodel, only:  nGrid, idxB, setupGeneralistsSimpleOnly, setupGeneralistsSimplePOM, &
        setupGeneralistsOnly,  &
        setHTL, setmortHTL, getRates, &         
-       setupGeneralistsOnly_csp, &
+       
        setupDiatomsOnly, &
-      setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
+       setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
        setupGeneralistsSimpleCopepod, &
-       setupGeneric, setupNUMmodel, setupGeneric_csp, &
+       setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
        getBalance
@@ -34,9 +34,9 @@ contains
     call setupGeneralistsSimpleOnly(n)
   end subroutine f_setupGeneralistsSimpleOnly
 
-  subroutine f_setupGeneralistsOnly_csp() bind(c)
-    call setupGeneralistsOnly_csp()
-  end subroutine f_setupGeneralistsOnly_csp
+  !subroutine f_setupGeneralistsOnly_csp() bind(c)
+  !  call setupGeneralistsOnly_csp()
+  !end subroutine f_setupGeneralistsOnly_csp
 
   subroutine f_setupDiatomsOnly(n) bind(c)
     integer(c_int), intent(in), value:: n
@@ -69,19 +69,33 @@ contains
     call setupGeneric(mAdult)
   end subroutine f_setupGeneric
 
-  subroutine f_setupNUMmodel(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
+  subroutine f_setupNUMmodel(n,nCopepod,nPOM, nCopepodsPassive, mAdultPassive, nCopepodsActive, mAdultActive) bind(c)
+    integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepodsPassive, nCopepodsActive
+    real(c_double), intent(in):: mAdultPassive(nCopepodsPassive), mAdultActive(nCopepodsActive)
+
+    call setupNUMmodel(n,nCopepod,nPOM, mAdultPassive, mAdultActive)
+  end subroutine f_setupNUMmodel
+
+    subroutine f_setupNUMmodelSimple(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
     integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
     real(c_double), intent(in):: mAdult(nCopepods)
 
-    call setupNUMmodel(n,nCopepod,nPOM,mAdult)
-  end subroutine f_setupNUMmodel
+    call setupNUMmodelSimple(n,nCopepod,nPOM,mAdult)
+  end subroutine f_setupNUMmodelSimple
 
-  subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
-    integer(c_int), intent(in), value:: nCopepods
+  subroutine f_setupGenDiatCope(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
+    integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
     real(c_double), intent(in):: mAdult(nCopepods)
 
-    call setupGeneric_csp(mAdult)
-  end subroutine f_setupGeneric_csp
+    call setupGenDiatCope(n,nCopepod,nPOM,mAdult)
+  end subroutine f_setupGenDiatCope
+
+  !subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
+  !  integer(c_int), intent(in), value:: nCopepods
+  !  real(c_double), intent(in):: mAdult(nCopepods)
+
+  !  call setupGeneric_csp(mAdult)
+  !end subroutine f_setupGeneric_csp
 
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
@@ -147,7 +161,7 @@ contains
     call simulateEuler(u, L, T, tEnd, dt)
   end subroutine f_simulateEuler
 
-    subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
+   subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
     real(c_double), intent(in):: u(nGrid)
     real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
 
@@ -179,24 +193,24 @@ contains
     call getSinking(velocity)
   end subroutine f_getSinking
    
-  subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-    jTot, jMax, jFmax, jR, jRespTot, jLossPassive, &
+  subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
+    jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
     jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
     use NUMmodel, only: nNutrients, getRates
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
-    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
+    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
-    real(dp), intent(out):: jR(nGrid-nNutrients), jRespTot(nGrid-nNutrients)
+    real(dp), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
     real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
-   call getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-   jTot, jMax, jFmax, jR, jRespTot, jLossPassive, &
+   call getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
+   jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
    jNloss,jLreal, jPOM, &
    mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates

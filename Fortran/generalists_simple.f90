@@ -58,7 +58,7 @@ module generalists_simple
   !
   ! Biogeo:
   !
-  real(dp) :: remin ! fraction of mortality losses reminerilized to DOC
+  !real(dp) :: remin ! fraction of mortality losses reminerilized to DOC
   real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
   real(dp) :: reminF ! fraction of feeding losses to DOC
   !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
@@ -92,7 +92,7 @@ contains
 
     namelist /input_generalists_simple / epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
              & alphaF, cF, beta, sigma, cLeakage, delta, alphaJ, cR, &
-             & remin, remin2, reminF, mMinGeneralist, mMaxGeneralist
+             & remin2, reminF, mMinGeneralist, mMaxGeneralist
 
     call open_inputfile(file_unit, io_err)
         read(file_unit, nml=input_generalists_simple, iostat=io_err)

@@ -68,8 +68,6 @@ DOC = [DOC(1,:); DOC];
 B(:,2:length(z),:) = B;
 B(:,1,:) = B(:,2,:);
 
-
-
 if options.bNewPlot
     clf
     tiledlayout(2+isfield(sim,'Si')+sim.p.nGroups,1,'tilespacing','tight','padding','tight')

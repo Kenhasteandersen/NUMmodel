@@ -5,7 +5,7 @@ for iGroup = 1:p.nGroups
     m = p.m(ix+p.idxB-1);
     semilogx(m, rates.mortpred(ix), 'r-','linewidth',2)
     hold on
-    semilogx(m, rates.jR(ix), 'k-', 'linewidth',2)
+    semilogx(m, rates.jR(ix), 'k-.', 'linewidth',2)
     semilogx(m, rates.jRespTot(ix), 'k-', 'linewidth',2)
     semilogx(m, rates.mort2(ix), 'b-','linewidth',2)
     semilogx(m, rates.jLossPassive(ix), 'color',[0 0.5 0],'linewidth',2)

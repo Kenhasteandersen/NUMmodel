@@ -16,46 +16,48 @@ module diatoms_simple
     !
     ! Stoichiometry:
     !
-    !real(dp), parameter:: rhoCN = 5.68
-    real(dp), parameter:: rhoCSi = 3.4 
+    real(dp) :: rhoCSi
     !
     ! Cell properties
     !
-     real(dp), parameter:: v=0.6 ! Vacuole fraction. Could be estimated by comparing the density of flagellages and diatoms in Menden-Deuer (2000)
+     real(dp) :: v ! Vacuole fraction. Could be estimated by comparing the density of flagellages and diatoms in Menden-Deuer (2000)
     !
     ! Light uptake:
     !
-    real(dp), parameter:: epsilonL = 0.9 ! Light uptake efficiency
-    real(dp), parameter:: alphaL = 0.13
-    real(dp), parameter:: rLstar = 7.5
+    real(dp) :: epsilonL = 0.8 ! Light uptake efficiency
+    real(dp) :: alphaL = 0.3
+    real(dp) :: rLstar = 7.5
     !
     ! Costs
     !
-    real(dp), parameter :: bL = 0 !0.08 ! cost of light harvesting mugC(mugC)^-1
-    real(dp), parameter :: bN = 0.45 ! cost of N uptake mugC(mugN)^-1
-    real(dp), parameter :: bSi = 0.45 ! cost of Si uptake mugC(mugSi)^-1
+    real(dp) :: bN ! cost of N uptake mugC(mugN)^-1
+    real(dp) :: bSi ! cost of Si uptake mugC(mugSi)^-1
     !
     ! Dissolved nutrient uptake:
     !
-    real(dp), parameter:: alphaN = 0.682 / (1-v) ! L/d/mugC/mum^2
-    real(dp), parameter:: rNstar = 2 ! mum
+    real(dp):: alphaN ! L/d/mugC/mum^2
+    real(dp):: rNstar ! mum
     !
     ! Metabolism
     !
-    real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
-    real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
-    real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
-    real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
-    real(dp), parameter:: cR = 0.1
+    real(dp) :: cLeakage! passive leakage of C and N
+    real(dp) :: delta ! Thickness of cell wall in mum
+    real(dp) :: alphaJ ! Constant for jmax.  per day
+    real(dp) :: cR
+    !
+    ! Predation risk:
+    !
+    real(dp) :: palatability
     !
     ! Bio-geo:
     !
-    real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-    real(dp), parameter:: remin2 = 1.d0 ! fraction of virulysis remineralized to N and DOC
+    !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
+    real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
     !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
-    
+    real(dp) :: mMin
+
     type, extends(spectrumUnicellular) :: spectrumDiatoms_simple
-!      real(dp), dimension(:), allocatable:: JSi
+      real(dp), dimension(:), allocatable:: JSi
 
       contains
       procedure, pass :: initDiatoms_simple
@@ -68,15 +70,31 @@ module diatoms_simple
     public calcDerivativesDiatoms_simple, printRatesDiatoms_simple
   contains
       
+     subroutine read_namelist()
+       integer :: file_unit,io_err
+
+        namelist /input_diatoms_simple / &
+             & RhoCSi, v, &
+             & epsilonL, alphaL, rLstar, bN, bSi, &
+             & alphaN,rNstar, &
+             & cLeakage, delta, alphaJ, cR, &
+             & palatability, &
+             & remin2, mMin
+
+        call open_inputfile(file_unit, io_err)
+        read(file_unit, nml=input_diatoms_simple, iostat=io_err)
+        call close_inputfile(file_unit, io_err)
+     end subroutine read_namelist
+
     subroutine initDiatoms_simple(this, n, mMax)
       class(spectrumDiatoms_simple):: this
       real(dp), intent(in):: mMax
       integer, intent(in):: n
-      real(dp), parameter:: mMin = 3.1623d-9
       real(dp), parameter:: rho = 0.4*1d6*1d-12
   
+      call read_namelist()
       call this%initUnicellular(n, mMin, mMax)
-      !allocate(this%JSi(this%n))
+      allocate(this%JSi(this%n))
       !
       ! Radius:
       !
@@ -97,7 +115,7 @@ module diatoms_simple
       this%Jresp = cR*alphaJ*this%m
   
       this%beta = 0.d0 ! No feeding
-      this%palatability = 0.5d0 ! Lower risk of predation
+      this%palatability = palatability ! Lower risk of predation
     end subroutine initDiatoms_simple
  
     subroutine calcRatesDiatoms_simple(this, L, N, Si, gammaN, gammaSi)

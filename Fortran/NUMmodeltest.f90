@@ -24,10 +24,24 @@ program NUMmodeltest
   !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
   !call setupGeneralistsOnly(10)
+  !call setupGenDiatCope(3,3,(/0.1d0, 1.0d0 /))
+  !call setupGenDiatCope(3,5,1,(/0.1d0, 1.0d0 /))
+   !               2 gens cop POM   mAdult     
+   !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /))
+   !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /))
+
+   !              gen-diat-cop      POM      mAdult    
+   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
+
   !call setupGeneralistssimpleOnly(10)
   !call setupDiatoms_simpleOnly(10)
-  call setupDiatomsOnly(10)
+  !call setupDiatomsOnly(10)
   !call setupDiatoms_simpleOnly(10)
+  !call setHTL(0.1d0, 0.1d0, .false., .false.)
+  !call setupGeneralistsOnly(5)
+  !call setupGeneralistsPOM(10,5)
+  !call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /), (/1.d0, 10.d0, 100.d0, 1000.d0/) )
+  call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -45,10 +59,24 @@ program NUMmodeltest
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
   
+  !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
+  call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
+  call printRates()
+
+  !select type (spec => group(1)%spec)
+  !    type is (spectrumGeneralists)
+  !      write(*,*) getNbalanceGeneralists(spec, u00(idxN), dudt(idxN), u00(idxB:nGrid), dudt(idxB:nGrid))    
+  !      write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
+  !end select
   
   
   call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
   !write(*,*) u00
+  !write(*,*) 'ngrid',nGrid
+  !write(*,*) 'ngroups',nGroups
+  !write(*,*) 'nbutrients',nNutrients
+
+
 
   ProdGross = 0
   ProdNet = 0
@@ -59,7 +87,7 @@ program NUMmodeltest
   Bnano=0
   Bmicro=0
 
-  !call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
+ ! call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
   !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
   !write(*,*) u00
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
@@ -70,7 +98,7 @@ program NUMmodeltest
 
  ! write(6,*) theta(3:5, 3:5)
  ! 
- call printRates()
+ !call printRates()
  !
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
