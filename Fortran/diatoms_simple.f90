@@ -99,18 +99,17 @@ module diatoms_simple
       ! Radius:
       !
       this%r = (threequarters/pi * this%m/rho/(1-v))**onethird  ! Andy's approximation
+      this%nu = 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
+        (v**twothirds + (1.+v)**twothirds)
 
-      this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
-      this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m
+      ! Affinities are the same as for the generalists divided by a factor (1-v):
+      this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m / (1-v)
+      this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu) / (1-v)
       this%AF = 0.d0
       this%JFmax = 0.d0
 
       this%JlossPassive = cLeakage/this%r * this%m ! in units of C
   
-      !nu = c * this%m**(-onethird)
-      this%nu = 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
-        (v**twothirds + (1.+v)**twothirds)
-
       this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
       this%Jresp = cR*alphaJ*this%m
   

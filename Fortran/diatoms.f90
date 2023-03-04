@@ -118,7 +118,7 @@ module diatoms
        enddo
        
        this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
-       this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m
+       this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu)
        this%AF = 0.d0
        this%JFmax = 0.d0
  
