@@ -51,7 +51,7 @@ switch sim.p.nameModel
         nZ = length(sim.z);
         ChlArea = zeros(nTime,1);
         ChlVolume = zeros(nTime, nZ);
-        jLreal = zeros(nTime,nZ,sim.p.n-2);
+        jLreal = zeros(nTime,nZ,sim.p.n-sim.p.idxB+1);
         for iTime = 1:nTime
             ProdGross = 0;
             ProdNet = 0;
