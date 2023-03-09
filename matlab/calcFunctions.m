@@ -12,6 +12,7 @@
 %         sim.ProdHTL   - amount of carbon extracted from the HTL mortality
 %         sim.Bpico, sim.Bnano, sim.Bmicro - pico, micro, and nano plankton
 %                         biomasses (gC/m2)
+%         sim.ChlArea (gChl/m2)
 %
 %         For global simulations additional fields are:
 %         sim.Ntotal    - total dissolved N as a function of time (mugN)
@@ -58,7 +59,7 @@ switch sim.p.nameModel
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
             fprintf("Final total biomass:  %.2f gC/m2\n", sim.Btot(end));
-            fprintf("Final Chl:            %.2f gChl/m2/yr\n", sim.ChlArea)
+            fprintf("Final Chl:            %.2f gChl/m2\n", sim.ChlArea)
             fprintf("Final gross PP:       %.2f gC/m2/yr\n", sim.ProdGross)
             fprintf("Final net PP:         %.2f gC/m2/yr\n", sim.ProdNet)
             fprintf("Final HTL production: %.2f gC/m2/yr\n", sim.ProdHTL)
