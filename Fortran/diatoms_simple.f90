@@ -45,6 +45,10 @@ module diatoms_simple
     real(dp) :: alphaJ ! Constant for jmax.  per day
     real(dp) :: cR
     !
+    ! Predation risk:
+    !
+    real(dp) :: palatability
+    !
     ! Bio-geo:
     !
     !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
@@ -74,6 +78,7 @@ module diatoms_simple
              & epsilonL, alphaL, rLstar, bN, bSi, &
              & alphaN,rNstar, &
              & cLeakage, delta, alphaJ, cR, &
+             & palatability, &
              & remin2, mMin
 
         call open_inputfile(file_unit, io_err)
@@ -94,23 +99,22 @@ module diatoms_simple
       ! Radius:
       !
       this%r = (threequarters/pi * this%m/rho/(1-v))**onethird  ! Andy's approximation
+      this%nu = 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
+        (v**twothirds + (1.+v)**twothirds)
 
-      this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
-      this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m
+      ! Affinities are the same as for the generalists divided by a factor (1-v):
+      this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m / (1-v)
+      this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu) / (1-v)
       this%AF = 0.d0
       this%JFmax = 0.d0
 
       this%JlossPassive = cLeakage/this%r * this%m ! in units of C
   
-      !nu = c * this%m**(-onethird)
-      this%nu = 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
-        (v**twothirds + (1.+v)**twothirds)
-
       this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
       this%Jresp = cR*alphaJ*this%m
   
       this%beta = 0.d0 ! No feeding
-      this%palatability = 0.5d0 ! Lower risk of predation
+      this%palatability = palatability ! Lower risk of predation
     end subroutine initDiatoms_simple
  
     subroutine calcRatesDiatoms_simple(this, L, N, Si, gammaN, gammaSi)
