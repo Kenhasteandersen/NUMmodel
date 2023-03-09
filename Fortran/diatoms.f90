@@ -113,15 +113,16 @@ module diatoms
         this%nu(i) = min(1.d0, this%nu(i))
        enddo
        
-       this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
-       this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu)
+       ! Affinities are the same as for the generalists divided by a factor (1-v):
+       this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m / (1-v)
+       this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu) / (1-v)
        this%AF = 0.d0
        this%JFmax = 0.d0
  
        this%JlossPassive = cLeakage/this%r * this%m ! in units of C
  
        this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
-       this%Jresp = 0.3*cR*alphaJ*this%m ! decrease suggested by Ken
+       this%Jresp = cR*alphaJ*this%m ! decrease suggested by Ken
    
        this%beta = 0.d0 ! No feeding
        this%palatability = 0.5d0 ! Lower risk of predation

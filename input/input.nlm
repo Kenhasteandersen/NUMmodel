@@ -97,7 +97,7 @@
 !
 ! Dissolved nutrient uptake:
       alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
-      rNstar = 0.4                  ! Description [mum]
+      rNstar = 2.                  ! Description [mum]
       bN = 0.3                      ! cost of N uptake [mugC/mugN]
       bDOC = 0.3                    ! cost of DOC uptake [mugC/mugC]
 !
@@ -137,11 +137,11 @@
 ! Light uptake
 !
       epsilonL = 0.8                ! Light uptake efficiency []
-      alphaL = 0.206                ! Scaling factor for light [unit]
+      alphaL = 0.33                ! Scaling factor for light [unit]
       rLstar = 8.25                 ! Description [unit]
 !
 ! Dissolved nutrient uptake:
-      alphaN = 2.43                ! alphaN/(1-v)[L/d/mugC/mum^2] 
+      alphaN = 0.972                ! alphaN/(1-v)[L/d/mugC/mum^2] 
       rNstar = 0.4                   ! Description [mum]
       bN = 0.0                     ! cost of N uptake [mugC/mugN]
 !
