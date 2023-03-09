@@ -45,7 +45,10 @@ module diatoms
      real(dp) :: alphaJ ! Constant for jmax.  per day
      real(dp) :: cR
      real(dp) :: bg ! cost of biosynthsesis -- parameter from literature pending
-
+    !
+    ! Predation risk:
+    !
+    real(dp) :: palatability
      !
      ! Bio-geo:
      !
@@ -81,6 +84,7 @@ module diatoms
              & alphaN,rNstar, bN, bDOC, &
              & bSi, &
              & cLeakage, delta, alphaJ, cR, bg, &
+             & palatability, &
              & remin2,mMinDiatom, mMaxDiatom
 
 
@@ -125,7 +129,6 @@ module diatoms
        this%Jresp = cR*alphaJ*this%m ! decrease suggested by Ken
    
        this%beta = 0.d0 ! No feeding
-       this%palatability = 0.5d0 ! Lower risk of predation
      end subroutine initDiatoms
   
      subroutine calcRatesDiatoms(this, L, N,DOC, Si, gammaN, gammaDOC, gammaSi)
