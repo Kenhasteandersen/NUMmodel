@@ -43,7 +43,7 @@ p.widthProductiveLayer = 20; % (meters) only used for calcFunctions
 p.tEnd = 365;  % Time to run in days
 p.tSave = 1;
 
-p.uDeep = 50; % Nutrients of the layer below the chemostat layer
+p.uDeep(1:p.idxB-1) = p.u0(1:p.idxB-1); % Nutrients of the layer below the chemostat layer
 p.u0(1) = 1; % Nitrogen concentration
 
 %
