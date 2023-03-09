@@ -53,11 +53,12 @@ switch sim.p.nameModel
         sim.Bnano = sim.Bnano * sim.p.widthProductiveLayer;
         sim.Bmicro = sim.Bmicro * sim.p.widthProductiveLayer;
         sim.Btot = sum(sim.B,2) * sim.p.widthProductiveLayer/1000;
+        sim.ChlArea = sum( calcChl( sim.B(end,:), sim.rates, sim.L) ) * sim.p.widthProductiveLayer/ 1000; % Convert to g
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
             fprintf("Final total biomass:  %.2f gC/m2\n", sim.Btot(end));
-            %fprintf("Average Chl:            %.2f gChl/m2/yr\n", mean(sim.ChlArea))
+            fprintf("Final Chl:            %.2f gChl/m2/yr\n", sim.ChlArea)
             fprintf("Final gross PP:       %.2f gC/m2/yr\n", sim.ProdGross)
             fprintf("Final net PP:         %.2f gC/m2/yr\n", sim.ProdNet)
             fprintf("Final HTL production: %.2f gC/m2/yr\n", sim.ProdHTL)
@@ -106,7 +107,7 @@ switch sim.p.nameModel
                     Bmicro = Bmicro + Bmicro1*conv;
                     % Chl:
                     rates = getRates(sim.p, u, sim.L(k,iTime), sim.T(k,iTime));
-                    tmp =  calcChl( squeeze(sim.B(k,:,iTime)), rates, sim.L(k,iTime)); % Convert to mg
+                    tmp =  calcChl( squeeze(sim.B(k,:,iTime)), rates, sim.L(k,iTime)) / 1000; % Convert to g
                     if ~isnan(tmp)
                         jLreal(iTime,k,:) = rates.jLreal;
                         ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
@@ -131,7 +132,7 @@ switch sim.p.nameModel
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Average total biomass:  %.2f gC/m2\n", mean(sim.Bpico(idxAverage)+sim.Bnano(idxAverage)+sim.Bmicro(idxAverage)));
+            fprintf("Average total biomass:  %.2f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
             fprintf("Average Chl:            %.2f gChl/m2/yr\n", mean(sim.ChlArea))
             fprintf("Average gross PP:       %.2f gC/m2/yr\n", mean(sim.ProdGross))
             fprintf("Average net PP:         %.2f gC/m2/yr\n", mean(sim.ProdNet))
