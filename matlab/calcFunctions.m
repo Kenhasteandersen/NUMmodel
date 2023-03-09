@@ -3,6 +3,7 @@
 %
 % In:
 %   sim - simulation structure
+%   bPrintSummary - prints out a summary
 %
 % Out:
 %   sim - same as input but with fields of global function added:
@@ -21,7 +22,13 @@
 %         sim.ProdNetAnnual - annual average NPP (gC/m2/yr)
 %         sim.ProdHTLAnnual - annual avearge HTL production (gc/m2/yr)
 %
-function sim = calcFunctions(sim)
+function sim = calcFunctions(sim, options)
+
+arguments
+    sim struct;
+    options.bPrintSummary = true;
+end
+
 
 switch sim.p.nameModel
     
@@ -45,6 +52,16 @@ switch sim.p.nameModel
         sim.Bpico = sim.Bpico * sim.p.widthProductiveLayer;
         sim.Bnano = sim.Bnano * sim.p.widthProductiveLayer;
         sim.Bmicro = sim.Bmicro * sim.p.widthProductiveLayer;
+
+        if options.bPrintSummary
+            fprintf("----------------------------------------------\n")
+            fprintf("Average total biomass:  %.2f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
+            %fprintf("Average Chl:            %.2f gChl/m2/yr\n", mean(sim.ChlArea))
+            fprintf("Average gross PP:       %.2f gC/m2/yr\n", mean(sim.ProdGross))
+            fprintf("Average net PP:         %.2f gC/m2/yr\n", mean(sim.ProdNet))
+            fprintf("Average HTL production: %.2f gC/m2/yr\n", mean(sim.ProdHTL))
+            fprintf("----------------------------------------------\n")
+        end
         
     case 'watercolumn'
         nTime = length(sim.t);
@@ -110,6 +127,16 @@ switch sim.p.nameModel
         sim.ChlArea = ChlArea;
         sim.ChlVolume = ChlVolume;
         sim.jLreal = jLreal;
+
+        if options.bPrintSummary
+            fprintf("----------------------------------------------\n")
+            fprintf("Average total biomass:  %.2f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
+            fprintf("Average Chl:            %.2f gChl/m2/yr\n", mean(sim.ChlArea))
+            fprintf("Average gross PP:       %.2f gC/m2/yr\n", mean(sim.ProdGross))
+            fprintf("Average net PP:         %.2f gC/m2/yr\n", mean(sim.ProdNet))
+            fprintf("Average HTL production: %.2f gC/m2/yr\n", mean(sim.ProdHTL))
+            fprintf("----------------------------------------------\n")
+        end
         
     case 'global'
         %
