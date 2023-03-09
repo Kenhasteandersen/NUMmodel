@@ -67,6 +67,12 @@ if options.bParallel
         Nlower(i) = min(sim.N(ixAve));
         Nupper(i) = max(sim.N(ixAve));
 
+        if isfield(p,'idxSi')
+            Si(i) = exp( mean( log(sim.Si(ixAve))));
+            Silower(i) = min(sim.Si(ixAve));
+            Siupper(i) = max(sim.Si(ixAve));
+        end
+
         for iGroup = 1:nGroups
             ix = (ppp.ixStart(iGroup):ppp.ixEnd(iGroup)) - ppp.idxB + 1;
             B(i,iGroup) = exp(mean(log(sum(sim.B(ixAve,ix),2))));
@@ -95,6 +101,15 @@ patch([range range(end:-1:1)], [Nlower, Nupper(end:-1:1)], 0.75*[0,0,1], ...
 
 legendentries(1) = semilogy(range, N,'--','linewidth',2,'color',p.colNutrients{p.idxN});
 sLegend{1} = 'N';
+
+if isfield(p,'idxSi')
+    semilogy(range, Si,'--','linewidth',2,'color',p.colNutrients{p.idxN});
+    patch([range range(end:-1:1)], [Silower, Siupper(end:-1:1)], 0.75*[0,0,1], ...
+        'edgecolor','none','facealpha',0.15)
+
+    legendentries(2) = semilogy(range, Si,'--','linewidth',2,'color',p.colNutrients{p.idxSi});
+    sLegend{2} = 'Si';
+end
 %
 % Biomass:
 %
@@ -102,14 +117,14 @@ for iGroup = 1:nGroups
     patch([range range(end:-1:1)], [Blower(:,iGroup)', Bupper(end:-1:1,iGroup)'],...
         p.colGroup{iGroup}, 'edgecolor','none','facealpha',0.15)
 
-    lwd = 2;
-    if (p.typeGroups(iGroup) == 10)
-        lwd = 1 + (iGroup-2)*0.5;
+    if (p.typeGroups(iGroup) >= 10)
+        lwd = 1 + log10( max(p.m(p.ixStart(iGroup):p.ixEnd(iGroup))));
     end
-    legendentries(1+iGroup) = ...
-        semilogy(range, B(:,iGroup),'color', p.colGroup{iGroup},'linewidth',lwd);
+    legendentries(p.idxB-2+iGroup) = ...
+        semilogy(range, B(:,iGroup),'color', p.colGroup{iGroup},...
+        'linewidth',lwd);
 
-    sLegend{iGroup+1} = p.nameGroup{iGroup};
+    sLegend{iGroup+p.idxB-2} = p.nameGroup{iGroup};
 end
 set(gca,'xscale','log','yscale','log')
 hold off
@@ -142,6 +157,12 @@ ylim([1e-4 1e3])
         N(i) = exp( mean( log(sim.N(ixAve))));
         Nlower(i) = min(sim.N(ixAve));
         Nupper(i) = max(sim.N(ixAve));
+
+        if isfield(p,'idxSi')
+            Si(i) = exp( mean( log(sim.Si(ixAve))));
+            Silower(i) = min(sim.Si(ixAve));
+            Siupper(i) = max(sim.Si(ixAve));
+        end
 
         for iGroup = 1:nGroups
             ix = (ppp.ixStart(iGroup):ppp.ixEnd(iGroup)) - ppp.idxB + 1;
