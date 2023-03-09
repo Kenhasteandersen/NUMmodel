@@ -31,18 +31,18 @@ end
 
 
 switch sim.p.nameModel
-    
+
     case 'chemostat'
         if sim.p.nNutrients==3
-                    u = [sim.N(end), sim.DOC(end),sim.Si(end), sim.B(end,:)];
-        [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
-            sim.Bpico, sim.Bnano, sim.Bmicro] = ...=
-            getFunctions(u, sim.L, sim.T);
+            u = [sim.N(end), sim.DOC(end),sim.Si(end), sim.B(end,:)];
+            [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
+                sim.Bpico, sim.Bnano, sim.Bmicro] = ...=
+                getFunctions(u, sim.L, sim.T);
         else
-        u = [sim.N(end), sim.DOC(end), sim.B(end,:)];
-        [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
-            sim.Bpico, sim.Bnano, sim.Bmicro] = ...=
-            getFunctions(u, sim.L, sim.T);
+            u = [sim.N(end), sim.DOC(end), sim.B(end,:)];
+            [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
+                sim.Bpico, sim.Bnano, sim.Bmicro] = ...=
+                getFunctions(u, sim.L, sim.T);
         end
         % Multiply by the assumed depth of the productive layer:
         sim.ProdGross = sim.ProdGross * sim.p.widthProductiveLayer;
@@ -52,17 +52,18 @@ switch sim.p.nameModel
         sim.Bpico = sim.Bpico * sim.p.widthProductiveLayer;
         sim.Bnano = sim.Bnano * sim.p.widthProductiveLayer;
         sim.Bmicro = sim.Bmicro * sim.p.widthProductiveLayer;
+        sim.Btot = sum(sim.B,2) * sim.p.widthProductiveLayer/1000;
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Average total biomass:  %.2f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
+            fprintf("Final total biomass:  %.2f gC/m2\n", sim.Btot(end));
             %fprintf("Average Chl:            %.2f gChl/m2/yr\n", mean(sim.ChlArea))
-            fprintf("Average gross PP:       %.2f gC/m2/yr\n", mean(sim.ProdGross))
-            fprintf("Average net PP:         %.2f gC/m2/yr\n", mean(sim.ProdNet))
-            fprintf("Average HTL production: %.2f gC/m2/yr\n", mean(sim.ProdHTL))
+            fprintf("Final gross PP:       %.2f gC/m2/yr\n", sim.ProdGross)
+            fprintf("Final net PP:         %.2f gC/m2/yr\n", sim.ProdNet)
+            fprintf("Final HTL production: %.2f gC/m2/yr\n", sim.ProdHTL)
             fprintf("----------------------------------------------\n")
         end
-        
+
     case 'watercolumn'
         nTime = length(sim.t);
         nZ = length(sim.z);
@@ -82,14 +83,14 @@ switch sim.p.nameModel
                 if ~isnan(sim.N(k,iTime))
                     % Get the functions per volume at each depth and time:
                     if sim.p.nNutrients==3
-                    u = [squeeze(sim.N(k,iTime)), ...
-                        squeeze(sim.DOC(k,iTime)), ...
-                        squeeze(sim.Si(k,iTime)), ...
-                        squeeze(sim.B(k,:,iTime))];
+                        u = [squeeze(sim.N(k,iTime)), ...
+                            squeeze(sim.DOC(k,iTime)), ...
+                            squeeze(sim.Si(k,iTime)), ...
+                            squeeze(sim.B(k,:,iTime))];
                     else
-                    u = [squeeze(sim.N(k,iTime)), ...
-                        squeeze(sim.DOC(k,iTime)), ...
-                        squeeze(sim.B(k,:,iTime))];
+                        u = [squeeze(sim.N(k,iTime)), ...
+                            squeeze(sim.DOC(k,iTime)), ...
+                            squeeze(sim.B(k,:,iTime))];
                     end
                     [ProdGross1, ProdNet1,ProdHTL1,ProdBact1,~,Bpico1,Bnano1,Bmicro1] = ...
                         getFunctions(u, sim.L(k,iTime), sim.T(k,iTime));
@@ -130,14 +131,14 @@ switch sim.p.nameModel
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Average total biomass:  %.2f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
+            fprintf("Average total biomass:  %.2f gC/m2\n", mean(sim.Bpico(idxAverage)+sim.Bnano(idxAverage)+sim.Bmicro(idxAverage)));
             fprintf("Average Chl:            %.2f gChl/m2/yr\n", mean(sim.ChlArea))
             fprintf("Average gross PP:       %.2f gC/m2/yr\n", mean(sim.ProdGross))
             fprintf("Average net PP:         %.2f gC/m2/yr\n", mean(sim.ProdNet))
             fprintf("Average HTL production: %.2f gC/m2/yr\n", mean(sim.ProdHTL))
             fprintf("----------------------------------------------\n")
         end
-        
+
     case 'global'
         %
         % Primary production in gC per m2/year::
@@ -146,7 +147,7 @@ switch sim.p.nameModel
             % Get grid volumes:
             load(sim.p.pathGrid,'dv','dz','dx','dy');
             ix = ~isnan(sim.N(:,:,1,1)); % Find all relevant grid cells
-            
+
             sim.ProdGross = zeros(length(sim.x), length(sim.y), length(sim.t));
             sim.ProdNet = sim.ProdGross;
             sim.ProdHTL = sim.ProdGross;
@@ -156,7 +157,7 @@ switch sim.p.nameModel
             sim.Bmicro = sim.ProdGross;
             ChlArea = 0*dx;
             ChlVolume = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z));
-            
+
             nTime = length(sim.t);
             nX = length(sim.x);
             nY = length(sim.y);
@@ -173,16 +174,16 @@ switch sim.p.nameModel
                         Bmicro = 0;
                         for k = 1:nZ
                             if ~isnan(sim.N(i,j,k,iTime))
-                               if isfield('sim','idxSi')
-                                u = [squeeze(sim.N(i,j,k,iTime)), ...
-                                    squeeze(sim.DOC(i,j,k,iTime)), ...
-                                    squeeze(sim.Si(i,j,k,iTime)), ...
-                                    squeeze(sim.B(i,j,k,:,iTime))'];
-                               else
-                                u = [squeeze(sim.N(i,j,k,iTime)), ...
-                                    squeeze(sim.DOC(i,j,k,iTime)), ...
-                                    squeeze(sim.B(i,j,k,:,iTime))'];
-                               end
+                                if isfield('sim','idxSi')
+                                    u = [squeeze(sim.N(i,j,k,iTime)), ...
+                                        squeeze(sim.DOC(i,j,k,iTime)), ...
+                                        squeeze(sim.Si(i,j,k,iTime)), ...
+                                        squeeze(sim.B(i,j,k,:,iTime))'];
+                                else
+                                    u = [squeeze(sim.N(i,j,k,iTime)), ...
+                                        squeeze(sim.DOC(i,j,k,iTime)), ...
+                                        squeeze(sim.B(i,j,k,:,iTime))'];
+                                end
                                 [ProdGross1, ProdNet1,ProdHTL1,ProdBact1, ~,Bpico1,Bnano1,Bmicro1] = ...
                                     getFunctions(u, sim.L(i,j,k,iTime), sim.T(i,j,k,iTime));
                                 conv = squeeze(dz(i,j,k));
@@ -221,7 +222,7 @@ switch sim.p.nameModel
             % Global totals
             %
             calcTotal = @(u) sum(u(ix(:)).*dv(ix(:))); % mug/day
-            
+
             for i = 1:length(sim.t)
                 sim.Ntotal(i) = calcTotal(sim.N(:,:,:,i));
                 sim.DOCtotal(i) = calcTotal(sim.DOC(:,:,:,i)); % mugC
@@ -229,12 +230,12 @@ switch sim.p.nameModel
                 for j = 1:(sim.p.n-sim.p.idxB+1)
                     sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(:,:,:,j,i)); % mugC
                 end
-                
+
                 sim.ProdNetTotal(i) = sum(sum(sim.ProdNet(:,:,i).*dx.*dy)); % gC/yr
                 sim.ProdGrossTotal(i) = sum(sum(sim.ProdGross(:,:,i).*dx.*dy)); % gC/yr
                 sim.ProdHTLTotal(i) = sum(sum(sim.ProdHTL(:,:,i).*dx.*dy));
             end
-            
+
             sim.ChlTotal = ChlArea.*dx.*dy;
             sim.ChlTotal = sum(sim.ChlTotal(:));%/ 1000; %gChl
         end
@@ -265,9 +266,9 @@ switch sim.p.nameModel
             %end
             %sim.ProdNetTotalAnnual = sim.ProdNetTotalAnnual/1000/1000/1000/1000; % GTon carbon/year
         end
-        
+
     otherwise
         disp('Model unknown; functions not calculated');
-        
+
 end
 sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro;
