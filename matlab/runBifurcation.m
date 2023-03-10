@@ -117,6 +117,7 @@ for iGroup = 1:nGroups
     patch([range range(end:-1:1)], [Blower(:,iGroup)', Bupper(end:-1:1,iGroup)'],...
         p.colGroup{iGroup}, 'edgecolor','none','facealpha',0.15)
 
+    lwd = 1;
     if (p.typeGroups(iGroup) >= 10)
         lwd = 1 + log10( max(p.m(p.ixStart(iGroup):p.ixEnd(iGroup))));
     end
