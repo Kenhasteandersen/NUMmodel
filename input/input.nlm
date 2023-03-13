@@ -90,7 +90,7 @@
 ! Light uptake
 !
       epsilonL = 0.8                ! Light uptake efficiency []
-      alphaL = 0.13                 ! Scaling factor for light [unit]
+      alphaL = 0.3                  ! Scaling factor for light [unit]
       rLstar = 7.5                  ! Description [unit]
       bL = 0.08                     ! Cost of light harvesting [mugC/mugC]
 !
@@ -111,10 +111,10 @@
 !
 ! Metabolism
 !
-      cLeakage = 0.003               ! Passive leakage of C and N
+      cLeakage = 0.03               ! Passive leakage of C and N
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
-      cR = 0.1       
+      cR = 0.03       
       bg = 0.2                      ! Cost of biosynthsesis
 !
 ! Biogeo:
@@ -153,19 +153,23 @@
       cLeakage = 0.03               ! Passive leakage of C and N
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
-      cR = 0.1       
+      cR = 0.03       
 !
 ! Biogeo:
 !
       remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
+!
+! Vulnerability to predation:
+!
+      palatability = 0.5
 /
 
 &input_diatoms
 !
 ! General
 !
-      mMinDiatom = 3.1623d-9    ! Description [mug C]
-	mMaxDiatom = 1.0		    ! Description [mug C]
+      mMinDiatom = 3.d-8            ! Description [mug C]
+	mMaxDiatom = 1.0		      ! Description [mug C]
 
       rhoCSi = 3.4                  ! Carbon:Si mass ratio
       v  = 0.6                      ! Vacuole volume fraction
@@ -173,15 +177,15 @@
 ! Light uptake
 !
       epsilonL = 0.8                ! Light uptake efficiency []
-      alphaL = 0.206                ! Scaling factor for light [unit]
-      rLstar = 8.25                 ! Description [unit]
+      alphaL = 0.3                  ! Scaling factor for light [unit]
+      rLstar = 7.5                  ! Description [unit]
       bL = 0.08                     ! Cost of light harvesting [mugC/mugC]
 !
 ! Dissolved nutrient uptake:
-      alphaN = 0.682                ! Description [L/d/mugC/mum^2] 
-      rNstar = 2.                   ! Description [mum]
-      bN = 0.3                     ! cost of N uptake [mugC/mugN]
-      bDOC = 0.3                   ! cost of DOC uptake [mugC/mugC]
+      alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
+      rNstar = 0.4                  ! Description [mum]
+      bN = 0.3                      ! cost of N uptake [mugC/mugN]
+      bDOC = 0.3                    ! cost of DOC uptake [mugC/mugC]
 !
 ! Silicate uptake
 !
@@ -189,17 +193,20 @@
 !
 ! Metabolism
 !
-      cLeakage = 0.003              ! Passive leakage of C and N
- !     c = 0.0015                    ! Parameter for cell wall fraction of mass.
+      cLeakage = 0.03              ! Passive leakage of C and N
       delta = 0.05                  ! Thickness of cell wall [mum]
       alphaJ = 1.5                  ! Constant for jmax. [day-1]
-      cR = 0.1       
+      cR = 0.03       
       bg = 0.2                      ! Cost of biosynthsesis
 !
 ! Biogeo:
 !
  !     remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
       remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
+!
+! Vulnerability to predation:
+!
+      palatability = 0.5
 /
 
 !
