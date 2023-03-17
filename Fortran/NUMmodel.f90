@@ -872,6 +872,17 @@ contains
       end do
      
    end subroutine getSinking
+   !
+   ! Set the sinking velocity of all groups. Typically used to change the velocity of POM
+   !
+   subroutine setSinking(velocity)
+      real(dp), intent(in) :: velocity(nGrid)
+      integer:: iGroup
+  
+      do iGroup = 1, nGroups
+         group(iGroup)%spec%velocity = velocity( (ixStart(iGroup)):(ixEnd(iGroup)) )
+      end do
+    end subroutine setSinking
   
   ! ---------------------------------------------------
   ! Get the ecosystem functions as calculated from the last call

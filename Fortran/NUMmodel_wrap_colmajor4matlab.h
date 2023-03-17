@@ -76,6 +76,8 @@ void f_getmass(
 
 void f_getsinking(double *velocity);
 
+void f_setsinking(double *velocity);
+
 void f_getfunctions(
 			double u[],
 		    double *ProdGross,
