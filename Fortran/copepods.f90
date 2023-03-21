@@ -26,10 +26,12 @@ module copepods
   real(dp) :: kSDA  ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
   real(dp) :: AdultOffspring
   real(dp) :: vulnerability ! Passed to "palatability" in the parent spectrum class
+  real(dp) :: DiatomsPreference
 
   type, extends(spectrumMulticellular) :: spectrumCopepod
     integer :: feedingmode ! Active=1; Passive=2
     real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:), JrespFactor(:)
+    real(dp) :: DiatomsPreference ! Feeding preference on diatoms
   contains
     procedure, pass :: initCopepod
     procedure :: calcDerivativesCopepod
@@ -46,9 +48,9 @@ contains
     integer :: file_unit,io_err
 
     namelist /input_copepods_passive / epsilonF, epsilonR, beta, sigma, alphaF,q, &
-             & h, hExponent, kBasal, kSDA, AdultOffspring, vulnerability
+             & h, hExponent, kBasal, kSDA, AdultOffspring, vulnerability, DiatomsPreference
     namelist /input_copepods_active /  epsilonF, epsilonR, beta, sigma, alphaF,q, &
-             & h, hExponent, kBasal, kSDA, AdultOffspring, vulnerability
+             & h, hExponent, kBasal, kSDA, AdultOffspring, vulnerability, DiatomsPreference
     
     call open_inputfile(file_unit, io_err)
 
@@ -73,8 +75,9 @@ contains
     real(dp):: lnDelta, mMin
 
     this%feedingmode = feedingmode
-
+    
     call read_namelist(this%feedingmode)
+    this%DiatomsPreference = DiatomsPreference
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
