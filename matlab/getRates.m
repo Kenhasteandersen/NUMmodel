@@ -9,7 +9,7 @@
 %  T - Temperature
 %
 % Out
-%  Struct with rates
+%  Struct with rates in units of 1/day
 %
 function rates = getRates(p, u, L, T)
 arguments
