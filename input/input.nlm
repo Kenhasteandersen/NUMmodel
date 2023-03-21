@@ -253,6 +253,6 @@
                                     !   data in Kiørboe and Hirst (2014) are for fully fed copepods.
       AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
       vulnerability = 0.2           ! Passive copepods have reduced risk of predation
-      DiatomsPreference = 0.5       ! Feeding preference on diatoms (lowered feeding on diatoms)
+      DiatomsPreference = 0.2       ! Feeding preference on diatoms (lowered feeding on diatoms)
 /
 
