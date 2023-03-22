@@ -949,7 +949,7 @@ contains
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       end select
 
-      mort = 0.d0 ! For odd reasons this gives a segfault when called from R
+      mort = 0.d0
 
    end do
   end subroutine getRates
