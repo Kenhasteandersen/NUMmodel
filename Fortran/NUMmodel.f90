@@ -393,8 +393,8 @@ contains
                           theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
                             spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
                       type is (spectrumDiatoms_simple)
-                            theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
-                              spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
+                           theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
+                            spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
                      end select
                end select
             end do
