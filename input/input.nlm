@@ -96,7 +96,7 @@
 !
 ! Dissolved nutrient uptake:
       alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
-      rNstar = 2.                   ! Description [mum]
+      rNstar = 0.4                   ! Description [mum]
       bN = 0.3                     ! cost of N uptake [mugC/mugN]
       bDOC = 0.3                   ! cost of DOC uptake [mugC/mugC]
 !
