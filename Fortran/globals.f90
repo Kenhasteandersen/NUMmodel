@@ -32,7 +32,7 @@ module globals
     integer :: file_unit,io_err
 
     namelist /input_general / rhoCN, fracHTL_to_N, fracHTL_to_POM
-
+    
     call open_inputfile(file_unit, io_err)
     read(file_unit, nml=input_general, iostat=io_err)
     call close_inputfile(file_unit, io_err)

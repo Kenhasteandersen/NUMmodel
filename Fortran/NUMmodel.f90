@@ -383,6 +383,20 @@ contains
                   calcPhi(group(iGroup)%spec%m(i)/group(jGroup)%spec%m(j), &
                      group(iGroup)%spec%beta, group(iGroup)%spec%sigma, &
                      group(iGroup)%spec%z(i))
+               !
+               ! Passive copepods have a lower preference for feeding on diatoms:
+               !
+               select type (spec => group(iGroup)%spec) ! Predator group
+                  type is (spectrumCopepod)
+                    select type (specPrey => group(jGroup)%spec) ! Prey group
+                      type is (spectrumDiatoms)
+                          theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
+                            spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
+                      type is (spectrumDiatoms_simple)
+                           theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
+                            spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
+                     end select
+               end select
             end do
          end do
       end do
@@ -872,6 +886,17 @@ contains
       end do
      
    end subroutine getSinking
+   !
+   ! Set the sinking velocity of all groups. Typically used to change the velocity of POM
+   !
+   subroutine setSinking(velocity)
+      real(dp), intent(in) :: velocity(nGrid)
+      integer:: iGroup
+  
+      do iGroup = 1, nGroups
+         group(iGroup)%spec%velocity = velocity( (ixStart(iGroup)):(ixEnd(iGroup)) )
+      end do
+    end subroutine setSinking
   
   ! ---------------------------------------------------
   ! Get the ecosystem functions as calculated from the last call

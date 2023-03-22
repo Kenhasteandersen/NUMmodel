@@ -1,9 +1,8 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int, c_bool
-  use NUMmodel, only:  nGrid, idxB, setupGeneralistsSimpleOnly, setupGeneralistsSimplePOM, &
+  use NUMmodel, only:  nGrid, idxB, nGrid, &
+       setupGeneralistsSimpleOnly, setupGeneralistsSimplePOM, &
        setupGeneralistsOnly,  &
-       setHTL, setmortHTL, getRates, &         
-       
        setupDiatomsOnly, &
        setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
@@ -11,7 +10,7 @@ module NUMmodel_wrap
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
-       getBalance
+       setHTL, setmortHTL, setSinking, getRates, getBalance
 
   use globals
 
@@ -192,6 +191,15 @@ contains
 
     call getSinking(velocity)
   end subroutine f_getSinking
+
+  subroutine f_setSinking(velocity) bind(c)
+    use globals
+    use NUMmodel, only: setSinking, nGrid
+
+    real(c_double), intent(in):: velocity(nGrid)
+
+    call setSinking(velocity)
+  end subroutine f_setSinking
    
   subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
     jTot, jMax, jFmax, jR, jResptot, jLossPassive, &

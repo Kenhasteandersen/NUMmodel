@@ -40,8 +40,8 @@ program NUMmodeltest
   !call setHTL(0.1d0, 0.1d0, .false., .false.)
   !call setupGeneralistsOnly(5)
   !call setupGeneralistsPOM(10,5)
-  !call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /), (/1.d0, 10.d0, 100.d0, 1000.d0/) )
-  call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
+  call setupNUMmodel(2,2,1, (/1.d0 /), (/1.d0/) )
+  !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -108,5 +108,8 @@ program NUMmodeltest
     write(*,*) 'Cbalance:', Cbalance
     !write(*,*) 'Sibalance:', Sibalance
 
+do i = 1,9
+   write(*,*) i, theta(i+3,4:12)
+end do
   end program NUMmodeltest
  
