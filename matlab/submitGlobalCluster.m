@@ -2,12 +2,12 @@
 % Submit to DTU cluster. The results can be picked up 
 % via a call to loadGlobalCluster
 %
-function submitGlobalCluster(p)
+function submitGlobalCluster()
 %
 % Remove old log files:
-system('rm Error_*txt Output_*txt');
+%system('rm Error_*txt Output_*txt');
 % Get parameters:
-save('tmpparameters','p');
+%save('tmpparameters','p');
 % Submit run:
 system('bsub < clusterrun.sh');
 
