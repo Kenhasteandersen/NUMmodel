@@ -98,7 +98,7 @@ module diatoms
        integer, intent(in):: n
        integer:: i
        real(dp), parameter:: mMin = 3.1623d-9
-       real(dp), parameter:: rho = 0.57*1d-6
+       real(dp), parameter:: rho = 0.4*1d-6
        !real(dp) :: fl
 
        call read_namelist()
