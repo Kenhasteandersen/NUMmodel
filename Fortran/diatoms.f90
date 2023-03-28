@@ -105,7 +105,6 @@ module diatoms
        call this%initUnicellular(n, mMinDiatom, mMaxDiatom)
        allocate(this%JSi(this%n))
        allocate(this%JSireal(this%n))
-
        !
        ! Radius:
        !
@@ -129,6 +128,7 @@ module diatoms
        this%Jresp = cR*alphaJ*this%m ! decrease suggested by Ken
    
        this%beta = 0.d0 ! No feeding
+       this%palatability = palatability ! Lower risk of predation
      end subroutine initDiatoms
   
      subroutine calcRatesDiatoms(this, L, N,DOC, Si, gammaN, gammaDOC, gammaSi)
