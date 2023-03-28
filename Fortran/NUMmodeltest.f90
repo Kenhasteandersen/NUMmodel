@@ -108,8 +108,8 @@ program NUMmodeltest
     write(*,*) 'Cbalance:', Cbalance
     !write(*,*) 'Sibalance:', Sibalance
 
-do i = 1,9
-   write(*,*) i, theta(i+3,4:12)
+do i = 5,9
+   write(*,*) i, theta(i+3,6:9)
 end do
   end program NUMmodeltest
  
