@@ -11,6 +11,7 @@
 #BSUB -W 4:00 
 #BSUB -n 1
 
+module load matlab/R2021b
 
 #cd /zhome/09/7/104700/local/cluster_runs/
 matlab -nodisplay -r runGlobalCluster -logfile cluster.log

@@ -24,7 +24,7 @@ module copepods
   real(dp) :: hExponent  ! Exponent for maximum ingestions rate
   real(dp) :: kBasal ! 0.006 ! Factor for basal metabolism.This value represents basal
   real(dp) :: kSDA  ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
-  real(dp) :: AdultOffspring
+  real(dp) :: AdultOffspring ! Adult-offspring mass ratio
   real(dp) :: vulnerability ! Passed to "palatability" in the parent spectrum class
   real(dp) :: DiatomsPreference
 
