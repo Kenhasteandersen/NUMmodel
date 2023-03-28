@@ -80,9 +80,9 @@ module spectrum
 contains
 
 ! ==========================================================================
-!  Member functions for the abstract spectrum parent class:
+!  Member functions for the abstract spectrum parent class.
+!  Initializes a spectrum with n size classes with masses from mMin to mMax.
 ! ==========================================================================
-
   subroutine initSpectrum(this, n, mMin, mMax)
     class(typeSpectrum) :: this
     integer, intent(in):: n
@@ -141,7 +141,7 @@ contains
     this%jCloss = 0.d0
     contains
 
-      !
+  !
   ! Set up a grid given minimum and maximum center masses
   !
   subroutine calcGrid()
