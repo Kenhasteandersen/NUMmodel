@@ -44,7 +44,7 @@ switch sim.p.nameModel
             Si = sim.Si;
         end
         for i = 1:sim.p.nGroups
-            B(i,:,:) = squeeze(sum(sim.B(:,sim.p.ixStart(i):sim.p.ixEnd(i)-sim.p.idxB+1,:),2));
+            B(i,:,:) = squeeze(sum(sim.B(:,(sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1,:),2));
         end
         z = sim.z + 0.5*sim.dznom;
         lat = sim.lat;
