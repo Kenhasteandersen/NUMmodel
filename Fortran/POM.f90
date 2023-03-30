@@ -14,11 +14,10 @@ module POM
   
     private 
   
-    real(dp), parameter:: remin = 0.07d0 ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
-    real(dp), parameter:: mMin = 1e-9 ! Smallest POM mass
-  
     type, extends(typeSpectrum) :: spectrumPOM
             
+      real(dp):: remin
+
     contains
       procedure, pass :: initPOM
       procedure :: calcDerivativesPOM
@@ -33,7 +32,18 @@ module POM
     class(spectrumPOM):: this
     integer, intent(in):: n
     real(dp), intent(in):: mMax
+    integer:: file_unit,io_err
+
+    real(dp):: remin != 0.07d0 ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
+    real(dp):: mMin != 1e-9 ! Smallest POM mass
     
+    namelist /input_POM / mMin, remin
+
+    call open_inputfile(file_unit, io_err)
+    read(file_unit, nml=input_POM, iostat=io_err)
+    call close_inputfile(file_unit, io_err)
+    this%remin = remin
+
     call this%initSpectrum(n)
     call this%calcGrid(mMin, mMax)
 
@@ -46,9 +56,9 @@ module POM
     real(dp), intent(in):: u(this%n)
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
 
-    dudt = dudt - fTemp2*remin*u - this%mortpred*u
-    dNdt = dNdt + fTemp2*remin*sum(u)/rhoCN
-    dDOCdt = dDOCdt + fTemp2*remin*sum(u)
+    dudt = dudt - fTemp2*this%remin*u - this%mortpred*u
+    dNdt = dNdt + fTemp2*this%remin*sum(u)/rhoCN
+    dDOCdt = dDOCdt + fTemp2*this%remin*sum(u)
   end subroutine calcDerivativesPOM
 
   subroutine printRatesPOM(this)
