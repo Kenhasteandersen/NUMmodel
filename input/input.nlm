@@ -39,7 +39,7 @@
 !
 ! General
 !
-      mMinGeneralist = 3.1623d-9    ! Smallest cell size [mug C]
+      mMinGeneralist = 1.1623d-9    ! Smallest cell size [mug C]
 	mMaxGeneralist = 1.0		! Largest cell size [mug C]
 !
 ! Light uptake
@@ -84,7 +84,7 @@
 !
 ! General
 !
-      mMinGeneralist = 3.1623d-9    ! Description [mug C]
+      mMinGeneralist = 1.1623d-9    ! Description [mug C]
 	mMaxGeneralist = 1.0		    ! Description [mug C]
 !
 ! Light uptake
@@ -129,7 +129,7 @@
 !
 ! General
 !
-      mMin = 3.1623d-8            ! Smallest size [mug C]
+      mMin = 1.1623d-8            ! Smallest size [mug C]
       rhoCSi = 3.4                  ! Carbon:Si mass ratio
       v  = 0.6                      ! Vacuole volume fraction
 !
@@ -168,7 +168,7 @@
 !
 ! General
 !
-      mMinDiatom = 3.d-8            ! Description [mug C]
+      mMinDiatom = 1.d-8            ! Description [mug C]
 	mMaxDiatom = 1.0		      ! Description [mug C]
 
       rhoCSi = 3.4                  ! Carbon:Si mass ratio
