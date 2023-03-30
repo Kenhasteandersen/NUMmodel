@@ -8,7 +8,7 @@ arguments
     mAdultActive (1,:) = [1 10 100 1000];
     n = 10;
     nCopepods = 10;
-    nPOM = 10;
+    nPOM = 1;
     options.bParallel = false;
 end
 
@@ -44,6 +44,7 @@ end
 
 % POM:
 p = parametersAddgroup(100, p, nPOM);
+setSinkingPOM(p, 10); % Since there is only one group, set a slow sinking
 
 p = getMass(p);
 
