@@ -1,6 +1,5 @@
-
 !
-! Module to handle the NUM model framework
+! The NUM model framework
 !
 module NUMmodel
   use globals
@@ -8,7 +7,6 @@ module NUMmodel
   use generalists
   use generalists_simple
   use diatoms_simple
-  !use generalists_csp
   use copepods
   use diatoms
   use POM
@@ -20,14 +18,13 @@ module NUMmodel
   integer, parameter :: idxSi = 3
 
   ! Types of spectra:
-   integer, parameter :: typeGeneralistSimple = 1
-   integer, parameter :: typeGeneralist = 5  
-   !integer, parameter :: typeGeneralist_csp = 2
-   integer, parameter :: typeDiatom = 3
-   integer, parameter :: typeDiatom_simple = 4
-   integer, parameter :: typeCopepodActive = 10
-   integer, parameter :: typeCopepodPassive = 11
-   integer, parameter :: typePOM = 100
+  integer, parameter :: typeGeneralistSimple = 1
+  integer, parameter :: typeGeneralist = 5  
+  integer, parameter :: typeDiatom = 3
+  integer, parameter :: typeDiatom_simple = 4
+  integer, parameter :: typeCopepodActive = 10
+  integer, parameter :: typeCopepodPassive = 11
+  integer, parameter :: typePOM = 100
   !
   ! Variables that contain the size spectrum groups
   !
@@ -86,41 +83,32 @@ contains
   ! A basic setup with generalists and POM
   ! -----------------------------------------------
   subroutine setupGeneralistsSimplePOM(n, nPOM)
-   integer, intent(in):: n, nPOM
-   call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
-   call parametersAddGroup(typeGeneralistSimple, n, 0.d0) ! generalists with n size classes
-   call parametersAddGroup(typePOM, nPOM, 1.0d0) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
- end subroutine setupGeneralistsSimplePOM
-
-  ! -----------------------------------------------
-  ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
-  ! -----------------------------------------------
-   !subroutine setupGeneralistsOnly_csp()
-   !  call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
-   !  call parametersAddGroup(typeGeneralist_csp, 10, 10.d0**(-1.3d0)) ! generalists with 10 size classes
-   !  call parametersFinalize(0.003d0, .true., .true.) ! Serra-Pompei (2020))
-   !end subroutine setupGeneralistsOnly_csp
+    integer, intent(in):: n, nPOM
+    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+    call parametersAddGroup(typeGeneralistSimple, n, 0.d0) ! generalists with n size classes
+    call parametersAddGroup(typePOM, nPOM, 1.0d0) ! POM with nPOM size classes and max size 1 ugC
+    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+  end subroutine setupGeneralistsSimplePOM
 
   ! -----------------------------------------------
   ! A basic setup with only diatoms:
   ! -----------------------------------------------
   subroutine setupDiatomsOnly(n)
-   integer, intent(in):: n
-   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
-   call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
-   call parametersFinalize(0.1d0, .false., .false.)
- end subroutine setupDiatomsOnly
+    integer, intent(in):: n
+    call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
+    call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
+    call parametersFinalize(0.1d0, .false., .false.)
+  end subroutine setupDiatomsOnly
 
-!  ! -----------------------------------------------
-!   ! A basic setup with only simple diatoms:
-!   ! -----------------------------------------------
- subroutine setupDiatoms_simpleOnly(n)
+  ! -----------------------------------------------
+  ! A basic setup with only simple diatoms:
+  ! -----------------------------------------------
+  subroutine setupDiatoms_simpleOnly(n)
    integer, intent(in):: n
    call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
    call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
    call parametersFinalize(0.1d0, .false., .false.)
- end subroutine setupDiatoms_simpleOnly
+  end subroutine setupDiatoms_simpleOnly
  
   ! -----------------------------------------------
   ! Generalists and diatoms:
@@ -195,7 +183,7 @@ contains
 
   end subroutine setupNUMmodel
 
-    ! -----------------------------------------------
+  ! -----------------------------------------------
   ! Full NUM model setup with generalistsSImple, copepods, and POM
   ! -----------------------------------------------
     subroutine setupNUMmodelSimple(n, nCopepod, nPOM, mAdult)
@@ -234,22 +222,6 @@ contains
    call parametersFinalize(0.001d0, .true., .true.)
 
   end subroutine setupGenDiatCope
-
-  ! -----------------------------------------------
-  ! A generic setup with generalists and a number of copepod species
-  ! -----------------------------------------------
-  !subroutine setupGeneric_csp(mAdult)
-  !  real(dp), intent(in):: mAdult(:)
-  !  integer, parameter:: n = 10 ! number of size classes in each group
-  !  integer:: iCopepod
-
-   ! call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-   ! call parametersAddGroup(typeGeneralist_csp, n, 0.1d0)
-   ! do iCopepod = 1, size(mAdult)
-   !    call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
-   ! end do
-   ! call parametersFinalize(0.003d0, .true., .true.)
-  !end subroutine setupGeneric_csp
 
   ! ======================================
   !  Model initialization stuff:
@@ -344,9 +316,6 @@ contains
     case (typeDiatom)
       call initDiatoms(specDiatoms, n)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms )
-    !case (typeGeneralist_csp)
-    !  call initGeneralists_csp(specGeneralists_csp, n, mMax)
-    !  allocate( group ( iCurrentGroup )%spec, source=specGeneralists_csp )
    case(typeCopepodPassive)
       call initCopepod(specCopepod, passive, n, mMax)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
@@ -709,9 +678,6 @@ contains
       type is (spectrumDiatoms)
          call calcRatesDiatoms(spec, &
                      L, upositive(idxN),  upositive(idxDOC), upositive(idxSi),gammaN, gammaDOC, gammaSi)
-      !type is (spectrumGeneralists_csp)
-      !   call calcRatesGeneralists_csp(spec, &
-      !               L, upositive(idxN), F( ixStart(iGroup):ixEnd(iGroup) ), gammaN)
       end select
    end do
    !
@@ -756,10 +722,6 @@ contains
          call calcDerivativesDiatoms(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
               dudt(idxN), dudt(idxDOC), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
-     ! type is (spectrumGeneralists_csp)
-     !    call calcDerivativesGeneralists_csp(spec, &
-     !         upositive(ixStart(iGroup):ixEnd(iGroup)), &
-     !         dudt(idxN), dudt(ixStart(iGroup):ixEnd(iGroup)))              
       end select
    end do
  end subroutine calcDerivativesUnicellulars
