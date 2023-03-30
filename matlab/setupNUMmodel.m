@@ -8,7 +8,7 @@ arguments
     mAdultActive (1,:) = [1 10 100 1000];
     n = 10;
     nCopepods = 10;
-    nPOM = 2;
+    nPOM = 1;
     options.bParallel = false;
 end
 

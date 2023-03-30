@@ -304,7 +304,7 @@ contains
   !  In:
   !    typeGroup: the group type (see definitions in Globals.f90
   !    n: number of grid points
-  !    mMax: the maximum size (mid-point in grid cell)
+  !    mMax: the maximum size (upper size of a grid cell)
   ! -----------------------------------------------
   subroutine parametersAddGroup(typeGroup, n, mMax)
     integer, intent(in):: typeGroup, n

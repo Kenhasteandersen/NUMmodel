@@ -111,5 +111,6 @@ program NUMmodeltest
 do i = 5,9
    write(*,*) i, theta(i+3,6:9)
 end do
+
   end program NUMmodeltest
  

@@ -106,7 +106,6 @@ contains
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
 
-
     this%beta = beta
     this%sigma = sigma
     this%epsilonF = epsilonF

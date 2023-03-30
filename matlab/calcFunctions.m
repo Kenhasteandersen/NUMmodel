@@ -114,6 +114,7 @@ switch sim.p.nameModel
                         ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
                         ChlVolume(iTime,k) = ChlVolume(iTime,k) + sum(tmp);
                     end
+                    %ratePOM(iTime, k, :) = rates.jPOM;
                 end
             end
             sim.ProdGross(iTime) = ProdGross;
@@ -130,6 +131,7 @@ switch sim.p.nameModel
         sim.ChlArea = ChlArea;
         sim.ChlVolume = ChlVolume;
         sim.jLreal = jLreal;
+        %sim.ratePOM = ratePOM;
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
