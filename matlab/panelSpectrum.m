@@ -58,7 +58,7 @@ function panelSpectrum(sim, ixTime)
     
         sLegend{iGroup+1} = p.nameGroup{iGroup};
     end
-    ylim([0.001,500])
+    ylim([0.0001,500])
     xlim(calcXlim(sim.p))
     hold off
     
