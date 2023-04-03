@@ -82,20 +82,20 @@ switch sim.p.nameModel
             Bmicro = 0;
             % Integrate over depth:
             for k = 1:nZ
-                if ~isnan(sim.N(k,iTime))
+                if ~isnan(sim.N(iTime,k))
                     % Get the functions per volume at each depth and time:
                     if sim.p.nNutrients==3
-                        u = [squeeze(sim.N(k,iTime)), ...
-                            squeeze(sim.DOC(k,iTime)), ...
-                            squeeze(sim.Si(k,iTime)), ...
-                            squeeze(sim.B(k,:,iTime))];
+                        u = [squeeze(sim.N(iTime,k)), ...
+                            squeeze(sim.DOC(iTime,k)), ...
+                            squeeze(sim.Si(iTime,k)), ...
+                            squeeze(sim.B(iTime,k,:))'];
                     else
-                        u = [squeeze(sim.N(k,iTime)), ...
-                            squeeze(sim.DOC(k,iTime)), ...
-                            squeeze(sim.B(k,:,iTime))];
+                        u = [squeeze(sim.N(iTime,k)), ...
+                            squeeze(sim.DOC(iTime,k)), ...
+                            squeeze(sim.B(iTime,k,:))'];
                     end
                     [ProdGross1, ProdNet1,ProdHTL1,ProdBact1,~,Bpico1,Bnano1,Bmicro1] = ...
-                        getFunctions(u, sim.L(k,iTime), sim.T(k,iTime));
+                        getFunctions(u, sim.L(iTime,k), sim.T(iTime,k));
                     % Multiply by the thickness of each layer:
                     conv = sim.dznom(k);
                     ProdGross = ProdGross + ProdGross1*conv;
@@ -107,8 +107,8 @@ switch sim.p.nameModel
                     Bnano = Bnano + Bnano1*conv;
                     Bmicro = Bmicro + Bmicro1*conv;
                     % Chl:
-                    rates = getRates(sim.p, u, sim.L(k,iTime), sim.T(k,iTime));
-                    tmp =  calcChl( squeeze(sim.B(k,:,iTime)), rates, sim.L(k,iTime)) / 1000; % Convert to g
+                    rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k));
+                    tmp =  calcChl( squeeze(sim.B(iTime,k,:)), rates, sim.L(iTime,k)) / 1000; % Convert to g
                     if ~isnan(tmp)
                         jLreal(iTime,k,:) = rates.jLreal;
                         ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
