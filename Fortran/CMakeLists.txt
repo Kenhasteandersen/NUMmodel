@@ -22,12 +22,12 @@ add_library(NUMmodel SHARED
 	${CMAKE_CURRENT_LIST_DIR}/NUMmodel.f90
 )
 
-add_library(libNUMmodel_matlab SHARED
+add_library(NUMmodel_matlab SHARED
 	$<TARGET_OBJECTS:NUMmodel>
 	${CMAKE_CURRENT_LIST_DIR}/NUMmodel_wrap_colmajor.f90
 )
 
-add_library(libNUMmodel_R SHARED
+add_library(NUMmodel_R SHARED
     $<TARGET_OBJECTS:NUMmodel>
     ${CMAKE_CURRENT_LIST_DIR}/NUMmodel_wrap_R.f90
 )
@@ -37,5 +37,5 @@ add_executable(NUMmodeltest
 	${CMAKE_CURRENT_LIST_DIR}/NUMmodeltest.f90
 )
 
-install(TARGETS libNUMmodel_matlab libNUMmodel_R  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../lib)
+install(TARGETS NUMmodel_matlab NUMmodel_R  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../lib)
 install(TARGETS NUMmodeltest DESTINATION ${CMAKE_CURRENT_LIST_DIR})
