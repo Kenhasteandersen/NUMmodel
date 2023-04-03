@@ -10,32 +10,32 @@ end
 m = sim.p.m(sim.p.idxB:end);
 
 switch sim.p.nameModel
-    
+
     case 'chemostat'
         s.B = sim.B;
         sTitle = "Sheldon spectrum";
-    
+
     case 'watercolumn'
         % Extract from a single water column:
         s.B = squeeze(sim.B(:,iDepth,:));
         sTitle = sprintf("Community sheldon spectrum at depth of max biomass: %3.0f m", sim.z(iDepth));
-    
+
     case 'global'
-    if isempty(lat)
-        disp('Must specify latitude and longitude')
-        stop
-    else
-        % Extract from global run:
-        idx = calcGlobalWatercolumn(lat,lon,sim);
-        s.B = squeeze(sim.B(idx.x, idx.y, iDepth, :, :))';
-        sTitle = sprintf("Sheldon spectrum at %3.0f m", sim.z(iDepth));
-    end
+        if isempty(lat)
+            disp('Must specify latitude and longitude')
+            stop
+        else
+            % Extract from global run:
+            idx = calcGlobalWatercolumn(lat,lon,sim);
+            s.B = squeeze(sim.B(:, idx.x, idx.y, iDepth, :));
+            sTitle = sprintf("Sheldon spectrum at %3.0f m", sim.z(iDepth));
+        end
 
     otherwise
         disp('Wrong model type ',sim.p.nameModel)
         stop
 end
-    
+
 % Create Sheldon size spectrum from biomasses by dividing with bin width:
 for iTime = 1:length(sim.t)
 

@@ -27,14 +27,14 @@ tiles = tiledlayout(3,1);%,'TileSpacing','compact');%,'padding','compact');
 tiles.InnerPosition = [0.13,0.11,0.65,0.8150]; % Make space for colorbars
 
 nexttile
-cbar = panelGlobal(sim.x,sim.y,log10(sim.ProdNetAnnual(:,:,end)),[1,3],...
+cbar = panelGlobal(sim.x,sim.y,log10(sim.ProdNetAnnual(end,:,:)),[1,3],...
     sTitle='Net primary production', sProjection=sProjection);
 cbar.Label.String = 'log_{10}(gC m^{-2}yr^{-1})';
 %cbar.Visible='off';
 % caxis([1,3])
 
 nexttile
-cbar = panelGlobal(sim.x,sim.y,log10(sim.ProdHTLAnnual(:,:,end)),[1,3],...
+cbar = panelGlobal(sim.x,sim.y,log10(sim.ProdHTLAnnual(end,:,:)),[1,3],...
     sTitle='HTL production', sProjection=sProjection);
 cbar.Label.String = 'log_{10}(gC m^{-2}yr^{-1})';
 % caxis([1,3])
@@ -43,9 +43,9 @@ cbar.Label.String = 'log_{10}(gC m^{-2}yr^{-1})';
 %caxis([-3,2])
 
 nexttile
-cbar = panelGlobal(sim.x,sim.y,sim.ProdHTLAnnual(:,:,end)./sim.ProdNetAnnual(:,:,end),[0,1],...
+cbar = panelGlobal(sim.x,sim.y,sim.ProdHTLAnnual(end,:,:)./sim.ProdNetAnnual(end,:,:),[0,1],...
     sTitle='\epsilon_{HTL}', sProjection=sProjection);
-caxis([0,1])
+clim([0,1])
 cbar.Label.String = '';
 %cbar.Location = 'SouthOutside';
 

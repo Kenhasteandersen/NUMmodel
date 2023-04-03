@@ -31,19 +31,19 @@ if strcmp(sim.p.nameModel, 'global')
         error('Not on land')
     end
     z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
-    B = squeeze(double(sim.B(idx.x, idx.y, idx.z, :, iTime)));
+    B = squeeze(double(sim.B(iTime, idx.x, idx.y, idx.z, :)));
     for i = 1:length(idx.z)
         if isfield(sim,'Si')
-            u(i,:) = [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
-                sim.DOC(idx.x, idx.y, idx.z(i), iTime), ...
-                sim.Si(idx.x, idx.y, idx.z(i), iTime), ...
+            u(i,:) = [sim.N(iTime, idx.x, idx.y, idx.z(i)), ...
+                sim.DOC(iTime, idx.x, idx.y, idx.z(i)), ...
+                sim.Si(iTime, idx.x, idx.y, idx.z(i)), ...
                 B(i,:)];
         else
-            u(i,:) = [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
-                sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)];
+            u(i,:) = [sim.N(iTime, idx.x, idx.y, idx.z(i)), ...
+                sim.DOC(iTime, idx.x, idx.y, idx.z(i)), B(i,:)];
         end
-        L(i) = sim.L(idx.x, idx.y, idx.z(i), iTime);
-        T(i) = sim.T(idx.x, idx.y, idx.z(i), iTime);
+        L(i) = sim.L(iTime, idx.x, idx.y, idx.z(i));
+        T(i) = sim.T(iTime, idx.x, idx.y, idx.z(i));
     end
 
 else

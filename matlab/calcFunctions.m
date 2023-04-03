@@ -150,9 +150,9 @@ switch sim.p.nameModel
         if ~isfield(sim,'ProdGross')
             % Get grid volumes:
             load(sim.p.pathGrid,'dv','dz','dx','dy');
-            ix = ~isnan(sim.N(:,:,1,1)); % Find all relevant grid cells
+            ix = ~isnan(sim.N(1,:,:,1)); % Find all relevant grid cells
 
-            sim.ProdGross = zeros(length(sim.x), length(sim.y), length(sim.t));
+            sim.ProdGross = zeros(length(sim.t), length(sim.x), length(sim.y));
             sim.ProdNet = sim.ProdGross;
             sim.ProdHTL = sim.ProdGross;
             sim.ProdBact = sim.ProdGross;
@@ -177,19 +177,19 @@ switch sim.p.nameModel
                         Bnano = 0;
                         Bmicro = 0;
                         for k = 1:nZ
-                            if ~isnan(sim.N(i,j,k,iTime))
+                            if ~isnan(sim.N(iTime,i,j,k))
                                 if isfield(sim.p,'idxSi')
-                                    u = [squeeze(sim.N(i,j,k,iTime)), ...
-                                        squeeze(sim.DOC(i,j,k,iTime)), ...
-                                        squeeze(sim.Si(i,j,k,iTime)), ...
-                                        squeeze(sim.B(i,j,k,:,iTime))'];
+                                    u = [squeeze(sim.N(iTime,i,j,k)), ...
+                                        squeeze(sim.DOC(iTime,i,j,k)), ...
+                                        squeeze(sim.Si(iTime,i,j,k)), ...
+                                        squeeze(sim.B(iTime,i,j,k,:))'];
                                 else
-                                    u = [squeeze(sim.N(i,j,k,iTime)), ...
-                                        squeeze(sim.DOC(i,j,k,iTime)), ...
-                                        squeeze(sim.B(i,j,k,:,iTime))'];
+                                    u = [squeeze(sim.N(iTime,i,j,k)), ...
+                                        squeeze(sim.DOC(iTime,i,j,k)), ...
+                                        squeeze(sim.B(iTime,i,j,k,:))'];
                                 end
                                 [ProdGross1, ProdNet1,ProdHTL1,ProdBact1, ~,Bpico1,Bnano1,Bmicro1] = ...
-                                    getFunctions(u, sim.L(i,j,k,iTime), sim.T(i,j,k,iTime));
+                                    getFunctions(u, sim.L(iTime,i,j,k), sim.T(iTime,i,j,k));
                                 conv = squeeze(dz(i,j,k));
                                 ProdGross = ProdGross + ProdGross1*conv; % gC/m2/yr
                                 ProdNet = ProdNet + ProdNet1*conv;
@@ -200,21 +200,21 @@ switch sim.p.nameModel
                                 Bnano = Bnano + Bnano1*dz(i,j,k);
                                 Bmicro = Bmicro + Bmicro1*dz(i,j,k);
                                 % Chl:
-                                rates = getRates(sim.p, u, sim.L(i,j,k,iTime), sim.T(i,j,k,iTime));
-                                tmp =  calcChl( squeeze(sim.B(i,j,k,:,iTime)), rates, sim.L(i,j,k,iTime)) ;%/ 1000; % Convert to mg
+                                rates = getRates(sim.p, u, sim.L(iTime,i,j,k), sim.T(iTime,i,j,k));
+                                tmp =  calcChl( squeeze(sim.B(iTime,i,j,k,:)), rates, sim.L(iTime,i,j,k)) ;%/ 1000; % Convert to mg
                                 if ~isnan(tmp)
                                     ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
                                     ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp;
                                 end
                             end
                         end
-                        sim.ProdGross(i,j,iTime) = ProdGross;
-                        sim.ProdNet(i,j,iTime) = ProdNet;
-                        sim.ProdHTL(i,j,iTime) = ProdHTL;
-                        sim.ProdBact(i,j,iTime) = ProdBact;
-                        sim.Bpico(i,j,iTime) = Bpico;
-                        sim.Bnano(i,j,iTime) = Bnano;
-                        sim.Bmicro(i,j,iTime) = Bmicro;
+                        sim.ProdGross(iTime,i,j) = ProdGross;
+                        sim.ProdNet(iTime,i,j) = ProdNet;
+                        sim.ProdHTL(iTime,i,j) = ProdHTL;
+                        sim.ProdBact(iTime,i,j) = ProdBact;
+                        sim.Bpico(iTime,i,j) = Bpico;
+                        sim.Bnano(iTime,i,j) = Bnano;
+                        sim.Bmicro(iTime,i,j) = Bmicro;
                     end
                 end
             end
@@ -228,16 +228,16 @@ switch sim.p.nameModel
             calcTotal = @(u) sum(u(ix(:)).*dv(ix(:))); % mug/day
 
             for i = 1:length(sim.t)
-                sim.Ntotal(i) = calcTotal(sim.N(:,:,:,i));
-                sim.DOCtotal(i) = calcTotal(sim.DOC(:,:,:,i)); % mugC
+                sim.Ntotal(i) = calcTotal(sim.N(i,:,:,:));
+                sim.DOCtotal(i) = calcTotal(sim.DOC(i,:,:,:)); % mugC
                 sim.Btotal(i) = 0;
                 for j = 1:(sim.p.n-sim.p.idxB+1)
-                    sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(:,:,:,j,i)); % mugC
+                    sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(i,:,:,:,j)); % mugC
                 end
 
-                sim.ProdNetTotal(i) = sum(sum(sim.ProdNet(:,:,i).*dx.*dy)); % gC/yr
-                sim.ProdGrossTotal(i) = sum(sum(sim.ProdGross(:,:,i).*dx.*dy)); % gC/yr
-                sim.ProdHTLTotal(i) = sum(sum(sim.ProdHTL(:,:,i).*dx.*dy));
+                sim.ProdNetTotal(i) = sum(sum(squeeze(sim.ProdNet(i,:,:)).*dx.*dy)); % gC/yr
+                sim.ProdGrossTotal(i) = sum(sum(squeeze(sim.ProdGross(i,:,:)).*dx.*dy)); % gC/yr
+                sim.ProdHTLTotal(i) = sum(sum(squeeze(sim.ProdHTL(i,:,:)).*dx.*dy));
             end
 
             sim.ChlTotal = ChlArea.*dx.*dy;
@@ -259,8 +259,8 @@ switch sim.p.nameModel
         % "bCalcGlobalAnnual" in simulateGlobal()
         %
         if (~isfield(sim, 'ProdNetAnnual'))
-            sim.ProdNetAnnual = mean(sim.ProdNet,3);
-            sim.ProdHTLAnnual(:,:,i) = mean(sim.ProdHTL,3);
+            sim.ProdNetAnnual = mean(sim.ProdNet,1);
+            sim.ProdHTLAnnual(i,:,:) = mean(sim.ProdHTL,1);
             %zeros(length(sim.x), length(sim.y), floor(sim.t(end)/365));
             %for i = 1:sim.t(end)/365
             %    ixTime = sim.t>365*(i-1) & sim.t<=365*i;
