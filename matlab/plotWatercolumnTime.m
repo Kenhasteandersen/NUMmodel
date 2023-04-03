@@ -38,13 +38,14 @@ switch sim.p.nameModel
         end
         z = sim.z(idx.z);
     case 'watercolumn'
-        N = sim.N;
-        DOC = sim.DOC;
+        N = sim.N';
+        DOC = sim.DOC';
         if isfield(sim,'Si')
-            Si = sim.Si;
+            Si = sim.Si';
         end
+        % Calc total biomass in each group:
         for i = 1:sim.p.nGroups
-            B(i,:,:) = squeeze(sum(sim.B(:,(sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1,:),2));
+            B(i,:,:) = squeeze(sum(sim.B(:,:,(sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1),3))';
         end
         z = sim.z + 0.5*sim.dznom;
         lat = sim.lat;
@@ -155,10 +156,8 @@ for i = 1:sim.p.nGroups
     end
 end
 
-
 if strcmp(sim.p.nameModel, 'watercolumn')
     sgtitle(['Nitrogen & DOC concentration/ Total biomass of each group ({\mu}gC/l) at: lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
 end
-
 
 end

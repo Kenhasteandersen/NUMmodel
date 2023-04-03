@@ -49,20 +49,20 @@ if strcmp(sim.p.nameModel, 'global')
 else
     % Extract data from water column simulation:
     z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
-    B = squeeze(double(sim.B(:, :, iTime)));
+    B = squeeze(double(sim.B(iTime, :, :)));
 
     % ixAve = find( sim.t > sim.t(end)/2 );
     % B = mean(squeeze(double(sim.B(:, :, ixAve))),2);
 
     for i = 1:length(sim.z)
         if isfield(sim,'Si')
-            u(i,:) = [sim.N(i, iTime), sim.DOC(i, iTime), ...
-                sim.Si(i,iTime), B(i,:)];
+            u(i,:) = [sim.N(iTime, i), sim.DOC(iTime,i), ...
+                sim.Si(iTime,i), B(i,:)];
         else
-            u(i,:) = [sim.N(i, iTime), sim.DOC(i, iTime), B(i,:)];
+            u(i,:) = [sim.N(iTime,i), sim.DOC(iTime,i), B(i,:)];
         end
-        L(i) = sim.L(i,iTime);
-        T(i) = sim.T(i,iTime);
+        L(i) = sim.L(iTime,i);
+        T(i) = sim.T(iTime,i);
     end
 end
 
@@ -134,10 +134,15 @@ for iGroup = 1:sim.p.nGroups
     BB = [BB(1,:); BB]; % Add dummy layer on top
     BB( BB<0.01 ) = 0.01;
 
-
-    %panelField(m, -z, (B(:,ix-sim.p.idxB+1))');
-    contourf( sim.p.m(sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup)), -z, BB, ...
-        10.^linspace(-2,2,20),'linestyle','none')
+    % Treat groups with only one size class correctly:
+    if size(BB,2)==1 
+        mm = [sim.p.mLower(sim.p.ixStart(iGroup)), sim.p.mUpper(sim.p.ixStart(iGroup))];
+        BB(:,2) = BB;
+    else
+        mm = sim.p.m(sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup));
+    end
+    
+    contourf( mm, -z, BB, 10.^linspace(-2,2,20),'linestyle','none')
 
     set(gca,'xscale','log','colorscale','log')
     set(gca,'xtick',10.^(-9:2), 'XTickLabel',[])

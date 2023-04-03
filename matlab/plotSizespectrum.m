@@ -30,15 +30,15 @@ switch sim.p.nameModel
     case 'watercolumn'
         % Extract from a single water column:
         z = sim.z;
-        s.B = squeeze(sim.B(iDepth,:,:))';
+        s.B = squeeze(sim.B(:,iDepth,:));
         if isfield(sim,'Si')
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iDepth, iTime), ...
+            u = [sim.N(iTime,iDepth), sim.DOC(iTime,iDepth), sim.Si(iTime,iDepth), ...
                 squeeze(s.B(iTime,:))];
         else
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), squeeze(s.B(iTime,:))];
+            u = [sim.N(iTime,iDepth), sim.DOC(iTime,iDepth), squeeze(s.B(iTime,:))];
         end
-        s.L = sim.L(iDepth,iTime);
-        s.T = sim.T(iDepth,iTime);
+        s.L = sim.L(iTime,iDepth);
+        s.T = sim.T(iTime,iDepth);
         
     case 'global'
         % Extract from global run:

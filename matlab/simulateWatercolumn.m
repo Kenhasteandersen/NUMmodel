@@ -168,13 +168,13 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 if isfield(sim,'B')
     disp('Starting from previous simulation.');
-    u(:,ixN) = sim.N(:,end);
-    u(:, ixDOC) = sim.DOC(:,end);
+    u(:,ixN) = sim.N(end,:);
+    u(:, ixDOC) = sim.DOC(end,:);
     if bSilicate
-        u(:, ixSi) = sim.Si(:,end);
+        u(:, ixSi) = sim.Si(end,:);
     end
     for i = 1:p.n -p.idxB+1
-        u(:, ixB(i)) = sim.B(:,i,end);
+        u(:, ixB(i)) = sim.B(end,:,i);
     end
 else
     if exist(strcat(p.pathN0,'.mat'),'file')
@@ -200,15 +200,15 @@ end
 iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
 
-sim.N = zeros(length(idx.z),nSave);
+sim.N = zeros(nSave, length(idx.z));
 if bSilicate
     sim.Si = sim.N;
 end
 sim.DOC = sim.N;
-sim.B = zeros(length(idx.z), p.n-p.idxB+1, nSave);
+sim.B = zeros(nSave, length(idx.z), p.n-p.idxB+1);
 sim.L = sim.N;
 sim.T = sim.N;
-sim.Nloss = zeros(1,nSave);
+sim.Nloss = zeros(nSave,1);
 sim.NlossHTL = sim.Nloss;
 tSave = [];
 %
@@ -298,16 +298,16 @@ for i = 1:simtime
     %
     if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
         iSave = iSave + 1;
-        sim.N(:,iSave) = u(:,ixN);
-        sim.DOC(:,iSave) = u(:,ixDOC);
+        sim.N(iSave,:) = u(:,ixN);
+        sim.DOC(iSave,:) = u(:,ixDOC);
         if bSilicate
-            sim.Si(:,iSave) = u(:,ixSi);
+            sim.Si(iSave,:) = u(:,ixSi);
         end
         for j = 1:p.n-p.idxB+1
-            sim.B(:,j,iSave) = u(:,ixB(j));
+            sim.B(iSave,:,j) = u(:,ixB(j));
         end
-        sim.L(:,iSave) = L;
-        sim.T(:,iSave) = T;
+        sim.L(iSave,:) = L;
+        sim.T(iSave,:) = T;
         % Loss to HTL and POM:
         for j = 1:nGrid
             rates = getRates(p,u(j,:),L(j),T(j));
@@ -357,9 +357,9 @@ sim.dznom = sim.dznom(1:length(idx.z));
 sim.lat = lat;
 sim.lon = lon;
 
-sim.Ntot = (sum(sim.N.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
-    sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68)/1000; % gN/m2 in biomass
-sim.Nprod = p.DiffBottom*(p.u0(p.idxN)-sim.N(end,:))/1000; % Diffusion in from the bottom; gN/m2/day
+sim.Ntot = (sum(sim.N'.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
+    sum(squeeze(sum(sim.B,3))'.*(sim.dznom*ones(1,length(sim.t))))/rhoCN)/1000; % gN/m2 in biomass
+sim.Nprod = p.DiffBottom*(p.u0(p.idxN)-sim.N(:,end))/1000; % Diffusion in from the bottom; gN/m2/day
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
 %     sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
