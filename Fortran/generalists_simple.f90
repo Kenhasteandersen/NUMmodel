@@ -198,6 +198,7 @@ contains
             this%JClossLiebig(i) +&
             this%JlossPassive(i)
       this%JF(i) = this%JFreal(i)
+      this%Jresptot(i) = fTemp2*this%Jresp(i)
     end do
     !
     ! Test for conservation budget. Should be close to zero:

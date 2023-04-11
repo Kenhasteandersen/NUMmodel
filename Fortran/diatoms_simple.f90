@@ -136,12 +136,12 @@ module diatoms_simple
          ! Estimate the limiting growth nutrient (Liebig):
          !
          JmaxT = max(0.d0, fTemp2 * this%Jmax(i))
-         this%Jtot(i) = min( JmaxT, this%JN(i), this%JL(i)-this%Jresp(i), this%JSi(i) )
+         this%Jtot(i) = min( JmaxT, this%JN(i), this%JL(i)-ftemp2*this%Jresp(i), this%JSi(i) )
          !    
          ! Account for possible carbon limitation due to carbon costs of uptakes:
          !
          this%Jtot(i) = min( this%Jtot(i), &
-            this%JL(i)-this%Jresp(i) - (bN/rhoCN + bSi/rhoCSi)*this%Jtot(i) )
+            this%JL(i)-ftemp2*this%Jresp(i) - (bN/rhoCN + bSi/rhoCSi)*this%Jtot(i) )
          
          ! Jtot synthesis limitation:
         if (this%Jtot(i) .gt. 0.) then
@@ -149,6 +149,7 @@ module diatoms_simple
         end if
 
         this%JLreal(i) = this%JL(i)
+        this%Jresptot(i) = fTemp2*this%Jresp(i)
       end do
     end subroutine calcRatesDiatoms_simple
   
