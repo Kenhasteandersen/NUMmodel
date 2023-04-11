@@ -245,6 +245,7 @@ end subroutine calcGrid
     ProdNet = 0.d0
     do i = 1, this%n
        ProdNet = ProdNet + max( 0.d0, &
+      ! (this%JLreal(i)-this%Jresp(i))*u(i)/this%m(i) )
                    (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
      end do
     end function getProdNet
