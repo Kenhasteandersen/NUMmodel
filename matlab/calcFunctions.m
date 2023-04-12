@@ -58,11 +58,11 @@ switch sim.p.nameModel
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Final total biomass:  %.2f gC/m2\n", sim.Btot(end));
-            fprintf("Final Chl:            %.2f gChl/m2\n", sim.ChlArea)
-            fprintf("Final gross PP:       %.2f gC/m2/yr\n", sim.ProdGross)
-            fprintf("Final net PP:         %.2f gC/m2/yr\n", sim.ProdNet)
-            fprintf("Final HTL production: %.2f gC/m2/yr\n", sim.ProdHTL)
+            fprintf("Final total biomass:  %.3f gC/m2\n", sim.Btot(end));
+            fprintf("Final Chl:            %.3f gChl/m2\n", sim.ChlArea)
+            fprintf("Final gross PP:       %.3f gC/m2/yr\n", sim.ProdGross)
+            fprintf("Final net PP:         %.3f gC/m2/yr\n", sim.ProdNet)
+            fprintf("Final HTL production: %.3f gC/m2/yr\n", sim.ProdHTL)
             fprintf("----------------------------------------------\n")
         end
 
@@ -135,11 +135,11 @@ switch sim.p.nameModel
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Average total biomass:  %.2f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
-            fprintf("Average Chl:            %.2f gChl/m2/yr\n", mean(sim.ChlArea))
-            fprintf("Average gross PP:       %.2f gC/m2/yr\n", mean(sim.ProdGross))
-            fprintf("Average net PP:         %.2f gC/m2/yr\n", mean(sim.ProdNet))
-            fprintf("Average HTL production: %.2f gC/m2/yr\n", mean(sim.ProdHTL))
+            fprintf("Average total biomass:  %.3f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
+            fprintf("Average Chl:            %.3f gChl/m2/yr\n", mean(sim.ChlArea))
+            fprintf("Average gross PP:       %.3f gC/m2/yr\n", mean(sim.ProdGross))
+            fprintf("Average net PP:         %.3f gC/m2/yr\n", mean(sim.ProdNet))
+            fprintf("Average HTL production: %.3f gC/m2/yr\n", mean(sim.ProdHTL))
             fprintf("----------------------------------------------\n")
         end
 
