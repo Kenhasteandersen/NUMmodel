@@ -62,6 +62,7 @@ switch sim.p.nameModel
             fprintf("Final Chl:            %8.3f gChl/m2\n", sim.ChlArea)
             fprintf("Final gross PP:       %8.3f gC/m2/yr\n", sim.ProdGross)
             fprintf("Final net PP:         %8.3f gC/m2/yr\n", sim.ProdNet)
+            fprintf("Final net bact prod.: %8.3f gC/m2/yr\n", sim.ProdBact)
             fprintf("Final HTL production: %8.3f gC/m2/yr\n", sim.ProdHTL)
             fprintf("----------------------------------------------\n")
         end
@@ -260,7 +261,7 @@ switch sim.p.nameModel
         %
         if (~isfield(sim, 'ProdNetAnnual'))
             sim.ProdNetAnnual = mean(sim.ProdNet,3);
-            sim.ProdHTLAnnual(:,:,i) = mean(sim.ProdHTL,3);
+            sim.ProdHTLAnnual = mean(sim.ProdHTL,3);
             %zeros(length(sim.x), length(sim.y), floor(sim.t(end)/365));
             %for i = 1:sim.t(end)/365
             %    ixTime = sim.t>365*(i-1) & sim.t<=365*i;
