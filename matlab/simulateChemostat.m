@@ -97,7 +97,9 @@ sim.bUnicellularloss = options.bUnicellularloss;
 
 [sim.Nbalance, sim.Cbalance,sim.Sibalance] = getBalance(sim.u(end,:), mean(sim.L), sim.T); % in units per day
 
-    %
+
+
+    % -------------------------------------------------------------------------
     % Function to assemble derivative for chemostat:
     %
     function dudt = fDeriv(t,u)

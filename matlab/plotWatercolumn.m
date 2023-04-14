@@ -134,15 +134,17 @@ for iGroup = 1:sim.p.nGroups
     BB = [BB(1,:); BB]; % Add dummy layer on top
     BB( BB<0.01 ) = 0.01;
 
-
-    %panelField(m, -z, (B(:,ix-sim.p.idxB+1))');
-    contourf( sim.p.m(sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup)), -z, BB, ...
-        10.^linspace(-2,2,20),'linestyle','none')
+    mm = sim.p.m(sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup));
+    if length(mm)==1
+        mm = mm*[1, 1.00001];
+        BB = [BB, BB];
+    end
+    contourf( mm, -z, BB, 10.^linspace(-2,2,20),'linestyle','none')
 
     set(gca,'xscale','log','colorscale','log')
     set(gca,'xtick',10.^(-9:2), 'XTickLabel',[])
 
-    caxis([0.01 100])
+    clim([0.01 100])
 
     title(sim.p.nameGroup(iGroup))
     if (iGroup==1)
@@ -151,7 +153,6 @@ for iGroup = 1:sim.p.nGroups
         set(gca,'yticklabel',[])
     end
     ylim(ylimit)
-
 
     if max(max(BB(:,:))) > Zmax
 
