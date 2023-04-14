@@ -27,11 +27,13 @@ tiledlayout(2+bSilicate+sim.p.nGroups,1)
 %text(0, 1, labels(i),'Units','normalized')
 nexttile
 panelGlobal(sim.x,sim.y,sim.DOC(:,:,1,iTime),[0 1],sTitle='Surface DOC',sProjection=sProjection);
+set(gca,'XTickLabel','')
 
 % Nitrogen
 nexttile
 c = panelGlobal(sim.x,sim.y,sim.N(:,:,1,iTime),[0 1],sTitle='Surface N',sProjection=sProjection);
 c.Label.String  = 'Concentration [\mug N l^{-1}]';
+set(gca,'XTickLabel','')
 
 % Silicate
 if bSilicate
@@ -39,6 +41,7 @@ if bSilicate
     c = panelGlobal(sim.x,sim.y,sim.Si(:,:,1,iTime),sTitle='Si',sProjection=sProjection);
     c.Label.String  = 'Concentration [\mug Si l^{-1}]';
 end
+set(gca,'XTickLabel','')
 
 % Unicellular plankton
 for i = 1:sim.p.nGroups
@@ -46,6 +49,7 @@ nexttile
 panelGlobal(sim.x,sim.y,log10(sum(sim.B(:,:,1,(sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1,iTime),4)),...
     [0 2], sTitle=strcat('Surface log10(',sim.p.nameGroup(i),')'), sProjection=sProjection);
 caxis([0 2])
+set(gca,'XTickLabel','')
 
 % Multicellular plankton
 %subplot(nPanels,1,nPanels)
@@ -60,3 +64,4 @@ if isfield(sim,'CnetPerArea')
         sProjection=sProjection);
     caxis([8 11])
 end
+set(gca,'xticklabel','auto')

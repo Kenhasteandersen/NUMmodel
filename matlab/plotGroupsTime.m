@@ -6,18 +6,29 @@ function plotGroupsTime(sim)
 p = sim.p;
 
 if isnan(p.seasonalOptions.lat_lon) & p.seasonalOptions.seasonalAmplitude == 0
+    sLegend = [];
     %
     % Biomass
     %
     for i = 1:p.nGroups
         ix = (p.ixStart(i):p.ixEnd(i)) - p.idxB + 1;
         B(i,:) = sum(sim.B( :, ix ),2);
-        semilogy(sim.t, B(i,:), 'linewidth',2);
+        legendentries(i) = semilogy(sim.t, B(i,:), 'linewidth',2,'color',p.colGroup{i});
+        sLegend{i} = p.nameGroup{i};
         hold on
     end
+    %
+    % Nutrients:
+    %
+    for i = 1:p.nNutrients
+        legendentries(p.nGroups + i) = ...
+            semilogy(sim.t, sim.u(:,i), 'color', p.colNutrients{i},'linewidth',2);
+        sLegend{p.nGroups+i} = p.nameNutrientsLong{i};
+    end
+
     hold off
     
-    legend(p.nameGroup);
+    legend(legendentries, sLegend, 'location','northeastoutside','box','off')
     %ylim([0.1 max(B(:))])
     xlabel('Time (days)')
     ylabel('Total biomass (ugC/l)')

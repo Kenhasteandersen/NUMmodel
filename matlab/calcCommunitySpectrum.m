@@ -1,7 +1,6 @@
 %
 % Calculate the community size spectrum from all groups using interplotation.
 %
-
 function [mc, Bc] = calcCommunitySpectrum(B, sim, iTime)
 
 arguments
@@ -27,10 +26,13 @@ for iGroup = 1:p.nGroups
 
     if isnan(iTime)
         ixAve = find( sim.t > sim.t(end)/2 );
-
         % Interpolation
         log_k = mean( log(B( ixAve, ixB)./log(Delta)),1);
-        vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
+        if length(ix)==1
+            vq1 = exp(interp1( log([p.mLower(ix) p.mUpper(ix)]), [log_k, log_k], log(mc),'linear') );
+        else
+            vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
+        end
 
         vq1(isnan(vq1)) = 0; % get rid of the NAs
         Bc = Bc + vq1;

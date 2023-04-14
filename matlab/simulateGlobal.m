@@ -122,6 +122,7 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 idxSinking = find(p.velocity ~= 0);
 
 if ~isempty(idxSinking)
+    disp('Allocating sinking matrices')
     % Allocate sinking matrices:
     Asink = {};
     for l = 1:length(idxSinking)
@@ -136,7 +137,6 @@ if ~isempty(idxSinking)
             % Find the watercolumn indices:
             idxGrid = squeeze(xx(i, j, :));
             idxGrid = idxGrid( ~isnan(idxGrid));
-
             if ~isempty(idxGrid)
                 % Run through all sinking state variables
                 for l = 1:length(idxSinking)
@@ -154,7 +154,6 @@ if ~isempty(idxSinking)
         end
     end
 end
-
 %%
 % Matrices for saving the solution:
 %

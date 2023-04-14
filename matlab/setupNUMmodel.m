@@ -8,7 +8,7 @@ arguments
     mAdultActive (1,:) = [1 10 100 1000];
     n = 10;
     nCopepods = 10;
-    nPOM = 10;
+    nPOM = 1;
     options.bParallel = false;
 end
 
@@ -44,10 +44,11 @@ end
 
 % POM:
 p = parametersAddgroup(100, p, nPOM);
+setSinkingPOM(p, 10); % Since there is only one group, set a slow sinking
 
 p = getMass(p);
 
-p.u0(1:3) = [150, 0, 10]; % Initial conditions (and deep layer concentrations)
+p.u0(1:3) = [150, 0, 200]; % Initial conditions (and deep layer concentrations)
 % Initial condition at a Sheldon spectrum of "0.1":
 ix = p.idxB:p.n;
 p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix)); 

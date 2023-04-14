@@ -58,11 +58,12 @@ switch sim.p.nameModel
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Final total biomass:  %.2f gC/m2\n", sim.Btot(end));
-            fprintf("Final Chl:            %.2f gChl/m2\n", sim.ChlArea)
-            fprintf("Final gross PP:       %.2f gC/m2/yr\n", sim.ProdGross)
-            fprintf("Final net PP:         %.2f gC/m2/yr\n", sim.ProdNet)
-            fprintf("Final HTL production: %.2f gC/m2/yr\n", sim.ProdHTL)
+            fprintf("Final total biomass:  %8.3f gC/m2\n", sim.Btot(end));
+            fprintf("Final Chl:            %8.3f gChl/m2\n", sim.ChlArea)
+            fprintf("Final gross PP:       %8.3f gC/m2/yr\n", sim.ProdGross)
+            fprintf("Final net PP:         %8.3f gC/m2/yr\n", sim.ProdNet)
+            fprintf("Final net bact prod.: %8.3f gC/m2/yr\n", sim.ProdBact)
+            fprintf("Final HTL production: %8.3f gC/m2/yr\n", sim.ProdHTL)
             fprintf("----------------------------------------------\n")
         end
 
@@ -114,6 +115,7 @@ switch sim.p.nameModel
                         ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
                         ChlVolume(iTime,k) = ChlVolume(iTime,k) + sum(tmp);
                     end
+                    %ratePOM(iTime, k, :) = rates.jPOM;
                 end
             end
             sim.ProdGross(iTime) = ProdGross;
@@ -130,14 +132,15 @@ switch sim.p.nameModel
         sim.ChlArea = ChlArea;
         sim.ChlVolume = ChlVolume;
         sim.jLreal = jLreal;
+        %sim.ratePOM = ratePOM;
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Average total biomass:  %.2f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
-            fprintf("Average Chl:            %.2f gChl/m2/yr\n", mean(sim.ChlArea))
-            fprintf("Average gross PP:       %.2f gC/m2/yr\n", mean(sim.ProdGross))
-            fprintf("Average net PP:         %.2f gC/m2/yr\n", mean(sim.ProdNet))
-            fprintf("Average HTL production: %.2f gC/m2/yr\n", mean(sim.ProdHTL))
+            fprintf("Average total biomass:  %8.3f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
+            fprintf("Average Chl:            %8.3f gChl/m2/yr\n", mean(sim.ChlArea))
+            fprintf("Average gross PP:       %8.3f gC/m2/yr\n", mean(sim.ProdGross))
+            fprintf("Average net PP:         %8.3f gC/m2/yr\n", mean(sim.ProdNet))
+            fprintf("Average HTL production: %8.3f gC/m2/yr\n", mean(sim.ProdHTL))
             fprintf("----------------------------------------------\n")
         end
 
@@ -258,7 +261,7 @@ switch sim.p.nameModel
         %
         if (~isfield(sim, 'ProdNetAnnual'))
             sim.ProdNetAnnual = mean(sim.ProdNet,3);
-            sim.ProdHTLAnnual(:,:,i) = mean(sim.ProdHTL,3);
+            sim.ProdHTLAnnual = mean(sim.ProdHTL,3);
             %zeros(length(sim.x), length(sim.y), floor(sim.t(end)/365));
             %for i = 1:sim.t(end)/365
             %    ixTime = sim.t>365*(i-1) & sim.t<=365*i;
