@@ -34,6 +34,7 @@ module spectrum
      contains 
 
      procedure, pass :: initSpectrum
+     procedure :: calcGrid
      procedure :: calcFeeding
      procedure :: printRates => printRatesSpectrum
      procedure :: printRatesSpectrum
@@ -80,20 +81,17 @@ module spectrum
 contains
 
 ! ==========================================================================
-!  Member functions for the abstract spectrum parent class:
+!  Member functions for the abstract spectrum parent class.
 ! ==========================================================================
-
-  subroutine initSpectrum(this, n, mMin, mMax)
+  subroutine initSpectrum(this, n)
     class(typeSpectrum) :: this
     integer, intent(in):: n
-    real(dp), intent(in):: mMin, mMax
 
     this%n = n
     allocate(this%m(n))
     allocate(this%mLower(n))
     allocate(this%mDelta(n))
     allocate(this%z(n))
-    call calcGrid()
 
     allocate(this%AF(n))
     allocate(this%JFmax(n))
@@ -110,8 +108,6 @@ contains
     allocate(this%JNlossLiebig(n))
     allocate(this%JNloss(n))
     allocate(this%JCloss(n))
-
-
 
     allocate(this%mPOM(n))
     allocate(this%jPOM(n))
@@ -139,29 +135,30 @@ contains
     this%JNlossLiebig = 0.d0
     this%JNloss = 0.d0
     this%jCloss = 0.d0
-    contains
-
-      !
-  ! Set up a grid given minimum and maximum center masses
-  !
-  subroutine calcGrid()
-    !class (typeSpectrum), intent(inout):: this
-    !real(dp), intent(in):: mMin, mMax
-    real(dp):: deltax, x
-    integer:: i
-
-    deltax = (log(mMax)-log(mMin))/(this%n-1)
-    do i=1, this%n
-       x = log(mMin) + (i-1)*deltax
-       this%m(i) = exp(x)
-       this%mLower(i) = exp(x - 0.5*deltax)
-       this%mDelta(i) =  exp(x + 0.5*deltax)-this%mLower(i)
-       this%z(i) = this%mLower(i)/(this%mLower(i) + this%mDelta(i))
-    end do
-    this%mort2constant = 0.004/log(this%m(2) / this%m(1))
-  end subroutine calcGrid
-
   end subroutine initSpectrum
+
+  subroutine calcGrid(this, mMin, mMax)
+    class(typeSpectrum) :: this
+    real(dp), intent(in):: mMin, mMax
+    integer:: i
+    real(dp):: x, deltax
+  !
+    ! Set up a grid given minimum and maximum sizes
+    ! The minimum size corresponds to the lower size of the 
+    ! first grid cell and the maxmimum size corresponds to
+    ! the upper size of the last grid cell
+    !
+    
+  deltax = (log(mMax)-log(mMin)) / this%n
+  do i=1, this%n
+     x = log(mMin) + (i-0.5)*deltax
+     this%m(i) = exp(x)
+     this%mLower(i) = exp(x - 0.5*deltax)
+     this%mDelta(i) =  exp(x + 0.5*deltax)-this%mLower(i)
+     this%z(i) = this%mLower(i)/(this%mLower(i) + this%mDelta(i))
+  end do
+  this%mort2constant = 0.004/log(this%m(2) / this%m(1))
+end subroutine calcGrid
 
   subroutine calcFeeding(this, F)
     class (typeSpectrum), intent(inout):: this
@@ -193,8 +190,9 @@ contains
     integer, intent(in):: n
     real(dp), intent(in):: mMin, mMax
 
-    call this%initSpectrum(n, mMin, mMax)
-
+    call this%initSpectrum(n)
+    call this%calcGrid(mMin, mMax)
+  
     allocate(this%nu(n))
     allocate(this%r(n))
 
@@ -208,7 +206,6 @@ contains
     allocate(this%JL(n))
     allocate(this%JNtot(n))
     allocate(this%JLreal(n))
-
 
     allocate(this%JCtot (n))
     allocate(this%JCloss_photouptake(n))
@@ -248,7 +245,7 @@ contains
     ProdNet = 0.d0
     do i = 1, this%n
        ProdNet = ProdNet + max( 0.d0, &
-                   (this%JLreal(i)-ftemp2*this%Jresp(i))*u(i)/this%m(i) )
+                   (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
      end do
     end function getProdNet
 
@@ -264,12 +261,39 @@ contains
   !  Member functions for the abstract unicellular class:
   ! ==========================================================================
 
-  subroutine initMulticellular(this, n, mMin, mMax)
+  subroutine initMulticellular(this, n, mOffspring, mAdult)
     class(spectrumMulticellular), intent(inout) :: this
     integer, intent(in):: n
-    real(dp), intent(in):: mMin, mMax
+    real(dp), intent(in):: mOffspring, mAdult
+    integer:: i
+    real(dp):: lnDelta
     
-    call this%initSpectrum(n, mMin, mMax)
+    call this%initSpectrum(n)
+    !
+    ! Set up a grid.
+    ! The minimum size corresponds to the offspring size.
+    ! The central size of the last cell is the mass of the adult.
+    ! The (log) width of the last cell is the same as the other cells;
+    ! this is needed to ensure that the mort2 is the same for all
+    ! cells.
+    !
+
+    lnDelta = (log(mAdult)-log(mOffspring)) / (n-0.5)
+    call this%calcGrid(mOffspring, exp( log(mAdult) + 0.5*lnDelta) )
+    ! deltax = (log(mAdult)-log(mOffspring)) / (this%n-1)
+    ! do i=1, this%n-1
+    !    x = log(mOffspring) + (i-0.5)*deltax
+    !    this%m(i) = exp(x)
+    !    this%mLower(i) = exp(x - 0.5*deltax)
+    !    this%mDelta(i) =  exp(x + 0.5*deltax)-this%mLower(i)
+    !    this%z(i) = this%mLower(i)/(this%mLower(i) + this%mDelta(i))
+    ! end do
+    ! this%m(n) = mAdult
+    ! this%mLower(n) = mAdult
+    ! this%mDelta(n) = mAdult ! Makes the upper size 2*mAdult
+    ! this%z(n) = 0.9
+ 
+    this%mort2constant = 0.004/log(this%m(2) / this%m(1))
   end subroutine initMulticellular
   
   subroutine printRatesMulticellular(this)

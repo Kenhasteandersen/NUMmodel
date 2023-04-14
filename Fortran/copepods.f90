@@ -24,7 +24,7 @@ module copepods
   real(dp) :: hExponent  ! Exponent for maximum ingestions rate
   real(dp) :: kBasal ! 0.006 ! Factor for basal metabolism.This value represents basal
   real(dp) :: kSDA  ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
-  real(dp) :: AdultOffspring
+  real(dp) :: AdultOffspring ! Adult-offspring mass ratio
   real(dp) :: vulnerability ! Passed to "palatability" in the parent spectrum class
   real(dp) :: DiatomsPreference
 
@@ -72,7 +72,7 @@ contains
     integer, intent(in) :: feedingmode ! Whether the copepods is active or passive
     integer, intent(in):: n
     real(dp), intent(in):: mAdult
-    real(dp):: lnDelta, mMin
+    integer:: i
 
     this%feedingmode = feedingmode
     
@@ -81,9 +81,10 @@ contains
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
-    lnDelta = (log(mAdult)-log(mAdult/AdultOffspring)) / (n-0.5)
-    mMin = exp(log(mAdult/AdultOffspring)+0.5*lnDelta);
-    call this%initSpectrum(n, mMin, mAdult)
+    call this%initMulticellular(n, mAdult/AdultOffspring, mAdult)
+    do i = 1,this%n
+      write(*,*) i,this%mLower(i), this%m(i), this%mLower(i)+this%mDelta(i)
+    end do
 
     allocate(this%gamma(n))
     allocate(this%g(n))
