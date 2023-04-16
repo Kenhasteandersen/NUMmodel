@@ -13,7 +13,7 @@ add_library(NUMmodel SHARED
 	${CMAKE_CURRENT_LIST_DIR}/input.f90
 	${CMAKE_CURRENT_LIST_DIR}/globals.f90
 	${CMAKE_CURRENT_LIST_DIR}/spectrum.f90
-    ${CMAKE_CURRENT_LIST_DIR}/generalists_simple.f90
+        ${CMAKE_CURRENT_LIST_DIR}/generalists_simple.f90
 	${CMAKE_CURRENT_LIST_DIR}/generalists.f90
 	${CMAKE_CURRENT_LIST_DIR}/diatoms_simple.f90
 	${CMAKE_CURRENT_LIST_DIR}/diatoms.f90 
