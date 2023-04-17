@@ -67,13 +67,13 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 if ~isempty(sim)
     disp('Starting from previous simulation.');
-    u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
-    u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
+    u(:,ixN) = gridToMatrix(squeeze(double(sim.N(end,:,:,:))),[],p.pathBoxes, p.pathGrid);
+    u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(end,:,:,:))),[],p.pathBoxes, p.pathGrid);
     if bSilicate
-        u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
+        u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(end,:,:,:))),[],p.pathBoxes, p.pathGrid);
     end
     for i = 1:p.n -p.idxB+1
-        u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],p.pathBoxes, p.pathGrid);
+        u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(end,:,:,:,i)))),[],p.pathBoxes, p.pathGrid);
     end
 else
     if exist(strcat(p.pathN0,'.mat'),'file')
@@ -159,12 +159,12 @@ end
 %
 iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
-sim.N = single(zeros(length(sim.x), length(sim.y), length(sim.z),nSave));
+sim.N = single(zeros(nSave,length(sim.x), length(sim.y), length(sim.z)));
 if bSilicate
     sim.Si = sim.N;
 end
 sim.DOC = sim.N;
-sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.n-p.idxB+1, nSave));
+sim.B = single(zeros(nSave, length(sim.x), length(sim.y), length(sim.z), p.n-p.idxB+1));
 sim.L = sim.N;
 sim.T = sim.N;
 tSave = [];
@@ -268,16 +268,16 @@ for i=1:simtime
         end
 
         iSave = iSave + 1;
-        sim.N(:,:,:,iSave) = single(matrixToGrid(u(:,ixN), [], p.pathBoxes, p.pathGrid));
-        sim.DOC(:,:,:,iSave) = single(matrixToGrid(u(:,ixDOC), [], p.pathBoxes, p.pathGrid));
+        sim.N(iSave,:,:,:) = single(matrixToGrid(u(:,ixN), [], p.pathBoxes, p.pathGrid));
+        sim.DOC(iSave,:,:,:) = single(matrixToGrid(u(:,ixDOC), [], p.pathBoxes, p.pathGrid));
         if bSilicate
-            sim.Si(:,:,:,iSave) = single(matrixToGrid(u(:,ixSi), [], p.pathBoxes, p.pathGrid));
+            sim.Si(iSave,:,:,:) = single(matrixToGrid(u(:,ixSi), [], p.pathBoxes, p.pathGrid));
         end
         for j = 1:p.n-p.idxB+1
-            sim.B(:,:,:,j,iSave) = single(matrixToGrid(u(:,ixB(j)), [], p.pathBoxes, p.pathGrid));
+            sim.B(iSave,:,:,:,j) = single(matrixToGrid(u(:,ixB(j)), [], p.pathBoxes, p.pathGrid));
         end
-        sim.L(:,:,:,iSave) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
-        sim.T(:,:,:,iSave) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
+        sim.L(iSave,:,:,:) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
+        sim.T(iSave,:,:,:) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
         tSave = [tSave, i*p.dtTransport];
         fprintf('.\n');
     end

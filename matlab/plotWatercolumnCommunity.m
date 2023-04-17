@@ -1,5 +1,5 @@
 function plotWatercolumnCommunity(sim, time, lat,lon, options)
-% θ
+
 arguments
     sim struct;
     time = NaN;
@@ -20,7 +20,7 @@ else
         B = sim.B;
     else
         [~, iTime] = min(abs(sim.t-time));
-        B = squeeze(double(sim.B(:, :, iTime))); % B(depth, grid)
+        B = squeeze(double(sim.B(iTime,:, :))); % B(depth, grid)
     end
 
 end
@@ -41,14 +41,14 @@ end
 % Run over all depths
 %
 
-nDepth = length(B(:,1));
+nDepth = size(B,2);
 
 for iDepth = 1:nDepth
 
     if isnan(time)
-        [mc, BB(iDepth,:)] = calcCommunitySpectrumWaterCol(squeeze(B(iDepth,:,:)), sim);
+        [mc, BB(iDepth,:)] = calcCommunitySpectrumWaterCol(squeeze(B(:,iDepth,:)), sim);
     else
-        [mc, BB(iDepth,:)] = calcCommunitySpectrumWaterCol(squeeze(B(iDepth,:)), sim, iTime);
+        [mc, BB(iDepth,:)] = calcCommunitySpectrumWaterCol(squeeze(B(:,iDepth)), sim, iTime);
     end
 
 end

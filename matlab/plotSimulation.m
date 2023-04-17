@@ -31,20 +31,23 @@ switch sim.p.nameModel
         
         figure(3)
         % Find the depth of maximum biomass:
-        Bdepth = sum(sum(sim.B,3),2);
+        Bdepth = sum( sim.B(day,:,:),3 );
         iDepth = find(Bdepth==max(Bdepth));
          
         plotSizespectrum(sim,day,iDepth);
         % plotSizespectrum(sim,iDepth);
 
         figure(4)
+        % Find the depth of maximum average biomass:
+        Bdepth = sum(sum( sim.B(:,:,:),3 ),1);
+        iDepth = find(Bdepth==max(Bdepth));
         plotSizespectrumTime(sim,iDepth);
  
-        figure(5)
-        plotWatercolumnCommunity(sim)
+        %figure(5)
+        %plotWatercolumnCommunity(sim)
 
-        figure(6)
-        plotWatercolumnCommunity(sim, day)
+        %figure(6)
+        %plotWatercolumnCommunity(sim, day)
    
     case 'global'
         figure(1)
