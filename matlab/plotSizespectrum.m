@@ -30,33 +30,33 @@ switch sim.p.nameModel
     case 'watercolumn'
         % Extract from a single water column:
         z = sim.z;
-        s.B = squeeze(sim.B(iDepth,:,:))';
+        s.B = squeeze(sim.B(:,iDepth,:));
         if isfield(sim,'Si')
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iDepth, iTime), ...
+            u = [sim.N(iTime,iDepth), sim.DOC(iTime,iDepth), sim.Si(iTime,iDepth), ...
                 squeeze(s.B(iTime,:))];
         else
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), squeeze(s.B(iTime,:))];
+            u = [sim.N(iTime,iDepth), sim.DOC(iTime,iDepth), squeeze(s.B(iTime,:))];
         end
-        s.L = sim.L(iDepth,iTime);
-        s.T = sim.T(iDepth,iTime);
+        s.L = sim.L(iTime,iDepth);
+        s.T = sim.T(iTime,iDepth);
         
     case 'global'
         % Extract from global run:
         idx = calcGlobalWatercolumn(lat,lon,sim);
         z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
-        s.B = squeeze(sim.B(idx.x, idx.y, iDepth, :, :))';
+        s.B = squeeze(sim.B(:, idx.x, idx.y, iDepth, :));
         if isfield(sim,'Si')
-            u = [sim.N(idx.x, idx.y,iDepth,iTime), ...
-                sim.DOC(idx.x, idx.y,iDepth,iTime), ...
-                sim.Si(idx.x, idx.y,iDepth,iTime), ...
-                squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))'];
+            u = [sim.N(iTime,idx.x, idx.y,iDepth), ...
+                sim.DOC(iTime,idx.x, idx.y,iDepth), ...
+                sim.Si(iTime,idx.x, idx.y,iDepth), ...
+                squeeze(sim.B(iTime,idx.x, idx.y, iDepth, :))'];
         else
-            u = [sim.N(idx.x, idx.y,iDepth,iTime), ...
-                sim.DOC(idx.x, idx.y,iDepth,iTime), ...
-                squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))'];
+            u = [sim.N(iTime,idx.x, idx.y,iDepth), ...
+                sim.DOC(iTime,idx.x, idx.y,iDepth), ...
+                squeeze(sim.B(iTime,idx.x, idx.y, iDepth, :))'];
         end
-        s.L = sim.L(idx.x, idx.y, iDepth,iTime);
-        s.T = sim.T(idx.x, idx.y, iDepth,iTime);
+        s.L = sim.L(iTime,idx.x, idx.y, iDepth);
+        s.T = sim.T(iTime,idx.x, idx.y, iDepth);
 end
 
 s.p = sim.p;

@@ -1,5 +1,6 @@
 !
 ! Module that handles the general methods for all spectrum groups.
+! It defines the two abstract classes for unicellullar and multicellular plankton.
 !
 module spectrum
   use globals
@@ -236,6 +237,11 @@ end subroutine calcGrid
     write(*,99) "jLossPass.", this%JlossPassive / this%m
   end subroutine printRatesUnicellular
 
+  !
+  ! Returns the net primary production calculated as the total amount of carbon fixed
+  ! by photsynthesis minus the respiration. Units: mugC/day/m3
+  ! (See Andersen and Visser (2023) table 5)
+  !
   function getProdNet(this, u) result(ProdNet)
     real(dp):: ProdNet
     class(spectrumUnicellular), intent(in):: this
@@ -246,26 +252,36 @@ end subroutine calcGrid
     do i = 1, this%n
        ProdNet = ProdNet + max( 0.d0, &
                    (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
-     end do
-    end function getProdNet
+    end do
+  end function getProdNet
 
+  !
+  ! Returns the net bacterial production calculated as the total amount of DOC
+  ! taken up minus the respiration. Units: mugC/day/m3
+  ! (See Andersen and Visser (2023) table 5)
+  !
   function getProdBactUnicellular(this, u) result(ProdBact)
     real(dp):: ProdBact
     class(spectrumUnicellular), intent(in):: this
     real(dp), intent(in):: u(this%n)
+    integer:: i
 
     ProdBact = 0.d0
+    do i = 1, this%n
+      ProdBact = ProdBact + max( 0.d0, &
+                  (this%JDOCreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
+    end do
   end function getProdBactUnicellular
 
   ! ==========================================================================
-  !  Member functions for the abstract unicellular class:
+  !  Member functions for the abstract multicellular class:
   ! ==========================================================================
 
   subroutine initMulticellular(this, n, mOffspring, mAdult)
     class(spectrumMulticellular), intent(inout) :: this
     integer, intent(in):: n
     real(dp), intent(in):: mOffspring, mAdult
-    integer:: i
+    !integer:: i
     real(dp):: lnDelta
     
     call this%initSpectrum(n)
@@ -277,21 +293,8 @@ end subroutine calcGrid
     ! this is needed to ensure that the mort2 is the same for all
     ! cells.
     !
-
     lnDelta = (log(mAdult)-log(mOffspring)) / (n-0.5)
     call this%calcGrid(mOffspring, exp( log(mAdult) + 0.5*lnDelta) )
-    ! deltax = (log(mAdult)-log(mOffspring)) / (this%n-1)
-    ! do i=1, this%n-1
-    !    x = log(mOffspring) + (i-0.5)*deltax
-    !    this%m(i) = exp(x)
-    !    this%mLower(i) = exp(x - 0.5*deltax)
-    !    this%mDelta(i) =  exp(x + 0.5*deltax)-this%mLower(i)
-    !    this%z(i) = this%mLower(i)/(this%mLower(i) + this%mDelta(i))
-    ! end do
-    ! this%m(n) = mAdult
-    ! this%mLower(n) = mAdult
-    ! this%mDelta(n) = mAdult ! Makes the upper size 2*mAdult
-    ! this%z(n) = 0.9
  
     this%mort2constant = 0.004/log(this%m(2) / this%m(1))
   end subroutine initMulticellular

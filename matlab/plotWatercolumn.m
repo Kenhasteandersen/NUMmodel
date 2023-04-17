@@ -31,38 +31,38 @@ if strcmp(sim.p.nameModel, 'global')
         error('Not on land')
     end
     z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
-    B = squeeze(double(sim.B(idx.x, idx.y, idx.z, :, iTime)));
+    B = squeeze(double(sim.B(iTime, idx.x, idx.y, idx.z, :)));
     for i = 1:length(idx.z)
         if isfield(sim,'Si')
-            u(i,:) = [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
-                sim.DOC(idx.x, idx.y, idx.z(i), iTime), ...
-                sim.Si(idx.x, idx.y, idx.z(i), iTime), ...
+            u(i,:) = [sim.N(iTime, idx.x, idx.y, idx.z(i)), ...
+                sim.DOC(iTime, idx.x, idx.y, idx.z(i)), ...
+                sim.Si(iTime, idx.x, idx.y, idx.z(i)), ...
                 B(i,:)];
         else
-            u(i,:) = [sim.N(idx.x, idx.y, idx.z(i), iTime), ...
-                sim.DOC(idx.x, idx.y, idx.z(i), iTime), B(i,:)];
+            u(i,:) = [sim.N(iTime, idx.x, idx.y, idx.z(i)), ...
+                sim.DOC(iTime, idx.x, idx.y, idx.z(i)), B(i,:)];
         end
-        L(i) = sim.L(idx.x, idx.y, idx.z(i), iTime);
-        T(i) = sim.T(idx.x, idx.y, idx.z(i), iTime);
+        L(i) = sim.L(iTime, idx.x, idx.y, idx.z(i));
+        T(i) = sim.T(iTime, idx.x, idx.y, idx.z(i));
     end
 
 else
     % Extract data from water column simulation:
     z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
-    B = squeeze(double(sim.B(:, :, iTime)));
+    B = squeeze(double(sim.B(iTime, :, :)));
 
     % ixAve = find( sim.t > sim.t(end)/2 );
     % B = mean(squeeze(double(sim.B(:, :, ixAve))),2);
 
     for i = 1:length(sim.z)
         if isfield(sim,'Si')
-            u(i,:) = [sim.N(i, iTime), sim.DOC(i, iTime), ...
-                sim.Si(i,iTime), B(i,:)];
+            u(i,:) = [sim.N(iTime, i), sim.DOC(iTime,i), ...
+                sim.Si(iTime,i), B(i,:)];
         else
-            u(i,:) = [sim.N(i, iTime), sim.DOC(i, iTime), B(i,:)];
+            u(i,:) = [sim.N(iTime,i), sim.DOC(iTime,i), B(i,:)];
         end
-        L(i) = sim.L(i,iTime);
-        T(i) = sim.T(i,iTime);
+        L(i) = sim.L(iTime,i);
+        T(i) = sim.T(iTime,i);
     end
 end
 
@@ -134,15 +134,19 @@ for iGroup = 1:sim.p.nGroups
     BB = [BB(1,:); BB]; % Add dummy layer on top
     BB( BB<0.01 ) = 0.01;
 
-
-    %panelField(m, -z, (B(:,ix-sim.p.idxB+1))');
-    contourf( sim.p.m(sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup)), -z, BB, ...
-        10.^linspace(-2,2,20),'linestyle','none')
+    % Treat groups with only one size class correctly:
+    if size(BB,2)==1 
+        mm = [sim.p.mLower(sim.p.ixStart(iGroup)), sim.p.mUpper(sim.p.ixStart(iGroup))];
+        BB(:,2) = BB;
+    else
+        mm = sim.p.m(sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup));
+    end
+    contourf( mm, -z, BB, 10.^linspace(-2,2,20),'linestyle','none')
 
     set(gca,'xscale','log','colorscale','log')
     set(gca,'xtick',10.^(-9:2), 'XTickLabel',[])
 
-    caxis([0.01 100])
+    clim([0.01 100])
 
     title(sim.p.nameGroup(iGroup))
     if (iGroup==1)
@@ -151,7 +155,6 @@ for iGroup = 1:sim.p.nGroups
         set(gca,'yticklabel',[])
     end
     ylim(ylimit)
-
 
     if max(max(BB(:,:))) > Zmax
 

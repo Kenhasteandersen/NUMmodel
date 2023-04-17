@@ -112,6 +112,7 @@ module diatoms_simple
   
       this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
       this%Jresp = cR*alphaJ*this%m
+      this%JDOCreal = 0.d0
   
       this%beta = 0.d0 ! No feeding
       this%palatability = palatability ! Lower risk of predation

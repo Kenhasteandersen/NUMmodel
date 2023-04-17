@@ -27,24 +27,25 @@ switch sim.p.nameModel
     case 'global'
         % Extract the water column from a global run:
         idx = calcGlobalWatercolumn(lat,lon,sim);
-        N = squeeze(double(sim.N(idx.x, idx.y, idx.z,:)));
-        DOC = squeeze(double(sim.DOC(idx.x, idx.y, idx.z,:)));
+        N = squeeze(double(sim.N(:,idx.x, idx.y, idx.z)));
+        DOC = squeeze(double(sim.DOC(:,idx.x, idx.y, idx.z)));
         if isfield(sim,'Si')
-            Si = squeeze(double(sim.Si(idx.x, idx.y, idx.z,:)));
+            Si = squeeze(double(sim.Si(:,idx.x, idx.y, idx.z)));
         end
         for i = 1:sim.p.nGroups
-            B(i,:,:) = squeeze((sum(double(sim.B(idx.x, idx.y, idx.z,...
-                (sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1,:)),4)));
+            B(i,:,:) = squeeze((sum(double(sim.B(:,idx.x, idx.y, idx.z,...
+                (sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1)),5)));
         end
         z = sim.z(idx.z);
     case 'watercolumn'
-        N = sim.N;
-        DOC = sim.DOC;
+        N = sim.N';
+        DOC = sim.DOC';
         if isfield(sim,'Si')
-            Si = sim.Si;
+            Si = sim.Si';
         end
+        % Calc total biomass in each group:
         for i = 1:sim.p.nGroups
-            B(i,:,:) = squeeze(sum(sim.B(:,(sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1,:),2));
+            B(i,:,:) = squeeze(sum(sim.B(:,:,(sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1),3))';
         end
         z = sim.z + 0.5*sim.dznom;
         lat = sim.lat;
@@ -155,10 +156,8 @@ for i = 1:sim.p.nGroups
     end
 end
 
-
 if strcmp(sim.p.nameModel, 'watercolumn')
     sgtitle(['Nitrogen & DOC concentration/ Total biomass of each group ({\mu}gC/l) at: lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
 end
-
 
 end

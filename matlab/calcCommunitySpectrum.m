@@ -40,7 +40,11 @@ for iGroup = 1:p.nGroups
 
         % Interpolation
         log_k = mean( log(B( iTime, ixB)./log(Delta)),1);
-        vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
+        if length(m)==1
+            vq1 = exp(interp1( log([p.mLower(ix) p.mUpper(ix)]), [log_k, log_k], log(mc), 'linear'));
+        else
+            vq1 = exp(interp1(log(m), log_k, log(mc), 'linear'));
+        end
 
         vq1(isnan(vq1)) = 0; % get rid of the NAs
         Bc = Bc + vq1;

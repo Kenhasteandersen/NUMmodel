@@ -87,7 +87,6 @@ module diatoms
              & palatability, &
              & remin2,mMinDiatom, mMaxDiatom
 
-
         call open_inputfile(file_unit, io_err)
         read(file_unit, nml=input_diatoms, iostat=io_err)
         call close_inputfile(file_unit, io_err)
