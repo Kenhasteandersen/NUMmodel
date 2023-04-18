@@ -27,14 +27,14 @@ switch sim.p.nameModel
     case 'global'
         % Extract the water column from a global run:
         idx = calcGlobalWatercolumn(lat,lon,sim);
-        N = squeeze(double(sim.N(:,idx.x, idx.y, idx.z)));
-        DOC = squeeze(double(sim.DOC(:,idx.x, idx.y, idx.z)));
+        N = squeeze(double(sim.N(:,idx.x, idx.y, idx.z)))';
+        DOC = squeeze(double(sim.DOC(:,idx.x, idx.y, idx.z)))';
         if isfield(sim,'Si')
-            Si = squeeze(double(sim.Si(:,idx.x, idx.y, idx.z)));
+            Si = squeeze(double(sim.Si(:,idx.x, idx.y, idx.z)))';
         end
         for i = 1:sim.p.nGroups
             B(i,:,:) = squeeze((sum(double(sim.B(:,idx.x, idx.y, idx.z,...
-                (sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1)),5)));
+                (sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1)),5)))';
         end
         z = sim.z(idx.z);
     case 'watercolumn'
