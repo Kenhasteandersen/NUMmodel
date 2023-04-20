@@ -89,17 +89,17 @@ switch sim.p.nameModel
             for iDepth = 1:length(sim.z)
                 for j = 1:length(sim.x)
                     for k = 1:length(sim.y)
-                        if ~isnan(sim.N(j,k,iDepth,iTime))
+                        if ~isnan(sim.N(iTime,j,k,iDepth))
                             %u = [sim.N(j,k,iDepth,iTime), sim.DOC(j,k,iDepth,iTime), ...
                             %    squeeze(sim.B(j,k,iDepth,:,iTime))' ];
                             %rates = getRates(p, u, sim.L(j,k,iDepth,iTime), sim.T(j,k,iDepth,iTime) );
                             % Losses from HTL:
                             lossHTL(iTime) = lossHTL(iTime) + ...
-                                sum((1-fracHTL_to_N)*rates.mortHTL.*squeeze(sim.B(j,k,iDepth,:,iTime)))/rhoCN ...
+                                sum((1-fracHTL_to_N)*rates.mortHTL.*squeeze(sim.B(iTime,j,k,iDepth,:)))/rhoCN ...
                                 * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
                             % Quadratic losses:
                             losses(iTime) = losses(iTime) + ...
-                                (1-remin2)*sum(rates.mort2.*squeeze(sim.B(j,k,iDepth,:,iTime)))/rhoCN ...
+                                (1-remin2)*sum(rates.mort2.*squeeze(sim.B(iTime,j,k,iDepth,:)))/rhoCN ...
                                 * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
                         end
                     end
@@ -116,9 +116,9 @@ switch sim.p.nameModel
         for iDepth = 1:length(sim.z)
             for j = 1:length(sim.x)
                 for k = 1:length(sim.y)
-                    if ~isnan(sim.N(j,k,iDepth,iTime))
-                        totN_0 = totN_0 + (sim.N(j,k,iDepth,1)  +sum(sim.B(j,k,iDepth,:,1),4)/rhoCN) * dv(j,k,iDepth)/1000;
-                        totN_end = totN_end + (sim.N(j,k,iDepth,end)  +sum(sim.B(j,k,iDepth,:,end),4)/rhoCN) * dv(j,k,iDepth)/1000;
+                    if ~isnan(sim.N(iTime,j,k,iDepth))
+                        totN_0 = totN_0 + (sim.N(1,j,k,iDepth)  +sum(sim.B(1,j,k,iDepth,:),5)/rhoCN) * dv(j,k,iDepth)/1000;
+                        totN_end = totN_end + (sim.N(end,j,k,iDepth) + sum(sim.B(end,j,k,iDepth,:),5)/rhoCN) * dv(j,k,iDepth)/1000;
                     end
                 end
             end
