@@ -68,6 +68,7 @@ switch sim.p.nameModel
         end
 
     case 'watercolumn'
+        sLibName = loadNUMmodelLibrary();
         nTime = length(sim.t);
         nZ = length(sim.z);
         ChlArea = zeros(nTime,1);
@@ -96,7 +97,7 @@ switch sim.p.nameModel
                             squeeze(sim.B(iTime,k,:))'];
                     end
                     [ProdGross1, ProdNet1,ProdHTL1,ProdBact1,~,Bpico1,Bnano1,Bmicro1] = ...
-                        getFunctions(u, sim.L(iTime,k), sim.T(iTime,k));
+                        getFunctions(u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
                     % Multiply by the thickness of each layer:
                     conv = sim.dznom(k);
                     ProdGross = ProdGross + ProdGross1*conv;
@@ -108,7 +109,7 @@ switch sim.p.nameModel
                     Bnano = Bnano + Bnano1*conv;
                     Bmicro = Bmicro + Bmicro1*conv;
                     % Chl:
-                    rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k));
+                    rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
                     tmp =  calcChl( squeeze(sim.B(iTime,k,:)), rates, sim.L(iTime,k)) / 1000; % Convert to g
                     if ~isnan(tmp)
                         jLreal(iTime,k,:) = rates.jLreal;
@@ -149,17 +150,18 @@ switch sim.p.nameModel
         % Primary production in gC per m2/year::
         %
         if ~isfield(sim,'ProdGross')
+            sLibName = loadNUMmodelLibrary();
             % Get grid volumes:
             load(sim.p.pathGrid,'dv','dz','dx','dy');
             ix = ~isnan(sim.N(1,:,:,1)); % Find all relevant grid cells
 
-            sim.ProdGross = zeros(length(sim.t), length(sim.x), length(sim.y));
-            sim.ProdNet = sim.ProdGross;
-            sim.ProdHTL = sim.ProdGross;
-            sim.ProdBact = sim.ProdGross;
-            sim.Bpico = sim.ProdGross;
-            sim.Bnano = sim.ProdGross;
-            sim.Bmicro = sim.ProdGross;
+            ProdGross = zeros(length(sim.t), length(sim.x), length(sim.y));
+            ProdNet = ProdGross;
+            ProdHTL = ProdGross;
+            ProdBact = ProdGross;
+            Bpico = ProdGross;
+            Bnano = ProdGross;
+            Bmicro = ProdGross;
             ChlArea = 0*dx;
             ChlVolume = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z));
 
@@ -167,58 +169,80 @@ switch sim.p.nameModel
             nX = length(sim.x);
             nY = length(sim.y);
             nZ = length(sim.z);
+            %
+            % Extract fields from sim:
+            %
+            N = sim.N;
+            DOC = sim.DOC;
+            if isfield(sim.p,'idxSi')
+                Si = sim.Si;
+            else
+                Si = 0;
+            end
+            B = sim.B;
+            L = sim.L;
+            T = sim.T;
+            p = sim.p;
+            
             for iTime = 1:nTime
                 for i = 1:nX
                     for j = 1:nY
-                        ProdGross = 0;
-                        ProdNet = 0;
-                        ProdHTL = 0;
-                        ProdBact = 0;
-                        Bpico = 0;
-                        Bnano = 0;
-                        Bmicro = 0;
+                        ProdGrosstmp = 0;
+                        ProdNettmp = 0;
+                        ProdHTLtmp = 0;
+                        ProdBacttmp = 0;
+                        Bpicotmp = 0;
+                        Bnanotmp = 0;
+                        Bmicrotmp = 0;
                         for k = 1:nZ
-                            if ~isnan(sim.N(iTime,i,j,k))
-                                if isfield(sim.p,'idxSi')
-                                    u = [squeeze(sim.N(iTime,i,j,k)), ...
-                                        squeeze(sim.DOC(iTime,i,j,k)), ...
-                                        squeeze(sim.Si(iTime,i,j,k)), ...
-                                        squeeze(sim.B(iTime,i,j,k,:))'];
+                            if ~isnan(N(iTime,i,j,k))
+                                if isfield(p,'idxSi')
+                                    u = [squeeze(N(iTime,i,j,k)), ...
+                                        squeeze(DOC(iTime,i,j,k)), ...
+                                        squeeze(Si(iTime,i,j,k)), ...
+                                        squeeze(B(iTime,i,j,k,:))'];
                                 else
-                                    u = [squeeze(sim.N(iTime,i,j,k)), ...
-                                        squeeze(sim.DOC(iTime,i,j,k)), ...
-                                        squeeze(sim.B(iTime,i,j,k,:))'];
+                                    u = [squeeze(N(iTime,i,j,k)), ...
+                                        squeeze(DOC(iTime,i,j,k)), ...
+                                        squeeze(B(iTime,i,j,k,:))'];
                                 end
                                 [ProdGross1, ProdNet1,ProdHTL1,ProdBact1, ~,Bpico1,Bnano1,Bmicro1] = ...
-                                    getFunctions(u, sim.L(iTime,i,j,k), sim.T(iTime,i,j,k));
+                                    getFunctions(u, L(iTime,i,j,k), T(iTime,i,j,k), sLibName);
                                 conv = squeeze(dz(i,j,k));
-                                ProdGross = ProdGross + ProdGross1*conv; % gC/m2/yr
-                                ProdNet = ProdNet + ProdNet1*conv;
-                                ProdHTL = ProdHTL +ProdHTL1*conv;
-                                ProdBact = ProdBact +ProdBact1*conv;
+                                ProdGrosstmp = ProdGrosstmp + ProdGross1*conv; % gC/m2/yr
+                                ProdNettmp = ProdNettmp + ProdNet1*conv;
+                                ProdHTLtmp = ProdHTLtmp +ProdHTL1*conv;
+                                ProdBacttmp = ProdBacttmp +ProdBact1*conv;
                                 %eHTL = eHTL + eHTL1/length(sim.z);
-                                Bpico = Bpico + Bpico1*dz(i,j,k); % gC/m2
-                                Bnano = Bnano + Bnano1*dz(i,j,k);
-                                Bmicro = Bmicro + Bmicro1*dz(i,j,k);
+                                Bpicotmp = Bpicotmp + Bpico1*dz(i,j,k); % gC/m2
+                                Bnanotmp = Bnanotmp + Bnano1*dz(i,j,k);
+                                Bmicrotmp = Bmicrotmp + Bmicro1*dz(i,j,k);
                                 % Chl:
-                                rates = getRates(sim.p, u, sim.L(iTime,i,j,k), sim.T(iTime,i,j,k));
-                                tmp =  calcChl( squeeze(sim.B(iTime,i,j,k,:)), rates, sim.L(iTime,i,j,k)) ;%/ 1000; % Convert to mg
+                                rates = getRates(p, u, L(iTime,i,j,k), T(iTime,i,j,k), sLibName);
+                                tmp =  calcChl( squeeze(B(iTime,i,j,k,:)), rates, L(iTime,i,j,k)) ;%/ 1000; % Convert to mg
                                 if ~isnan(tmp)
-                                    ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
+                                    %ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
                                     ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp;
                                 end
                             end
                         end
-                        sim.ProdGross(iTime,i,j) = ProdGross;
-                        sim.ProdNet(iTime,i,j) = ProdNet;
-                        sim.ProdHTL(iTime,i,j) = ProdHTL;
-                        sim.ProdBact(iTime,i,j) = ProdBact;
-                        sim.Bpico(iTime,i,j) = Bpico;
-                        sim.Bnano(iTime,i,j) = Bnano;
-                        sim.Bmicro(iTime,i,j) = Bmicro;
+                        ProdGross(iTime,i,j) = ProdGrosstmp;
+                        ProdNet(iTime,i,j) = ProdNettmp;
+                        ProdHTL(iTime,i,j) = ProdHTLtmp;
+                        ProdBact(iTime,i,j) = ProdBacttmp;
+                        Bpico(iTime,i,j) = Bpicotmp;
+                        Bnano(iTime,i,j) = Bnanotmp;
+                        Bmicro(iTime,i,j) = Bmicrotmp;
                     end
                 end
             end
+            sim.ProdGross = ProdGross;
+            sim.ProdNet = ProdNet;
+            sim.ProdHTL = ProdHTL;
+            sim.ProdBact = ProdBact;
+            sim.Bpico = Bpico;
+            sim.Bnano = Bnano;
+            sim.Bmicro = Bmicro;
             sim.eHTL = sim.ProdHTL./sim.ProdNet;
             sim.ePP = sim.ProdNet./sim.ProdGross;
             sim.ChlArea = ChlArea/length(sim.t);
