@@ -146,9 +146,7 @@ switch sim.p.nameModel
         end
 
     case 'global'
-        %
-        % Primary production in gC per m2/year::
-        %
+        
         if ~isfield(sim,'ProdGross')
             sLibName = loadNUMmodelLibrary();
             % Get grid volumes:
