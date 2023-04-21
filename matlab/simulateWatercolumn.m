@@ -222,7 +222,7 @@ tSave = [];
 %   sim.BnanoAnnualMean = zeros( nb,1 );
 %   sim.BmicroAnnualMean = zeros( nb,1 );
 %end
-
+sLibName = loadNUMmodelLibrary();
 % ---------------------------------------
 % Run transport matrix simulation
 % ---------------------------------------
@@ -262,7 +262,7 @@ for i = 1:simtime
     %else
 
     for k = 1:nGrid
-        u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
+        u(k,:) = calllib(sLibName, 'f_simulateeuler', ...
             u(k,:),L(k), T(k), dtTransport, dt);
     end
     %end
