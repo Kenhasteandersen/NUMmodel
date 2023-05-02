@@ -146,7 +146,7 @@ for iGroup = 1:sim.p.nGroups
     set(gca,'xscale','log','colorscale','log')
     set(gca,'xtick',10.^(-9:2), 'XTickLabel',[])
 
-    clim([0.01 100])
+    caxis([0.01 100])
 
     title(sim.p.nameGroup(iGroup))
     if (iGroup==1)

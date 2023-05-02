@@ -7,23 +7,23 @@
 %
 % Out:
 %   sim - same as input but with fields of global function added:
-%         sim.ProdGross - gross primary production (gC/m2/yr)
-%         sim.ProdNet   - net primary production (gC/m2/yr)
+%         sim.ProdGross - gross primary production (mgC/m2/d)
+%         sim.ProdNet   - net primary production (mgC/m2/d)
 %         sim.ProdHTL   - amount of carbon extracted from the HTL mortality
 %         sim.Bpico, sim.Bnano, sim.Bmicro - pico, micro, and nano plankton
-%                         biomasses (gC/m2)
-%         sim.ChlArea (gChl/m2)
-%
+%                         biomasses (mgC/m2)
+%         sim.ChlArea (mgChl/m2)
+%         
 %         For global simulations additional fields are:
 %         sim.Ntotal    - total dissolved N as a function of time (mugN)
 %         sim.DOCtotal  - total dissolved DOC (mugC)
-%         sim.Btotal    - total biomass (mugC)
-%         sim.ProdNetTotal - total NPP (gC/yr)
+%         sim.Btotal    - total biomass (mugC)% different in Ln:264 & 307 
+%         sim.ProdNetTotal - total NPP (mgC/d)
 %
-%         sim.ProdNetAnnual - annual average NPP (gC/m2/yr)
-%         sim.ProdHTLAnnual - annual avearge HTL production (gc/m2/yr)
+%         sim.ProdNetAnnual - annual average NPP (mgC/m2/d)
+%         sim.ProdHTLAnnual - annual avearge HTL production (mgc/m2/d)
 %
-function sim = calcFunctions(sim, options)
+function sim = calcFunctions_3(sim, options)
 
 arguments
     sim struct;
@@ -53,17 +53,17 @@ switch sim.p.nameModel
         sim.Bpico = sim.Bpico * sim.p.widthProductiveLayer;
         sim.Bnano = sim.Bnano * sim.p.widthProductiveLayer;
         sim.Bmicro = sim.Bmicro * sim.p.widthProductiveLayer;
-        sim.Btot = sum(sim.B,2) * sim.p.widthProductiveLayer/1000;
-        sim.ChlArea = sum( calcChl( sim.B(end,:), sim.rates, sim.L) ) * sim.p.widthProductiveLayer/ 1000; % Convert to g
-
+        sim.Btot = sum(sim.B,2) * sim.p.widthProductiveLayer;%/1000; removed the 1000 now in mgC/m^2
+        sim.ChlArea = sum( calcChl( sim.B(end,:), sim.rates, sim.L) ) * sim.p.widthProductiveLayer;%/ 1000; % Convert to g  %removed the 1000
+        %ChlArea now in mgChl/m^2
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Final total biomass:  %8.3f gC/m2\n", sim.Btot(end));
+            fprintf("Final total biomass:  %8.3f mgC/m2\n", sim.Btot(end));
             fprintf("Final Chl:            %8.3f gChl/m2\n", sim.ChlArea)
-            fprintf("Final gross PP:       %8.3f gC/m2/yr\n", sim.ProdGross)
-            fprintf("Final net PP:         %8.3f gC/m2/yr\n", sim.ProdNet)
-            fprintf("Final net bact prod.: %8.3f gC/m2/yr\n", sim.ProdBact)
-            fprintf("Final HTL production: %8.3f gC/m2/yr\n", sim.ProdHTL)
+            fprintf("Final gross PP:       %8.3f mgC/m2/day\n", sim.ProdGross)
+            fprintf("Final net PP:         %8.3f mgC/m2/day\n", sim.ProdNet)
+            fprintf("Final net bact prod.: %8.3f mgC/m2/day\n", sim.ProdBact)
+            fprintf("Final HTL production: %8.3f mgC/m2/day\n", sim.ProdHTL)
             fprintf("----------------------------------------------\n")
         end
 
@@ -71,9 +71,9 @@ switch sim.p.nameModel
         sLibName = loadNUMmodelLibrary();
         nTime = length(sim.t);
         nZ = length(sim.z);
-        ChlArea = zeros(nTime,1);
-        ChlVolume = zeros(nTime, nZ);
-        jLreal = zeros(nTime,nZ,sim.p.n-sim.p.idxB+1);
+%         ChlArea = zeros(nTime,1); %not needed anymore
+%         ChlVolume = zeros(1, nZ); % corrected
+%         jLreal = zeros(nTime,nZ,sim.p.n-sim.p.idxB+1); %removed, was just a check for NPP
         for iTime = 1:nTime
             ProdGross = 0;
             ProdNet = 0;
@@ -82,6 +82,8 @@ switch sim.p.nameModel
             Bpico = 0;
             Bnano = 0;
             Bmicro = 0;
+            ChlArea = 0; %added
+            ChlVolume = zeros(1, nZ); % added
             % Integrate over depth:
             for k = 1:nZ
                 if ~isnan(sim.N(iTime,k))
@@ -105,17 +107,19 @@ switch sim.p.nameModel
                     ProdHTL = ProdHTL +ProdHTL1*conv;
                     ProdBact = ProdBact + ProdBact1*conv;
                     %eHTL = eHTL + eHTL1/length(sim.z);
-                    Bpico = Bpico + Bpico1*conv; % gC/m2
+                    Bpico = Bpico + Bpico1*conv; % mgC/m2
                     Bnano = Bnano + Bnano1*conv;
                     Bmicro = Bmicro + Bmicro1*conv;
                     % Chl:
                     rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
-                    tmp =  calcChl( squeeze(sim.B(iTime,k,:)), rates, sim.L(iTime,k)) / 1000; % Convert to g
-                    if ~isnan(tmp)
-                        jLreal(iTime,k,:) = rates.jLreal;
-                        ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
-                        ChlVolume(iTime,k) = ChlVolume(iTime,k) + sum(tmp);
-                    end
+                    tmp =  calcChl( squeeze(sim.B(iTime,k,:)), rates, sim.L(iTime,k));
+                    ChlArea = ChlArea + tmp .* sim.dznom(k); %tmp is already the sum over all sizes, so no need to do sum(tmp) again
+                    ChlVolume(k) = tmp;
+%                     if ~isnan(tmp)
+%                         jLreal(iTime,k,:) = rates.jLreal;
+%                         ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
+%                         ChlVolume(iTime,k) = ChlVolume(iTime,k) + sum(tmp); %no need to do the sum for Chlvolume
+%                     end
                     %ratePOM(iTime, k, :) = rates.jPOM;
                 end
             end
@@ -127,21 +131,23 @@ switch sim.p.nameModel
             sim.Bpico(iTime) = Bpico;
             sim.Bnano(iTime) = Bnano;
             sim.Bmicro(iTime) = Bmicro;
+            sim.ChlArea(iTime) = ChlArea; %put it here for consistency instead of below
+            sim.ChlVolume(iTime,:) = ChlVolume;
         end
         sim.eHTL = sim.ProdHTL./sim.ProdNet;
         sim.ePP = sim.ProdNet./sim.ProdGross;
-        sim.ChlArea = ChlArea;
-        sim.ChlVolume = ChlVolume;
-        sim.jLreal = jLreal;
+%         sim.ChlArea = ChlArea;
+%         sim.ChlVolume = ChlVolume;
+%         sim.jLreal = jLreal;
         %sim.ratePOM = ratePOM;
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Average total biomass:  %8.3f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
-            fprintf("Average Chl:            %8.3f gChl/m2/yr\n", mean(sim.ChlArea))
-            fprintf("Average gross PP:       %8.3f gC/m2/yr\n", mean(sim.ProdGross))
-            fprintf("Average net PP:         %8.3f gC/m2/yr\n", mean(sim.ProdNet))
-            fprintf("Average HTL production: %8.3f gC/m2/yr\n", mean(sim.ProdHTL))
+            fprintf("Average total biomass:  %8.3f mgC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
+            fprintf("Average Chl:            %8.3f gChl/m2\n", mean(sim.ChlArea)) %units corrected (there was a time dimension)
+            fprintf("Average gross PP:       %8.3f mgC/m2/day\n", mean(sim.ProdGross))
+            fprintf("Average net PP:         %8.3f mgC/m2/day\n", mean(sim.ProdNet))
+            fprintf("Average HTL production: %8.3f mgC/m2/day\n", mean(sim.ProdHTL))
             fprintf("----------------------------------------------\n")
         end
 
@@ -220,7 +226,7 @@ switch sim.p.nameModel
                                 tmp =  calcChl( squeeze(B(iTime,i,j,k,:)), rates, L(iTime,i,j,k)) ;%/ 1000; % Convert to mg
                                 if ~isnan(tmp)
                                     %ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
-                                    ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp;
+                                    ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp; %mgChl/m^3
                                 end
                             end
                         end
@@ -258,13 +264,13 @@ switch sim.p.nameModel
                     sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(i,:,:,:,j)); % mugC
                 end
 
-                sim.ProdNetTotal(i) = sum(sum(squeeze(sim.ProdNet(i,:,:)).*dx.*dy)); % gC/yr
-                sim.ProdGrossTotal(i) = sum(sum(squeeze(sim.ProdGross(i,:,:)).*dx.*dy)); % gC/yr
-                sim.ProdHTLTotal(i) = sum(sum(squeeze(sim.ProdHTL(i,:,:)).*dx.*dy));
+                sim.ProdNetTotal(i) = sum(sum(squeeze(sim.ProdNet(i,:,:)).*dx.*dy)); % mgC/day
+                sim.ProdGrossTotal(i) = sum(sum(squeeze(sim.ProdGross(i,:,:)).*dx.*dy)); % mgC/day
+                sim.ProdHTLTotal(i) = sum(sum(squeeze(sim.ProdHTL(i,:,:)).*dx.*dy));% mgC/day
             end
 
             sim.ChlTotal = ChlArea.*dx.*dy;
-            sim.ChlTotal = sum(sim.ChlTotal(:));%/ 1000; %gChl
+            sim.ChlTotal = sum(sim.ChlTotal(:));% mgChl
         end
         %
         % Watercolumn totals:
@@ -298,4 +304,4 @@ switch sim.p.nameModel
         disp('Model unknown; functions not calculated');
 
 end
-sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro;
+sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro; %mgC/m^2

@@ -50,9 +50,17 @@
 %         ChlVolume = ChlVolume/length(sim.t);
 % 
 % end
+% p.cA % correlation between (AL/m) vs. Chl-a:C in units mummol photons
+% m^-2s^-1 day mugChl/mugC
 
-function Bchl = calcChl(B,rates,L) 
-   Bchl = sum( B .* rates.jLreal )/L; % in units of mu g Chl per l 
+function Bchl = calcChl(B,rates,L) %check units!
+  cA = 1; % in units mummol photons m^-2s^-1 day mugChl/mugC
+    if size(B)~=size(rates.jLreal)
+%         error('Size of B is different from size of JLreal, should be the same');
+        Bchl = cA*sum( B .* rates.jLreal' )/L; % in units of mu g Chl per l 
+    else
+        Bchl = cA*sum( B .* rates.jLreal )/L; % in units of mu g Chl per l 
+    end
 end 
 
 %end

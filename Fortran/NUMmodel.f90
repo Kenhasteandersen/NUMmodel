@@ -882,7 +882,8 @@ contains
     !
     ! Get primary production only from unicellular spectra:
     !
-    conversion = 365.*1d-6*1000. ! Convert to gC/yr/m3
+    !conversion = 365.*1d-6*1000. ! Convert to gC/yr/m3
+    conversion = 1d-3*1000. ! Convert to mgC/d/m3
     do i = 1, nGroups
        select type (spec => group(i)%spec)
           class is (spectrumUnicellular)
@@ -903,7 +904,9 @@ contains
     !
     call getMass(m, mDelta )
     ESD = 10000. * 1.5 * (m*1d-6)**onethird
-    conversion = 1d-6*1000 ! Convert to gC/m3
+    !conversion = 1d-6*1000 ! Convert to gC/m3
+    conversion = 1d-3*1000 ! Convert to mgC/m3
+
     do i = idxB, nGrid
        if (ESD(i) .le. 2.) then
           Bpico = Bpico + conversion*u(i)
@@ -921,7 +924,8 @@ contains
     ! HTL production:
     !  
     do i = 1, nGroups
-       ProdHTL = ProdHTL + 365*conversion* &
+       !ProdHTL = ProdHTL + 365*conversion* &
+        ProdHTL = ProdHTL + conversion* &
           sum(group(i)%spec%mortHTL*u( ixStart(i):ixEnd(i) ))
     end do
 

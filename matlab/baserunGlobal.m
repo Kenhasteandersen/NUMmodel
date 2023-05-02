@@ -20,7 +20,8 @@ if (nargin==0)
     n = 10;
     nCopepods = 10;
     nPOM = 10;
-    p = setupGeneralistsSimpleOnly(10, true); % Use 10 size groups and parallel execution
+%     p = setupGeneralistsSimpleOnly(10, true); % Use 10 size groups and parallel execution
+    p=setupNUMmodel(true);
     p = parametersGlobal(p); % Use standard low-res model
     %p = parametersGlobal(10,2); % Use MITgcm_ECCO
     p.tEnd = 365;
@@ -43,8 +44,8 @@ sim.B(sim.B<0)=0; % Get rid of negative biomasses
 %
 % Plots:
 %
-disp('Plotting')
- plotSimulation(sim)
+% disp('Plotting')
+%  plotSimulation(sim)
 
 checkConservation(sim);
 %
