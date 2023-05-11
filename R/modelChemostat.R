@@ -212,10 +212,10 @@ simulateChemostatEuler = function(p=parametersChemostat(), bLosses=TRUE) {
 
 simulateChemostat = function(p=parametersChemostat(), 
                              useC=FALSE, useF=TRUE,
-                             sSetup="GeneralistsOnly") {
+                             sSetup="GeneralistsSimpleOnly") {
   
   # Get the version of sundialr:
-  pkg = installed.packages(fields = "Built")
+  #pkg = installed.packages(fields = "Built")
   
   # if (useC) {
   #   # Load library
@@ -249,7 +249,7 @@ simulateChemostat = function(p=parametersChemostat(),
     loadNUMmodel()
     # Choose setup:
     if (sSetup=="GeneralistsOnly") { 
-      dummy = .Fortran("f_setupgeneralistsonly", as.integer(p$n))
+      dummy = .Fortran("f_setupgeneralistssimpleonly", as.integer(p$n))
       dummy = .Fortran("f_sethtl", as.double(p$mHTL), as.double(p$mortHTL), 
                        as.logical(FALSE), as.logical(FALSE))
     } 
