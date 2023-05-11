@@ -139,9 +139,8 @@ contains
     b = epsilonR * this%g(this%n) ! Birth rate
     ! Production of POM:
     this%jPOM = &
-          (1-epsilonF)*this%JF/(this%m * epsilonF) & ! Unassimilated food
-        + this%mortStarve*u                          ! Copepods dead from starvation
-    ! From unassimilated feeding (fecal pellets)
+          (1-epsilonF)*this%JF/(this%m * epsilonF) & ! Unassimilated food (fecal pellets)
+        + this%mortStarve                            ! Copepods dead from starvation
     this%jPOM(this%n) = this%jPOM(this%n) + (1.d0-epsilonR)*this%g(this%n) ! Lost reproductive flux
   
     !

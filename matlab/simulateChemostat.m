@@ -122,6 +122,14 @@ sim.bUnicellularloss = options.bUnicellularloss;
             % Chemostat dynamics for nutrients and unicellulars:
             %
             dudt(ix) = dudt(ix) + p.d(t_int)*(uDeep(ix)-u(ix)');
+            %
+            % Losses of POM:
+            %
+            if ~sum(ismember(p.typeGroups,100))
+                ixPOM = p.ixStart(p.ixPOM):p.ixEnd(p.ixPOM);
+                dudt(ixPOM) = dudt(ixPOM) - p.velocity(ixPOM).*u(ixPOM);
+            end
+            %
         end
         %
         % Sinking of POM:

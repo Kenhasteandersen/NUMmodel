@@ -138,17 +138,17 @@ contains
     this%jCloss = 0.d0
   end subroutine initSpectrum
 
+  !
+  ! Set up a grid for the size groups
+  ! The minimum size corresponds to the lower size of the 
+  ! first grid cell and the maxmimum size corresponds to
+  ! the upper size of the last grid cell
+  !
   subroutine calcGrid(this, mMin, mMax)
     class(typeSpectrum) :: this
     real(dp), intent(in):: mMin, mMax
     integer:: i
     real(dp):: x, deltax
-  !
-    ! Set up a grid given minimum and maximum sizes
-    ! The minimum size corresponds to the lower size of the 
-    ! first grid cell and the maxmimum size corresponds to
-    ! the upper size of the last grid cell
-    !
     
   deltax = (log(mMax)-log(mMin)) / this%n
   do i=1, this%n

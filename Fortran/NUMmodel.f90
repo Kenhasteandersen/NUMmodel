@@ -1031,7 +1031,15 @@ contains
         jMax( i1:i2 ) = fTemp2 * spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
-        f( i1:i2 ) = group(iGroup)%spec%f 
+        f( i1:i2 ) = group(iGroup)%spec%f
+      class is (spectrumMulticellular)
+        jN( i1:i2 ) = 0
+        jDOC( i1:i2 ) = 0
+        jL( i1:i2 ) = 0
+        jMax( i1:i2 ) = 0
+        jLossPassive( i1:i2 ) = 0
+        jLreal( i1:i2 ) = 0
+        f( i1:i2 ) = 0
       end select
 
       select type (spectrum => group(iGroup)%spec)

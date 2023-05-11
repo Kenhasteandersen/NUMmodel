@@ -1,5 +1,5 @@
 %
-% Search for a parameter value in the namelist
+% Search for a parameter value in a namelist file
 %
 function [parval] = search_namelist(filename,namelist,parameter)
 

@@ -13,8 +13,8 @@ function Nbalance = checkBalanceDerivative(sim)
 %
 % Constants:
 %
-fracHTL_to_N = 0.5;
-rhoCN = 5.68;
+fracHTL_to_N = search_namelist('../input/input.nlm','general','fracHTL_to_N');
+rhoCN = search_namelist('../input/input.nlm','general','rhoCN');
 %
 % Extract u, dudt, and rates from the last time step:
 %
@@ -34,12 +34,11 @@ B = u(p.idxB:end);
 if ~sum(ismember(p.typeGroups,100))
     % Losses from HTL:
     lossHTL = sum((1-fracHTL_to_N)*rates.mortHTL.*B')/rhoCN;
-    % Losses from POM:
-    %loss2 = sum(rates.mort2*(1-remin2).*B')/rhoCN;
     lossPOM = sum(rates.jPOM.*B') / rhoCN;
 else
-    ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
-    loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);
+    lossHTL = 0;
+    ixPOM = p.ixStart(p.ixPOM):p.ixEnd(p.ixPOM);
+    lossPOM = p.velocity(ixPOM).*u(ixPOM)/rhoCN;
 end
 
-Nbalance = dudt(p.idxN) + sum(dudt(p.idxB:end))/rhoCN + lossHTL + lossPOM;% + lossR;
+Nbalance = dudt(p.idxN) + sum(dudt(p.idxB:end))/rhoCN + lossHTL + lossPOM;

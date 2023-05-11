@@ -228,7 +228,7 @@ end subroutine calcRatesGeneralistsSimple
            + ((-this%JN(i) &
            +  this%JlossPassive(i) &
            +  this%JNlossLiebig(i) &
-           +  this%JCloss_feeding(i))/this%m(i) &
+           +  this%JCloss_feeding(i))/this%m(i) & ! All feeding losses are reminineralized
            +  remin2*this%mort2(i) & 
            !+ reminHTL*this%mortHTL(i)& ! Now done in NUMmodel.f90
            ) * u(i)/rhoCN
