@@ -360,6 +360,7 @@ getFrates = function(p) {
                    jSi = vector(length=nGrid, mode="numeric"),
                    jF = vector(length=nGrid, mode="numeric"),
                    jFreal = vector(length=nGrid, mode="numeric"),
+                   f = vector(length=nGrid, mode="numeric"),
                    jTot = vector(length=nGrid, mode="numeric"),
                    jMax = vector(length=nGrid, mode="numeric"),
                    jFmax = vector(length=nGrid, mode="numeric"),
