@@ -7,6 +7,7 @@ switch sim.p.nameModel
     
     case 'chemostat'
         figure(1)
+        clf
         plotGroupsTime(sim);
 
         figure(2)
