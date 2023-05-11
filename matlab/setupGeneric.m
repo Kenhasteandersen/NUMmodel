@@ -18,9 +18,7 @@ if bParallel
     end
 end
 
-p.idxN = 1;
-p.idxDOC = 2;
-p.idxB = 3; % We have two nutrient groups so biomass groups starts at index 3.
+p = setupNutrients_N_DOC;
 
 p.n = 2;
 % Generalists:

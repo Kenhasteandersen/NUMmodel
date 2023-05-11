@@ -13,7 +13,7 @@ switch sim.p.nameModel
         clf
         plotSizespectrum(sim);
 
-        if ~isnan(sim.p.seasonalOptions.lat_lon) || sim.p.seasonalOptions.seasonalAmplitude ~= 0
+        if ~any(isnan(sim.p.seasonalOptions.lat_lon)) || sim.p.seasonalOptions.seasonalAmplitude ~= 0
             figure(3)
             plotSizespectrumTime(sim)
         end
