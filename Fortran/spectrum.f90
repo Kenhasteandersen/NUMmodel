@@ -39,7 +39,32 @@ module spectrum
      procedure :: calcFeeding
      procedure :: printRates => printRatesSpectrum
      procedure :: printRatesSpectrum
+     procedure(getNbalanceInterface), deferred :: getNbalance
+     procedure(getCbalanceInterface), deferred :: getCbalance
   end type typeSpectrum
+
+interface
+  !
+  ! Functions to determine whether the N and DOC balances are calculated correct 
+  !
+  function getNbalanceInterface(this, u, dudt) result(Nbalance)
+    use globals
+    import typeSpectrum
+    class(typeSpectrum), intent(in) :: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+    real(dp) :: Nbalance
+  end function getNbalanceInterface
+    
+  function getCbalanceInterface(this, u, dudt) result(Cbalance)
+    use globals
+    import typeSpectrum
+    class(typeSpectrum), intent(in) :: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+    real(dp) :: Cbalance
+  end function getCbalanceInterface
+
+end interface
+
   ! ------------------------------------------------
   ! Abstract class for all unicellular spectra:
   !
@@ -64,6 +89,7 @@ module spectrum
     procedure :: getProdNet
     procedure :: getProdBact => getProdBactUnicellular
   end type spectrumUnicellular
+
   ! ------------------------------------------------
   ! Abstact class for all multicellular spectra:
   ! 
@@ -254,7 +280,6 @@ end subroutine calcGrid
                    (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
     end do
   end function getProdNet
-
   !
   ! Returns the net bacterial production calculated as the total amount of DOC
   ! taken up minus the respiration. Units: mugC/day/m3

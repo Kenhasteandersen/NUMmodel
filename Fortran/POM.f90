@@ -22,6 +22,8 @@ module POM
       procedure, pass :: initPOM
       procedure :: calcDerivativesPOM
       procedure :: printRates => printRatesPOM
+      procedure :: getNbalance
+      procedure :: getCbalance
     end type spectrumPOM
    
     public initPOM, spectrumPOM, calcDerivativesPOM, printRatesPOM
@@ -60,6 +62,22 @@ module POM
     dNdt = dNdt + fTemp2*this%remin*sum(u)/rhoCN
     dDOCdt = dDOCdt + fTemp2*this%remin*sum(u)
   end subroutine calcDerivativesPOM
+
+  function getNbalance(this, u, dudt) result(Nbalance)
+    real(dp):: Nbalance
+    class(spectrumPOM), intent(in):: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Nbalance = 0.d0
+  end function getNbalance
+
+  function getCbalance(this, u, dudt) result(Cbalance)
+    real(dp):: Cbalance
+    class(spectrumPOM), intent(in):: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Cbalance = 0.d0
+  end function getCbalance
 
   subroutine printRatesPOM(this)
     class(spectrumPOM), intent(in):: this

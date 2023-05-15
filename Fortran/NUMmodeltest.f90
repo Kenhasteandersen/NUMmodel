@@ -39,8 +39,10 @@ program NUMmodeltest
   !call setupDiatoms_simpleOnly(10)
   !call setHTL(0.1d0, 0.1d0, .false., .false.)
   !call setupGeneralistsOnly(5)
+  call setupGeneralistsDiatoms(10)
+  !call setupGeneralistsDiatoms_simple(10)
   !call setupGeneralistsPOM(10,5)
-  call setupNUMmodel(2,2,1, (/1.d0 /), (/1.d0/) )
+  !call setupNUMmodel(2,2,1, (/1.d0 /), (/1.d0/) )
   !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
 
   allocate(u0(nGrid))
@@ -60,8 +62,8 @@ program NUMmodeltest
   !                      u  ,  L  ,   T  ,   dt , dudt
   
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
-  call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
-  call printRates()
+  !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
+  !call printRates()
 
   !select type (spec => group(1)%spec)
   !    type is (spectrumGeneralists)
@@ -70,13 +72,11 @@ program NUMmodeltest
   !end select
   
   
-  call calcDerivatives(u00, 100.d0, 10.d0, 0.1d0, dudt)
-  !write(*,*) u00
+  call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
+  write(*,*) dudt
   !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
   !write(*,*) 'nbutrients',nNutrients
-
-
 
   ProdGross = 0
   ProdNet = 0
@@ -106,11 +106,11 @@ program NUMmodeltest
     call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
     write(*,*) 'Nbalance:', Nbalance
     write(*,*) 'Cbalance:', Cbalance
-    !write(*,*) 'Sibalance:', Sibalance
+    write(*,*) 'Sibalance:', Sibalance
 
-do i = 5,9
-   write(*,*) i, theta(i+3,6:9)
-end do
+!do i = 5,9
+!   write(*,*) i, theta(i+3,6:9)
+!end do
 
   end program NUMmodeltest
  

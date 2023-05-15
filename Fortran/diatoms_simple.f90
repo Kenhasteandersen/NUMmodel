@@ -64,10 +64,13 @@ module diatoms_simple
       procedure :: calcRates => calcRatesDiatoms_simple
       procedure :: calcDerivativesDiatoms_simple
       procedure :: printRates => printRatesDiatoms_simple
+      procedure :: getNbalance
+      procedure :: getCbalance
+      procedure :: getSiBalance
     end type spectrumDiatoms_simple
 
     public spectrumDiatoms_simple, initDiatoms_simple, calcRatesDiatoms_simple
-    public calcDerivativesDiatoms_simple, printRatesDiatoms_simple
+    public calcDerivativesDiatoms_simple, printRatesDiatoms_simple, getNbalance, getCbalance, getSiBalance
   contains
       
      subroutine read_namelist()
@@ -194,8 +197,36 @@ module diatoms_simple
 
      end do
    end subroutine calcDerivativesDiatoms_simple
-     
-   subroutine printRatesDiatoms_simple(this)
+
+   function getNbalance(this, u, dudt) result(Nbalance)
+    real(dp):: Nbalance
+    class(spectrumDiatoms_simple), intent(in):: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Nbalance = sum( dudt &
+    + (1-fracHTL_to_N)*this%mortHTL*u &
+    + (1-remin2)*this%mort2*u)/rhoCN ! full N remineralization of viral mortality
+  end function getNbalance
+
+  function getCbalance(this, u, dudt) result(Cbalance)
+    real(dp):: Cbalance
+    class(spectrumDiatoms_simple), intent(in):: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Cbalance = sum( dudt &
+    + (1-fracHTL_to_N)*this%mortHTL*u &
+    + (1-remin2)*this%mort2*u) ! full N remineralization of viral mortality
+  end function getCbalance
+   
+  function getSiBalance(this, u, dudt) result(SiBalance)
+    real(dp):: SiBalance
+    class(spectrumDiatoms_simple), intent(in):: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    SiBalance = -1.
+  end function getSiBalance
+
+  subroutine printRatesDiatoms_simple(this)
      class(spectrumDiatoms_simple), intent(in):: this
 
      write(*,*) "Diatoms_simple with ", this%n, " size classes:"

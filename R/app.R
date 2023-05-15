@@ -21,13 +21,13 @@ bUseF = TRUE
 # ===================================================
 
 uiChemostat <- fluidPage(
-  # tags$head(
-  #   # Add google analytics tracking:
-  #   includeHTML(("googleanalytics.html")),
-  #   # Make rules widers:
-  #   tags$style(HTML("hr {border-top: 1px solid #000000;}"))
-  # )
-  # ,
+  tags$head(
+     # Add google analytics tracking:
+     includeHTML(("analytics.html")),
+     # Make rules widers:
+     tags$style(HTML("hr {border-top: 1px solid #000000;}"))
+  )
+  ,
   h1('Size-based plankton simulator'),
   p('Simulate a plankton ecosystem in the upper part of a watercolumn. 
    Cell size is the only trait characterizing each plankton group.
@@ -41,8 +41,9 @@ uiChemostat <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       selectInput("setup", "Setup:",
-                  c("Unicellular" = "GeneralistsOnly",
-                    "Uni+multicellular" = "Generic"))
+                  c("Unicellular (simple)" = "GeneralistsSimpleOnly",
+                    "Unicellular" = "GeneralistsOnly"))
+                    #"Uni+multicellular" = "Generic"))
       ,
       sliderInput("L",
                   "Light (PAR; uE/m2/s)",
