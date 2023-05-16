@@ -988,7 +988,8 @@ contains
          Cbalance = Cbalance + POMloss
       end if
       !
-      ! Deal with silicate balance. Clunky
+      ! Deal with silicate balance. Clunky and does not work when copepods are present (does not account for feeding losses)
+      !
       select type ( spec => group(iGroup)%spec )
          type is (spectrumDiatoms)
             Sibalance = Sibalance + dudt(idxSi) &  
@@ -996,14 +997,13 @@ contains
                   u(ixStart(iGroup):ixEnd(iGroup) ), &
                   dudt( ixStart(iGroup):ixEnd(iGroup) )) 
 
-            !Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4d0 ! rhoCSi is hard-coded here
             Sibalance = SiBalance + HTLloss / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
             if (idxPOM .eq. 0) then
                Sibalance = SiBalance + POMloss / 3.4d0 ! rhoCSi is hard-coded here
             end if
             
          type is (spectrumDiatoms_simple)
-         ! NOT IMPLEMENTED
+           ! NOT IMPLEMENTED
             Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4d0 ! rhoCSi is hard-coded here
 
       end select
@@ -1018,9 +1018,9 @@ contains
 
   end subroutine getBalance
    
-!   ! ---------------------------------------------------
-!   ! Returns the rates calculated from last call to calcDerivatives
-!   ! ---------------------------------------------------
+  ! ---------------------------------------------------
+  ! Returns the rates calculated from last call to calcDerivatives
+  ! ---------------------------------------------------
   subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal, f,&
     jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
     jNloss,jLreal, jPOM, &
