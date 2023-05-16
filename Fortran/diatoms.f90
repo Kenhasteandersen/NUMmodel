@@ -65,13 +65,13 @@ module diatoms
        procedure :: calcRates => calcRatesDiatoms
        procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
-       procedure :: getNbalance
+  !     procedure :: getNbalance
        procedure :: getCbalance
        procedure :: getSibalance
      end type spectrumDiatoms
 
      public  initDiatoms, spectrumDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
-     public printRatesDiatoms, getNbalance, getCbalance, getSiBalance
+     public printRatesDiatoms, getCbalance, getSiBalance
 
    contains
        
@@ -370,13 +370,13 @@ module diatoms
       write(*,99) "jResptot:", this%Jresptot / this%m
     end subroutine printRatesDiatoms
 
-    function getNbalance(this, u, dudt) result(Nbalance)
-      real(dp):: Nbalance
-      class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: u(this%n), dudt(this%n)
+    ! function getNbalance(this, u, dudt) result(Nbalance)
+    !   real(dp):: Nbalance
+    !   class(spectrumDiatoms), intent(in):: this
+    !   real(dp), intent(in):: u(this%n), dudt(this%n)
   
-      Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
-    end function getNbalance
+    !   Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
+    ! end function getNbalance
 
     function getCbalance(this, u, dudt) result(Cbalance)
       real(dp):: Cbalance

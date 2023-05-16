@@ -55,7 +55,7 @@
 !
 ! Phagotrophy
 !
-      epsilonF = 0.8                ! Food assimilation efficiency [-]
+      epsilonF = 1.0                ! Food assimilation efficiency [-]
       alphaF = 0.018                ! Clearance rate [L/d/ug C]
       cF = 30.                      ! Max phagotrophy coefficient [um/day]
       beta = 500.d0                 ! Preferred predator-prey mass ratio
@@ -90,24 +90,24 @@
 ! Light uptake
 !
       epsilonL = 0.8                ! Light uptake efficiency []
-      alphaL = 0.3                  ! Scaling factor for light [unit]
+      alphaL = 0.3                  ! Scaling factor for light [-]
       rLstar = 7.5                  ! Description [unit]
       bL = 0.08                     ! Cost of light harvesting [mugC/mugC]
 !
 ! Dissolved nutrient uptake:
       alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
-      rNstar = 0.4                   ! Description [mum]
-      bN = 0.3                     ! cost of N uptake [mugC/mugN]
-      bDOC = 0.3                   ! cost of DOC uptake [mugC/mugC]
+      rNstar = 0.4                  ! Description [mum]
+      bN = 0.3                      ! cost of N uptake [mugC/mugN]
+      bDOC = 0.3                    ! cost of DOC uptake [mugC/mugC]
 !
 ! Phagotrophy
 !
-      epsilonF = 0.8                ! Food Assimilation efficiency [unit]
+      epsilonF = 0.8                ! Food assimilation efficiency [-]
       alphaF = 0.018                ! Food affinity scaling factor [L mug C-1 d-1]
       cF = 30.
       beta = 500.d0
       sigma = 1.3d0
-      bF = 0.3                     ! Cost of food uptake [mugC/mugC]
+      bF = 0.3                      ! Cost of food uptake [mugC/mugC]
 !
 ! Metabolism
 !

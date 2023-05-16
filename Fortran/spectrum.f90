@@ -39,21 +39,22 @@ module spectrum
      procedure :: calcFeeding
      procedure :: printRates => printRatesSpectrum
      procedure :: printRatesSpectrum
-     procedure(getNbalanceInterface), deferred :: getNbalance
+     procedure :: getNbalance => getNbalanceSpectrum
+     !procedure(getNbalanceInterface), deferred :: getNbalance
      procedure(getCbalanceInterface), deferred :: getCbalance
   end type typeSpectrum
 
-interface
-  !
-  ! Functions to determine whether the N and DOC balances are calculated correct 
-  !
-  function getNbalanceInterface(this, u, dudt) result(Nbalance)
-    use globals
-    import typeSpectrum
-    class(typeSpectrum), intent(in) :: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-    real(dp) :: Nbalance
-  end function getNbalanceInterface
+ interface
+!   !
+!   ! Functions to determine whether the N and DOC balances are calculated correct 
+!   !
+!   function getNbalanceInterface(this, u, dudt) result(Nbalance)
+!     use globals
+!     import typeSpectrum
+!     class(typeSpectrum), intent(in) :: this
+!     real(dp), intent(in):: u(this%n), dudt(this%n)
+!     real(dp) :: Nbalance
+!   end function getNbalanceInterface
     
   function getCbalanceInterface(this, u, dudt) result(Cbalance)
     use globals
@@ -97,6 +98,7 @@ end interface
   contains
     procedure :: initMulticellular
     procedure :: printRatesMulticellular
+    procedure :: getCbalance => getCbalanceMulticellular
   end type spectrumMulticellular
   ! ------------------------------------------------
   ! Type needed to make an array of spectra:
@@ -186,6 +188,14 @@ contains
   end do
   this%mort2constant = 0.004/log(this%m(2) / this%m(1))
 end subroutine calcGrid
+
+function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
+    real(dp):: Nbalance
+    class(typeSpectrum), intent(in):: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Nbalance = sum( dudt ) / rhoCN
+  end function getNbalanceSpectrum
 
   !
   ! Returns the amount of encounter and potentially assimilated food available for a group, JF
@@ -327,6 +337,15 @@ end subroutine calcGrid
     this%mort2constant = 0.004/log(this%m(2) / this%m(1))
   end subroutine initMulticellular
   
+  function getCbalanceMulticellular(this, u, dudt) result(Cbalance)
+    class(spectrumMulticellular), intent(in):: this
+    real(dp):: Cbalance
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Cbalance = sum( dudt & ! Change in standing stock of N
+          + this%Jresptot*u/this%m )  ! Losses from respiration
+  end function getCbalanceMulticellular
+
   subroutine printRatesMulticellular(this)
     class(spectrumMulticellular), intent(in) :: this
   end subroutine printRatesMulticellular

@@ -17,6 +17,7 @@ end
 %
 S = inputRead;
 fracHTL_to_N = S.input_general.fracHTL_to_N;
+fracHTL_to_POM = S.input_general.fracHTL_to_POM;
 rhoCN = S.input_general.rhoCN;
 remin2 = S.input_generalists.remin2; % NOTE: only valid for generalists
 
@@ -39,16 +40,23 @@ switch sim.p.nameModel
             end
             rates = getRates(p, u, mean(sim.L), sim.T );
             ixUni = findIxUnicellular(sim.p);
+            
             if ~sum(ismember(p.typeGroups,100))
+                % 
+                % If pom is not present:
+                %
                 B = squeeze(0.5*sum(sim.B(iTime:iTime+1,:))); % Interpolate B
                 % Losses from HTL:
                 lossHTL = lossHTL + ...
-                    sum((1-fracHTL_to_N)*rates.mortHTL.*B')/rhoCN*dt(iTime);
+                    sum((1-fracHTL_to_N-fracHTL_to_POM)*rates.mortHTL.*B')/rhoCN*dt(iTime);
                 % Losses to POM:
                 loss = loss + sum(rates.jPOM.*B')/rhoCN*dt(iTime);%sum(rates.mort2*(1-remin2).*B')/rhoCN*dt(iTime);
             else
+                %
+                % If POM is present:
+                %
                 ixPOM = p.ixStart(p.ixPOM):p.ixEnd(p.ixPOM);
-                loss = loss + p.velocity(ixPOM).*u(ixPOM)/rhoCN*dt(iTime);
+                loss = loss + p.velocity(ixPOM).*u(ixPOM)/p.widthProductiveLayer /rhoCN*dt(iTime);
     %ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
      %           loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);
             end
@@ -57,7 +65,7 @@ switch sim.p.nameModel
             loss = loss + sim.bUnicellularloss*p.d*sum(B(ixUni))/rhoCN * dt(iTime);
 
             % Gains from diffusion:
-            gains = gains + p.d*(p.uDeep-0.5*(sim.N(iTime)+sim.N(iTime+1))) * dt(iTime);
+            gains = gains + p.d*(p.uDeep(p.idxN)-0.5*(sim.N(iTime)+sim.N(iTime+1))) * dt(iTime);
         end
         %
         % Calculate total budget:

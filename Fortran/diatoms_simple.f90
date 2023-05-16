@@ -64,13 +64,12 @@ module diatoms_simple
       procedure :: calcRates => calcRatesDiatoms_simple
       procedure :: calcDerivativesDiatoms_simple
       procedure :: printRates => printRatesDiatoms_simple
-      procedure :: getNbalance
       procedure :: getCbalance
       procedure :: getSiBalance
     end type spectrumDiatoms_simple
 
     public spectrumDiatoms_simple, initDiatoms_simple, calcRatesDiatoms_simple
-    public calcDerivativesDiatoms_simple, printRatesDiatoms_simple, getNbalance, getCbalance, getSiBalance
+    public calcDerivativesDiatoms_simple, printRatesDiatoms_simple, getCbalance, getSiBalance
   contains
       
      subroutine read_namelist()
@@ -199,14 +198,6 @@ module diatoms_simple
 
      end do
    end subroutine calcDerivativesDiatoms_simple
-
-   function getNbalance(this, u, dudt) result(Nbalance)
-    real(dp):: Nbalance
-    class(spectrumDiatoms_simple), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
-  end function getNbalance
 
   function getCbalance(this, u, dudt) result(Cbalance)
     real(dp):: Cbalance

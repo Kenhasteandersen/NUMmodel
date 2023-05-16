@@ -829,7 +829,7 @@ contains
    N = 0
    N = u(idxN)
    do i = 1, nGrid
-      N = N + u(nNutrients+i)/5.68
+      N = N + u(nNutrients+i)/rhoCN
    end do
  end function calcN
  
