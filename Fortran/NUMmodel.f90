@@ -478,6 +478,7 @@ contains
          end if
       end if
     end do
+
     if (.not. boolQuadraticHTL) then
       !
       ! Standard HTL mortality that is constant over time:
@@ -499,7 +500,9 @@ contains
 
     bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
   end subroutine setHTL
-
+  !
+  ! Routine for the user to override the calculation of HTL mortality done by setHTL:
+  !
   subroutine setMortHTL(mortHTL)
    real(dp), intent(in):: mortHTL(nGrid-idxB+1)
    integer:: iGroup
