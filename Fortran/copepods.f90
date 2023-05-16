@@ -201,12 +201,7 @@ contains
     real(dp):: Nbalance
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Nbalance = & !(dNdt + sum( dudt & ! Change in standing stock of N
-          + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
-          - sum(dudt)/rhoCN & ! Accumulation of biomass
-          - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
-          - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
-          - sum(this%mort*u)/rhoCN  ! Mortality losses
+    Nbalance = sum(dudt)/rhoCN ! HTL losses
   end function getNbalance
 
   function getCbalance(this, u, dudt) result(Cbalance)
@@ -214,12 +209,9 @@ contains
     real(dp):: Cbalance
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = & !(dNdt + sum( dudt & ! Change in standing stock of N
-          + sum(this%JF/this%m*u) &  ! Gains from feeding
-          - sum(dudt) & ! Accumulation of biomass
-          - sum( this%Jresp*u/this%m ) & ! Losses from respiration
-          - (1-epsilonR)*this%g(this%n)*u(this%n)  & ! Losses from reproduction
-          - sum(this%mort*u)  ! Mortality losses
+    Cbalance = sum( dudt & ! Change in standing stock of N
+          + sum( this%Jresp*u/this%m ))  ! Losses from respiration
+         ! + (1-epsilonR)*this%g(this%n)*u(this%n)   ! Losses from reproduction
    end function getCbalance
 
 end module copepods

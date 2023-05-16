@@ -187,6 +187,9 @@ contains
   this%mort2constant = 0.004/log(this%m(2) / this%m(1))
 end subroutine calcGrid
 
+  !
+  ! Returns the amount of encounter and potentially assimilated food available for a group, JF
+  !
   subroutine calcFeeding(this, F)
     class (typeSpectrum), intent(inout):: this
     real(dp), intent(in):: F(this%n)

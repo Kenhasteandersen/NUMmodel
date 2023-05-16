@@ -8,30 +8,25 @@ program NUMmodeltest
   integer:: i
   real(dp):: Nbalance,Cbalance, Sibalance
 
-  !call setupGeneric( (/0.1d0, 1.0d0 /) )
-  !call setHTL(0.0001d0, 1.d0, .true.)
+  !call setupNUMmodel( (/0.1d0, 1.0d0 /) )
 
   !call setupGeneralistsCopepod()
   !call setupGeneralistsOnly(10)
   !call setupGeneralistsSimpleOnly(10)
 
-  !call setupGeneralistsOnly_csp()
- ! call setupGeneralistsOnly_csp()
-  !call setupGeneralistsOnly_csp()
-  !call setupGeneralistsOnly_csp()
   !call parametersFinalize(0.d0, .false.)
   
   !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
-  !call setupGeneralistsOnly(10)
+  ! setupGeneralistsOnly(10)
   !call setupGenDiatCope(3,3,(/0.1d0, 1.0d0 /))
   !call setupGenDiatCope(3,5,1,(/0.1d0, 1.0d0 /))
    !               2 gens cop POM   mAdult     
-   !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /))
+   !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /), (/1.d0 /))
    !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /))
 
    !              gen-diat-cop      POM      mAdult    
-   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
+  !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
   !call setupGeneralistssimpleOnly(10)
   !call setupDiatoms_simpleOnly(10)
@@ -39,11 +34,14 @@ program NUMmodeltest
   !call setupDiatoms_simpleOnly(10)
   !call setHTL(0.1d0, 0.1d0, .false., .false.)
   !call setupGeneralistsOnly(5)
-  call setupGeneralistsDiatoms(10)
+  !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
   !call setupGeneralistsPOM(10,5)
-  !call setupNUMmodel(2,2,1, (/1.d0 /), (/1.d0/) )
+  call setupNUMmodel(2,2,1, (/1.d0 /), (/1.d0/) )
   !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
+  !call setupGeneric( (/0.1d0/) )
+
+  !call setHTL(0.0d0, 0.1d0, .true., .true.)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))

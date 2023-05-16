@@ -334,9 +334,8 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Nbalance = sum( dudt &
-   !+ (1-reminHTL)*this%mortHTL*u &
-    + (1-fracHTL_to_N)*this%mortHTL*u &
-    + (1-remin2)*this%mort2*u & ! full N remineralization of viral mortality
+    !+ (1-fracHTL_to_N)*this%mortHTL*u &
+    !+ (1-remin2)*this%mort2*u & ! full N remineralization of viral mortality
     + (1-reminF)*this%JCloss_feeding/this%m * u &
        )/rhoCN ! full N remineralization of feeding losses
   end function getNbalance
@@ -347,9 +346,8 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Cbalance = sum(dudt &
-    !+ (1-reminHTL)*this%mortHTL*u &
-    + this%mortHTL*u &
-    + (1-remin2)*this%mort2*u &
+    !+ this%mortHTL*u &
+    !+ (1-remin2)*this%mort2*u &
     - this%JLreal*u/this%m &
     - this%JCloss_photouptake*u/this%m & !saturation effect??
     + this%Jresptot*u/this%m & !plus uptake costs

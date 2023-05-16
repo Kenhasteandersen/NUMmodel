@@ -268,11 +268,7 @@ end subroutine printRatesGeneralistsSimple
     class(spectrumGeneralistsSimple), intent(in):: this
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Nbalance = sum( dudt & ! Change in standing stock of N
-    + (1-fracHTL_to_N)*this%mortHTL*u & ! HTL not remineralized
-    + (1-remin2)*this%mort2*u & ! Viral mortality not remineralized
-    !+ (1-reminF)*this%JCloss_feeding/this%m * u & ! Feeding losses not remineralized
-       )/rhoCN
+    Nbalance = sum( dudt )/rhoCN
   end function getNbalance
 
   function getCbalance(this, u, dudt) result(Cbalance)
@@ -281,8 +277,7 @@ end subroutine printRatesGeneralistsSimple
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Cbalance = sum(dudt &
-    + this%mortHTL*u &
-    + (1-remin2)*this%mort2*u &
+    !+ (1-remin2)*this%mort2*u &
     - this%JLreal*u/this%m &
     - this%JCloss_photouptake*u/this%m &
     + fTemp2*this%Jresp*u/this%m &

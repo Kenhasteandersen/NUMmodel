@@ -68,7 +68,7 @@ module POM
     class(spectrumPOM), intent(in):: this
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Nbalance = 0.d0
+    Nbalance = sum(dudt) / rhoCN
   end function getNbalance
 
   function getCbalance(this, u, dudt) result(Cbalance)
@@ -76,7 +76,7 @@ module POM
     class(spectrumPOM), intent(in):: this
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = 0.d0
+    Cbalance = sum(dudt)
   end function getCbalance
 
   subroutine printRatesPOM(this)

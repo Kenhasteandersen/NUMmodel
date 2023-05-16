@@ -303,7 +303,7 @@ module diatoms
        integer:: i
    
        this%mort2 = this%mort2constant*u
-       this%jPOM = 0*(1-remin2)*this%mort2 ! non-remineralized mort2 => POM
+       this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
        do i = 1, this%n
         ! mortloss = u(i)*(remin2*this%mort2(i) +reminHTL* this%mortHTL(i))
@@ -375,9 +375,8 @@ module diatoms
       class(spectrumDiatoms), intent(in):: this
       real(dp), intent(in):: u(this%n), dudt(this%n)
   
-      Nbalance = sum( dudt &
-      + (1-fracHTL_to_N)*this%mortHTL*u &
-      + (1-remin2)*this%mort2*u)/rhoCN ! full N remineralization of viral mortality
+      Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
+    !  + (1-remin2)*this%mort2*u
     end function getNbalance
 
     function getCbalance(this, u, dudt) result(Cbalance)
@@ -386,23 +385,22 @@ module diatoms
       real(dp), intent(in):: u(this%n), dudt(this%n)
   
       Cbalance = sum(dudt &
-      + this%mortHTL*u &
-      + (1-remin2)*this%mort2*u &
+     ! + (1-remin2)*this%mort2*u &
       - this%JLreal*u/this%m & ! ??
       - this%JCloss_photouptake*u/this%m &
       + this%Jresptot*u/this%m & !plus uptake costs
       ) 
     end function getCbalance
 
-    function getSibalance(this, Si, dSidt, u, dudt) result(Sibalance)
+    function getSibalance(this, u, dudt) result(Sibalance)
       real(dp):: Sibalance
       class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: Si,dSidt, u(this%n), dudt(this%n)
+      real(dp), intent(in):: u(this%n), dudt(this%n)
   
-      Sibalance = (dSidt + sum( dudt &
-      + this%mortHTL*u &
-      + (1-remin2)*this%mort2*u & ! full Si remineralization of viral mortality
-      )/rhoCSi)/Si 
+      Sibalance = sum( dudt )/rhoCSi !&
+      !+ this%mortHTL*u &
+      !+ (1-remin2)*this%mort2*u & ! full Si remineralization of viral mortality
+      !)/rhoCSi)/Si 
     end function getSibalance
   
     function getProdBactDiatoms(this, u) result(ProdBact)

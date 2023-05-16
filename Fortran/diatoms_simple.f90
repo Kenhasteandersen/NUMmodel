@@ -165,8 +165,10 @@ module diatoms_simple
       integer:: i
   
       this%mort2 = this%mort2constant*u
+      this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
+
       do i = 1, this%n
-        mortloss = u(i)*(remin2*this%mort2(i)) !+reminHTL*this%mortHTL(i))
+        mortloss = remin2 * this%mort2(i)*u(i) !+reminHTL*this%mortHTL(i))
         !
         ! Update nitrogen:
         !
@@ -203,9 +205,7 @@ module diatoms_simple
     class(spectrumDiatoms_simple), intent(in):: this
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Nbalance = sum( dudt &
-    + (1-fracHTL_to_N)*this%mortHTL*u &
-    + (1-remin2)*this%mort2*u)/rhoCN ! full N remineralization of viral mortality
+    Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
   end function getNbalance
 
   function getCbalance(this, u, dudt) result(Cbalance)
@@ -214,7 +214,6 @@ module diatoms_simple
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Cbalance = sum( dudt &
-    + (1-fracHTL_to_N)*this%mortHTL*u &
     + (1-remin2)*this%mort2*u) ! full N remineralization of viral mortality
   end function getCbalance
    

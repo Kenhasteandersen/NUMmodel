@@ -942,13 +942,19 @@ contains
    real(dp), intent(in):: u(nGrid), dudt(nGrid)
    real(dp), intent(out):: Nbalance, Cbalance, Sibalance
    integer:: iGroup
+   real(dp) :: HTLloss, POMloss, fracPOMlost
    
    Nbalance = dudt(idxN)
    Cbalance = dudt(idxDOC)
    SiBalance = 0.d0
 
+   if (idxPOM .ne. 0) then
+      fracPOMlost = fracHTL_to_POM
+   else
+      fracPOMlost = 0.d0
+   endif
+
    do iGroup = 1, nGroups
-   !iGroup = 1 ! Do it only for the first group:
       Nbalance = Nbalance + group(iGroup)%spec%getNbalance( &
          u(ixStart(iGroup):ixEnd(iGroup) ), &
          dudt( ixStart(iGroup):ixEnd(iGroup) ))
@@ -956,49 +962,35 @@ contains
          u(ixStart(iGroup):ixEnd(iGroup) ), &
          dudt( ixStart(iGroup):ixEnd(iGroup) ))
 
-
-
       select type ( spec => group(iGroup)%spec )
-      !type is (spectrumGeneralistsSimple)
-         !Nbalance = Nbalance + &
-         !            spec%getNbalanceGeneralistsSimple(u(idxN), dudt(idxN), &
-         !            u(ixStart(iGroup):ixEnd(iGroup) ), &
-         !            dudt( ixStart(iGroup):ixEnd(iGroup) ))
-        ! Cbalance = Cbalance + &
-        !             spec%getCbalanceGeneralistsSimple(u(idxDOC), dudt(idxDOC), &
-        !             u(ixStart(iGroup):ixEnd(iGroup) ), &
-        !             dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-      !type is (spectrumGeneralists)
-         !Nbalance = Nbalance + &
-         !            spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
-         !            u(ixStart(iGroup):ixEnd(iGroup) ), &
-         !            dudt( ixStart(iGroup):ixEnd(iGroup) ))
-         !Cbalance = Cbalance + &
-         !            spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
-         !            u(ixStart(iGroup):ixEnd(iGroup) ), &
-         !            dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-       !  write(*,*) 'Generalists:', Nbalance            
+   
       type is (spectrumDiatoms)
-          !  Nbalance = Nbalance + &
-          !          spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
-          !          u(ixStart(iGroup):ixEnd(iGroup) ), &
-          !          dudt( ixStart(iGroup):ixEnd(iGroup) ))
-          !  Cbalance = Cbalance + &
-          !          spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
-          !          u(ixStart(iGroup):ixEnd(iGroup) ), &
-          !          dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-            Sibalance = Sibalance + dudt(idxSi) &
-                    + spec%getSibalance(u(idxSi), dudt(idxSi), &
+ 
+         Sibalance = Sibalance + dudt(idxSi) &
+                    + spec%getSibalance(&
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
       type is (spectrumDiatoms_simple)
-      Sibalance = -Sibalance ! Not implemented, so returning a negative number
-      !type is (spectrumCopepod)
-           ! Nbalance = Nbalance + &
-           !         spec%getNbalanceCopepods(u(idxN), dudt(idxN), &
-           !         u(ixStart(iGroup):ixEnd(iGroup) ), &
-           !         dudt( ixStart(iGroup):ixEnd(iGroup) ))
-     end select
+         Sibalance = -Sibalance ! Not implemented, so returning a negative number
+      end select
+      !
+      ! Deal with HTL losses:
+      !
+      HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
+      Nbalance = Nbalance + (1-fracHTL_to_N-fracPOMlost) * HTLloss/rhoCN
+      Cbalance = Cbalance + (1-fracPOMlost) * HTLloss
+      Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4 ! rhoCSi is hard-coded here
+      !
+      ! If there is no POM, then POM is lost from the system:
+      !
+      if (idxPOM .eq. 0) then
+         POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
+         
+         Nbalance = Nbalance + POMloss / rhoCN
+         Cbalance = Cbalance + POMloss
+         Sibalance = SiBalance + POMloss / 3.4 ! rhoCSi is hard-coded here
+      end if
+   
    end do
    !
    ! Normalize by the concentrations:
