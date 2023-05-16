@@ -288,7 +288,6 @@ end subroutine calcRatesGeneralists
            +  this%JNlossLiebig(i) &     ! N leakage due to excess food
            +  reminF*this%JCloss_feeding(i))/this%m(i) & !reminF
            +  remin2*this%mort2(i) & 
-           !+ reminHTL*this%mortHTL(i) &
            ) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -299,13 +298,11 @@ end subroutine calcRatesGeneralists
            +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
            +   remin2*this%mort2(i) & 
-           !+  reminHTL*this%mortHTL(i) &
            ) * u(i)
       !
       ! Update the generalists:
       !
       dudt(i) = (this%Jtot(i)/this%m(i)  &
-           !- mort(i) &
            - this%mortpred(i) &
            - this%mort2(i) &
            - this%mortHTL(i))*u(i)
@@ -334,10 +331,8 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Nbalance = sum( dudt &
-    !+ (1-fracHTL_to_N)*this%mortHTL*u &
-    !+ (1-remin2)*this%mort2*u & ! full N remineralization of viral mortality
-    + (1-reminF)*this%JCloss_feeding/this%m * u &
-       )/rhoCN ! full N remineralization of feeding losses
+      + (1-reminF)*this%JCloss_feeding/this%m * u &
+        )/rhoCN ! full N remineralization of feeding losses
   end function getNbalance
 
   function getCbalance(this, u, dudt) result(Cbalance)
@@ -346,8 +341,6 @@ end subroutine printRatesGeneralists
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Cbalance = sum(dudt &
-    !+ this%mortHTL*u &
-    !+ (1-remin2)*this%mort2*u &
     - this%JLreal*u/this%m &
     - this%JCloss_photouptake*u/this%m & !saturation effect??
     + this%Jresptot*u/this%m & !plus uptake costs

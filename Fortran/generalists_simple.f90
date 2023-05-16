@@ -230,7 +230,6 @@ end subroutine calcRatesGeneralistsSimple
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) & ! All feeding losses are reminineralized
            +  remin2*this%mort2(i) & 
-           !+ reminHTL*this%mortHTL(i)& ! Now done in NUMmodel.f90
            ) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -242,13 +241,11 @@ end subroutine calcRatesGeneralistsSimple
            +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
            +   remin2*this%mort2(i) & 
-           !+  reminHTL*this%mortHTL(i)&  ! Now done in NUMmodel.f90
            ) * u(i)
       !
       ! Update the generalists:
       !
       dudt(i) = (this%Jtot(i)/this%m(i)  &
-           !- mort(i) &
            - this%mortpred(i) &
            - this%mort2(i) &
            - this%mortHTL(i))*u(i)
@@ -277,7 +274,6 @@ end subroutine printRatesGeneralistsSimple
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Cbalance = sum(dudt &
-    !+ (1-remin2)*this%mort2*u &
     - this%JLreal*u/this%m &
     - this%JCloss_photouptake*u/this%m &
     + fTemp2*this%Jresp*u/this%m &

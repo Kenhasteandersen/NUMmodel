@@ -162,8 +162,7 @@ contains
          - this%mort(this%n)*u(this%n); ! adult mortality
 
     dNdt = dNdt + sum( this%Jresp*u/this%m )/rhoCN  ! All respiration of carbon results in a corresponding
-                                    ! surplus of nutrients. This surplus (pee) is routed to nutrients
-                !+ (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  ! Should perhaps also go to DOC
+                                                   ! surplus of nutrients. This surplus (pee) is routed to nutrients
     !
     ! Check balance: (should be zero)
     !
@@ -211,7 +210,6 @@ contains
 
     Cbalance = sum( dudt & ! Change in standing stock of N
           + this%Jresp*u/this%m )  ! Losses from respiration
-         ! + (1-epsilonR)*this%g(this%n)*u(this%n)   ! Losses from reproduction
    end function getCbalance
 
 end module copepods

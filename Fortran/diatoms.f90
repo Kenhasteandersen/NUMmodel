@@ -376,7 +376,6 @@ module diatoms
       real(dp), intent(in):: u(this%n), dudt(this%n)
   
       Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
-    !  + (1-remin2)*this%mort2*u
     end function getNbalance
 
     function getCbalance(this, u, dudt) result(Cbalance)
@@ -385,10 +384,9 @@ module diatoms
       real(dp), intent(in):: u(this%n), dudt(this%n)
   
       Cbalance = sum(dudt &
-     ! + (1-remin2)*this%mort2*u &
-      - this%JLreal*u/this%m & ! ??
-      - this%JCloss_photouptake*u/this%m &
-      + this%Jresptot*u/this%m & !plus uptake costs
+      - this%JLreal*u/this%m & ! Carbon imported into the system by photosynthesis
+      - this%JCloss_photouptake*u/this%m & ! 
+      + this%Jresptot*u/this%m & ! Carbon lost to respiration
       ) 
     end function getCbalance
 
@@ -399,10 +397,6 @@ module diatoms
   
       Sibalance = sum( dudt & 
         +  this%mortpred*u )/rhoCSi  ! The silicate from consumed diatoms is considered lost
-
-      !+ this%mortHTL*u &
-      !+ (1-remin2)*this%mort2*u & ! full Si remineralization of viral mortality
-      !)/rhoCSi)/Si 
     end function getSibalance
   
     function getProdBactDiatoms(this, u) result(ProdBact)
