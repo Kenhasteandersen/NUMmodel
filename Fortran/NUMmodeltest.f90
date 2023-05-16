@@ -15,7 +15,7 @@ program NUMmodeltest
 
   !call parametersFinalize(0.d0, .false.)
   
-  !call setupGeneralistsDiatoms(10)
+  
   !call setupGeneralistsDiatoms_simple(10)
   !call setupGeneralistsOnly(10)
   !call setupGenDiatCope(3,3,(/0.1d0, 1.0d0 /))
@@ -35,8 +35,9 @@ program NUMmodeltest
   !call setupGeneralistsOnly(5)
   !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
-  call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
+  !call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
   !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
+  call setupGeneralistsDiatoms(10)
   !call setupGeneric( (/0.1d0/) )
 
   call setHTL(0.1d0, 0.1d0, .false., .false.)

@@ -22,7 +22,6 @@ module POM
       procedure, pass :: initPOM
       procedure :: calcDerivativesPOM
       procedure :: printRates => printRatesPOM
-      procedure :: getNbalance
       procedure :: getCbalance
     end type spectrumPOM
    
@@ -62,14 +61,6 @@ module POM
     dNdt = dNdt + fTemp2*this%remin*sum(u)/rhoCN
     dDOCdt = dDOCdt !+ fTemp2*this%remin*sum(u) ! remineralized carbon is respired, so lost
   end subroutine calcDerivativesPOM
-
-  function getNbalance(this, u, dudt) result(Nbalance)
-    real(dp):: Nbalance
-    class(spectrumPOM), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Nbalance = sum(dudt) / rhoCN
-  end function getNbalance
 
   function getCbalance(this, u, dudt) result(Cbalance)
     real(dp):: Cbalance

@@ -40,6 +40,7 @@ module spectrum
      procedure :: printRates => printRatesSpectrum
      procedure :: printRatesSpectrum
      procedure :: getNbalance => getNbalanceSpectrum
+     procedure :: getLosses => getLossesSpectrum
      !procedure(getNbalanceInterface), deferred :: getNbalance
      procedure(getCbalanceInterface), deferred :: getCbalance
   end type typeSpectrum
@@ -87,6 +88,7 @@ end interface
 
     procedure, pass :: initUnicellular
     procedure :: printRatesUnicellular
+    procedure :: getCbalance => getCbalanceUnicellular
     procedure :: getProdNet
     procedure :: getProdBact => getProdBactUnicellular
   end type spectrumUnicellular
@@ -197,6 +199,15 @@ function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
     Nbalance = sum( dudt ) / rhoCN
   end function getNbalanceSpectrum
 
+  subroutine getLossesSpectrum(this, u, Nloss, Closs, SiLoss)
+    class(typeSpectrum), intent(in):: this
+    real(dp), intent(in):: u(this%n)
+    real(dp), intent(out) :: Nloss, Closs, SiLoss
+
+    Nloss = 0.d0
+    Closs = sum( this%Jresptot * u / this%m )
+    SiLoss = 0.d0
+  end subroutine getLossesSpectrum
   !
   ! Returns the amount of encounter and potentially assimilated food available for a group, JF
   !
@@ -276,6 +287,17 @@ function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
     write(*,99) "jLossPass.", this%JlossPassive / this%m
   end subroutine printRatesUnicellular
 
+  function getCbalanceUnicellular(this, u, dudt) result(Cbalance)
+    real(dp):: Cbalance
+    class(spectrumUnicellular), intent(in):: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Cbalance = sum(dudt &
+    - this%JLreal*u/this%m &
+    - this%JCloss_photouptake*u/this%m &
+    + this%Jresptot*u/this%m &
+    )
+  end function getCbalanceUnicellular
   !
   ! Returns the net primary production calculated as the total amount of carbon fixed
   ! by photsynthesis minus the respiration. Units: mugC/day/m3

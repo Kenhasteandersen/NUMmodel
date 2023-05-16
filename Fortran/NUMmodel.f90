@@ -953,22 +953,16 @@ contains
    real(dp), intent(in):: u(nGrid), dudt(nGrid)
    real(dp), intent(out):: Nbalance, Cbalance, Sibalance
    integer:: iGroup
-   real(dp) :: HTLloss, POMloss, fracPOMlost
+   real(dp) :: HTLloss, POMloss
    
-   Nbalance = dudt(idxN)
+   Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN
    Cbalance = dudt(idxDOC)
    SiBalance = 0.d0
 
-   if (idxPOM .ne. 0) then
-      fracPOMlost = fracHTL_to_POM
-   else
-      fracPOMlost = 0.d0
-   endif
-
    do iGroup = 1, nGroups
-      Nbalance = Nbalance + group(iGroup)%spec%getNbalance( &
-         u(ixStart(iGroup):ixEnd(iGroup) ), &
-         dudt( ixStart(iGroup):ixEnd(iGroup) ))
+    !  Nbalance = Nbalance + group(iGroup)%spec%getNbalance( &
+    !     u(ixStart(iGroup):ixEnd(iGroup) ), &
+    !     dudt( ixStart(iGroup):ixEnd(iGroup) ))
       Cbalance = Cbalance + group(iGroup)%spec%getCbalance( &
          u(ixStart(iGroup):ixEnd(iGroup) ), &
          dudt( ixStart(iGroup):ixEnd(iGroup) ))
@@ -976,8 +970,8 @@ contains
       ! Deal with HTL losses:
       !
       HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
-      Nbalance = Nbalance + (1-fracHTL_to_N-fracPOMlost) * HTLloss/rhoCN
-      Cbalance = Cbalance + (1-fracPOMlost) * HTLloss
+      Nbalance = Nbalance + (1-fracHTL_to_N) * HTLloss/rhoCN
+      Cbalance = Cbalance + HTLloss
       !
       ! If there is no POM, then POM is lost from the system:
       !
@@ -1004,7 +998,7 @@ contains
             
          type is (spectrumDiatoms_simple)
            ! NOT IMPLEMENTED
-            Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4d0 ! rhoCSi is hard-coded here
+            Sibalance = SiBalance + HTLloss / 3.4d0 ! rhoCSi is hard-coded here
 
       end select
       
@@ -1016,8 +1010,37 @@ contains
    Cbalance = Cbalance / u(idxDOC)
    Sibalance = Sibalance / u(idxSi)
 
-  end subroutine getBalance
+   end subroutine getBalance
    
+   subroutine getNLosses(u, dudt, HTLlost, POMlost)
+     real(dp), intent(in):: u(nGrid), dudt(nGrid)
+     real(dp), intent(out):: HTLlost, POMlost
+     integer:: iGroup
+     real(dp) :: fracPOMlost
+
+      HTLlost = 0.d0
+      POMlost = 0.d0
+
+      if (idxPOM .ne. 0) then
+         fracPOMlost = fracHTL_to_POM
+      else
+         fracPOMlost = 0.d0
+      endif
+
+      do iGroup = 1, nGroups
+         HTLlost = HTLlost + (1-fracHTL_to_N-fracPOMlost) &
+           * sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) )) / rhoCN
+      end do
+
+      !
+      ! If there is no POM, then POM is lost from the system:
+      !
+      if (idxPOM .eq. 0) then
+         POMlost = POMlost + sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )/rhoCN
+      end if
+
+   end subroutine getNlosses
+
   ! ---------------------------------------------------
   ! Returns the rates calculated from last call to calcDerivatives
   ! ---------------------------------------------------

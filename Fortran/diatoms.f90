@@ -66,12 +66,12 @@ module diatoms
        procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
   !     procedure :: getNbalance
-       procedure :: getCbalance
+      ! procedure :: getCbalance
        procedure :: getSibalance
      end type spectrumDiatoms
 
      public  initDiatoms, spectrumDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
-     public printRatesDiatoms, getCbalance, getSiBalance
+     public printRatesDiatoms, getSiBalance
 
    contains
        
@@ -369,26 +369,6 @@ module diatoms
       write(*,99) "jSireal:", this%JSireal / this%m
       write(*,99) "jResptot:", this%Jresptot / this%m
     end subroutine printRatesDiatoms
-
-    ! function getNbalance(this, u, dudt) result(Nbalance)
-    !   real(dp):: Nbalance
-    !   class(spectrumDiatoms), intent(in):: this
-    !   real(dp), intent(in):: u(this%n), dudt(this%n)
-  
-    !   Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
-    ! end function getNbalance
-
-    function getCbalance(this, u, dudt) result(Cbalance)
-      real(dp):: Cbalance
-      class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: u(this%n), dudt(this%n)
-  
-      Cbalance = sum(dudt &
-      - this%JLreal*u/this%m & ! Carbon imported into the system by photosynthesis
-      - this%JCloss_photouptake*u/this%m & ! 
-      + this%Jresptot*u/this%m & ! Carbon lost to respiration
-      ) 
-    end function getCbalance
 
     function getSibalance(this, u, dudt) result(Sibalance)
       real(dp):: Sibalance

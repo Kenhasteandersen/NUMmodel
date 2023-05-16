@@ -268,8 +268,7 @@ end subroutine printRatesGeneralistsSimple
     Cbalance = sum(dudt &
     - this%JLreal*u/this%m &
     - this%JCloss_photouptake*u/this%m &
-    + fTemp2*this%Jresp*u/this%m &
-    + (1-reminF)*this%JCloss_feeding/this%m * u &
+    + this%Jresptot*u/this%m &
     )
   end function getCbalance
 
