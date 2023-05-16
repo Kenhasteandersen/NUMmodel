@@ -210,7 +210,7 @@ contains
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Cbalance = sum( dudt & ! Change in standing stock of N
-          + sum( this%Jresp*u/this%m ))  ! Losses from respiration
+          + this%Jresp*u/this%m )  ! Losses from respiration
          ! + (1-epsilonR)*this%g(this%n)*u(this%n)   ! Losses from reproduction
    end function getCbalance
 

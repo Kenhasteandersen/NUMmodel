@@ -50,7 +50,7 @@ program NUMmodeltest
   u00(idxDOC) = 10.d0
   u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 10 + 0.1*(i-2)
+     u00(i) = 10! + 0.1*(i-2)
   end do
   dudt = 0.d0
 

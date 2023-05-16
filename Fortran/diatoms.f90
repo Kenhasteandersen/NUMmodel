@@ -397,7 +397,9 @@ module diatoms
       class(spectrumDiatoms), intent(in):: this
       real(dp), intent(in):: u(this%n), dudt(this%n)
   
-      Sibalance = sum( dudt )/rhoCSi !&
+      Sibalance = sum( dudt & 
+        +  this%mortpred*u )/rhoCSi  ! The silicate from consumed diatoms is considered lost
+
       !+ this%mortHTL*u &
       !+ (1-remin2)*this%mort2*u & ! full Si remineralization of viral mortality
       !)/rhoCSi)/Si 

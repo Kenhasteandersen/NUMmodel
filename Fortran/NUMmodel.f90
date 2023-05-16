@@ -961,25 +961,12 @@ contains
       Cbalance = Cbalance + group(iGroup)%spec%getCbalance( &
          u(ixStart(iGroup):ixEnd(iGroup) ), &
          dudt( ixStart(iGroup):ixEnd(iGroup) ))
-
-      select type ( spec => group(iGroup)%spec )
-   
-      type is (spectrumDiatoms)
- 
-         Sibalance = Sibalance + dudt(idxSi) &
-                    + spec%getSibalance(&
-                    u(ixStart(iGroup):ixEnd(iGroup) ), &
-                    dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-      type is (spectrumDiatoms_simple)
-         Sibalance = -Sibalance ! Not implemented, so returning a negative number
-      end select
       !
       ! Deal with HTL losses:
       !
       HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
       Nbalance = Nbalance + (1-fracHTL_to_N-fracPOMlost) * HTLloss/rhoCN
       Cbalance = Cbalance + (1-fracPOMlost) * HTLloss
-      Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4 ! rhoCSi is hard-coded here
       !
       ! If there is no POM, then POM is lost from the system:
       !
@@ -988,9 +975,25 @@ contains
          
          Nbalance = Nbalance + POMloss / rhoCN
          Cbalance = Cbalance + POMloss
-         Sibalance = SiBalance + POMloss / 3.4 ! rhoCSi is hard-coded here
       end if
-   
+      !
+      ! Deal with silicate balance. Clunky
+      select type ( spec => group(iGroup)%spec )
+         type is (spectrumDiatoms)
+            Sibalance = Sibalance + dudt(idxSi) &  
+              + spec%getSibalance(&
+                  u(ixStart(iGroup):ixEnd(iGroup) ), &
+                  dudt( ixStart(iGroup):ixEnd(iGroup) )) 
+            Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4d0 ! rhoCSi is hard-coded here
+            if (idxPOM .eq. 0) then
+               Sibalance = SiBalance + POMloss / 3.4d0 ! rhoCSi is hard-coded here
+            end if
+         type is (spectrumDiatoms_simple)
+         ! NOT IMPLEMENTED
+            Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4d0 ! rhoCSi is hard-coded here
+
+      end select
+      
    end do
    !
    ! Normalize by the concentrations:

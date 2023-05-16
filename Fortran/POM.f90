@@ -60,7 +60,7 @@ module POM
 
     dudt = dudt - fTemp2*this%remin*u - this%mortpred*u
     dNdt = dNdt + fTemp2*this%remin*sum(u)/rhoCN
-    dDOCdt = dDOCdt + fTemp2*this%remin*sum(u)
+    dDOCdt = dDOCdt !+ fTemp2*this%remin*sum(u) ! remineralized carbon is respired, so lost
   end subroutine calcDerivativesPOM
 
   function getNbalance(this, u, dudt) result(Nbalance)
@@ -76,7 +76,7 @@ module POM
     class(spectrumPOM), intent(in):: this
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = sum(dudt)
+    Cbalance = sum(dudt + fTemp2*this%remin*sum(u))
   end function getCbalance
 
   subroutine printRatesPOM(this)
