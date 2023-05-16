@@ -942,6 +942,12 @@ contains
   ! Returns mass conservation calculated from last call to calcDerivatives.
   ! The numbers returned are the changes in N, DOC, and Si relative to the 
   ! concentrations of N, DOC, and Si, in units of 1/day
+  ! 
+  ! ISSUE:
+  ! The silicate lost in fecal pellets from eaten diatoms by multicellulars is lost.
+  ! We currently have no way of calculating that loss. Therefore the Si balance
+  ! is incorrect when multicellular organisms are present.
+  !
   ! ---------------------------------------------------
   subroutine getBalance(u, dudt, Nbalance,Cbalance,Sibalance)
    real(dp), intent(in):: u(nGrid), dudt(nGrid)
@@ -995,7 +1001,7 @@ contains
             if (idxPOM .eq. 0) then
                Sibalance = SiBalance + POMloss / 3.4d0 ! rhoCSi is hard-coded here
             end if
-
+            
          type is (spectrumDiatoms_simple)
          ! NOT IMPLEMENTED
             Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4d0 ! rhoCSi is hard-coded here
