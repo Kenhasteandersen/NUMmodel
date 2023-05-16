@@ -21,12 +21,12 @@ end
 field(isnan(field)) = 0;
 
 if length(size(field)==5) % Assume a spectrum
-    field = sum(field,4); % Total biomass in the group
+    field = sum(field,5); % Total biomass in the group
 end
 % Integrate over depth:
 dz = sim.dznom;
-field = squeeze( sum(field.*reshape(dz ,1,1,numel(dz)),3) / 1000); % g/m2
+field = squeeze( sum(field.*reshape(dz ,1,1,1,numel(dz)),4) / 1000); % g/m2
 
 if bAverageTime
-    field = mean(field,3);
+    field = mean(field,1);
 end

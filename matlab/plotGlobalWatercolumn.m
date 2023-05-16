@@ -27,7 +27,7 @@ tiledlayout(4,1,'TileSpacing','compact','padding','compact');
 %
 nexttile(1,[2,1])
 
-B = calcIntegrateGlobal(sim, sim.B(:,:,:,:,iTime));
+B = calcIntegrateGlobal(sim, sim.B(iTime,:,:,:,:));
 
 c = panelGlobal(sim.x, sim.y, ...
     log10(B(:,:,1)), ...

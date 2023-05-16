@@ -36,7 +36,8 @@ module copepods
     procedure, pass :: initCopepod
     procedure :: calcDerivativesCopepod
     procedure :: printRates => printRatesCopepod
-    procedure :: getNbalanceCopepods
+    procedure :: getNbalance
+    procedure :: getCbalance
   end type spectrumCopepod
   
   public active, passive, spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod
@@ -139,9 +140,8 @@ contains
     b = epsilonR * this%g(this%n) ! Birth rate
     ! Production of POM:
     this%jPOM = &
-          (1-epsilonF)*this%JF/(this%m * epsilonF) & ! Unassimilated food
-        + this%mortStarve*u                          ! Copepods dead from starvation
-    ! From unassimilated feeding (fecal pellets)
+          (1-epsilonF)*this%JF/(this%m * epsilonF) & ! Unassimilated food (fecal pellets)
+        + this%mortStarve                            ! Copepods dead from starvation
     this%jPOM(this%n) = this%jPOM(this%n) + (1.d0-epsilonR)*this%g(this%n) ! Lost reproductive flux
   
     !
@@ -196,10 +196,10 @@ contains
      write(*,99) "g:", this%g
   end subroutine printRatesCopepod
 
-  function getNbalanceCopepods(this, N, dNdt, u, dudt) result(Nbalance)
+  function getNbalance(this, u, dudt) result(Nbalance)
     class(spectrumCopepod), intent(in):: this
     real(dp):: Nbalance
-    real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
+    real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Nbalance = & !(dNdt + sum( dudt & ! Change in standing stock of N
           + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
@@ -207,6 +207,19 @@ contains
           - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
           - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
           - sum(this%mort*u)/rhoCN  ! Mortality losses
-  end function getNbalanceCopepods
+  end function getNbalance
+
+  function getCbalance(this, u, dudt) result(Cbalance)
+    class(spectrumCopepod), intent(in):: this
+    real(dp):: Cbalance
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Cbalance = & !(dNdt + sum( dudt & ! Change in standing stock of N
+          + sum(this%JF/this%m*u) &  ! Gains from feeding
+          - sum(dudt) & ! Accumulation of biomass
+          - sum( this%Jresp*u/this%m ) & ! Losses from respiration
+          - (1-epsilonR)*this%g(this%n)*u(this%n)  & ! Losses from reproduction
+          - sum(this%mort*u)  ! Mortality losses
+   end function getCbalance
 
 end module copepods

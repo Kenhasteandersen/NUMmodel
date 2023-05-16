@@ -126,7 +126,7 @@ sim.bUnicellularloss = options.bUnicellularloss;
         %
         % Sinking of POM:
         %
-        dudt(ixPOM) = dudt(ixPOM) - p.velocity(ixPOM).*u(ixPOM)';
+        dudt(ixPOM) = dudt(ixPOM) - p.velocity(ixPOM).*u(ixPOM)'/p.widthProductiveLayer;
         dudt = dudt';
     end
 end

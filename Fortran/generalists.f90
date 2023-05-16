@@ -72,13 +72,13 @@ module generalists
     procedure :: calcRates => calcRatesGeneralists
     procedure :: calcDerivativesGeneralists
     procedure :: printRates => printRatesGeneralists
-    procedure :: getNbalanceGeneralists
-    procedure :: getCbalanceGeneralists
-    procedure :: getProdBact => getProdBactGeneralists
+    procedure :: getNbalance
+    procedure :: getCbalance
+    procedure :: getProdBact => getProdBactGeneralists 
   end type spectrumGeneralists
  
   public initGeneralists, spectrumGeneralists, calcRatesGeneralists, calcDerivativesGeneralists
-  public printRatesGeneralists, getNbalanceGeneralists, getCbalanceGeneralists
+  public printRatesGeneralists, getNbalance, getCbalance
 
 contains
   subroutine read_namelist()
@@ -328,25 +328,25 @@ subroutine printRatesGeneralists(this)
   write(*,99) "deltaDOC:", this%dDOC
 end subroutine printRatesGeneralists
  
-  function getNbalanceGeneralists(this, N, dNdt, u, dudt) result(Nbalance)
+  function getNbalance(this, u, dudt) result(Nbalance)
     real(dp):: Nbalance
     class(spectrumGeneralists), intent(in):: this
-    real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
+    real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Nbalance = (dNdt + sum( dudt &
+    Nbalance = sum( dudt &
    !+ (1-reminHTL)*this%mortHTL*u &
     + (1-fracHTL_to_N)*this%mortHTL*u &
     + (1-remin2)*this%mort2*u & ! full N remineralization of viral mortality
     + (1-reminF)*this%JCloss_feeding/this%m * u &
-       )/rhoCN)/N ! full N remineralization of feeding losses
-  end function getNbalanceGeneralists 
+       )/rhoCN ! full N remineralization of feeding losses
+  end function getNbalance
 
-  function getCbalanceGeneralists(this, DOC, dDOCdt, u, dudt) result(Cbalance)
+  function getCbalance(this, u, dudt) result(Cbalance)
     real(dp):: Cbalance
     class(spectrumGeneralists), intent(in):: this
-    real(dp), intent(in):: DOC, dDOCdt, u(this%n), dudt(this%n)
+    real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = (dDOCdt + sum(dudt &
+    Cbalance = sum(dudt &
     !+ (1-reminHTL)*this%mortHTL*u &
     + this%mortHTL*u &
     + (1-remin2)*this%mort2*u &
@@ -354,9 +354,8 @@ end subroutine printRatesGeneralists
     - this%JCloss_photouptake*u/this%m & !saturation effect??
     + this%Jresptot*u/this%m & !plus uptake costs
     + (1-reminF)*this%JCloss_feeding/this%m * u &
-    )) / DOC
-  end function getCbalanceGeneralists 
-  
+    )
+  end function getCbalance
 
   function getProdBactGeneralists(this, u) result(ProdBact)
     real(dp):: ProdBact

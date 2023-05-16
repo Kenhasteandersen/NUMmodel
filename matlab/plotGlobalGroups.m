@@ -22,10 +22,10 @@ for i = 1:sim.p.nGroups
     nexttile
     % Extract the group:
     ix = (sim.p.ixStart(i):sim.p.ixEnd(i)) -sim.p.idxB+1;
-    B = calcIntegrateGlobal(sim, sim.B(:,:,:,ix,:), options.bAverageTime);
+    B = calcIntegrateGlobal(sim, sim.B(:,:,:,:,ix), options.bAverageTime);
     % Average over time:
     if ~options.bAverageTime
-        B = B(:,:,iTime);
+        B = B(iTime,:,:);
     end
     % Plot the group:
     c = panelGlobal(sim.x,sim.y, log10(B),[-1 2], ...

@@ -43,4 +43,4 @@ toc
 % Plot
 %
 plotSimulation(sim);
-% checkConservation(sim);
+checkConservation(sim);

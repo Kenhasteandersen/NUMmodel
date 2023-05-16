@@ -65,13 +65,13 @@ module diatoms
        procedure :: calcRates => calcRatesDiatoms
        procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
-       procedure :: getNbalanceDiatoms
-       procedure :: getCbalanceDiatoms
-       procedure :: getSibalanceDiatoms
+       procedure :: getNbalance
+       procedure :: getCbalance
+       procedure :: getSibalance
      end type spectrumDiatoms
 
      public  initDiatoms, spectrumDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
-     public printRatesDiatoms, getNbalanceDiatoms, getCbalanceDiatoms, getSiBalanceDiatoms
+     public printRatesDiatoms, getNbalance, getCbalance, getSiBalance
 
    contains
        
@@ -285,9 +285,9 @@ module diatoms
           !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
           !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
 
-         !write(*,*) 'Si budget', i,':',(this%JSi(i)-this%JlossPassive(i) - (this%JSi(i)-this%JlossPassive(i)-this%Jtot(i)) &
-         !- this%Jtot(i))/this%m(i)
-         this%f(i)=f
+          !write(*,*) 'Si budget', i,':',(this%JSi(i)-this%JlossPassive(i) - (this%JSi(i)-this%JlossPassive(i)-this%Jtot(i)) &
+          !- this%Jtot(i))/this%m(i)
+          this%f(i)=f
          !write(*,*) this%JCloss_photouptake(i), this%JLreal(i),dL(i)
         end do
         this%jN = this%jNreal  ! Needed to get the the actual uptakes out with "getRates"
@@ -368,23 +368,33 @@ module diatoms
       write(*,99) "jSi:", this%JSi / this%m
       write(*,99) "jSireal:", this%JSireal / this%m
       write(*,99) "jResptot:", this%Jresptot / this%m
-
-
-
     end subroutine printRatesDiatoms
 
-    function getNbalanceDiatoms(this, N, dNdt, u, dudt) result(Nbalance)
+    function getNbalance(this, u, dudt) result(Nbalance)
       real(dp):: Nbalance
       class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
+      real(dp), intent(in):: u(this%n), dudt(this%n)
   
-      Nbalance = (dNdt + sum( dudt &
+      Nbalance = sum( dudt &
       + (1-fracHTL_to_N)*this%mortHTL*u &
-      + (1-remin2)*this%mort2*u & ! full N remineralization of viral mortality
-         )/rhoCN)/N 
-    end function getNbalanceDiatoms 
+      + (1-remin2)*this%mort2*u)/rhoCN ! full N remineralization of viral mortality
+    end function getNbalance
 
-    function getSibalanceDiatoms(this, Si, dSidt, u, dudt) result(Sibalance)
+    function getCbalance(this, u, dudt) result(Cbalance)
+      real(dp):: Cbalance
+      class(spectrumDiatoms), intent(in):: this
+      real(dp), intent(in):: u(this%n), dudt(this%n)
+  
+      Cbalance = sum(dudt &
+      + this%mortHTL*u &
+      + (1-remin2)*this%mort2*u &
+      - this%JLreal*u/this%m & ! ??
+      - this%JCloss_photouptake*u/this%m &
+      + this%Jresptot*u/this%m & !plus uptake costs
+      ) 
+    end function getCbalance
+
+    function getSibalance(this, Si, dSidt, u, dudt) result(Sibalance)
       real(dp):: Sibalance
       class(spectrumDiatoms), intent(in):: this
       real(dp), intent(in):: Si,dSidt, u(this%n), dudt(this%n)
@@ -393,22 +403,7 @@ module diatoms
       + this%mortHTL*u &
       + (1-remin2)*this%mort2*u & ! full Si remineralization of viral mortality
       )/rhoCSi)/Si 
-    end function getSibalanceDiatoms 
-  
-    function getCbalanceDiatoms(this, DOC, dDOCdt, u, dudt) result(Cbalance)
-      real(dp):: Cbalance
-      class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: DOC, dDOCdt, u(this%n), dudt(this%n)
-  
-      Cbalance = (dDOCdt + sum(dudt &
-      + this%mortHTL*u &
-      + (1-remin2)*this%mort2*u &
-      - this%JLreal*u/this%m & ! ??
-      - this%JCloss_photouptake*u/this%m &
-      + this%Jresptot*u/this%m & !plus uptake costs
-      )) / DOC
-    end function getCbalanceDiatoms 
-    
+    end function getSibalance
   
     function getProdBactDiatoms(this, u) result(ProdBact)
       real(dp):: ProdBact

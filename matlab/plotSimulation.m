@@ -7,13 +7,14 @@ switch sim.p.nameModel
     
     case 'chemostat'
         figure(1)
+        clf
         plotGroupsTime(sim);
 
         figure(2)
         clf
         plotSizespectrum(sim);
 
-        if ~isnan(sim.p.seasonalOptions.lat_lon) || sim.p.seasonalOptions.seasonalAmplitude ~= 0
+        if ~any(isnan(sim.p.seasonalOptions.lat_lon)) || sim.p.seasonalOptions.seasonalAmplitude ~= 0
             figure(3)
             plotSizespectrumTime(sim)
         end

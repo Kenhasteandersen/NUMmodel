@@ -47,8 +47,10 @@ switch sim.p.nameModel
                 % Losses to POM:
                 loss = loss + sum(rates.jPOM.*B')/rhoCN*dt(iTime);%sum(rates.mort2*(1-remin2).*B')/rhoCN*dt(iTime);
             else
-                ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
-                loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);
+                ixPOM = p.ixStart(p.ixPOM):p.ixEnd(p.ixPOM);
+                loss = loss + p.velocity(ixPOM).*u(ixPOM)/rhoCN*dt(iTime);
+    %ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
+     %           loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);
             end
 
             % Losses from diffusion:

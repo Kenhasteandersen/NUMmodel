@@ -27,7 +27,7 @@ switch computer('arch')
         sLibname = 'libNUMmodel_matlab';
         sExtension = '.dylib';
     case {'glnx86','glnxa64'}
-        sLibname = 'libNUMmodel_linux_matlab';
+        sLibname = 'libNUMmodel_matlab';
         sExtension = '.so';
     case {'win32','win64'}
         sLibname = 'libNUMmodel_matlab';
@@ -41,6 +41,9 @@ end
 path = fileparts(mfilename('fullpath'));
 
 if bParallel
+    if ~exist("gcp")
+        error('Running parallel simulation requires that the matlab parallel toolbox is installed.\n');
+    end
     if isempty(gcp('nocreate'))
         parpool('AttachedFiles',...
             {strcat(path,'/../lib/',sLibname,sExtension),...

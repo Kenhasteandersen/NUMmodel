@@ -934,58 +934,79 @@ contains
   end subroutine getFunctions
 
   ! ---------------------------------------------------
-  ! Returns mass conservation calculated from last call to calcDerivatives
+  ! Returns mass conservation calculated from last call to calcDerivatives.
+  ! The numbers returned are the changes in N, DOC, and Si relative to the 
+  ! concentrations of N, DOC, and Si, in units of 1/day
   ! ---------------------------------------------------
   subroutine getBalance(u, dudt, Nbalance,Cbalance,Sibalance)
    real(dp), intent(in):: u(nGrid), dudt(nGrid)
    real(dp), intent(out):: Nbalance, Cbalance, Sibalance
    integer:: iGroup
    
-   Nbalance = 0.
-   Cbalance = 0.
-   SiBalance = 0.
+   Nbalance = dudt(idxN)
+   Cbalance = dudt(idxDOC)
+   SiBalance = 0.d0
 
    do iGroup = 1, nGroups
    !iGroup = 1 ! Do it only for the first group:
-   select type ( spec => group(iGroup)%spec )
-      type is (spectrumGeneralistsSimple)
-         Nbalance = Nbalance + &
-                     spec%getNbalanceGeneralistsSimple(u(idxN), dudt(idxN), &
-                     u(ixStart(iGroup):ixEnd(iGroup) ), &
-                     dudt( ixStart(iGroup):ixEnd(iGroup) ))
-         Cbalance = Cbalance + &
-                     spec%getCbalanceGeneralistsSimple(u(idxDOC), dudt(idxDOC), &
-                     u(ixStart(iGroup):ixEnd(iGroup) ), &
-                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-      type is (spectrumGeneralists)
-         Nbalance = Nbalance + &
-                     spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
-                     u(ixStart(iGroup):ixEnd(iGroup) ), &
-                     dudt( ixStart(iGroup):ixEnd(iGroup) ))
-         Cbalance = Cbalance + &
-                     spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
-                     u(ixStart(iGroup):ixEnd(iGroup) ), &
-                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
+      Nbalance = Nbalance + group(iGroup)%spec%getNbalance( &
+         u(ixStart(iGroup):ixEnd(iGroup) ), &
+         dudt( ixStart(iGroup):ixEnd(iGroup) ))
+      Cbalance = Cbalance + group(iGroup)%spec%getCbalance( &
+         u(ixStart(iGroup):ixEnd(iGroup) ), &
+         dudt( ixStart(iGroup):ixEnd(iGroup) ))
+
+
+
+      select type ( spec => group(iGroup)%spec )
+      !type is (spectrumGeneralistsSimple)
+         !Nbalance = Nbalance + &
+         !            spec%getNbalanceGeneralistsSimple(u(idxN), dudt(idxN), &
+         !            u(ixStart(iGroup):ixEnd(iGroup) ), &
+         !            dudt( ixStart(iGroup):ixEnd(iGroup) ))
+        ! Cbalance = Cbalance + &
+        !             spec%getCbalanceGeneralistsSimple(u(idxDOC), dudt(idxDOC), &
+        !             u(ixStart(iGroup):ixEnd(iGroup) ), &
+        !             dudt( ixStart(iGroup):ixEnd(iGroup) )) 
+      !type is (spectrumGeneralists)
+         !Nbalance = Nbalance + &
+         !            spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
+         !            u(ixStart(iGroup):ixEnd(iGroup) ), &
+         !            dudt( ixStart(iGroup):ixEnd(iGroup) ))
+         !Cbalance = Cbalance + &
+         !            spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
+         !            u(ixStart(iGroup):ixEnd(iGroup) ), &
+         !            dudt( ixStart(iGroup):ixEnd(iGroup) )) 
+       !  write(*,*) 'Generalists:', Nbalance            
       type is (spectrumDiatoms)
-            Nbalance = Nbalance + &
-                    spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
-                    u(ixStart(iGroup):ixEnd(iGroup) ), &
-                    dudt( ixStart(iGroup):ixEnd(iGroup) ))
-            Cbalance = Cbalance + &
-                    spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
+          !  Nbalance = Nbalance + &
+          !          spec%getNbalanceDiatoms(u(idxN), dudt(idxN), &
+          !          u(ixStart(iGroup):ixEnd(iGroup) ), &
+          !          dudt( ixStart(iGroup):ixEnd(iGroup) ))
+          !  Cbalance = Cbalance + &
+          !          spec%getCbalanceDiatoms(u(idxDOC), dudt(idxDOC), &
+          !          u(ixStart(iGroup):ixEnd(iGroup) ), &
+          !          dudt( ixStart(iGroup):ixEnd(iGroup) )) 
+            Sibalance = Sibalance + dudt(idxSi) &
+                    + spec%getSibalance(u(idxSi), dudt(idxSi), &
                     u(ixStart(iGroup):ixEnd(iGroup) ), &
                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-            Sibalance = Sibalance + &
-                    spec%getSibalanceDiatoms(u(idxSi), dudt(idxSi), &
-                    u(ixStart(iGroup):ixEnd(iGroup) ), &
-                    dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-      type is (spectrumCopepod)
-            Nbalance = Nbalance + &
-                    spec%getNbalanceCopepods(u(idxN), dudt(idxN), &
-                    u(ixStart(iGroup):ixEnd(iGroup) ), &
-                    dudt( ixStart(iGroup):ixEnd(iGroup) ))
+      type is (spectrumDiatoms_simple)
+      Sibalance = -Sibalance ! Not implemented, so returning a negative number
+      !type is (spectrumCopepod)
+           ! Nbalance = Nbalance + &
+           !         spec%getNbalanceCopepods(u(idxN), dudt(idxN), &
+           !         u(ixStart(iGroup):ixEnd(iGroup) ), &
+           !         dudt( ixStart(iGroup):ixEnd(iGroup) ))
      end select
    end do
+   !
+   ! Normalize by the concentrations:
+   !
+   Nbalance = Nbalance / u(idxN)
+   Cbalance = Cbalance / u(idxDOC)
+   Sibalance = Sibalance / u(idxSi)
+
   end subroutine getBalance
    
 !   ! ---------------------------------------------------
@@ -1031,7 +1052,15 @@ contains
         jMax( i1:i2 ) = fTemp2 * spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
-        f( i1:i2 ) = group(iGroup)%spec%f 
+        f( i1:i2 ) = group(iGroup)%spec%f
+      class is (spectrumMulticellular)
+        jN( i1:i2 ) = 0
+        jDOC( i1:i2 ) = 0
+        jL( i1:i2 ) = 0
+        jMax( i1:i2 ) = 0
+        jLossPassive( i1:i2 ) = 0
+        jLreal( i1:i2 ) = 0
+        f( i1:i2 ) = 0
       end select
 
       select type (spectrum => group(iGroup)%spec)

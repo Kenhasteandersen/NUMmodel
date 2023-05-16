@@ -17,7 +17,6 @@ add_library(NUMmodel SHARED
 	${CMAKE_CURRENT_LIST_DIR}/generalists.f90
 	${CMAKE_CURRENT_LIST_DIR}/diatoms_simple.f90
 	${CMAKE_CURRENT_LIST_DIR}/diatoms.f90 
-	${CMAKE_CURRENT_LIST_DIR}/generalists_csp.f90
 	${CMAKE_CURRENT_LIST_DIR}/copepods.f90
 	${CMAKE_CURRENT_LIST_DIR}/POM.f90
 	${CMAKE_CURRENT_LIST_DIR}/NUMmodel.f90

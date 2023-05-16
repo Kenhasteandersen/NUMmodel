@@ -87,7 +87,7 @@ for i = 1:length(z)-1
         else
             fc = rates.jR/rates.jMax; % Critical feeding level
             if f(j,i) < fc
-                colFeeding(j,i,:) = [0, 0, f(j,i)/fc]; % Below critical feeding level
+                colFeeding(j,i,:) = [0, 1, f(j,i)/fc]; % Below critical feeding level
             else
                 colFeeding(j,i,:) = [f(j,i), 0, 0]; % Above critical feeding level
             end
@@ -120,7 +120,11 @@ for iGroup = 1:sim.p.nGroups
     %
     % Biomass spectrum:
     %
-    h(iGroup) = nexttile;
+    if (~options.bNewplot) && (iGroup==1)
+        h(iGroup) = gca;
+    else
+        h(iGroup) = nexttile;
+    end
     %     BB = B(:,ix-sim.p.idxB+1);
     %     BB = [BB(1,:); BB]; % Add dummy layer on top
     %     BB( BB<0.01 ) = 0.01;
@@ -135,7 +139,7 @@ for iGroup = 1:sim.p.nGroups
     BB( BB<0.01 ) = 0.01;
 
     % Treat groups with only one size class correctly:
-    if size(BB,2)==1 
+    if size(BB,2)==1
         mm = [sim.p.mLower(sim.p.ixStart(iGroup)), sim.p.mUpper(sim.p.ixStart(iGroup))];
         BB(:,2) = BB;
     else
@@ -169,30 +173,32 @@ for iGroup = 1:sim.p.nGroups
     if (iGroup == sim.p.nGroups)
         cbar = colorbar;
         cbar.Label.String  = 'Sheldon biomass (\mug C l^{-1})';
-%         set(cbar,'limits',[0.01, 100], ...
-%         'ticks',[0.01,0.1,1,10,100],'ticklabels',{'0.01','0.1','1','10','100'})
-if Zmin==Zmax
-    Zmax=Zmin+0.0001;
-end
-    set(h, 'Colormap', jet, 'CLim', [Zmin Zmax])
+        %         set(cbar,'limits',[0.01, 100], ...
+        %         'ticks',[0.01,0.1,1,10,100],'ticklabels',{'0.01','0.1','1','10','100'})
+        if Zmin==Zmax
+            Zmax=Zmin+0.0001;
+        end
+        set(h, 'Colormap', jet, 'CLim', [Zmin Zmax])
     end
     %
     % Trophic strategy or feeding level:
     %
     nexttile
 
-    %if (sim.p.typeGroups < 10) ! Unicellular
+    if (sim.p.typeGroups(iGroup) < 10) % Unicellular
     panelField(m,-z,colStrategy(ix-sim.p.idxB+1,:,:));
-    %else
-    %panelField(m,-z,)
-    %end
+    else
+    panelField(m,-z,colFeeding(ix-sim.p.idxB+1,:,:));
+    end
     set(gca,'xscale','log')
     if (sim.p.typeGroups(iGroup) < 10) | (sim.p.typeGroups(iGroup) >=100) % Unicellular
         set(gca,'xtick',10.^(-9:2:5))
+        xlabel('Cell size (\mugC)')
     else
         set(gca,'xtick',10.^(-9:1:5))
+        xlabel('Body size (\mugC)')
     end
-    xlabel('Mass (\mugC)')
+    
     if (iGroup==1)
         ylabel('Depth (m)')
     else

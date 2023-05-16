@@ -212,10 +212,10 @@ simulateChemostatEuler = function(p=parametersChemostat(), bLosses=TRUE) {
 
 simulateChemostat = function(p=parametersChemostat(), 
                              useC=FALSE, useF=TRUE,
-                             sSetup="GeneralistsOnly") {
+                             sSetup="GeneralistsSimpleOnly") {
   
   # Get the version of sundialr:
-  pkg = installed.packages(fields = "Built")
+  #pkg = installed.packages(fields = "Built")
   
   # if (useC) {
   #   # Load library
@@ -248,7 +248,12 @@ simulateChemostat = function(p=parametersChemostat(),
     # Load library
     loadNUMmodel()
     # Choose setup:
-    if (sSetup=="GeneralistsOnly") { 
+    if (sSetup=="GeneralistsSimpleOnly") { 
+      dummy = .Fortran("f_setupgeneralistssimpleonly", as.integer(p$n))
+      dummy = .Fortran("f_sethtl", as.double(p$mHTL), as.double(p$mortHTL), 
+                       as.logical(FALSE), as.logical(FALSE))
+    } 
+    else if (sSetup=="GeneralistsOnly") { 
       dummy = .Fortran("f_setupgeneralistsonly", as.integer(p$n))
       dummy = .Fortran("f_sethtl", as.double(p$mHTL), as.double(p$mortHTL), 
                        as.logical(FALSE), as.logical(FALSE))
@@ -360,6 +365,7 @@ getFrates = function(p) {
                    jSi = vector(length=nGrid, mode="numeric"),
                    jF = vector(length=nGrid, mode="numeric"),
                    jFreal = vector(length=nGrid, mode="numeric"),
+                   f = vector(length=nGrid, mode="numeric"),
                    jTot = vector(length=nGrid, mode="numeric"),
                    jMax = vector(length=nGrid, mode="numeric"),
                    jFmax = vector(length=nGrid, mode="numeric"),
@@ -607,13 +613,18 @@ plotFunctionsChemostat <- function(sim) {
 # Returns the trophic strategy as one of: osmoheterotroph, light or nutrient-limited
 # phototroph, mixotroph, or heterotroph.
 #
-calcStrategy = function(p,r, bPlot=FALSE, ylim=c(0.1,1000)) {
+calcStrategy = function(sim, bPlot=FALSE, ylim=c(0.1,1000)) {
+  p = sim$p
+  r = sim$rates
+  
   strategy = rep('Unknown', p$n)
-  strategy[r$jN>r$jL] = "Light limited"
-  strategy[r$jL>=r$jN] = "Nutrient limited"
+  jNencounter = p$aNm * sim$N
+  jLencounter = p$aLm * p$L
+  strategy[jNencounter>jLencounter] = "Light limited"
+  strategy[jLencounter>=jNencounter] = "Nutrient limited"
   strategy[r$jDOC > r$jLreal] = "Osmoheterotroph"
   strategy[(r$jNloss>1e-5) & (r$jN<r$jF)] = "Heterotroph"
-  strategy[((r$jL/r$jFreal > 1)  & (r$jF>r$jN)) ] = "Mixotroph"  
+  strategy[((jLencounter/r$jFreal > 1)  & (r$jF>r$jN)) ] = "Mixotroph"  
   
   # Plot shadings:
   if (bPlot) {
@@ -705,7 +716,7 @@ plotSpectrum <- function(sim, t=max(sim$t), bPlot=TRUE,
           col=rgb(0.5,0.5,0.5,alpha=0.25), border=NA)
   
   # Determine limiting process:
-  strategy = calcStrategy(p,r,bPlot=TRUE)
+  strategy = calcStrategy(sim,bPlot=TRUE)
   #
   # Add extra size labels
   #
@@ -771,7 +782,7 @@ plotRates = function(sim, p=sim$p,
                 xlab="Carbon mass ($\\mu$gC)",
                 ylab="Rates (1/day)",
                 xaxis=bXaxis)
-  calcStrategy(p,r,bPlot=TRUE, ylim=ylim)
+  calcStrategy(sim,bPlot=TRUE, ylim=ylim)
   #
   # Gains
   #
