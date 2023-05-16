@@ -984,10 +984,10 @@ contains
               + spec%getSibalance(&
                   u(ixStart(iGroup):ixEnd(iGroup) ), &
                   dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-            Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4d0 ! rhoCSi is hard-coded here
-            if (idxPOM .eq. 0) then
-               Sibalance = SiBalance + POMloss / 3.4d0 ! rhoCSi is hard-coded here
-            end if
+            Sibalance = SiBalance + HTLloss / 3.4d0 ! All silicate from HTL is lost. rhoCSi is hard-coded here
+            !if (idxPOM .eq. 0) then
+            !   Sibalance = SiBalance + POMloss / 3.4d0 ! rhoCSi is hard-coded here
+            !end if
          type is (spectrumDiatoms_simple)
          ! NOT IMPLEMENTED
             Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4d0 ! rhoCSi is hard-coded here
