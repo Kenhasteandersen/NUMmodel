@@ -58,9 +58,9 @@ module POM
     real(dp), intent(in):: u(this%n)
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
 
-    this%Jresptot = fTemp2*this%remin
-    dudt = dudt - this%Jresptot*u - this%mortpred*u
-    dNdt = dNdt + sum(this%Jresptot*u)/rhoCN
+    this%Jresptot = fTemp2*this%remin*this%m
+    dudt = dudt - fTemp2*this%remin*u - this%mortpred*u
+    dNdt = dNdt + sum(fTemp2*this%remin*u)/rhoCN
     dDOCdt = dDOCdt ! remineralized carbon is respired, so lost
   end subroutine calcDerivativesPOM
 
@@ -77,7 +77,7 @@ module POM
     class(spectrumPOM), intent(in):: this
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = sum(dudt + this%Jresptot*u)
+    Cbalance = sum(dudt + this%Jresptot/this%m*u)
   end function getCbalance
 
   subroutine printRatesPOM(this)
