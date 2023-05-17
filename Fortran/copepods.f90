@@ -36,8 +36,6 @@ module copepods
     procedure, pass :: initCopepod
     procedure :: calcDerivativesCopepod
     procedure :: printRates => printRatesCopepod
-    procedure :: getNbalance
-    procedure :: getCbalance
   end type spectrumCopepod
   
   public active, passive, spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod
@@ -194,22 +192,5 @@ contains
      write(*,99) "mortStarve:", this%mortStarve
      write(*,99) "g:", this%g
   end subroutine printRatesCopepod
-
-  function getNbalance(this, u, dudt) result(Nbalance)
-    class(spectrumCopepod), intent(in):: this
-    real(dp):: Nbalance
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Nbalance = sum(dudt)/rhoCN ! HTL losses
-  end function getNbalance
-
-  function getCbalance(this, u, dudt) result(Cbalance)
-    class(spectrumCopepod), intent(in):: this
-    real(dp):: Cbalance
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Cbalance = sum( dudt & ! Change in standing stock of N
-          + this%Jresptot*u/this%m )  ! Losses from respiration
-   end function getCbalance
 
 end module copepods

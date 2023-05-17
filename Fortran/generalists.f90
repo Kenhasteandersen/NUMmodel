@@ -72,13 +72,11 @@ module generalists
     procedure :: calcRates => calcRatesGeneralists
     procedure :: calcDerivativesGeneralists
     procedure :: printRates => printRatesGeneralists
-    procedure :: getNbalance
-    procedure :: getCbalance
     procedure :: getProdBact => getProdBactGeneralists 
   end type spectrumGeneralists
  
   public initGeneralists, spectrumGeneralists, calcRatesGeneralists, calcDerivativesGeneralists
-  public printRatesGeneralists, getNbalance, getCbalance
+  public printRatesGeneralists
 
 contains
   subroutine read_namelist()
@@ -324,29 +322,6 @@ subroutine printRatesGeneralists(this)
   write(*,99) "deltaN:", this%dN
   write(*,99) "deltaDOC:", this%dDOC
 end subroutine printRatesGeneralists
- 
-  function getNbalance(this, u, dudt) result(Nbalance)
-    real(dp):: Nbalance
-    class(spectrumGeneralists), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Nbalance = sum( dudt &
-      + (1-reminF)*this%JCloss_feeding/this%m * u &
-        )/rhoCN ! full N remineralization of feeding losses
-  end function getNbalance
-
-  function getCbalance(this, u, dudt) result(Cbalance)
-    real(dp):: Cbalance
-    class(spectrumGeneralists), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Cbalance = sum(dudt &
-    - this%JLreal*u/this%m &
-    - this%JCloss_photouptake*u/this%m & !saturation effect??
-    + this%Jresptot*u/this%m & !plus uptake costs
-    + (1-reminF)*this%JCloss_feeding/this%m * u &
-    )
-  end function getCbalance
 
   function getProdBactGeneralists(this, u) result(ProdBact)
     real(dp):: ProdBact

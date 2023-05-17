@@ -949,65 +949,28 @@ contains
   ! is incorrect when multicellular organisms are present.
   !
   ! ---------------------------------------------------
-  subroutine getBalance(u, dudt, Nbalance,Cbalance,Sibalance)
+subroutine getBalance(u, dudt, Nbalance,Cbalance,Sibalance)
    real(dp), intent(in):: u(nGrid), dudt(nGrid)
    real(dp), intent(out):: Nbalance, Cbalance, Sibalance
-   integer:: iGroup
-   real(dp) :: HTLloss, POMloss, fracPOMlost
-   
-   Nbalance = dudt(idxN)
-   Cbalance = dudt(idxDOC)
-   SiBalance = 0.d0
+   real(dp) :: Clost, Nlost, SiLost
+   integer :: iGroup
 
-   if (idxPOM .ne. 0) then
-      fracPOMlost = fracHTL_to_POM
-   else
-      fracPOMlost = 0.d0
-   endif
-
+   call getLost(u, Clost, Nlost, SiLost) ! Find what is lost from the system
+   !
+   ! The balance is the change in the nutrient + the change in biomass + whatever is lost:
+   !
+   Nbalance = dudt(idxN)   + sum( dudt(idxB:nGrid) )/rhoCN + Nlost 
+   Cbalance = dudt(idxDOC) + sum( dudt(idxB:nGrid) )       + Clost
+   ! Only diatom groups for silicate
+   Sibalance = dudt(idxSi) + SiLost ! rhoC:Si hardcoded here
    do iGroup = 1, nGroups
-      Nbalance = Nbalance + group(iGroup)%spec%getNbalance( &
-         u(ixStart(iGroup):ixEnd(iGroup) ), &
-         dudt( ixStart(iGroup):ixEnd(iGroup) ))
-      Cbalance = Cbalance + group(iGroup)%spec%getCbalance( &
-         u(ixStart(iGroup):ixEnd(iGroup) ), &
-         dudt( ixStart(iGroup):ixEnd(iGroup) ))
-      !
-      ! Deal with HTL losses:
-      !
-      HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
-      Nbalance = Nbalance + (1-fracHTL_to_N-fracPOMlost) * HTLloss/rhoCN
-      Cbalance = Cbalance + (1-fracPOMlost) * HTLloss
-      !
-      ! If there is no POM, then POM is lost from the system:
-      !
-      if (idxPOM .eq. 0) then
-         POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
-         
-         Nbalance = Nbalance + POMloss / rhoCN
-         Cbalance = Cbalance + POMloss
-      end if
-      !
-      ! Deal with silicate balance. Clunky and does not work when copepods are present (does not account for feeding losses)
-      !
       select type ( spec => group(iGroup)%spec )
          type is (spectrumDiatoms)
-            Sibalance = Sibalance + dudt(idxSi) &  
-              + spec%getSibalance(&
-                  u(ixStart(iGroup):ixEnd(iGroup) ), &
-                  dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-
-            Sibalance = SiBalance + HTLloss / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
-            if (idxPOM .eq. 0) then
-               Sibalance = SiBalance + POMloss / 3.4d0 ! rhoCSi is hard-coded here
-            end if
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0
             
          type is (spectrumDiatoms_simple)
-           ! NOT IMPLEMENTED
-            Sibalance = SiBalance + (1-fracPOMlost) * HTLloss / 3.4d0 ! rhoCSi is hard-coded here
-
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0
       end select
-      
    end do
    !
    ! Normalize by the concentrations:
@@ -1015,28 +978,7 @@ contains
    Nbalance = Nbalance / u(idxN)
    Cbalance = Cbalance / u(idxDOC)
    Sibalance = Sibalance / u(idxSi)
-
-  end subroutine getBalance
-   
-  subroutine getBalance2(u, dudt, Nbalance,Cbalance,Sibalance)
-   real(dp), intent(in):: u(nGrid), dudt(nGrid)
-   real(dp), intent(out):: Nbalance, Cbalance, Sibalance
-   integer:: iGroup
-   real(dp) :: Clost, Nlost, SiLost
-
-   call getLost(u, Clost, Nlost, SiLost) ! Find what is lost from the system
-   !
-   ! The balance is the change in the nutrient + the change in biomass + whatever is lost:
-   !
-   Nbalance = dudt(idxN) + sum( dudt(idxB:nGrid) )/rhoCN + Nlost 
-   Cbalance = dudt(idxDOC) + sum( dudt(idxB:nGrid) ) + Clost
-   !
-   ! Normalize by the concentrations:
-   !
-   Nbalance = Nbalance / u(idxN)
-   Cbalance = Cbalance / u(idxDOC)
-   Sibalance = Sibalance / u(idxSi)
-end subroutine getBalance2
+end subroutine getBalance
 !
 ! Return what is lost (or gained) of carbon, nutrients and silicate from the system:
 !
@@ -1044,7 +986,7 @@ subroutine getLost(u, Clost, Nlost, SiLost)
    real(dp), intent(in):: u(nGrid)
    real(dp), intent(out):: Clost, Nlost, SiLost
    integer:: iGroup
-   real(dp) :: HTLloss, POMloss, fracPOMlost
+   real(dp) :: HTLloss, POMloss
 
    Clost = 0.d0
    Nlost = 0.d0
@@ -1077,6 +1019,24 @@ subroutine getLost(u, Clost, Nlost, SiLost)
          !
          Clost = Clost +  fracHTL_to_N * HTLloss  ! Respiration losses from HTL
       end if
+      !
+      ! Deal with silicate balance. Clunky and does not deal with remin2-losses
+      !
+      select type ( spec => group(iGroup)%spec )
+         type is (spectrumDiatoms)
+            ! Consumed silicate is considered lost:
+            SiLost = SiLost + ( &
+               sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
+               + HTLloss ) / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
+            
+         type is (spectrumDiatoms_simple)
+           ! NOT IMPLEMENTED
+            SiLost = SiLost + ( &
+               sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
+               + HTLloss ) / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
+
+      end select
+
    end do
 end subroutine getLost
 

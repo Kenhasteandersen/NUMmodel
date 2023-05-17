@@ -201,7 +201,6 @@
 !
 ! Biogeo:
 !
- !     remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
       remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
 !
 ! Vulnerability to predation:

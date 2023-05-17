@@ -33,12 +33,12 @@ program NUMmodeltest
   !call setupDiatoms_simpleOnly(10)
   !call setHTL(0.1d0, 0.1d0, .false., .false.)
   !call setupGeneralistsOnly(5)
-  !call setupGeneralistsDiatoms(10)
   !call setupGeneralistsDiatoms_simple(10)
-  call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
   !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
   !call setupGeneric( (/0.1d0/) )
-
+  !call setupGeneralistsDiatoms(10)
+  call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
+  
   call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))
@@ -99,10 +99,11 @@ program NUMmodeltest
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
  !write(*,*) Bpico, Bnano, Bmicro
-    call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
+  call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
     write(*,*) 'Nbalance:', Nbalance
     write(*,*) 'Cbalance:', Cbalance
     write(*,*) 'Sibalance:', Sibalance
+   
 
 !do i = 5,9
 !   write(*,*) i, theta(i+3,6:9)
