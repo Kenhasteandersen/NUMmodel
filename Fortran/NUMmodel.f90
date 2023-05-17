@@ -622,7 +622,7 @@ contains
                end if
                ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
-                 fracHTL_to_POM * u(ix) * group(iGroup)%spec%mortHTL(i)
+                 (1-fracHTL_to_N) * u(ix) * group(iGroup)%spec%mortHTL(i)
             end do
          end if
       end do
@@ -1018,6 +1018,68 @@ contains
 
   end subroutine getBalance
    
+  subroutine getBalance2(u, dudt, Nbalance,Cbalance,Sibalance)
+   real(dp), intent(in):: u(nGrid), dudt(nGrid)
+   real(dp), intent(out):: Nbalance, Cbalance, Sibalance
+   integer:: iGroup
+   real(dp) :: Clost, Nlost, SiLost
+
+   call getLost(u, Clost, Nlost, SiLost) ! Find what is lost from the system
+   !
+   ! The balance is the change in the nutrient + the change in biomass + whatever is lost:
+   !
+   Nbalance = dudt(idxN) + sum( dudt(idxB:nGrid) )/rhoCN + Nlost 
+   Cbalance = dudt(idxDOC) + sum( dudt(idxB:nGrid) ) + Clost
+   !
+   ! Normalize by the concentrations:
+   !
+   Nbalance = Nbalance / u(idxN)
+   Cbalance = Cbalance / u(idxDOC)
+   Sibalance = Sibalance / u(idxSi)
+end subroutine getBalance2
+!
+! Return what is lost (or gained) of carbon, nutrients and silicate from the system:
+!
+subroutine getLost(u, Clost, Nlost, SiLost)
+   real(dp), intent(in):: u(nGrid)
+   real(dp), intent(out):: Clost, Nlost, SiLost
+   integer:: iGroup
+   real(dp) :: HTLloss, POMloss, fracPOMlost
+
+   Clost = 0.d0
+   Nlost = 0.d0
+   SiLost = 0.d0
+
+   do iGroup = 1, nGroups
+      !
+      ! Get carbon losses from each group:
+      !
+      Clost = Clost + group(iGroup)%spec%getClost( &
+         u(ixStart(iGroup):ixEnd(iGroup)))
+      !
+      ! Deal with higher trophic level losses and POM:
+      !
+      HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
+      if (idxPOM .eq. 0) then
+         !
+         ! If there is no POM, then POM is lost from the system:
+         !
+         Nlost = Nlost + (1-fracHTL_to_N) * HTLloss/rhoCN ! The part of POM which is not respired
+         Clost = Clost +  HTLloss  ! Both respiration losses and POM losses
+
+         POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
+      
+         Nlost = Nlost + POMloss / rhoCN
+         Clost = Clost + POMloss
+      else
+         !
+         ! If there is POM then just account for the respiration
+         !
+         Clost = Clost +  fracHTL_to_N * HTLloss  ! Respiration losses from HTL
+      end if
+   end do
+end subroutine getLost
+
   ! ---------------------------------------------------
   ! Returns the rates calculated from last call to calcDerivatives
   ! ---------------------------------------------------
