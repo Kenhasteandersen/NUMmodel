@@ -116,9 +116,9 @@ contains
        !
 
        ! Basal and SDA respiration:
-       this%Jresp(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i)
+       this%Jresptot(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i)
        ! Available energy:
-       nu = this%JF(i) - this%Jresp(i)
+       nu = this%JF(i) - this%Jresptot(i)
        ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
        ! Starvation:
@@ -161,7 +161,7 @@ contains
          this%gamma(this%n-1)*u(this%n-1) & ! growth into adult group
          - this%mort(this%n)*u(this%n); ! adult mortality
 
-    dNdt = dNdt + sum( this%Jresp*u/this%m )/rhoCN  ! All respiration of carbon results in a corresponding
+    dNdt = dNdt + sum( this%Jresptot*u/this%m )/rhoCN  ! All respiration of carbon results in a corresponding
                                                    ! surplus of nutrients. This surplus (pee) is routed to nutrients
     !
     ! Check balance: (should be zero)
@@ -209,7 +209,7 @@ contains
     real(dp), intent(in):: u(this%n), dudt(this%n)
 
     Cbalance = sum( dudt & ! Change in standing stock of N
-          + this%Jresp*u/this%m )  ! Losses from respiration
+          + this%Jresptot*u/this%m )  ! Losses from respiration
    end function getCbalance
 
 end module copepods
