@@ -940,18 +940,16 @@ contains
 
   ! ---------------------------------------------------
   ! Returns mass conservation calculated from last call to calcDerivatives.
-  ! The numbers returned are the changes in N, DOC, and Si relative to the 
+  ! The numbers returned are the changes in carbon, N, and Si relative to the 
   ! concentrations of N, DOC, and Si, in units of 1/day
   ! 
   ! ISSUE:
-  ! The silicate lost in fecal pellets from eaten diatoms by multicellulars is lost.
-  ! We currently have no way of calculating that loss. Therefore the Si balance
-  ! is incorrect when multicellular organisms are present.
+  ! Does not deal with remin2 losses
   !
   ! ---------------------------------------------------
-subroutine getBalance(u, dudt, Nbalance,Cbalance,Sibalance)
+subroutine getBalance(u, dudt, Cbalance,Nbalance,SiBalance)
    real(dp), intent(in):: u(nGrid), dudt(nGrid)
-   real(dp), intent(out):: Nbalance, Cbalance, Sibalance
+   real(dp), intent(out):: Cbalance, Nbalance, Sibalance
    real(dp) :: Clost, Nlost, SiLost
    integer :: iGroup
 
@@ -959,8 +957,8 @@ subroutine getBalance(u, dudt, Nbalance,Cbalance,Sibalance)
    !
    ! The balance is the change in the nutrient + the change in biomass + whatever is lost:
    !
-   Nbalance = dudt(idxN)   + sum( dudt(idxB:nGrid) )/rhoCN + Nlost 
    Cbalance = dudt(idxDOC) + sum( dudt(idxB:nGrid) )       + Clost
+   Nbalance = dudt(idxN)   + sum( dudt(idxB:nGrid) )/rhoCN + Nlost 
    ! Only diatom groups for silicate
    Sibalance = dudt(idxSi) + SiLost ! rhoC:Si hardcoded here
    do iGroup = 1, nGroups
@@ -975,8 +973,8 @@ subroutine getBalance(u, dudt, Nbalance,Cbalance,Sibalance)
    !
    ! Normalize by the concentrations:
    !
-   Nbalance = Nbalance / u(idxN)
    Cbalance = Cbalance / u(idxDOC)
+   Nbalance = Nbalance / u(idxN)
    Sibalance = Sibalance / u(idxSi)
 end subroutine getBalance
 !

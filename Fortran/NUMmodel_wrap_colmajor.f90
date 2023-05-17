@@ -145,11 +145,11 @@ contains
     call getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
   end subroutine f_getFunctions
 
-  subroutine f_getBalance(u, dudt, Nbalance, Cbalance, Sibalance) bind(c)
+  subroutine f_getBalance(u, dudt, Cbalance, Nbalance, Sibalance) bind(c)
      real(c_double), intent(in):: u(nGrid), dudt(nGrid)
-     real(c_double), intent(out):: Nbalance, Cbalance, Sibalance
+     real(c_double), intent(out):: Cbalance, Nbalance, Sibalance
 
-     call getBalance(u, dudt, Nbalance, Cbalance, Sibalance)
+     call getBalance(u, dudt, Cbalance, Nbalance, Sibalance)
    end subroutine f_getBalance  
 
   subroutine f_getLost(u, Clost, Nlost, SiLost) bind(c)

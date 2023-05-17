@@ -92,8 +92,8 @@ void f_getfunctions(
 void f_getbalance(
 	const double u[],
 	const double dudt[],
-	double *Nbalance,
 	double *Cbalance,
+	double *Nbalance,
 	double *Sibalance);
 
 void f_getlost(
