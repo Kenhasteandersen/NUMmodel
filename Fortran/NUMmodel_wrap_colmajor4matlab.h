@@ -95,6 +95,12 @@ void f_getbalance(
 	double *Nbalance,
 	double *Cbalance,
 	double *Sibalance);
+
+void f_getlost(
+	const double u[],
+	double *Clost,
+	double *Nlost,
+	double *SiLost);
 				  
 void f_getrates(
 		double *jN,

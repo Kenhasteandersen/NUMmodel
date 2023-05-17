@@ -10,7 +10,7 @@ module NUMmodel_wrap
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
-       setHTL, setmortHTL, setSinking, getRates, getBalance
+       setHTL, setmortHTL, setSinking, getRates, getBalance, getLost
 
   use globals
 
@@ -32,10 +32,6 @@ contains
     integer(c_int), intent(in), value:: n
     call setupGeneralistsSimpleOnly(n)
   end subroutine f_setupGeneralistsSimpleOnly
-
-  !subroutine f_setupGeneralistsOnly_csp() bind(c)
-  !  call setupGeneralistsOnly_csp()
-  !end subroutine f_setupGeneralistsOnly_csp
 
   subroutine f_setupDiatomsOnly(n) bind(c)
     integer(c_int), intent(in), value:: n
@@ -124,24 +120,6 @@ contains
     
   end subroutine f_calcDerivatives
 
-  ! subroutine f_calcRates(nGrid, u, L, T, jN, jL, jF, jTot, mortHTL, mortpred, g) bind(c)
-  !   use NUMmodel, only: idxB
-  !   integer(c_int), intent(in), value:: nGrid
-  !   real(c_double), intent(in):: u(nGrid)
-  !   real(c_double), intent(in), value:: L, T
-  !   real(c_double), intent(out):: jN(nGrid), jL(nGrid), jF(nGrid)
-  !   real(c_double), intent(out):: jTot(nGrid), mortHTL(nGrid), mortpred(nGrid), g(nGrid)
-
-  !   call calcDerivatives(u, L, T, 0.d0)
-  !   ! jN(idxB:nGrid) = rates%JN(idxB:nGrid) / m(idxB:nGrid)
-  !   ! jL(idxB:nGrid) = rates%JL(idxB:nGrid) / m(idxB:nGrid)
-  !   ! jF(idxB:nGrid) = rates%JF(idxB:nGrid) / m(idxB:nGrid)
-  !   ! jtot(idxB:nGrid) = rates%Jtot(idxB:nGrid) / m(idxB:nGrid)
-  !   ! mortHTL(idxB:nGrid) = rates%mortHTL(idxB:nGrid)
-  !   ! mortpred(idxB:nGrid) = rates%mortpred(idxB:nGrid)
-  !   ! g(idxB:nGrid) = rates%g(idxB:nGrid)
-  ! end subroutine f_calcRates
-
   subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt, bLosses) bind(c)
     !integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(inout):: u(nGrid)
@@ -173,6 +151,13 @@ contains
 
      call getBalance(u, dudt, Nbalance, Cbalance, Sibalance)
    end subroutine f_getBalance  
+
+  subroutine f_getLost(u, Clost, Nlost, SiLost) bind(c)
+    real(c_double), intent(in):: u(nGrid)
+    real(c_double), intent(out):: Clost, Nlost, SiLost
+    
+    call getLost(u, Clost, Nlost, SiLost)
+  end subroutine f_getLost
   
   subroutine f_getMass(m, mDelta) bind(c)
     use globals

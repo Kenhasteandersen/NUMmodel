@@ -1,5 +1,5 @@
 %
-% Get the nitrogen and carbon balance. Only works with setupGeneralistsOnly
+% Get the carbon, nitrogen and silicate balances.
 %
 % In:
 %  u - state variable vector (nutrients and biomasses of all groups).
@@ -25,7 +25,7 @@ dudt = 0*u';
 %
 Nbalance = 0;
 Cbalance = 0;
-Sibalance=0;
+Sibalance= 0;
 
 [~, ~, Nbalance, Cbalance,Sibalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
     u, dudt, Nbalance, Cbalance,Sibalance);

@@ -236,7 +236,7 @@ end subroutine calcGrid
     allocate(this%JDOCreal(n))
 
     this%mPOM = this%m ! Assume that POM created by dead cells are 
-                       !the same size as the cells
+                       ! the same size as the cells
   end subroutine initUnicellular
   !
   ! Carbon lost from the system (with gains being negative):
