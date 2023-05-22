@@ -10,6 +10,7 @@
 module POM
     use globals
     use spectrum
+    use read_input_module
     implicit none
   
     private 
@@ -22,6 +23,8 @@ module POM
       procedure, pass :: initPOM
       procedure :: calcDerivativesPOM
       procedure :: printRates => printRatesPOM
+      procedure :: getNbalance
+      procedure :: getCbalance
     end type spectrumPOM
    
     public initPOM, spectrumPOM, calcDerivativesPOM, printRatesPOM
@@ -34,14 +37,7 @@ module POM
     real(dp), intent(in):: mMax
     integer:: file_unit,io_err
 
-    real(dp):: remin != 0.07d0 ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
-    real(dp):: mMin != 1e-9 ! Smallest POM mass
-    
-    namelist /input_POM / mMin, remin
-
-    call open_inputfile(file_unit, io_err)
-    read(file_unit, nml=input_POM, iostat=io_err)
-    call close_inputfile(file_unit, io_err)
+    call read_input(inputfile,'POM')
     this%remin = remin
 
     call this%initSpectrum(n)
@@ -58,8 +54,24 @@ module POM
 
     dudt = dudt - fTemp2*this%remin*u - this%mortpred*u
     dNdt = dNdt + fTemp2*this%remin*sum(u)/rhoCN
-    dDOCdt = dDOCdt + fTemp2*this%remin*sum(u)
+    dDOCdt = dDOCdt !+ fTemp2*this%remin*sum(u) ! remineralized carbon is respired, so lost
   end subroutine calcDerivativesPOM
+
+  function getNbalance(this, u, dudt) result(Nbalance)
+    real(dp):: Nbalance
+    class(spectrumPOM), intent(in):: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Nbalance = sum(dudt) / rhoCN
+  end function getNbalance
+
+  function getCbalance(this, u, dudt) result(Cbalance)
+    real(dp):: Cbalance
+    class(spectrumPOM), intent(in):: this
+    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+    Cbalance = sum(dudt + fTemp2*this%remin*sum(u))
+  end function getCbalance
 
   subroutine printRatesPOM(this)
     class(spectrumPOM), intent(in):: this

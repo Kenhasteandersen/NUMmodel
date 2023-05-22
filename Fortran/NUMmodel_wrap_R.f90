@@ -1,4 +1,11 @@
 
+subroutine f_setupGeneralistsSimpleOnly(n)
+  use NUMmodel, only:  setupGeneralistsSimpleOnly
+  use globals
+  integer, intent(in):: n
+  call setupGeneralistsSimpleOnly(n)
+end subroutine f_setupGeneralistsSimpleOnly
+
 subroutine f_setupGeneralistsOnly(n)
   use NUMmodel, only:  setupGeneralistsOnly
   use globals

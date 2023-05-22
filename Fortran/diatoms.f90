@@ -6,56 +6,10 @@
 module diatoms
      use globals
      use spectrum
-     use input
+     use read_input_module
      implicit none
  
      private
-     !
-     ! Stoichiometry:
-     !
-     !real(dp), parameter:: rhoCN = 5.68
-     real(dp) :: rhoCSi
-     !cell properties
-     !real(dp), parameter:: cm = 6d-7 ! rhoCmem 6*d.-7 ! Carbon content in cell membrane mugC(mum^-3)
-     !real(dp), parameter:: cb = 1.25d-7 ! rhoCcyt 1.25*d.-7 ! Carbon content in cell cytoplasm mugC(mum^-3)  
-     real(dp) :: v ! Vacuole fraction
-     !
-     ! Light uptake:
-     !
-     real(dp) :: epsilonL ! Light uptake efficiency
-     real(dp) :: alphaL
-     real(dp) :: rLstar
-     real(dp) :: bL ! cost of light harvesting mugC(mugC)^-1
-
-     !real(dp), parameter :: cL=0.18 ! photosynthetic affinity constant
-     !
-     ! Dissolved nutrient uptake:
-     !
-     real(dp) :: alphaN ! L/d/mugC/mum^2
-     real(dp) :: rNstar ! mum
-     real(dp) :: bN ! cost of N uptake mugC(mugN)^-1
-     real(dp) :: bDOC ! cost of DOC uptake mugC(mugN)^-1
-     real(dp) :: bSi ! cost of Si uptake mugC(mugSi)^-1
-     !
-     ! Metabolism
-     !
-     real(dp) :: cLeakage ! passive leakage of C and N
-     !real(dp) :: c ! Parameter for cell wall fraction of mass.
-     real(dp) :: delta ! Thickness of cell wall in mum
-     real(dp) :: alphaJ ! Constant for jmax.  per day
-     real(dp) :: cR
-     real(dp) :: bg ! cost of biosynthsesis -- parameter from literature pending
-    !
-    ! Predation risk:
-    !
-    real(dp) :: palatability
-     !
-     ! Bio-geo:
-     !
-     real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
-     !real(dp) :: reminHTL ! fraction of HTL mortality remineralized
-     real(dp) :: mMinDiatom
-     real(dp) :: mMaxDiatom
      
      type, extends(spectrumUnicellular) :: spectrumDiatoms
      real(dp), dimension(:), allocatable:: JSi,JSireal
@@ -65,33 +19,16 @@ module diatoms
        procedure :: calcRates => calcRatesDiatoms
        procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
-       procedure :: getNbalanceDiatoms
-       procedure :: getCbalanceDiatoms
-       procedure :: getSibalanceDiatoms
+       procedure :: getNbalance
+       procedure :: getCbalance
+       procedure :: getSibalance
      end type spectrumDiatoms
 
      public  initDiatoms, spectrumDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
-     public printRatesDiatoms, getNbalanceDiatoms, getCbalanceDiatoms, getSiBalanceDiatoms
+     public printRatesDiatoms, getNbalance, getCbalance, getSiBalance
 
    contains
        
-     subroutine read_namelist()
-        integer :: file_unit,io_err
-
-        namelist /input_diatoms / &
-             & RhoCSi, v, &
-             & epsilonL, alphaL, rLstar, bL, &
-             & alphaN,rNstar, bN, bDOC, &
-             & bSi, &
-             & cLeakage, delta, alphaJ, cR, bg, &
-             & palatability, &
-             & remin2,mMinDiatom, mMaxDiatom
-
-        call open_inputfile(file_unit, io_err)
-        read(file_unit, nml=input_diatoms, iostat=io_err)
-        call close_inputfile(file_unit, io_err)
-     end subroutine read_namelist
-
      subroutine initDiatoms(this, n)
        class(spectrumDiatoms):: this
        integer, intent(in):: n
@@ -99,8 +36,7 @@ module diatoms
        real(dp), parameter:: mMin = 3.1623d-9
        real(dp), parameter:: rho = 0.4*1d-6
        !real(dp) :: fl
-
-       call read_namelist()
+       call read_input(inputfile,'diatoms')
        call this%initUnicellular(n, mMinDiatom, mMaxDiatom)
        allocate(this%JSi(this%n))
        allocate(this%JSireal(this%n))
@@ -285,9 +221,9 @@ module diatoms
           !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
           !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
 
-         !write(*,*) 'Si budget', i,':',(this%JSi(i)-this%JlossPassive(i) - (this%JSi(i)-this%JlossPassive(i)-this%Jtot(i)) &
-         !- this%Jtot(i))/this%m(i)
-         this%f(i)=f
+          !write(*,*) 'Si budget', i,':',(this%JSi(i)-this%JlossPassive(i) - (this%JSi(i)-this%JlossPassive(i)-this%Jtot(i)) &
+          !- this%Jtot(i))/this%m(i)
+          this%f(i)=f
          !write(*,*) this%JCloss_photouptake(i), this%JLreal(i),dL(i)
         end do
         this%jN = this%jNreal  ! Needed to get the the actual uptakes out with "getRates"
@@ -303,7 +239,7 @@ module diatoms
        integer:: i
    
        this%mort2 = this%mort2constant*u
-       this%jPOM = 0*(1-remin2)*this%mort2 ! non-remineralized mort2 => POM
+       this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
        do i = 1, this%n
         ! mortloss = u(i)*(remin2*this%mort2(i) +reminHTL* this%mortHTL(i))
@@ -368,47 +304,42 @@ module diatoms
       write(*,99) "jSi:", this%JSi / this%m
       write(*,99) "jSireal:", this%JSireal / this%m
       write(*,99) "jResptot:", this%Jresptot / this%m
-
-
-
     end subroutine printRatesDiatoms
 
-    function getNbalanceDiatoms(this, N, dNdt, u, dudt) result(Nbalance)
+    function getNbalance(this, u, dudt) result(Nbalance)
       real(dp):: Nbalance
       class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: N,dNdt, u(this%n), dudt(this%n)
+      real(dp), intent(in):: u(this%n), dudt(this%n)
   
-      Nbalance = (dNdt + sum( dudt &
-      + (1-fracHTL_to_N)*this%mortHTL*u &
-      + (1-remin2)*this%mort2*u & ! full N remineralization of viral mortality
-         )/rhoCN)/N 
-    end function getNbalanceDiatoms 
+      Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
+    !  + (1-remin2)*this%mort2*u
+    end function getNbalance
 
-    function getSibalanceDiatoms(this, Si, dSidt, u, dudt) result(Sibalance)
-      real(dp):: Sibalance
-      class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: Si,dSidt, u(this%n), dudt(this%n)
-  
-      Sibalance = (dSidt + sum( dudt &
-      + this%mortHTL*u &
-      + (1-remin2)*this%mort2*u & ! full Si remineralization of viral mortality
-      )/rhoCSi)/Si 
-    end function getSibalanceDiatoms 
-  
-    function getCbalanceDiatoms(this, DOC, dDOCdt, u, dudt) result(Cbalance)
+    function getCbalance(this, u, dudt) result(Cbalance)
       real(dp):: Cbalance
       class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: DOC, dDOCdt, u(this%n), dudt(this%n)
+      real(dp), intent(in):: u(this%n), dudt(this%n)
   
-      Cbalance = (dDOCdt + sum(dudt &
-      + this%mortHTL*u &
-      + (1-remin2)*this%mort2*u &
+      Cbalance = sum(dudt &
+     ! + (1-remin2)*this%mort2*u &
       - this%JLreal*u/this%m & ! ??
       - this%JCloss_photouptake*u/this%m &
       + this%Jresptot*u/this%m & !plus uptake costs
-      )) / DOC
-    end function getCbalanceDiatoms 
-    
+      ) 
+    end function getCbalance
+
+    function getSibalance(this, u, dudt) result(Sibalance)
+      real(dp):: Sibalance
+      class(spectrumDiatoms), intent(in):: this
+      real(dp), intent(in):: u(this%n), dudt(this%n)
+  
+      Sibalance = sum( dudt & 
+        +  this%mortpred*u )/rhoCSi  ! The silicate from consumed diatoms is considered lost
+
+      !+ this%mortHTL*u &
+      !+ (1-remin2)*this%mort2*u & ! full Si remineralization of viral mortality
+      !)/rhoCSi)/Si 
+    end function getSibalance
   
     function getProdBactDiatoms(this, u) result(ProdBact)
       real(dp):: ProdBact

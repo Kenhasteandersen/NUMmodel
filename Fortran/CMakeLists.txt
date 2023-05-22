@@ -5,19 +5,19 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 #   set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 #   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 #endif()
-set(CMAKE_FORTRAN_FLAGS="-O2")
+#set(CMAKE_FORTRAN_FLAGS="-O2")
+set(CMAKE_FORTRAN_FLAGS="-O0")
 set(RELEASE_FLAGS "-O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS")
 set(DEBUG_FLAGS "-g3")
 
 add_library(NUMmodel SHARED
-	${CMAKE_CURRENT_LIST_DIR}/input.f90
+	${CMAKE_CURRENT_LIST_DIR}/read_input.f90
 	${CMAKE_CURRENT_LIST_DIR}/globals.f90
 	${CMAKE_CURRENT_LIST_DIR}/spectrum.f90
         ${CMAKE_CURRENT_LIST_DIR}/generalists_simple.f90
 	${CMAKE_CURRENT_LIST_DIR}/generalists.f90
 	${CMAKE_CURRENT_LIST_DIR}/diatoms_simple.f90
 	${CMAKE_CURRENT_LIST_DIR}/diatoms.f90 
-	${CMAKE_CURRENT_LIST_DIR}/generalists_csp.f90
 	${CMAKE_CURRENT_LIST_DIR}/copepods.f90
 	${CMAKE_CURRENT_LIST_DIR}/POM.f90
 	${CMAKE_CURRENT_LIST_DIR}/NUMmodel.f90

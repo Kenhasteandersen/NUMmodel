@@ -23,11 +23,11 @@ switch p.nameGroup{iGroup}
     case 'Generalists'
 
         % Find beta parameters from the input file:
-        betaL = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bL');
-        betaN = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bN');
-        betaDOC = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bDOC');
-        betaF = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bF');
-        betaG = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bg');
+        betaL = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bL');
+        betaN = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bN');
+        betaDOC = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bDOC');
+        betaF = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bF');
+        betaG = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bg');
 
         jR_L = betaL*rates.jLreal(ix);
         jR_N = betaN*rates.jN(ix);
@@ -49,11 +49,11 @@ switch p.nameGroup{iGroup}
         legend({'Basal','DOC','Light','Nutrients','Feeding','Growth','Total growth'})
     case 'Diatoms'
         % Find beta parameters from the input file:
-        betaL = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bL');
-        betaN = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bN');
-        betaDOC = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bDOC');
-        betaSi = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bSi');
-        betaG = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bg');
+        betaL = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bL');
+        betaN = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bN');
+        betaDOC = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bDOC');
+        betaSi = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bSi');
+        betaG = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bg');
 
         jR_L = betaL*rates.jLreal(ix);
         jR_N = betaN*rates.jN(ix);

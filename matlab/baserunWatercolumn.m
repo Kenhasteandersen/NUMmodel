@@ -17,7 +17,7 @@ end
 
 p = setupNUMmodel();
 
-p = parametersWatercolumn(p);
+p = parametersWatercolumn(p,1);
 p.tEnd = 5*365;
 
 %
