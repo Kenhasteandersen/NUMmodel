@@ -77,12 +77,11 @@ module generalists_simple
     procedure :: calcRates => calcRatesGeneralistsSimple
     procedure :: calcDerivativesGeneralistsSimple
     procedure :: printRates => printRatesGeneralistsSimple
-    procedure :: getCbalance
     procedure :: getProdBact => getProdBactGeneralistsSimple
   end type spectrumGeneralistsSimple
  
   public initGeneralistsSimple, spectrumGeneralistsSimple, calcRatesGeneralistsSimple, calcDerivativesGeneralistsSimple
-  public printRatesGeneralistsSimple, getCbalance
+  public printRatesGeneralistsSimple
 
 contains
 
@@ -258,19 +257,6 @@ subroutine printRatesGeneralistsSimple(this)
   write(*,*) "Generalists Simple with ", this%n, " size classes:"
   call this%printRatesUnicellular()
 end subroutine printRatesGeneralistsSimple
- 
-
-  function getCbalance(this, u, dudt) result(Cbalance)
-    real(dp):: Cbalance
-    class(spectrumGeneralistsSimple), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Cbalance = sum(dudt &
-    - this%JLreal*u/this%m &
-    - this%JCloss_photouptake*u/this%m &
-    + this%Jresptot*u/this%m &
-    )
-  end function getCbalance
 
   function getProdBactGeneralistsSimple(this, u) result(ProdBact)
     real(dp):: ProdBact

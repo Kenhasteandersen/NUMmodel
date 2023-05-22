@@ -71,7 +71,6 @@ contains
     integer, intent(in) :: feedingmode ! Whether the copepods is active or passive
     integer, intent(in):: n
     real(dp), intent(in):: mAdult
-    integer:: i
 
     this%feedingmode = feedingmode
     
@@ -192,5 +191,5 @@ contains
      write(*,99) "mortStarve:", this%mortStarve
      write(*,99) "g:", this%g
   end subroutine printRatesCopepod
- 
+
 end module copepods

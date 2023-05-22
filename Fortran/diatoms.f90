@@ -65,13 +65,10 @@ module diatoms
        procedure :: calcRates => calcRatesDiatoms
        procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
-  !     procedure :: getNbalance
-      ! procedure :: getCbalance
-       procedure :: getSibalance
      end type spectrumDiatoms
 
      public  initDiatoms, spectrumDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
-     public printRatesDiatoms, getSiBalance
+     public printRatesDiatoms
 
    contains
        
@@ -369,16 +366,7 @@ module diatoms
       write(*,99) "jSireal:", this%JSireal / this%m
       write(*,99) "jResptot:", this%Jresptot / this%m
     end subroutine printRatesDiatoms
-
-    function getSibalance(this, u, dudt) result(Sibalance)
-      real(dp):: Sibalance
-      class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: u(this%n), dudt(this%n)
-  
-      Sibalance = sum( dudt & 
-        +  this%mortpred*u )/rhoCSi  ! The silicate from consumed diatoms is considered lost
-    end function getSibalance
-  
+    
     function getProdBactDiatoms(this, u) result(ProdBact)
       real(dp):: ProdBact
       class(spectrumDiatoms), intent(in):: this

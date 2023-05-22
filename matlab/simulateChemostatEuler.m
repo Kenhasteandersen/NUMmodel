@@ -64,6 +64,6 @@ sim.L = L;
 sim.T = T;
 sim.bUnicellularloss = options.bUnicellularloss;
 
-[sim.Nbalance, sim.Cbalance] = getBalance(u, sim.L, sim.T); % in units per day
+[sim.Cbalance, sim.Nbalance, sim.Sibalance] = getBalance(u, sim.L, sim.T); % in units per day
 
 end

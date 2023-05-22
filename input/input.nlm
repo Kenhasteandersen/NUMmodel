@@ -102,7 +102,7 @@
 !
 ! Phagotrophy
 !
-      epsilonF = 0.8                ! Food assimilation efficiency [-]
+      epsilonF = 1.0                ! Food Assimilation efficiency [unit]
       alphaF = 0.018                ! Food affinity scaling factor [L mug C-1 d-1]
       cF = 30.
       beta = 500.d0
@@ -201,7 +201,6 @@
 !
 ! Biogeo:
 !
- !     remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
       remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
 !
 ! Vulnerability to predation:

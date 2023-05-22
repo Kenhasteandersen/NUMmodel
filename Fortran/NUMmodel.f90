@@ -535,7 +535,7 @@ contains
     real(dp), intent(in):: L, T, dt, u(nGrid)
     real(dp), intent(inout) :: dudt(nGrid)
     integer:: i, j, iGroup, ix
-    real(dp):: gammaN, gammaDOC, gammaSi, Nbalance
+    real(dp):: gammaN, gammaDOC, gammaSi
 
     dudt = 0.d0
     !
@@ -622,7 +622,7 @@ contains
                end if
                ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
-                 fracHTL_to_POM * u(ix) * group(iGroup)%spec%mortHTL(i)
+                 (1-fracHTL_to_N) * u(ix) * group(iGroup)%spec%mortHTL(i)
             end do
          end if
       end do
@@ -940,106 +940,103 @@ contains
 
   ! ---------------------------------------------------
   ! Returns mass conservation calculated from last call to calcDerivatives.
-  ! The numbers returned are the changes in N, DOC, and Si relative to the 
+  ! The numbers returned are the changes in carbon, N, and Si relative to the 
   ! concentrations of N, DOC, and Si, in units of 1/day
   ! 
   ! ISSUE:
-  ! The silicate lost in fecal pellets from eaten diatoms by multicellulars is lost.
-  ! We currently have no way of calculating that loss. Therefore the Si balance
-  ! is incorrect when multicellular organisms are present.
+  ! Does not deal with remin2 losses
   !
   ! ---------------------------------------------------
-  subroutine getBalance(u, dudt, Nbalance,Cbalance,Sibalance)
+subroutine getBalance(u, dudt, Cbalance,Nbalance,SiBalance)
    real(dp), intent(in):: u(nGrid), dudt(nGrid)
-   real(dp), intent(out):: Nbalance, Cbalance, Sibalance
-   integer:: iGroup
-   real(dp) :: HTLloss, POMloss
-   
-   Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN
-   Cbalance = dudt(idxDOC)
-   SiBalance = 0.d0
+   real(dp), intent(out):: Cbalance, Nbalance, Sibalance
+   real(dp) :: Clost, Nlost, SiLost
+   integer :: iGroup
 
+   call getLost(u, Clost, Nlost, SiLost) ! Find what is lost from the system
+   !
+   ! The balance is the change in the nutrient + the change in biomass + whatever is lost:
+   !
+   Cbalance = dudt(idxDOC) + sum( dudt(idxB:nGrid) )       + Clost
+   Nbalance = dudt(idxN)   + sum( dudt(idxB:nGrid) )/rhoCN + Nlost 
+   ! Only diatom groups for silicate
+   Sibalance = dudt(idxSi) + SiLost ! rhoC:Si hardcoded here
    do iGroup = 1, nGroups
-    !  Nbalance = Nbalance + group(iGroup)%spec%getNbalance( &
-    !     u(ixStart(iGroup):ixEnd(iGroup) ), &
-    !     dudt( ixStart(iGroup):ixEnd(iGroup) ))
-      Cbalance = Cbalance + group(iGroup)%spec%getCbalance( &
-         u(ixStart(iGroup):ixEnd(iGroup) ), &
-         dudt( ixStart(iGroup):ixEnd(iGroup) ))
-      !
-      ! Deal with HTL losses:
-      !
-      HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
-      Nbalance = Nbalance + (1-fracHTL_to_N) * HTLloss/rhoCN
-      Cbalance = Cbalance + HTLloss
-      !
-      ! If there is no POM, then POM is lost from the system:
-      !
-      if (idxPOM .eq. 0) then
-         POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
-         
-         Nbalance = Nbalance + POMloss / rhoCN
-         Cbalance = Cbalance + POMloss
-      end if
-      !
-      ! Deal with silicate balance. Clunky and does not work when copepods are present (does not account for feeding losses)
-      !
       select type ( spec => group(iGroup)%spec )
          type is (spectrumDiatoms)
-            Sibalance = Sibalance + dudt(idxSi) &  
-              + spec%getSibalance(&
-                  u(ixStart(iGroup):ixEnd(iGroup) ), &
-                  dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-
-            Sibalance = SiBalance + HTLloss / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
-            if (idxPOM .eq. 0) then
-               Sibalance = SiBalance + POMloss / 3.4d0 ! rhoCSi is hard-coded here
-            end if
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0
             
          type is (spectrumDiatoms_simple)
-           ! NOT IMPLEMENTED
-            Sibalance = SiBalance + HTLloss / 3.4d0 ! rhoCSi is hard-coded here
-
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0
       end select
-      
    end do
    !
    ! Normalize by the concentrations:
    !
-   Nbalance = Nbalance / u(idxN)
    Cbalance = Cbalance / u(idxDOC)
+   Nbalance = Nbalance / u(idxN)
    Sibalance = Sibalance / u(idxSi)
+end subroutine getBalance
+!
+! Return what is lost (or gained) of carbon, nutrients and silicate from the system:
+!
+subroutine getLost(u, Clost, Nlost, SiLost)
+   real(dp), intent(in):: u(nGrid)
+   real(dp), intent(out):: Clost, Nlost, SiLost
+   integer:: iGroup
+   real(dp) :: HTLloss, POMloss
 
-   end subroutine getBalance
-   
-   subroutine getNLosses(u, dudt, HTLlost, POMlost)
-     real(dp), intent(in):: u(nGrid), dudt(nGrid)
-     real(dp), intent(out):: HTLlost, POMlost
-     integer:: iGroup
-     real(dp) :: fracPOMlost
+   Clost = 0.d0
+   Nlost = 0.d0
+   SiLost = 0.d0
 
-      HTLlost = 0.d0
-      POMlost = 0.d0
-
-      if (idxPOM .ne. 0) then
-         fracPOMlost = fracHTL_to_POM
-      else
-         fracPOMlost = 0.d0
-      endif
-
-      do iGroup = 1, nGroups
-         HTLlost = HTLlost + (1-fracHTL_to_N-fracPOMlost) &
-           * sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) )) / rhoCN
-      end do
-
+   do iGroup = 1, nGroups
       !
-      ! If there is no POM, then POM is lost from the system:
+      ! Get carbon losses from each group:
       !
+      Clost = Clost + group(iGroup)%spec%getClost( &
+         u(ixStart(iGroup):ixEnd(iGroup)))
+      !
+      ! Deal with higher trophic level losses and POM:
+      !
+      HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
       if (idxPOM .eq. 0) then
-         POMlost = POMlost + sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )/rhoCN
-      end if
+         !
+         ! If there is no POM, then POM is lost from the system:
+         !
+         Nlost = Nlost + (1-fracHTL_to_N) * HTLloss/rhoCN ! The part of POM which is not respired
+         Clost = Clost +  HTLloss  ! Both respiration losses and POM losses
 
-   end subroutine getNlosses
+         POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
+      
+         Nlost = Nlost + POMloss / rhoCN
+         Clost = Clost + POMloss
+      else
+         !
+         ! If there is POM then just account for the respiration
+         !
+         Clost = Clost +  fracHTL_to_N * HTLloss  ! Respiration losses from HTL
+      end if
+      !
+      ! Deal with silicate balance. Clunky and does not deal with remin2-losses
+      !
+      select type ( spec => group(iGroup)%spec )
+         type is (spectrumDiatoms)
+            ! Consumed silicate is considered lost:
+            SiLost = SiLost + ( &
+               sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
+               + HTLloss ) / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
+            
+         type is (spectrumDiatoms_simple)
+           ! NOT IMPLEMENTED
+            SiLost = SiLost + ( &
+               sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
+               + HTLloss ) / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
+
+      end select
+
+   end do
+end subroutine getLost
 
   ! ---------------------------------------------------
   ! Returns the rates calculated from last call to calcDerivatives
