@@ -27,6 +27,9 @@ Cbalance = 0;
 Nbalance = 0;
 Sibalance= 0;
 
-[~, ~, Cbalance, Nbalance,Sibalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
+[~, ~,Cbalance, Nbalance,Sibalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
     u, dudt, Cbalance, Nbalance,Sibalance);
+
+[tmp,Cbalance, Nbalance,Sibalance] = calllib(loadNUMmodelLibrary(), 'f_getlost', ...
+    u, Cbalance, Nbalance,Sibalance);
 
