@@ -296,7 +296,6 @@ module diatoms
        class(spectrumDiatoms), intent(inout):: this
        real(dp), intent(in):: u(this%n)
        real(dp), intent(inout):: dNdt, dDOCdt,dSidt, dudt( this%n )
-       real(dp):: mortloss
        integer:: i
    
        this%mort2 = this%mort2constant*u
