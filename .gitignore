@@ -35,3 +35,17 @@ Fortran/module spec.f90
 matlab/debug.out
 matlab/Global.mp4
 .Rproj.user
+CMakeFiles
+cmake_install.cmake
+CMakeCache.txt
+Fortran/cmake_install_cmake
+Fortran/libNUMmodel.so
+Fortran/libNUMmodel_matlab.so
+Fortran/libNUMmodel_R.so
+Fortran/Makefile
+install_manifest.txt
+lib/libNUMmodel_matlab.so
+lib/libNUMmodel_R.so
+Makefile
+
+

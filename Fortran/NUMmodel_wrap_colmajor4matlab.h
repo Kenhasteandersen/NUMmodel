@@ -4,6 +4,8 @@ void f_setupgeneralistssimplepom(const int n, const int nPOM);
 
 void f_setupgeneralistssimpleonly(const int n);
 
+void f_setupgeneralistssimple_two(const int n1, const int n2);
+
 //void f_setupgeneralistsonly_csp();
 
 void f_setupdiatomsonly(const int n);

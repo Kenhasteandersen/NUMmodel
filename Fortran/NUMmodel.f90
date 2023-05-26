@@ -68,6 +68,17 @@ contains
     call parametersAddGroup(typeGeneralistSimple, n, 0.d0) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimpleOnly
+  
+  ! -----------------------------------------------
+  ! A basic setup with 2 simple generalists
+  ! -----------------------------------------------
+  subroutine setupGeneralistsSimple_two(n1,n2)
+    integer, intent(in):: n1, n2
+    call parametersInit(2, n1+n2, 2) ! 1 group, n size classes (excl nutrients and DOC)
+    call parametersAddGroup(typeGeneralistSimple, n1, 0.d0) ! generalists with n size classes
+    call parametersAddGroup(typeGeneralistSimple, n2, 0.d0) ! generalists with n size classes
+    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+  end subroutine setupGeneralistsSimple_two
  
   ! -----------------------------------------------
   ! A basic setup with only generalists
@@ -109,7 +120,8 @@ contains
    call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
    call parametersFinalize(0.1d0, .false., .false.)
   end subroutine setupDiatoms_simpleOnly
- 
+  
+
   ! -----------------------------------------------
   ! Generalists and diatoms:
   ! -----------------------------------------------

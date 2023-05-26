@@ -1,7 +1,8 @@
 module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int, c_bool
   use NUMmodel, only:  nGrid, idxB, nGrid, &
-       setupGeneralistsSimpleOnly, setupGeneralistsSimplePOM, &
+       setupGeneralistsSimpleOnly, setupGeneralistsSimple_two, &
+       setupGeneralistsSimplePOM, &
        setupGeneralistsOnly,  &
        setupDiatomsOnly, &
        setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
@@ -32,6 +33,11 @@ contains
     integer(c_int), intent(in), value:: n
     call setupGeneralistsSimpleOnly(n)
   end subroutine f_setupGeneralistsSimpleOnly
+  
+  subroutine f_setupGeneralistsSimple_two(n1, n2) bind(c)
+    integer(c_int), intent(in), value:: n1, n2
+    call setupGeneralistsSimple_two(n1, n2)
+  end subroutine f_setupGeneralistsSimple_two
 
   subroutine f_setupDiatomsOnly(n) bind(c)
     integer(c_int), intent(in), value:: n
