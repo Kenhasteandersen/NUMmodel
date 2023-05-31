@@ -68,6 +68,7 @@ module spectrum
     procedure :: getProdBact => getProdBactUnicellular
   end type spectrumUnicellular
 
+
   ! ------------------------------------------------
   ! Abstact class for all multicellular spectra:
   ! 
@@ -316,7 +317,6 @@ function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
                    (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
     end do
   end function getProdNet
-
   !
   ! Returns the net bacterial production calculated as the total amount of DOC
   ! taken up minus the respiration. Units: mugC/day/m3

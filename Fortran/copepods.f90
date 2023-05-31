@@ -6,27 +6,13 @@
 module copepods
   use globals
   use spectrum
-  use input
+  use read_input_module
   implicit none
 
   integer, parameter :: passive = 1
   integer, parameter :: active = 2
 
   private
-
-  real(dp) :: epsilonF  ! Assimilation efficiency
-  real(dp) :: epsilonR  ! Reproductive efficiency
-  real(dp) :: beta
-  real(dp) :: sigma 
-  real(dp) :: alphaF  ! Clearance rate coefficient
-  real(dp) :: q  ! Exponent of clerance rate
-  real(dp) :: h  ! Factor for maximum ingestion rate
-  real(dp) :: hExponent  ! Exponent for maximum ingestions rate
-  real(dp) :: kBasal ! 0.006 ! Factor for basal metabolism.This value represents basal
-  real(dp) :: kSDA  ! Factor for SDA metabolism (Serra-Pompei 2020). This value assumes that the
-  real(dp) :: AdultOffspring ! Adult-offspring mass ratio
-  real(dp) :: vulnerability ! Passed to "palatability" in the parent spectrum class
-  real(dp) :: DiatomsPreference
 
   type, extends(spectrumMulticellular) :: spectrumCopepod
     integer :: feedingmode ! Active=1; Passive=2
@@ -42,39 +28,24 @@ module copepods
 
 contains
 
-  subroutine read_namelist(feedingmode)
-    integer, intent(in) :: feedingmode
-    integer :: file_unit,io_err
-
-    namelist /input_copepods_passive / epsilonF, epsilonR, beta, sigma, alphaF,q, &
-             & h, hExponent, kBasal, kSDA, AdultOffspring, vulnerability, DiatomsPreference
-    namelist /input_copepods_active /  epsilonF, epsilonR, beta, sigma, alphaF,q, &
-             & h, hExponent, kBasal, kSDA, AdultOffspring, vulnerability, DiatomsPreference
-    
-    call open_inputfile(file_unit, io_err)
-
-    if (feedingmode .eq. active) then
-      read(file_unit, nml=input_copepods_active, iostat=io_err)
-    else
-      if (feedingmode .eq. passive) then
-        read(file_unit, nml=input_copepods_passive, iostat=io_err)
-      else
-        stop
-      endif
-    endif
-
-    call close_inputfile(file_unit, io_err)
-  end subroutine read_namelist
-
   subroutine initCopepod(this, feedingmode, n, mAdult)
     class(spectrumCopepod), intent(inout):: this
     integer, intent(in) :: feedingmode ! Whether the copepods is active or passive
     integer, intent(in):: n
     real(dp), intent(in):: mAdult
-
+    integer:: i
+    
+    if (feedingmode .eq. active) then
+       call read_input(inputfile,'copepods_active')
+    else if (feedingmode .eq. passive) then
+       call read_input(inputfile,'copepods_passive')
+    else
+       print*, 'no feeding mode defined'
+       stop
+    end if
+    
     this%feedingmode = feedingmode
     
-    call read_namelist(this%feedingmode)
     this%DiatomsPreference = DiatomsPreference
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size

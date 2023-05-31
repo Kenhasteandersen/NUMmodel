@@ -10,6 +10,7 @@
 module POM
     use globals
     use spectrum
+    use read_input_module
     implicit none
   
     private 
@@ -35,14 +36,7 @@ module POM
     real(dp), intent(in):: mMax
     integer:: file_unit,io_err
 
-    real(dp):: remin != 0.07d0 ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
-    real(dp):: mMin != 1e-9 ! Smallest POM mass
-    
-    namelist /input_POM / mMin, remin
-
-    call open_inputfile(file_unit, io_err)
-    read(file_unit, nml=input_POM, iostat=io_err)
-    call close_inputfile(file_unit, io_err)
+    call read_input(inputfile,'POM')
     this%remin = remin
 
     call this%initSpectrum(n)

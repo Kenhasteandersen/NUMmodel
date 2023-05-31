@@ -10,6 +10,7 @@ module NUMmodel
   use copepods
   use diatoms
   use POM
+  use read_input_module
   implicit none
 
   ! Indices into the state-variable vector:
@@ -250,7 +251,7 @@ contains
     !
     ! Set groups:
     !
-    call read_namelist_general()
+    call read_input(inputfile,'general')
 
     nGroups = nnGroups
     iCurrentGroup = 0
@@ -1118,3 +1119,4 @@ end subroutine getLost
   end subroutine getRates
 
 end module NUMmodel
+

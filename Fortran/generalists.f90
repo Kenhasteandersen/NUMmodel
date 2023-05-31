@@ -4,61 +4,10 @@
 module generalists
   use globals
   use spectrum
-  use input
+  use read_input_module
   implicit none
 
   private 
-
-  !real(dp), parameter:: rhoCN = 5.68
-  !
-  ! Light uptake:
-  !
-  real(dp) :: epsilonL  ! Light uptake efficiency
-  real(dp) :: alphaL  ! 0.206
-  real(dp) :: rLstar  !8.25
-  real(dp) :: bL ! cost of light harvesting mugC(mugC)^-1
-
-  !real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
-  !real(dp), parameter:: alphaL = 0.13 ! 0.206
-  !real(dp), parameter:: rLstar = 7.5 !8.25
-  !
-  ! Dissolved nutrient uptake:
-  !
-  real(dp) :: alphaN !0.682 ! L/d/mugC/mum^2
-  real(dp) :: rNstar ! mum
-  real(dp) :: bN ! cost of N uptake mugC(mugN)^-1
-  real(dp) :: bDOC ! cost of DOC uptake mugC(mugN)^-1
-  !real(dp), parameter:: alphaN = 0.972 !0.682 ! L/d/mugC/mum^2
-  !real(dp), parameter:: rNstar = 2 ! mum
-  !
-  ! Phagotrophy:
-  !
-  real(dp) :: epsilonF ! Assimilation efficiency
-  real(dp) :: alphaF 
-  real(dp) :: cF 
-  real(dp) :: beta 
-  real(dp) :: sigma 
-  real(dp) :: bF ! cost of food uptake mugC(mugSi)^-1
-  !
-  ! Metabolism
-  !
-  real(dp) :: cLeakage  ! passive leakage of C and N
-  real(dp) :: delta     ! Thickness of cell wall in mum
-  real(dp) :: alphaJ    ! Constant for jmax.  per day
-  real(dp) :: cR 
-  real(dp) :: bg ! cost of biosynthsesis -- parameter from literature pending
-
-  !
-  ! Biogeo:
-  !
-  !real(dp) :: remin ! fraction of mortality losses reminerilized to DOC
-  real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
-  real(dp) :: reminF ! fraction of feeding losses to DOC
-  !
-  ! Max and min sizes
-  !
-  real(dp) :: mMinGeneralist
-  real(dp) :: mMaxGeneralist
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
@@ -79,28 +28,14 @@ module generalists
   public printRatesGeneralists
 
 contains
-  subroutine read_namelist()
-    integer :: file_unit,io_err
-
-    namelist /input_generalists / &
-             & epsilonL, alphaL, rLstar, bL, &
-             & alphaN,rNstar, bN, bDOC, &
-             & epsilonF, alphaF, cF, beta, sigma, bF, &
-             & cLeakage, delta, alphaJ, cR, bg, &
-             & remin2, reminF, mMinGeneralist, mMaxGeneralist
-    call open_inputfile(file_unit, io_err)
-        read(file_unit, nml=input_generalists, iostat=io_err)
-        call close_inputfile(file_unit, io_err)
-  end subroutine read_namelist
-
+  
   subroutine initGeneralists(this, n)
     class(spectrumGeneralists):: this
     integer, intent(in):: n
     integer:: i
     real(dp), parameter:: mMin = 3.1623d-9 !2.78d-8!
     real(dp), parameter:: rho = 0.4*1d6*1d-12
-
-    call read_namelist()
+    call read_input(inputfile,'generalists')
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
 

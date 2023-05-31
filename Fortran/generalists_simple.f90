@@ -4,70 +4,10 @@
 module generalists_simple
   use globals
   use spectrum
-  use input
+  use read_input_module 
   implicit none
 
   private 
-
-  !real(dp) :: rhoCN ! SHOULD BE MOVED TO GLOBALS
-  !real(dp), parameter:: rhoCN = 5.68 ! SHOULD BE MOVED TO GLOBALS
-  !
-  ! Light uptake:
-  !
-  real(dp) :: epsilonL  ! Light uptake efficiency
-  real(dp) :: alphaL  ! 0.206
-  real(dp) :: rLstar  !8.25
-  !real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
-  !real(dp), parameter:: alphaL = 0.13 ! 0.206
-  !real(dp), parameter:: rLstar = 7.5 !8.25
-
-  !
-  ! Dissolved nutrient uptake:
-  !
-
-  real(dp) :: alphaN !0.682 ! L/d/mugC/mum^2
-  real(dp) :: rNstar ! mum
-  !real(dp), parameter:: alphaN = 0.972 !0.682 ! L/d/mugC/mum^2
-  !real(dp), parameter:: rNstar = 2 ! mum
-  !
-  ! Phagotrophy:
-  !
-
-  real(dp) :: epsilonF ! Assimilation efficiency
-  real(dp) :: alphaF 
-  real(dp) :: cF 
-  real(dp) :: beta 
-  real(dp) :: sigma 
-  !real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
-  !real(dp), parameter:: alphaF = 0.018 
-  !real(dp), parameter:: cF = 30.
-  !real(dp), parameter:: beta = 500.d0
-  !real(dp), parameter:: sigma = 1.3d0
-  !
-  ! Metabolism
-  !
-  real(dp) :: cLeakage  ! passive leakage of C and N
-  real(dp) :: delta     ! Thickness of cell wall in mum
-  real(dp) :: alphaJ    ! Constant for jmax.  per day
-  real(dp) :: cR 
-  !real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
-  !real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
-            !The constant is increased a bit to limit the lower cell size
-  !real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
-  !real(dp), parameter:: cR = 0.1
-  !
-  ! Biogeo:
-  !
-  !real(dp) :: remin ! fraction of mortality losses reminerilized to DOC
-  real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
-  real(dp) :: reminF ! fraction of feeding losses to DOC
-  !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
-  !real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
-  !real(dp), parameter:: reminF = 0.1d0 ! fraction of feeding losses to DOC
-  !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
-
-  real(dp) :: mMinGeneralist
-  real(dp) :: mMaxGeneralist
 
   type, extends(spectrumUnicellular) :: spectrumGeneralistsSimple
     real(dp), allocatable :: JFreal(:)
@@ -85,26 +25,12 @@ module generalists_simple
 
 contains
 
-  subroutine read_namelist()
-    integer :: file_unit,io_err
-
-    namelist /input_generalists_simple / epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
-             & alphaF, cF, beta, sigma, cLeakage, delta, alphaJ, cR, &
-             & remin2, reminF, mMinGeneralist, mMaxGeneralist
-
-    call open_inputfile(file_unit, io_err)
-        read(file_unit, nml=input_generalists_simple, iostat=io_err)
-        call close_inputfile(file_unit, io_err)
-
-  end subroutine read_namelist
-
   subroutine initGeneralistsSimple(this, n)
     class(spectrumGeneralistsSimple):: this
     integer, intent(in):: n
     integer:: i
     real(dp), parameter:: rho = 0.4*1d6*1d-12
-
-    call read_namelist()
+    call read_input(inputfile,'generalists_simple')
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
 

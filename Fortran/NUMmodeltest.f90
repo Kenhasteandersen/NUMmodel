@@ -9,6 +9,7 @@ program NUMmodeltest
   real(dp):: Nbalance,Cbalance, Sibalance
 
   !call setupNUMmodel( (/0.1d0, 1.0d0 /) )
+  !call setupNUMmodel( (/0.1d0, 1.0d0 /) )
 
   !call setupGeneralistsOnly(10)
   !call setupGeneralistsSimpleOnly(10)
@@ -22,9 +23,11 @@ program NUMmodeltest
   !call setupGenDiatCope(3,5,1,(/0.1d0, 1.0d0 /))
    !               2 gens cop POM   mAdult     
    !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /), (/1.d0 /))
+   !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /), (/1.d0 /))
    !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /))
 
    !              gen-diat-cop      POM      mAdult    
+  !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
   !call setupGeneralistssimpleOnly(10)
@@ -50,16 +53,18 @@ program NUMmodeltest
   u00(idxDOC) = 10.d0
   u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 10 + 0.1*(i-2)
+     u00(i) = 10! + 0.1*(i-2)
   end do
   dudt = 0.d0
 
-  !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
+  call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
   
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
+  !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
+  !call printRates()
   !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
   !call printRates()
 
@@ -70,6 +75,8 @@ program NUMmodeltest
   !end select
   
   
+  call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
+  write(*,*) dudt
   call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
   write(*,*) dudt
   !write(*,*) 'ngrid',nGrid
