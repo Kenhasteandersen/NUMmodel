@@ -8,6 +8,9 @@
 % Options:
 %  bUnicellularloss - determines whether unicellular groups are subject to
 %      mixing losses
+%  bCalculateNloss - determines whether to calculate the variation of Nitrogen per day in the Chemostat layer (takes time)
+%                    Adds to the output : NDeepTot - N gain from the deep throughout the simulation in µg/L
+%                                         deltaNdt - Variation of Nitrogen per day in the Chemostat layer in µg/L/day
 %
 % Out:
 %  sim - simulation object
@@ -19,6 +22,7 @@ arguments
     L double = 100;
     T double = 10;
     options.bUnicellularloss logical = true;
+    options.bCalculateNloss logical = false;
 end
 %
 % Get the chemostat parameters if they are not already set:
@@ -37,7 +41,7 @@ sim.L = L;
 % Concentrations in the deep layer:
 %
 if options.bUnicellularloss
-    ix = 1:p.ixEnd( max(find(p.typeGroups<10)) ); % Nutrients and unicellulars are lost to the deep layer
+    ix = 1:p.ixEnd( max(find(p.typeGroups<10)) ); % Nitrogen and unicellulars are lost to the deep layer
 else
     ix = 1:(p.idxB-1); % Nutrients
 end
@@ -58,12 +62,20 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 % Simulate:
 %
 sLibname = loadNUMmodelLibrary();
-[t,u] = ode23s(@fDeriv, [0 p.tEnd], p.u0);
-%
-% Enforce minimum concentration
-%
-for k = 1:size(u,1)
-    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+
+% Initial conditions
+if options.bCalculateNloss
+    u0=[p.u0 0];
+else 
+    u0=p.u0;
+end
+
+sim.rhoCN=5.68;
+[t,u] = ode23s(@fDeriv, [0 p.tEnd], u0); 
+
+if options.bCalculateNloss
+    sim.NDeepTot=u(:,end); % N gain from the deep throughout the simulation
+    u=u(:,1:p.n);
 end
 %
 % Enforce minimum concentration
@@ -71,6 +83,13 @@ end
 for k = 1:size(u,1)
     u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
 end
+%
+% Enforce minimum concentration
+%
+for k = 1:size(u,1)
+    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+end
+
 
 %
 % Assemble result:
@@ -95,7 +114,16 @@ sim.bUnicellularloss = options.bUnicellularloss;
 %sim.Bnano = Bpnm(2);
 %sim.Bmicro = Bpnm(3);
 
-[sim.Cbalance, sim.Nbalance,sim.Sibalance] = getBalance(sim.u(end,:), mean(sim.L), sim.T); % in units per day
+%
+% Calculate N variations
+%
+if options.bCalculateNloss
+    sim.deltaNdt = (sim.N(end)+sum(sim.B(end,:))/sim.rhoCN - ...
+        (p.u0(p.idxN)+sum(p.u0(p.idxB:end))/sim.rhoCN + ...
+        sim.NDeepTot(end)))/ t(end); % Variation of Nitrogen per day in the Chemostat layer
+end
+
+[sim.Cbalance,sim.Nbalance,sim.Sibalance] = getBalance(sim.u(end,:), mean(sim.L), sim.T); % in units per day
 
 
 
@@ -103,6 +131,8 @@ sim.bUnicellularloss = options.bUnicellularloss;
     % Function to assemble derivative for chemostat:
     %
     function dudt = fDeriv(t,u)
+
+        u = u(1:p.n);
         dudt = 0*u';
         if (isnan(p.seasonalOptions.lat_lon) & p.seasonalOptions.seasonalAmplitude==0)
             [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
@@ -111,6 +141,27 @@ sim.bUnicellularloss = options.bUnicellularloss;
             % Chemostat dynamics for nutrients and unicellulars:
             %
             dudt(ix) = dudt(ix) + p.d*(uDeep(ix)-u(ix)');
+    
+            %
+            % Calculate N gain from the deep
+            %
+            if options.bCalculateNloss
+                
+                % Extract the losses
+                Clost=0;
+                Nlost = 0;
+                SiLost=0;
+
+                [~,~, Nlost, ~] = calllib(loadNUMmodelLibrary(), 'f_getlost', ...
+                    u, Clost, Nlost, SiLost);
+           
+                dudt(end+1) = (uDeep(1)-u(1))*p.d-Nlost; 
+            
+                if options.bUnicellularloss 
+                    dudt(end)=dudt(end)-p.d*sum(u(p.idxB:end))/sim.rhoCN; %takes B's losses to the deep into account
+                end
+            end
+
         else % Incorporate the time dependency if necessary
             t_int = floor(mod(t,365))+1;
             if t_int>365
