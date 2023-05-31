@@ -17,13 +17,11 @@ module generalists_simple
     procedure :: calcRates => calcRatesGeneralistsSimple
     procedure :: calcDerivativesGeneralistsSimple
     procedure :: printRates => printRatesGeneralistsSimple
-    procedure :: getNbalance
-    procedure :: getCbalance
     procedure :: getProdBact => getProdBactGeneralistsSimple
   end type spectrumGeneralistsSimple
  
   public initGeneralistsSimple, spectrumGeneralistsSimple, calcRatesGeneralistsSimple, calcDerivativesGeneralistsSimple
-  public printRatesGeneralistsSimple, getNbalance, getCbalance
+  public printRatesGeneralistsSimple
 
 contains
 
@@ -156,7 +154,6 @@ end subroutine calcRatesGeneralistsSimple
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) & ! All feeding losses are reminineralized
            +  remin2*this%mort2(i) & 
-           !+ reminHTL*this%mortHTL(i)& ! Now done in NUMmodel.f90
            ) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -168,13 +165,11 @@ end subroutine calcRatesGeneralistsSimple
            +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
            +   remin2*this%mort2(i) & 
-           !+  reminHTL*this%mortHTL(i)&  ! Now done in NUMmodel.f90
            ) * u(i)
       !
       ! Update the generalists:
       !
       dudt(i) = (this%Jtot(i)/this%m(i)  &
-           !- mort(i) &
            - this%mortpred(i) &
            - this%mort2(i) &
            - this%mortHTL(i))*u(i)
@@ -188,28 +183,6 @@ subroutine printRatesGeneralistsSimple(this)
   write(*,*) "Generalists Simple with ", this%n, " size classes:"
   call this%printRatesUnicellular()
 end subroutine printRatesGeneralistsSimple
- 
-  function getNbalance(this, u, dudt) result(Nbalance)
-    real(dp):: Nbalance
-    class(spectrumGeneralistsSimple), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Nbalance = sum( dudt )/rhoCN
-  end function getNbalance
-
-  function getCbalance(this, u, dudt) result(Cbalance)
-    real(dp):: Cbalance
-    class(spectrumGeneralistsSimple), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Cbalance = sum(dudt &
-    !+ (1-remin2)*this%mort2*u &
-    - this%JLreal*u/this%m &
-    - this%JCloss_photouptake*u/this%m &
-    + fTemp2*this%Jresp*u/this%m &
-    + (1-reminF)*this%JCloss_feeding/this%m * u &
-    )
-  end function getCbalance
 
   function getProdBactGeneralistsSimple(this, u) result(ProdBact)
     real(dp):: ProdBact

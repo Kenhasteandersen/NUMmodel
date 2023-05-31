@@ -1,5 +1,5 @@
 %
-% Get the nitrogen and carbon balance. Only works with setupGeneralistsOnly
+% Get the carbon, nitrogen and silicate balances.
 %
 % In:
 %  u - state variable vector (nutrients and biomasses of all groups).
@@ -10,7 +10,7 @@
 %  N balance, C balance in units 1/day
 
 %
-function [Nbalance, Cbalance,Sibalance] = getBalance(u, L, T)
+function [Cbalance, Nbalance, Sibalance] = getBalance(u, L, T)
 arguments
     u double;
     L double;
@@ -23,10 +23,9 @@ dudt = 0*u';
 %
 % Then extract balance:
 %
-Nbalance = 0;
 Cbalance = 0;
-Sibalance=0;
+Nbalance = 0;
+Sibalance= 0;
 
-[~, ~, Nbalance, Cbalance,Sibalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
-    u, dudt, Nbalance, Cbalance,Sibalance);
-
+[~, ~,Cbalance, Nbalance,Sibalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
+    u, dudt, Cbalance, Nbalance,Sibalance);

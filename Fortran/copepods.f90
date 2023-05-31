@@ -22,8 +22,6 @@ module copepods
     procedure, pass :: initCopepod
     procedure :: calcDerivativesCopepod
     procedure :: printRates => printRatesCopepod
-    procedure :: getNbalance
-    procedure :: getCbalance
   end type spectrumCopepod
   
   public active, passive, spectrumCopepod, initCopepod, calcDerivativesCopepod, printRatesCopepod
@@ -86,9 +84,9 @@ contains
        !
 
        ! Basal and SDA respiration:
-       this%Jresp(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i)
+       this%Jresptot(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i)
        ! Available energy:
-       nu = this%JF(i) - this%Jresp(i)
+       nu = this%JF(i) - this%Jresptot(i)
        ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
        ! Starvation:
@@ -131,9 +129,8 @@ contains
          this%gamma(this%n-1)*u(this%n-1) & ! growth into adult group
          - this%mort(this%n)*u(this%n); ! adult mortality
 
-    dNdt = dNdt + sum( this%Jresp*u/this%m )/rhoCN  ! All respiration of carbon results in a corresponding
-                                    ! surplus of nutrients. This surplus (pee) is routed to nutrients
-                !+ (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  ! Should perhaps also go to DOC
+    dNdt = dNdt + sum( this%Jresptot*u/this%m )/rhoCN  ! All respiration of carbon results in a corresponding
+                                                   ! surplus of nutrients. This surplus (pee) is routed to nutrients
     !
     ! Check balance: (should be zero)
     !
@@ -165,23 +162,5 @@ contains
      write(*,99) "mortStarve:", this%mortStarve
      write(*,99) "g:", this%g
   end subroutine printRatesCopepod
-
-  function getNbalance(this, u, dudt) result(Nbalance)
-    class(spectrumCopepod), intent(in):: this
-    real(dp):: Nbalance
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Nbalance = sum(dudt)/rhoCN ! HTL losses
-  end function getNbalance
-
-  function getCbalance(this, u, dudt) result(Cbalance)
-    class(spectrumCopepod), intent(in):: this
-    real(dp):: Cbalance
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Cbalance = sum( dudt & ! Change in standing stock of N
-          + this%Jresp*u/this%m )  ! Losses from respiration
-         ! + (1-epsilonR)*this%g(this%n)*u(this%n)   ! Losses from reproduction
-   end function getCbalance
 
 end module copepods

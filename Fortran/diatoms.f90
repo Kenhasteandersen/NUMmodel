@@ -19,13 +19,10 @@ module diatoms
        procedure :: calcRates => calcRatesDiatoms
        procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
-       procedure :: getNbalance
-       procedure :: getCbalance
-       procedure :: getSibalance
      end type spectrumDiatoms
 
      public  initDiatoms, spectrumDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
-     public printRatesDiatoms, getNbalance, getCbalance, getSiBalance
+     public printRatesDiatoms
 
    contains
        
@@ -305,42 +302,7 @@ module diatoms
       write(*,99) "jSireal:", this%JSireal / this%m
       write(*,99) "jResptot:", this%Jresptot / this%m
     end subroutine printRatesDiatoms
-
-    function getNbalance(this, u, dudt) result(Nbalance)
-      real(dp):: Nbalance
-      class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: u(this%n), dudt(this%n)
-  
-      Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
-    !  + (1-remin2)*this%mort2*u
-    end function getNbalance
-
-    function getCbalance(this, u, dudt) result(Cbalance)
-      real(dp):: Cbalance
-      class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: u(this%n), dudt(this%n)
-  
-      Cbalance = sum(dudt &
-     ! + (1-remin2)*this%mort2*u &
-      - this%JLreal*u/this%m & ! ??
-      - this%JCloss_photouptake*u/this%m &
-      + this%Jresptot*u/this%m & !plus uptake costs
-      ) 
-    end function getCbalance
-
-    function getSibalance(this, u, dudt) result(Sibalance)
-      real(dp):: Sibalance
-      class(spectrumDiatoms), intent(in):: this
-      real(dp), intent(in):: u(this%n), dudt(this%n)
-  
-      Sibalance = sum( dudt & 
-        +  this%mortpred*u )/rhoCSi  ! The silicate from consumed diatoms is considered lost
-
-      !+ this%mortHTL*u &
-      !+ (1-remin2)*this%mort2*u & ! full Si remineralization of viral mortality
-      !)/rhoCSi)/Si 
-    end function getSibalance
-  
+    
     function getProdBactDiatoms(this, u) result(ProdBact)
       real(dp):: ProdBact
       class(spectrumDiatoms), intent(in):: this

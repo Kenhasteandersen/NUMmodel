@@ -142,31 +142,6 @@ module diatoms_simple
      end do
    end subroutine calcDerivativesDiatoms_simple
 
-   function getNbalance(this, u, dudt) result(Nbalance)
-    real(dp):: Nbalance
-    class(spectrumDiatoms_simple), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Nbalance = sum( dudt )/rhoCN ! full N remineralization of viral mortality
-  end function getNbalance
-
-  function getCbalance(this, u, dudt) result(Cbalance)
-    real(dp):: Cbalance
-    class(spectrumDiatoms_simple), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Cbalance = sum( dudt &
-    + (1-remin2)*this%mort2*u) ! full N remineralization of viral mortality
-  end function getCbalance
-   
-  function getSiBalance(this, u, dudt) result(SiBalance)
-    real(dp):: SiBalance
-    class(spectrumDiatoms_simple), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    SiBalance = -1.
-  end function getSiBalance
-
   subroutine printRatesDiatoms_simple(this)
      class(spectrumDiatoms_simple), intent(in):: this
 
