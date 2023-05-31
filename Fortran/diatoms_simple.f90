@@ -23,9 +23,6 @@ module diatoms_simple
       procedure :: calcRates => calcRatesDiatoms_simple
       procedure :: calcDerivativesDiatoms_simple
       procedure :: printRates => printRatesDiatoms_simple
-      procedure :: getNbalance
-      procedure :: getCbalance
-      procedure :: getSiBalance
     end type spectrumDiatoms_simple
 
     public spectrumDiatoms_simple, initDiatoms_simple, calcRatesDiatoms_simple
