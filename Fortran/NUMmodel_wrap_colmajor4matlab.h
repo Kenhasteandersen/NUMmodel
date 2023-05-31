@@ -123,3 +123,7 @@ void f_getrates(
 		double *mortHTL,
 		double *mort2,
 		double *mort);
+
+void f_gettheta(
+		double *thetaMatrix
+);

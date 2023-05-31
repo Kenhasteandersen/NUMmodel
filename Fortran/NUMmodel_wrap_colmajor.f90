@@ -10,7 +10,7 @@ module NUMmodel_wrap
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
-       setHTL, setmortHTL, setSinking, getRates, getBalance, getLost
+       setHTL, setmortHTL, setSinking, getRates, getBalance, getLost, theta
 
   use globals
 
@@ -208,4 +208,10 @@ contains
    mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates
   
+  subroutine f_getTheta(thetaMatrix) bind(c)
+    real(dp), intent (inout) :: thetaMatrix(nGrid,nGrid)
+
+    thetaMatrix = theta
+  end subroutine
+
 end module NUMmodel_wrap

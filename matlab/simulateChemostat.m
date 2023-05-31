@@ -152,7 +152,7 @@ end
                 Nlost = 0;
                 SiLost=0;
 
-                [~,~, Nlost, ~] = calllib(loadNUMmodelLibrary(), 'f_getlost', ...
+                [~,~, Nlost, ~] = calllib(sLibname, 'f_getlost', ...
                     u, Clost, Nlost, SiLost);
            
                 dudt(end+1) = (uDeep(1)-u(1))*p.d-Nlost; 
