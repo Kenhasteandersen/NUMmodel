@@ -29,7 +29,7 @@ module diatoms_simple
     end type spectrumDiatoms_simple
 
     public spectrumDiatoms_simple, initDiatoms_simple, calcRatesDiatoms_simple
-    public calcDerivativesDiatoms_simple, printRatesDiatoms_simple, getNbalance, getCbalance, getSiBalance
+    public calcDerivativesDiatoms_simple, printRatesDiatoms_simple
   contains
       
     subroutine initDiatoms_simple(this, n, mMax)
