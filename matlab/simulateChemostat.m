@@ -8,7 +8,7 @@
 % Options:
 %  bUnicellularloss - determines whether unicellular groups are subject to
 %      mixing losses
-%  bCalculateNloss - determines whether to calculate the variation of Nitrogen per day in the Chemostat layer (takes time)
+%  bCalculateNloss - determines whether to calculate the variation of Nitrogen per day in the Chemostat layer
 %                    Adds to the output : NDeepTot - N gain from the deep throughout the simulation in µg/L
 %                                         deltaNdt - Variation of Nitrogen per day in the Chemostat layer in µg/L/day
 %
@@ -152,7 +152,7 @@ end
                 Nlost = 0;
                 SiLost=0;
 
-                [~,~, Nlost, ~] = calllib(loadNUMmodelLibrary(), 'f_getlost', ...
+                [~,~, Nlost, ~] = calllib(sLibname, 'f_getlost', ...
                     u, Clost, Nlost, SiLost);
            
                 dudt(end+1) = (uDeep(1)-u(1))*p.d-Nlost; 
