@@ -75,7 +75,7 @@ module spectrum
   contains
     procedure :: initMulticellular
     procedure :: printRatesMulticellular
-    procedure :: getCbalance => getCbalanceMulticellular
+    !procedure :: getCbalance => getCbalanceMulticellular
   end type spectrumMulticellular
   ! ------------------------------------------------
   ! Type needed to make an array of spectra:
@@ -288,17 +288,17 @@ end subroutine calcGrid
     write(*,99) "jLossPass.", this%JlossPassive / this%m
   end subroutine printRatesUnicellular
 
-  function getCbalanceUnicellular(this, u, dudt) result(Cbalance)
-    real(dp):: Cbalance
-    class(spectrumUnicellular), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
+  !function getCbalanceUnicellular(this, u, dudt) result(Cbalance)
+  !  real(dp):: Cbalance
+  !  class(spectrumUnicellular), intent(in):: this
+  !  real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = sum(dudt &
-    - this%JLreal*u/this%m &
-    - this%JCloss_photouptake*u/this%m &
-    + this%Jresptot*u/this%m &
-    )
-  end function getCbalanceUnicellular
+  !  Cbalance = sum(dudt &
+  !  - this%JLreal*u/this%m &
+  !  - this%JCloss_photouptake*u/this%m &
+  !  + this%Jresptot*u/this%m &
+  !  )
+  !end function getCbalanceUnicellular
   !
   ! Returns the net primary production calculated as the total amount of carbon fixed
   ! by photsynthesis minus the respiration. Units: mugC/day/m3
@@ -361,14 +361,14 @@ end subroutine calcGrid
     this%mort2constant = 0.004/log(this%m(2) / this%m(1))
   end subroutine initMulticellular
   
-  function getCbalanceMulticellular(this, u, dudt) result(Cbalance)
-    class(spectrumMulticellular), intent(in):: this
-    real(dp):: Cbalance
-    real(dp), intent(in):: u(this%n), dudt(this%n)
+  !function getCbalanceMulticellular(this, u, dudt) result(Cbalance)
+  !  class(spectrumMulticellular), intent(in):: this
+  !  real(dp):: Cbalance
+  !  real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = sum( dudt & ! Change in standing stock of N
-          + this%Jresptot*u/this%m )  ! Losses from respiration
-  end function getCbalanceMulticellular
+  !  Cbalance = sum( dudt & ! Change in standing stock of N
+  !        + this%Jresptot*u/this%m )  ! Losses from respiration
+  !end function getCbalanceMulticellular
 
   subroutine printRatesMulticellular(this)
     class(spectrumMulticellular), intent(in) :: this
