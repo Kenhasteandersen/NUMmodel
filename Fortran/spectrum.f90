@@ -74,7 +74,7 @@ module spectrum
   type, abstract, extends(typeSpectrum) :: spectrumMulticellular
   contains
     procedure :: initMulticellular
-    procedure :: printRatesMulticellular
+    !procedure :: printRatesMulticellular
     !procedure :: getCbalance => getCbalanceMulticellular
   end type spectrumMulticellular
   ! ------------------------------------------------
@@ -370,8 +370,8 @@ end subroutine calcGrid
   !        + this%Jresptot*u/this%m )  ! Losses from respiration
   !end function getCbalanceMulticellular
 
-  subroutine printRatesMulticellular(this)
-    class(spectrumMulticellular), intent(in) :: this
-  end subroutine printRatesMulticellular
+  !subroutine printRatesMulticellular(this)
+  !  class(spectrumMulticellular), intent(in) :: this
+  !end subroutine printRatesMulticellular
 
  end module spectrum

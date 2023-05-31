@@ -192,15 +192,15 @@ contains
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
     use NUMmodel, only: nNutrients, getRates
-    real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
-    real(dp), intent(out):: jSi(nGrid-nNutrients)
-    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
-    real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
-    real(dp), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
-    real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
-    real(dp), intent(out):: jPOM(nGrid-nNutrients)
-    real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
-    real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
+    real(c_double), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
+    real(c_double), intent(out):: jSi(nGrid-nNutrients)
+    real(c_double), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
+    real(c_double), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
+    real(c_double), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
+    real(c_double), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(c_double), intent(out):: jPOM(nGrid-nNutrients)
+    real(c_double), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
+    real(c_double), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
    call getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
    jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
@@ -209,7 +209,7 @@ contains
   end subroutine f_getRates
   
   subroutine f_getTheta(thetaMatrix) bind(c)
-    real(dp), intent (inout) :: thetaMatrix(nGrid,nGrid)
+    real(c_double), intent (inout) :: thetaMatrix(nGrid,nGrid)
 
     thetaMatrix = theta
   end subroutine
