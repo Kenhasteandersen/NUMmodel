@@ -166,13 +166,13 @@ contains
   this%mort2constant = 0.004/log(this%m(2) / this%m(1))
 end subroutine calcGrid
 
-function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
-    real(dp):: Nbalance
-    class(typeSpectrum), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
+!function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
+!    real(dp):: Nbalance
+!    class(typeSpectrum), intent(in):: this
+!    real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Nbalance = sum( dudt ) / rhoCN
-  end function getNbalanceSpectrum
+!    Nbalance = sum( dudt ) / rhoCN
+!  end function getNbalanceSpectrum
 
   subroutine getLossesSpectrum(this, u, Nloss, Closs, SiLoss)
     class(typeSpectrum), intent(in):: this
