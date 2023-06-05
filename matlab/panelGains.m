@@ -6,7 +6,7 @@ for iGroup = 1:p.nGroups
     semilogx(m, rates.jF(ix), 'r-', 'linewidth',2)
     hold on
     % Rates for unicellulars:
-    if ((p.typeGroups(iGroup)~=3) || (p.typeGroups(iGroup)~=4))
+    if ((p.typeGroups(iGroup)~=3) && (p.typeGroups(iGroup)~=4))
        semilogx(m, rates.jN(ix), 'b-','linewidth',2)
        semilogx(m, rates.jLreal(ix), 'g-','linewidth',2)
        semilogx(m, rates.jDOC(ix), 'color',[181 100 30]/256,'linewidth',2)
