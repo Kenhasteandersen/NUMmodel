@@ -19,6 +19,9 @@ arguments
     sField char = 'd';
     range double = logspace(-5, 0, 10);
     options.bParallel = false;
+    options.mHTL double = 1/500^1.5; % Suits simulations with only generalists
+    options.bQuadraticHTL logical = false;
+    options.bDecliningHTL logical = false;
 end
 
 L = 30;
@@ -55,7 +58,7 @@ if options.bParallel
         % Simulate:
         %
         if strcmp(sField, 'mortHTL')
-            setHTL(range(i));
+            setHTL(range(i), options.mHTL, options.bQuadraticHTL, options.bDecliningHTL);
         end
         sim = simulateChemostat(ppp, L, T);
         %
