@@ -8,17 +8,22 @@
 %  sField - String with the field to do the bifurcation over
 %  range - The value to do the bifurcation over.
 %
+% Out:
+%  mc, Bc - community spectra from calls to calcCommunitySpectrum
+%
 % Example:
 %  p = parametersChemostat( setupGeneric([0.1, 100], true));
 %  runBifurcation(p,'d',logspace(-4,-1,10));
 %
-function runBifurcation(p, sField, range, options)
+function [mc, Bc] = runBifurcation(p, sField, range, options)
 
 arguments
     p struct;
     sField char = 'd';
     range double = logspace(-5, 0, 10);
     options.bParallel = false;
+    options.bPlotSpectra = true; % Plot also the community size spectrum
+    % These options are only for the HTL bifurcation:
     options.mHTL double = 1/500^1.5; % Suits simulations with only generalists
     options.bQuadraticHTL logical = false;
     options.bDecliningHTL logical = false;
@@ -46,6 +51,9 @@ B = zeros(n, p.nGroups);
 Blower = B;
 Bupper = B;
 nGroups = p.nGroups;
+mc = NaN;
+Bc = NaN;
+
 
 if options.bParallel
     parfor i = 1:n
@@ -97,6 +105,12 @@ end
 %
 % Nutrients:
 %
+if options.bPlotSpectra
+    tiledlayout(1,2)
+    nexttile
+end
+
+% Bifurcation plot of biomasses:
 semilogy(range, N,'--','linewidth',2,'color',p.colNutrients{p.idxN});
 hold on
 patch([range range(end:-1:1)], [Nlower, Nupper(end:-1:1)], 0.75*[0,0,1], ...
@@ -113,6 +127,7 @@ if isfield(p,'idxSi')
     legendentries(2) = semilogy(range, Si,'--','linewidth',2,'color',p.colNutrients{p.idxSi});
     sLegend{2} = 'Si';
 end
+
 %
 % Biomass:
 %
@@ -140,6 +155,21 @@ legend(legendentries, sLegend, 'location','northwest','box','off')
 xlabel(sField)
 ylabel('Biomass ({\mu}g/l)')
 ylim([1e-4 1e3])
+xlim([min(range), max(range)])
+%
+% Spectra
+%
+if options.bPlotSpectra
+    nexttile
+    surface(mc,range,log10(Bc))
+    shading flat
+    set(gca,'xscale','log','yscale','log')
+    ylabel(sField)
+    xlabel('Cell mass ({\mu}g_C)')
+    xlim('tight')
+    ylim('tight')
+    colorbar
+end
 
     function runSim(i)
         %
@@ -151,7 +181,7 @@ ylim([1e-4 1e3])
         % Simulate:
         %
         if strcmp(sField, 'mortHTL')
-            setHTL(range(i));
+            setHTL(range(i), options.mHTL, options.bQuadraticHTL, options.bDecliningHTL);
         end
         sim = simulateChemostat(ppp, L, T);
         %
@@ -176,6 +206,11 @@ ylim([1e-4 1e3])
             Bupper(i,iGroup) = max(sum( sim.B(ixAve,ix),2 ));
         end
 
+        if isnan(mc)
+            [mc, Bc] = calcCommunitySpectrum(sim.B, sim);
+        else
+            [mc, Bc(i,:)] = calcCommunitySpectrum(sim.B, sim);
+        end
         %Bpnm(i,:) = calcPicoNanoMicro(sim);
     end
 end
