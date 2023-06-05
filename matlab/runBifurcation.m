@@ -75,7 +75,7 @@ if options.bParallel
 
         for iGroup = 1:nGroups
             ix = (ppp.ixStart(iGroup):ppp.ixEnd(iGroup)) - ppp.idxB + 1;
-            B(i,iGroup) = exp(mean(log(sum(sim.B(ixAve,ix),2))));
+            B(i,iGroup) = max(1e-20, exp(mean(log(sum(sim.B(ixAve,ix),2)))));
             Blower(i,iGroup) = min(sum( sim.B(ixAve,ix),2 ));
             Bupper(i,iGroup) = max(sum( sim.B(ixAve,ix),2 ));
         end
@@ -119,8 +119,9 @@ for iGroup = 1:nGroups
 
     lwd = 1;
     if (p.typeGroups(iGroup) >= 10)
-        lwd = 1 + log10( max(p.m(p.ixStart(iGroup):p.ixEnd(iGroup))));
+        lwd = max(1, 1 + log10( max(p.m(p.ixStart(iGroup):p.ixEnd(iGroup)))));
     end
+    %% 
     legendentries(p.idxB-2+iGroup) = ...
         semilogy(range, B(:,iGroup),'color', p.colGroup{iGroup},...
         'linewidth',lwd);
