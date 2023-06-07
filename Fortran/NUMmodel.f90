@@ -1,5 +1,11 @@
 !
 ! The NUM model framework
+! 
+! This module consists of three parts:
+!  1) Setting up a new simulation. This handled by all the subroutines starting with
+!     setupXXX and parametersXXX.
+!  2) The core routines to make a derivative and simulate with Euler integration
+!  3) The remaining subroutines are getting information out about parameters or the simulation
 !
 module NUMmodel
   use globals
@@ -286,7 +292,6 @@ contains
     type(spectrumGeneralistsSimple) :: specGeneralistsSimple
     type(spectrumDiatoms_simple):: specDiatoms_simple
     type(spectrumDiatoms):: specDiatoms
-    !type(spectrumGeneralists_csp):: specGeneralists_csp
     type(spectrumCopepod):: specCopepod
     type(spectrumPOM):: specPOM
     !
@@ -326,7 +331,7 @@ contains
       call initPOM(specPOM, n, mMax)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
       idxPOM = iCurrentGroup 
-    end select
+   end select
 
   end subroutine parametersAddGroup
   ! -----------------------------------------------

@@ -85,13 +85,6 @@ contains
     call setupGenDiatCope(n,nCopepod,nPOM,mAdult)
   end subroutine f_setupGenDiatCope
 
-  !subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
-  !  integer(c_int), intent(in), value:: nCopepods
-  !  real(c_double), intent(in):: mAdult(nCopepods)
-
-  !  call setupGeneric_csp(mAdult)
-  !end subroutine f_setupGeneric_csp
-
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
     logical, intent(in), value:: bQuadraticHTL, bDecliningHTL
