@@ -11,6 +11,7 @@ module POM
     use globals
     use spectrum
     use read_input_module
+    use read_input_module2 
     implicit none
   
     private 
@@ -30,14 +31,17 @@ module POM
   
   contains
 
-  subroutine initPOM(this, n, mMax)
+  subroutine initPOM(this, n, mMax,errorio,errorstr)
+    use iso_c_binding, only: c_char
     class(spectrumPOM):: this
     integer, intent(in):: n
     real(dp), intent(in):: mMax
+    logical(1), intent(out):: errorio 
+    character(c_char), dimension(*), intent(out) :: errorstr
     integer:: file_unit,io_err
-
-    call read_input(inputfile,'POM')
-    this%remin = remin
+    print*, 'Loading parameter for POM from ', inputfile, ':'
+    call read_input2(inputfile,'POM','mMin',mMin,errorio,errorstr)
+    call read_input2(inputfile,'POM','remin',this%remin,errorio,errorstr)
 
     call this%initSpectrum(n)
     call this%calcGrid(mMin, mMax)

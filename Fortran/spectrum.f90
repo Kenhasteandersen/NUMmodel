@@ -21,6 +21,12 @@ module spectrum
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width
      real(dp):: epsilonF ! Assimilation efficiency
+     real(dp):: epsilonL ! Light Assimilation efficiency
+     real(dp):: epsilonR 
+     real(dp):: rhoCSi 
+     real(dp):: remin2, reminF
+     real(dp):: bL, bN, bDOC, bF, bg, bSi
+     real(dp):: kBasal, kSDA 
      real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), f(:)
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
@@ -130,6 +136,19 @@ contains
     this%JF = 0.d0
     this%f = 0.d0
     this%epsilonF = 1.d0 ! Probably overridden by the specific group, but must be >0.
+    this%epsilonL = 1.d0 ! Probably overridden by the specific group, but must be >0.
+    this%epsilonR = 1.d0 ! Probably overridden by the specific group, but must be >0.
+    this%rhoCSi = 3.4d0
+    this%bL = 0.3d0
+    this%bN = 0.3d0
+    this%bDOC = 0.3d0
+    this%bF = 0.3d0
+    this%bg = 0.3d0
+    this%bSi = 0.3d0
+    this%remin2 = 0.0d0
+    this%reminF = 0.0d0
+    this%kBasal = 0.0d0
+    this%kSDA = 0.0d0
     this%palatability = 1.d0 ! set to default
     this%mPOM = 0.d0
     this%jPOM = 0.d0
@@ -167,9 +186,10 @@ contains
 end subroutine calcGrid
 
 function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
-    real(dp):: Nbalance
+    real(dp):: Nbalance, rhoCN
     class(typeSpectrum), intent(in):: this
     real(dp), intent(in):: u(this%n), dudt(this%n)
+    rhoCN=5.68d0
 
     Nbalance = sum( dudt ) / rhoCN
   end function getNbalanceSpectrum

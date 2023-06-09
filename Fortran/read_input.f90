@@ -2,6 +2,7 @@ module read_input_module
   use globals
   implicit none
   
+  
  
   ! CN mass ratio:
   real(dp) :: rhoCN 

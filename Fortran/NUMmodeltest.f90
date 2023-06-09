@@ -7,7 +7,9 @@ program NUMmodeltest
   real(dp):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
   integer:: i
   real(dp):: Nbalance,Cbalance, Sibalance
-
+  !real(dp):: myout
+  character(len=5) :: mystr
+  logical(1):: myout=.false. ! Whether to losses to the deep
   !call setupNUMmodel( (/0.1d0, 1.0d0 /) )
 
   !call setupGeneralistsOnly(10)
@@ -39,8 +41,10 @@ program NUMmodeltest
   !call setupGeneralistsDiatoms(10)
   !call setupGeneric( (/0.1d0/) )
   !call setupGeneralistsDiatoms(10)
-  call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
+  !call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
+  !myout=1.0d0
   
+  call setupNUMmodel2(2,myout,mystr) 
   call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))

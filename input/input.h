@@ -34,33 +34,33 @@
 !***********************************************************************
 !
   mMinGeneralist = 1.1623d-9    ! Smallest cell size [mug C]
-  mMaxGeneralist = 1.0		! Largest cell size [mug C]
+  mMaxGeneralist = 1.0d0	! Largest cell size [mug C]
 
 ! Light uptake:
 !--------------
-  epsilonL = 0.8                ! Light uptake efficiency []
-  alphaL = 0.3                  ! Light affinity coef. [1/(uE/m2/s) 1/day um]
-  rLstar = 7.5                  ! Light affinity cross-over size [um]
+  epsilonL = 0.8d0              ! Light uptake efficiency []
+  alphaL = 0.3d0                ! Light affinity coef. [1/(uE/m2/s) 1/day um]
+  rLstar = 7.5d0                ! Light affinity cross-over size [um]
 
 ! Dissolved nutrient and DOC uptake:
 !-----------------------------------
-  alphaN = 0.972                ! Diffusive affinity coefficient [L/d/mugC/um^2] 
-  rNstar = 0.4                  ! Diffusive affinity cross-over size [um]
+  alphaN = 0.972d0                ! Diffusive affinity coefficient [L/d/mugC/um^2] 
+ ! rNstar = 0.4d0                  ! Diffusive affinity cross-over size [um]
 
 ! Phagotrophy:
 !-------------
-  epsilonF = 0.8                ! Food assimilation efficiency [-]
-  alphaF = 0.018                ! Clearance rate [L/d/ug C]
-  cF = 30.                      ! Max phagotrophy coefficient [um/day]
+  epsilonF = 0.8d0                ! Food assimilation efficiency [-]
+  alphaF = 0.018d0                ! Clearance rate [L/d/ug C]
+  cF = 30.0d0                      ! Max phagotrophy coefficient [um/day]
   beta = 500.d0                 ! Preferred predator-prey mass ratio
   sigma = 1.3d0                 ! Preferred predator-prey mass range
 
 ! Metabolism:
 !------------
-  cLeakage = 0.03               ! Passive leakage of C and N
-  delta = 0.05                  ! Thickness of cell wall [um]
-  alphaJ = 1.5                  ! Constant for jMax [day-1]
-  cR = 0.1                      ! Basal metabolism relative to jMax [-]
+  cLeakage = 0.03d0             ! Passive leakage of C and N
+  delta = 0.05d0                 ! Thickness of cell wall [um]
+  alphaJ = 1.5d0                 ! Constant for jMax [day-1]
+  cR = 0.1d0                     ! Basal metabolism relative to jMax [-]
 
 ! Biogeo:
 !--------

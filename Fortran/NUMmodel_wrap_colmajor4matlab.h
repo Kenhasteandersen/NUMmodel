@@ -4,6 +4,8 @@ void f_setupgeneralistssimplepom(const int n, const int nPOM);
 
 void f_setupgeneralistssimpleonly(const int n);
 
+void f_setupnummodel2(const int n, bool *Clost, char *errorstr);
+
 //void f_setupgeneralistsonly_csp();
 
 void f_setupdiatomsonly(const int n);
