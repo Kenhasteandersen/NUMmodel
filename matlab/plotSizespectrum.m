@@ -61,6 +61,7 @@ end
 
 s.p = sim.p;
 s.t = sim.t;
+s.rates = sim.rates;
 %
 % Setup tiles:
 %
@@ -90,7 +91,7 @@ set(gca,'XTickLabel','');
 nexttile
 panelLosses(sim.p, sim.rates);
 
-s.rates = sim.rates;
+
 
 if strcmp(sim.p.nameModel, 'watercolumn')
 
