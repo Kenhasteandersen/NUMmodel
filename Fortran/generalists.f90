@@ -42,9 +42,11 @@ contains
     real(dp) :: mMinGeneralist, mMaxGeneralist
     real(dp) :: alphaL, rLstar !Light uptake
     real(dp) :: alphaN, rNstar !osmotrophic uptake
-    real(dp) :: epsilonF, alphaF, cF, beta, sigma !Phagotrophy
+    real(dp) :: alphaF, cF !Phagotrophy
     real(dp) :: cLeakage, delta, alphaJ, cR !Metabolism
-    real(dp) ::remin2, reminF 
+
+     
+
     
     ! no errors to begin with
     errorio=.false.
@@ -75,13 +77,37 @@ contains
     call read_input2(inputfile,'generalists_simple','remin2',this%remin2,errorio,errorstr)
     call read_input2(inputfile,'generalists_simple','reminF',this%reminF,errorio,errorstr)
     
+  ! mMinGeneralist = 1.1623d-9    ! Description [mug C]
+  ! mMaxGeneralist = 1.0d0	! Description [mug C]
+  !this%epsilonL = 0.8d0                ! Light uptake efficiency []
+  !alphaL = 0.3d0                  ! Scaling factor for light [unit]
+  !rLstar = 7.5d0                  ! Description [unit]
+  !this%bL = 0.08d0                     ! Cost of light harvesting [mugC/mugC]
+  !alphaN = 0.972d0                ! Description [L/d/mugC/mum^2] 
+  !rNstar = 0.4d0                  ! Description [mum]
+  !this%bN = 0.3d0                     	! cost of N uptake [mugC/mugN]
+  !this%bDOC = 0.3d0                   	! cost of DOC uptake [mugC/mugC]
+  !this%epsilonF = 0.8d0                ! Food Assimilation efficiency [unit]
+  !alphaF = 0.018d0                ! Food affinity scaling factor [L mug C-1 d-1]
+  !cF = 30.0d0
+  !this%beta = 500.d0
+  !this%sigma = 1.3d0
+  !this%bF = 0.3d0                     	! Cost of food uptake [mugC/mugC]
+  !cLeakage = 0.03d0               ! Passive leakage of C and N
+  !delta = 0.05d0                  ! Thickness of cell wall [mum]
+  !alphaJ = 1.5d0                  ! Constant for jmax. [day-1]
+  !cR = 0.03d0       
+  !this%bg = 0.2d0                      ! Cost of biosynthsesis
+  !this%remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
+  !this%reminF = 0.1d0
+    
     !call read_input(inputfile,'generalists')
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
 
     this%beta = beta
     this%sigma = sigma
-    !this%epsilonF = epsilonF
+    this%epsilonF = epsilonF
 
     this%r = (3./(4.*pi)*this%m/rho)**onethird
     

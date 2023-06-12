@@ -4,7 +4,9 @@ n = 10;
 errorio=false;
 
 loadNUMmodelLibrary(options.bParallel);
-text ='h0';
+errortext ='init';
+
+[errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly', int32(n), errorio, errortext );
 
 %% generalists simple
 [errorio,text]=calllib(loadNUMmodelLibrary(), 'f_setupnummodel2',int32(n), errorio, text );

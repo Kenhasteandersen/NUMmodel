@@ -101,7 +101,7 @@ contains
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
-  ! A basic setup with generalists and POM
+  ! A basic setup with generalists simple and POM
   ! -----------------------------------------------
   subroutine setupGeneralistsSimplePOM(n, nPOM,errorio,errorstr)
     integer, intent(in):: n, nPOM
@@ -109,9 +109,25 @@ contains
     character(c_char), dimension(*) :: errorstr
     call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
     call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimplePOM
+  
+  
+    ! -----------------------------------------------
+  ! A basic setup with generalists and POM
+  ! -----------------------------------------------
+  subroutine setupGeneralistsPOM(n, nPOM,errorio,errorstr)
+    integer, intent(in):: n, nPOM
+    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    character(c_char), dimension(*) :: errorstr
+    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+    call parametersAddGroup(typeGeneralist, n, 0.d0,errorio,errorstr) ! generalists with n size classes
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
+    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+  end subroutine setupGeneralistsPOM
 
   ! -----------------------------------------------
   ! A basic setup with only diatoms:
@@ -146,6 +162,7 @@ contains
       character(c_char), dimension(*) :: errorstr
       call parametersInit(2, 2*n, 3)
       call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr) ! generalists with n size classes
+        IF ( errorio ) RETURN 
       call parametersAddGroup(typeDiatom, n, 0.d0,errorio,errorstr) ! diatoms with n size classes
       call parametersFinalize(.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms
@@ -156,6 +173,7 @@ contains
       character(c_char), dimension(*) :: errorstr
       call parametersInit(2, 2*n, 3)
       call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
+        IF ( errorio ) RETURN 
       call parametersAddGroup(typeDiatom_simple, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
       call parametersFinalize(0.1d0, .false., .false.)
    end subroutine setupGeneralistsDiatoms_simple
@@ -168,6 +186,7 @@ contains
     character(c_char), dimension(*) :: errorstr
     call parametersInit(2, 20, 2)
     call parametersAddGroup(typeGeneralistSimple, 10, 0.0d0,errorio,errorstr)
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typeCopepodActive, 10, .1d0,errorio,errorstr) ! add copepod with adult mass .1 mugC
     call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
   end subroutine setupGeneralistsSimpleCopepod
@@ -184,11 +203,13 @@ contains
 
     call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
     call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
+      IF ( errorio ) RETURN 
     if ( size(mAdult) .eq. 0) then
        call parametersFinalize(0.1d0, .true., .true.)
     else
        do iCopepod = 1, size(mAdult)
           call parametersAddGroup(typeCopepodActive, n, mAdult(iCopepod),errorio,errorstr) ! add copepod
+            IF ( errorio ) RETURN 
        end do
        call parametersFinalize(0.001d0, .true., .true.)
     end if
@@ -205,14 +226,17 @@ contains
  
    call parametersInit(size(mAdultActive)+size(mAdultPassive)+3, 2*n + nPOM + nCopepod*(size(mAdultPassive)+size(mAdultActive)), 3)
    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
 
    do iCopepod = 1, size(mAdultPassive)
       call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
    end do
    
    do iCopepod = 1, size(mAdultActive)
       call parametersAddGroup(typeCopepodActive, nCopepod, mAdultActive(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
    end do
    
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
@@ -232,10 +256,13 @@ contains
  
    call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3)
    call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom_simple, n, 1.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
 
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepodActive, nCopepod, mAdult(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
    end do
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
    call parametersFinalize(0.001d0, .true., .true.)
@@ -254,10 +281,13 @@ contains
  
    call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3)
    call parametersAddGroup(typeDiatom, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
 
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepodActive, nCopepod, mAdult(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
    end do
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
    call parametersFinalize(0.001d0, .true., .true.)

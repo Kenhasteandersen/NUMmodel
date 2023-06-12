@@ -13,18 +13,47 @@ arguments
 end
 
 loadNUMmodelLibrary(options.bParallel);
-calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
+
+
+errortext ='';
+errorio=false;
+
+[~,~,errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
     int32(n), int32(nCopepods), int32(nPOM), ...
-    length(mAdultPassive), mAdultPassive, length(mAdultActive), mAdultActive );
+    length(mAdultPassive), mAdultPassive, length(mAdultActive), mAdultActive, ...
+    errorio, errortext);
 if options.bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
+
+    errorio=false(1,poolsize);
+    errortext = repmat({''}, [1 poolsize]);
+
     parfor i=1:poolsize
-        calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
+        this_errortext ='';
+        [~,~,errorio(i),this_errortext]=calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
             int32(n), int32(nCopepods), int32(nPOM),...
-            length(mAdultPassive), mAdultPassive, length(mAdultActive), mAdultActive );
+            length(mAdultPassive), mAdultPassive, length(mAdultActive), mAdultActive ,...
+            errorio(i), this_errortext);
+        errortext(i)={this_errortext}
+    end
+    if any(errorio)
+        i=find(errorio==true,1);
+        disp(['Error loading ',errortext{i},'. Execution terminated'])
+        return
+    else
+        disp('done loading input parameters')
+    end
+else
+    if errorio
+        disp(['Error loading ',errortext,'. Execution terminated'])
+        return
+    else
+        disp('done loading input parameters')
     end
 end
+
+
 
 p = setupNutrients_N_DOC_Si;
 

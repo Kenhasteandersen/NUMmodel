@@ -11,14 +11,35 @@ loadNUMmodelLibrary(bParallel);
 if bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
+    errorio=false(1,poolsize);
+    errortext = repmat({''}, [1 poolsize]);
     parfor i=1:poolsize
-        calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsdiatoms_simple',int32(n));
+        this_errortext ='';
+        [errorio(i),this_errortext]=calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsdiatoms_simple',int32(n),errorio(i), this_errortext);
+        errortext(i)={this_errortext}
     end
     p.bParallel = true;
+    if any(errorio)
+        i=find(errorio==true,1);
+        disp(['Error loading ',errortext{i},'. Execution terminated'])
+        return
+    else
+        disp('done loading input parameters')
+    end
 else
+    errortext ='';
+    errorio=false;
+    [errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsdiatoms_simple', int32(n),errorio, errortext);
     p.bParallel = false;
-    calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsdiatoms_simple', int32(n) );
+    if errorio
+        disp(['Error loading ',errortext,'. Execution terminated'])
+        return
+    else
+        disp('done loading input parameters')
+    end
 end
+
+
 
 % Nutrients:
 p = setupNutrients_N_DOC_Si;
