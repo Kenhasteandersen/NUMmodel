@@ -66,7 +66,7 @@ s.rates = sim.rates;
 % Setup tiles:
 %
 clf
-tiledlayout(3,1,'tilespacing','compact','padding','compact')
+tiledlayout(4,1,'tilespacing','compact','padding','compact')
 %
 % Spectrum
 %
@@ -90,6 +90,11 @@ set(gca,'XTickLabel','');
 %
 nexttile
 panelLosses(sim.p, sim.rates);
+set(gca,'XTickLabel','');
+xlabel('')
+
+nexttile
+panelTrophicLevel(sim.p,sim.rates);
 
 
 
