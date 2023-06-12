@@ -61,11 +61,12 @@ end
 
 s.p = sim.p;
 s.t = sim.t;
+s.rates = sim.rates;
 %
 % Setup tiles:
 %
 clf
-tiledlayout(3,1,'tilespacing','compact','padding','compact')
+tiledlayout(4,1,'tilespacing','compact','padding','compact')
 %
 % Spectrum
 %
@@ -89,8 +90,13 @@ set(gca,'XTickLabel','');
 %
 nexttile
 panelLosses(sim.p, sim.rates);
+set(gca,'XTickLabel','');
+xlabel('')
 
-s.rates = sim.rates;
+nexttile
+panelTrophicLevel(sim.p,sim.rates);
+
+
 
 if strcmp(sim.p.nameModel, 'watercolumn')
 

@@ -1,5 +1,29 @@
 function panelLosses(p,rates)
 
+% brackground depending on trophic strategies
+
+[strategy, col] = calcTrophicStrategy(rates);
+
+Ngroup=1; %select the group for which the background is drawn
+ix = (p.ixStart(Ngroup):p.ixEnd(Ngroup));
+m = p.m(ix);
+color=col(ix-(p.idxB-1),:);
+colori=color(1,:);
+Xlim=calcXlim(p);
+Xmin=Xlim(1);
+Xmax=Xlim(2);
+rectangle(Position=[Xmin,0,(m(2)+m(1))/2-Xmin,2], FaceColor=colori, EdgeColor=colori);
+hold on
+for i = 2:length(ix)-1
+    colori=color(i,:);
+    step=(m(i)+m(i+1))/2-(m(i-1)+m(i))/2;
+    rectangle(Position=[(m(i-1)+m(i))/2,0,step,2], FaceColor=colori, EdgeColor=colori);
+end
+colori=color(length(ix),:);
+rectangle(Position=[(m(length(ix)-1)+m(length(ix)))/2,0,Xmax-(m(length(ix)-1)+m(length(ix)))/2,2], FaceColor=colori, EdgeColor=colori);
+
+
+set(gca,'XScale', 'log', "Layer", "top")
 
 
 for iGroup = 1:p.nGroups
