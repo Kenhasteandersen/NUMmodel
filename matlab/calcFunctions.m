@@ -68,9 +68,9 @@ switch sim.p.nameModel
 
     case 'watercolumn'
         sLibName = loadNUMmodelLibrary();
-        nTime = length(sim.t);
+        ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
         nZ = length(sim.z);
-        for iTime = 1:nTime
+        for iTime = ixTime
             ProdGross = 0;
             ProdNet = 0;
             ProdHTL = 0;
@@ -113,17 +113,18 @@ switch sim.p.nameModel
                     ChlVolume(k) = tmp;
                 end
             end
-            sim.ProdGross(iTime) = ProdGross;
-            sim.ProdNet(iTime) = ProdNet;
-            sim.ProdHTL(iTime) = ProdHTL;
-            sim.ProdBact(iTime) = ProdBact;
+            iTimenow = iTime - ixTime(1)+1;
+            sim.ProdGross(iTimenow) = ProdGross;
+            sim.ProdNet(iTimenow) = ProdNet;
+            sim.ProdHTL(iTimenow) = ProdHTL;
+            sim.ProdBact(iTimenow) = ProdBact;
             %%sim.eHTL(i,j,iTime) = eHTL;
-            sim.Bpico(iTime) = Bpico;
-            sim.Bnano(iTime) = Bnano;
-            sim.Bmicro(iTime) = Bmicro;
+            sim.Bpico(iTimenow) = Bpico;
+            sim.Bnano(iTimenow) = Bnano;
+            sim.Bmicro(iTimenow) = Bmicro;
             sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro; %mgC/m^2
-            sim.ChlArea(iTime) = ChlArea; 
-            sim.ChlVolume(iTime,:) = ChlVolume;
+            sim.ChlArea(iTimenow) = ChlArea; 
+            sim.ChlVolume(iTimenow,:) = ChlVolume;
         end
         sim.eHTL = sim.ProdHTL./sim.ProdNet;
         sim.ePP = sim.ProdNet./sim.ProdGross;
