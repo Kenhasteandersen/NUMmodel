@@ -10,30 +10,36 @@
 %          nutrients.
 %
 
-function [lambda]=calcTrophicLevel(p,rates)
+function [lambda]=calcTrophicLevel(sim,rates)
 
 arguments
-    p struct
+    sim struct
     rates struct
 end
 
 %Get the size preference matrix of all size groups that are not nutrients.
-theta = getTheta(p);
+theta = getTheta(sim.p);
+
 
 %cell rates
 jPP=rates.jDOC+rates.jLreal; %Uptake of Primary Production 
-jF=rates.jF; %Uptake of Food
+jF=rates.jFreal; %Uptake of Food
 
 %
 %Calculate the trophic level
 %
-lambda=p.u0(p.idxB:end)*0;
-lambda(1)=1;
+
+%Sort the masses in ascending order
+[~,mSorted]=sort(sim.p.m(sim.p.idxB:end));
+
+lambda=sim.B(1,:)*0;
+lambda(mSorted(1))=1;
 for i=2:length(lambda)
-    if sum(theta(i,1:i-1))==0
-        lambda(i)=1; %for cells not eating
+    idx=mSorted(i);
+    if sum(theta(idx,:))==0
+        lambda(idx)=1; %for cells not eating
     else
-        lambda(i)=(jPP(i)+jF(i)*(1+sum(theta(i,1:i-1).*lambda(1:i-1)))/sum(theta(i,1:i-1)))/(jPP(i)+jF(i)); %trophic level
+        lambda(idx)=(jPP(idx)+jF(idx)*(1+sum(theta(idx,:).*lambda.*sim.B(end,:))/sum(theta(idx,:).*sim.B(end,:))))/(jPP(idx)+jF(idx)); %trophic level
     end
 end 
 
