@@ -14,7 +14,7 @@ function panelSpectrum(sim, ixTime)
 
     % brackground depending on trophic strategies
     [strategy, col] = calcTrophicStrategy(rates);
-
+    strategy
     Ngroup=1; %select the group for which the background is drawn
     ix = (p.ixStart(Ngroup):p.ixEnd(Ngroup));
     m = p.m(ix);
