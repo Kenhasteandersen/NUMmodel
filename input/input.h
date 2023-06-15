@@ -45,7 +45,7 @@
 ! Dissolved nutrient and DOC uptake:
 !-----------------------------------
   alphaN = 0.972d0                ! Diffusive affinity coefficient [L/d/mugC/um^2] 
- ! rNstar = 0.4d0                  ! Diffusive affinity cross-over size [um]
+  rNstar = 0.4d0                  ! Diffusive affinity cross-over size [um]
 
 ! Phagotrophy:
 !-------------
@@ -74,38 +74,39 @@
 ! -generalists with explict metabolic costs
 !***********************************************************************
   mMinGeneralist = 1.1623d-9    ! Description [mug C]
-  mMaxGeneralist = 1.0		! Description [mug C]
+  mMaxGeneralist = 1.0d0	! Description [mug C]
+  rho = 0.4d-6
 
 ! Light uptake:
 !--------------
-  epsilonL = 0.8                ! Light uptake efficiency []
-  alphaL = 0.3                  ! Scaling factor for light [unit]
-  rLstar = 7.5                  ! Description [unit]
-  bL = 0.08                     ! Cost of light harvesting [mugC/mugC]
+  epsilonL = 0.8d0                ! Light uptake efficiency []
+  alphaL = 0.3d0                  ! Scaling factor for light [unit]
+  rLstar = 7.5d0                  ! Description [unit]
+  bL = 0.08d0                     ! Cost of light harvesting [mugC/mugC]
 
 ! Dissolved nutrient and DOC uptake:
 !-----------------------------------
-  alphaN = 0.972                ! Description [L/d/mugC/mum^2] 
-  rNstar = 0.4                  ! Description [mum]
-  bN = 0.3                     	! cost of N uptake [mugC/mugN]
-  bDOC = 0.3                   	! cost of DOC uptake [mugC/mugC]
+  alphaN = 0.972d0                ! Description [L/d/mugC/mum^2] 
+  rNstar = 0.4d0                  ! Description [mum]
+  bN = 0.3d0                     	! cost of N uptake [mugC/mugN]
+  bDOC = 0.3d0                   	! cost of DOC uptake [mugC/mugC]
 
 ! Phagotrophy:
 !-------------
-  epsilonF = 0.8                ! Food Assimilation efficiency [unit]
-  alphaF = 0.018                ! Food affinity scaling factor [L mug C-1 d-1]
-  cF = 30.
+  epsilonF = 0.8d0                ! Food Assimilation efficiency [unit]
+  alphaF = 0.018d0                ! Food affinity scaling factor [L mug C-1 d-1]
+  cF = 30.0d0
   beta = 500.d0
   sigma = 1.3d0
-  bF = 0.3                     	! Cost of food uptake [mugC/mugC]
+  bF = 0.3d0                     	! Cost of food uptake [mugC/mugC]
 
 ! Metabolism:
 !------------
-  cLeakage = 0.03               ! Passive leakage of C and N
-  delta = 0.05                  ! Thickness of cell wall [mum]
-  alphaJ = 1.5                  ! Constant for jmax. [day-1]
-  cR = 0.03       
-  bg = 0.2                      ! Cost of biosynthsesis
+  cLeakage = 0.03d0               ! Passive leakage of C and N
+  delta = 0.05d0                  ! Thickness of cell wall [mum]
+  alphaJ = 1.5d0                  ! Constant for jmax. [day-1]
+  cR = 0.03d0       
+  bg = 0.2d0                      ! Cost of biosynthsesis
 
 ! Biogeo:
 !--------

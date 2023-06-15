@@ -19,7 +19,7 @@ errorio=false;
 [errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupgeneralistsonly', int32(n), errorio, errortext );
 
 if errorio
-    disp(['Error loading ',text,'. Execution terminated'])
+    disp(['Error loading ',errortext,'. Execution terminated'])
     return
 else
     disp('done loading input parameters')

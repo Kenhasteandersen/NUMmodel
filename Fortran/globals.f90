@@ -15,6 +15,15 @@ module globals
   real(dp) :: fTemp2, fTemp15 ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
   real(dp), parameter:: Tref = 10. ! Reference temperature
   
+  !
+  ! Specification of what to do with HTL losses:
+  !
+  real(dp) :: fracHTL_to_N ! Half becomes urine that is routed back to N
+  real(dp) :: fracHTL_to_POM ! Another half is fecal pellets that are routed back to the largest POM size class
+  
+  ! CN mass ratio:
+  real(dp) :: rhoCN 
+  
   character(len=16) :: inputfile='../input/input.h'
   
  

@@ -11,10 +11,10 @@ module diatoms_simple
     use globals
     use spectrum
     use read_input_module
-    use read_input_module2 
     implicit none
 
     private
+    real(dp) :: rhoCSi, epsilonL, bN, bSi, remin2
 
     type, extends(spectrumUnicellular) :: spectrumDiatoms_simple
       real(dp), dimension(:), allocatable:: JSi
@@ -39,27 +39,28 @@ module diatoms_simple
       character(c_char), dimension(*), intent(out) :: errorstr
       real(dp), parameter:: rho = 0.4*1d6*1d-12
       real(dp) :: mMin, v, alphaL, rLstar,  alphaN
-      real(dp) :: rNstar, cLeakage, delta, alphaJ, cR, palatability
+      real(dp) :: rNstar, cLeakage, delta, alphaJ, cR
+      real(dp) :: palatability
       ! no errors to begin with
        errorio=.false.
        
        print*, 'Loading parameter for diatoms simple from ', inputfile, ':'
-       call read_input2(inputfile,'diatoms_simple','mMin',mMin,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','rhoCSi',this%rhoCSi,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','v',v,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','epsilonL',this%epsilonL,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','alphaL',alphaL,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','rLstar',rLstar,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','alphaN',alphaN,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','rNstar',rNstar,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','bN',this%bN,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','bSi',this%bSi,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','cLeakage',cLeakage,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','delta',delta,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','alphaJ',alphaJ,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','cR',cR,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','remin2',this%remin2,errorio,errorstr)
-       call read_input2(inputfile,'diatoms_simple','palatability',palatability,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','mMin',mMin,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','rhoCSi',rhoCSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','v',v,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','epsilonL',epsilonL,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','alphaL',alphaL,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','rLstar',rLstar,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','alphaN',alphaN,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','rNstar',rNstar,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','bN',bN,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','bSi',bSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','cLeakage',cLeakage,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','delta',delta,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','alphaJ',alphaJ,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','cR',cR,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','remin2',remin2,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','palatability',palatability,errorio,errorstr)
       
       call this%initUnicellular(n, mMin, mMax)
       allocate(this%JSi(this%n))
@@ -99,8 +100,8 @@ module diatoms_simple
          !
          this%JN(i) =   fTemp15 * gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
          !this%JDOC(i) = gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
-         this%JSi(i) = fTemp15 * gammaSi * this%AN(i)*Si*this%rhoCSi! Diffusive Si uptake, units of C/time
-         this%JL(i) =   this%epsilonL * this%AL(i)*L  ! Photoharvesting
+         this%JSi(i) = fTemp15 * gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
+         this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
          !
          ! Estimate the limiting growth nutrient (Liebig):
          !
@@ -110,7 +111,7 @@ module diatoms_simple
          ! Account for possible carbon limitation due to carbon costs of uptakes:
          !
          this%Jtot(i) = min( this%Jtot(i), &
-            this%JL(i)-ftemp2*this%Jresp(i) - (this%bN/rhoCN + this%bSi/this%rhoCSi)*this%Jtot(i) )
+            this%JL(i)-ftemp2*this%Jresp(i) - (bN/rhoCN + bSi/rhoCSi)*this%Jtot(i) )
          
          ! Jtot synthesis limitation:
         if (this%Jtot(i) .gt. 0.) then
@@ -130,10 +131,10 @@ module diatoms_simple
       integer:: i
   
       this%mort2 = this%mort2constant*u
-      this%jPOM = (1-this%remin2)*this%mort2 ! non-remineralized mort2 => POM
+      this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
       do i = 1, this%n
-        mortloss = this%remin2 * this%mort2(i)*u(i) !+reminHTL*this%mortHTL(i))
+        mortloss = remin2 * this%mort2(i)*u(i) !+reminHTL*this%mortHTL(i))
         !
         ! Update nitrogen:
         !
@@ -153,7 +154,7 @@ module diatoms_simple
         dSidt = dSidt &
              + ((-this%Jtot(i))*u(i)/this%m(i) & ! Uptakes of silicate
              + mortloss  & ! all mortality due to remineralisation, HTL and virulysis is returned
-             + this%mortpred(i) )/this%rhoCSi ! Silicate relased during predation by generalists is assumed to be remineralized immidiately
+             + this%mortpred(i) )/rhoCSi ! Silicate relased during predation by generalists is assumed to be remineralized immidiately
         !
         ! Update the diatoms:
         !

@@ -4,11 +4,12 @@
 module generalists_simple
   use globals
   use spectrum
-  use read_input_module 
-  use read_input_module2 
+  use read_input_module
   implicit none
 
   private 
+  
+  real(dp) :: epsilonL, remin2, reminF
 
   type, extends(spectrumUnicellular) :: spectrumGeneralistsSimple
     real(dp), allocatable :: JFreal(:)
@@ -46,48 +47,25 @@ contains
     errorio=.false.
 
     print*, 'Loading parameter for generalist simple from ', inputfile, ':'
-    call read_input2(inputfile,'generalists_simple','mMinGeneralist',mMinGeneralist,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','alphaN',alphaN,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','rNstar',rNstar,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','alphaL',alphaL,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','alphaF',alphaF,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','cF',cF,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','cLeakage',cLeakage,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','alphaJ',alphaJ,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','cR',cR,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','rLstar',rLstar,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','delta',delta,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','beta',this%beta,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','sigma',this%sigma,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','epsilonF',this%epsilonF,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','epsilonL',this%epsilonL,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','remin2',this%remin2,errorio,errorstr)
-    call read_input2(inputfile,'generalists_simple','reminF',this%reminF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','mMinGeneralist',mMinGeneralist,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaN',alphaN,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','rNstar',rNstar,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaL',alphaL,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaF',alphaF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','cF',cF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','cLeakage',cLeakage,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaJ',alphaJ,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','cR',cR,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','rLstar',rLstar,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','delta',delta,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','epsilonL',epsilonL,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','remin2',remin2,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','reminF',reminF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','beta',this%beta,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','sigma',this%sigma,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','epsilonF',this%epsilonF,errorio,errorstr)
     
-   ! mMinGeneralist = 1.1623d-9    ! Smallest cell size [mug C]
-  ! mMaxGeneralist = 1.0d0	! Largest cell size [mug C]
-
-  !this%epsilonL = 0.8d0              ! Light uptake efficiency []
-  !alphaL = 0.3d0                ! Light affinity coef. [1/(uE/m2/s) 1/day um]
-  !rLstar = 7.5d0                ! Light affinity cross-over size [um]
-  !alphaN = 0.972d0                ! Diffusive affinity coefficient [L/d/mugC/um^2] 
-  !rNstar = 0.4d0                  ! Diffusive affinity cross-over size [um]
-  !this%epsilonF = 0.8d0                ! Food assimilation efficiency [-]
-  !alphaF = 0.018d0                ! Clearance rate [L/d/ug C]
-  !cF = 30.0d0                      ! Max phagotrophy coefficient [um/day]
-  !this%beta = 500.d0                 ! Preferred predator-prey mass ratio
-  !this%sigma = 1.3d0                 ! Preferred predator-prey mass range
-  !cLeakage = 0.03d0             ! Passive leakage of C and N
-  !delta = 0.05d0                 ! Thickness of cell wall [um]
-  !alphaJ = 1.5d0                 ! Constant for jMax [day-1]
-  !cR = 0.1d0                     ! Basal metabolism relative to jMax [-]
-  !this%remin2 = 0.5d0                ! Fraction of viral lysis remineralized to DOC
-  !this%reminF = 0.1d0                ! Fraction of feeding losses remineralized
-    
-    
-    
-
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
 
@@ -123,7 +101,7 @@ contains
        !
        this%JN(i) =   gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
        this%JDOC(i) = gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
-       this%JL(i) =   this%epsilonL * this%AL(i)*L  ! Photoharvesting
+       this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
        this%JNtot(i) = this%JN(i)+this%JF(i)-this%Jlosspassive(i) ! In units of C
        ! Total carbon uptake
@@ -162,7 +140,7 @@ contains
       ! Losses:
       !
       this%JCloss_feeding(i) = (1.-this%epsilonF)/this%epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
-      this%JCloss_photouptake(i) = (1.-this%epsilonL)/this%epsilonL * this%JLreal(i)
+      this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
       this%JNlossLiebig(i) = max( 0.d0, this%JNtot(i)-this%Jtot(i))  ! In units of C
       this%JClossLiebig(i) = max( 0.d0, this%JCtot(i)-this%Jtot(i)) ! C losses from Liebig, not counting losses from photoharvesting
 
@@ -196,7 +174,7 @@ end subroutine calcRatesGeneralistsSimple
     integer:: i
 
     this%mort2 = this%mort2constant*u ! "quadratic" mortality
-    this%jPOM = (1-this%remin2)*this%mort2 ! non-remineralized mort2 => POM
+    this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
     do i = 1, this%n
       !
@@ -207,7 +185,7 @@ end subroutine calcRatesGeneralistsSimple
            +  this%JlossPassive(i) &
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) & ! All feeding losses are reminineralized
-           +  this%remin2*this%mort2(i) & 
+           +  remin2*this%mort2(i) & 
            ) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -217,8 +195,8 @@ end subroutine calcRatesGeneralistsSimple
            +   this%JlossPassive(i) &
            +   this%JClossLiebig(i) &
            +   this%JCloss_photouptake(i) &
-           +   this%reminF*this%JCloss_feeding(i))/this%m(i) &
-           +   this%remin2*this%mort2(i) & 
+           +   reminF*this%JCloss_feeding(i))/this%m(i) &
+           +   remin2*this%mort2(i) & 
            ) * u(i)
       !
       ! Update the generalists:

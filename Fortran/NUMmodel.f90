@@ -69,7 +69,8 @@ contains
     logical(1), intent(out):: errorio ! Whether to losses to the deep
     character(c_char), dimension(*) :: errorstr
     
-    call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
+    call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimpleOnly
@@ -80,7 +81,8 @@ contains
     character(c_char), dimension(*) :: errorstr
 
    
-    call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
+    call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
 
@@ -95,7 +97,8 @@ contains
     integer, intent(in):: n
     logical(1), intent(out):: errorio ! Whether to losses to the deep
     character(c_char), dimension(*) :: errorstr
-    call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
+    call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr) ! generalists with n size classes
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
@@ -107,7 +110,8 @@ contains
     integer, intent(in):: n, nPOM
     logical(1), intent(out):: errorio ! Whether to losses to the deep
     character(c_char), dimension(*) :: errorstr
-    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+    call parametersInit(2, n+nPOM, 2,errorio,errorstr) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
       IF ( errorio ) RETURN 
     call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
@@ -122,7 +126,8 @@ contains
     integer, intent(in):: n, nPOM
     logical(1), intent(out):: errorio ! Whether to losses to the deep
     character(c_char), dimension(*) :: errorstr
-    call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+    call parametersInit(2, n+nPOM, 2,errorio,errorstr) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralist, n, 0.d0,errorio,errorstr) ! generalists with n size classes
       IF ( errorio ) RETURN 
     call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
@@ -136,7 +141,8 @@ contains
     integer, intent(in):: n
     logical(1), intent(out):: errorio ! Whether to losses to the deep
     character(c_char), dimension(*) :: errorstr
-    call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
+    call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typeDiatom, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
     call parametersFinalize(0.1d0, .false., .false.)
   end subroutine setupDiatomsOnly
@@ -148,7 +154,8 @@ contains
    integer, intent(in):: n
    logical(1), intent(out):: errorio ! Whether to losses to the deep
    character(c_char), dimension(*) :: errorstr
-   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
+   call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
+     IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom_simple, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
    call parametersFinalize(0.1d0, .false., .false.)
   end subroutine setupDiatoms_simpleOnly
@@ -160,7 +167,8 @@ contains
       integer, intent(in):: n
       logical(1), intent(out):: errorio ! Whether to losses to the deep
       character(c_char), dimension(*) :: errorstr
-      call parametersInit(2, 2*n, 3)
+      call parametersInit(2, 2*n, 3,errorio,errorstr)
+        IF ( errorio ) RETURN 
       call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr) ! generalists with n size classes
         IF ( errorio ) RETURN 
       call parametersAddGroup(typeDiatom, n, 0.d0,errorio,errorstr) ! diatoms with n size classes
@@ -171,7 +179,8 @@ contains
       integer, intent(in):: n
       logical(1), intent(out):: errorio ! Whether to losses to the deep
       character(c_char), dimension(*) :: errorstr
-      call parametersInit(2, 2*n, 3)
+      call parametersInit(2, 2*n, 3,errorio,errorstr)
+        IF ( errorio ) RETURN 
       call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
         IF ( errorio ) RETURN 
       call parametersAddGroup(typeDiatom_simple, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
@@ -184,7 +193,8 @@ contains
   subroutine setupGeneralistsSimpleCopepod(errorio,errorstr)
     logical(1), intent(out):: errorio ! Whether to losses to the deep
     character(c_char), dimension(*) :: errorstr
-    call parametersInit(2, 20, 2)
+    call parametersInit(2, 20, 2,errorio,errorstr)
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralistSimple, 10, 0.0d0,errorio,errorstr)
       IF ( errorio ) RETURN 
     call parametersAddGroup(typeCopepodActive, 10, .1d0,errorio,errorstr) ! add copepod with adult mass .1 mugC
@@ -201,7 +211,8 @@ contains
     integer, parameter:: n = 10 ! number of size classes in each group
     integer:: iCopepod
 
-    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
+    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2,errorio,errorstr)
+      IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
       IF ( errorio ) RETURN 
     if ( size(mAdult) .eq. 0) then
@@ -224,7 +235,9 @@ contains
    character(c_char), dimension(*) :: errorstr
    integer:: iCopepod
  
-   call parametersInit(size(mAdultActive)+size(mAdultPassive)+3, 2*n + nPOM + nCopepod*(size(mAdultPassive)+size(mAdultActive)), 3)
+   call parametersInit(size(mAdultActive)+size(mAdultPassive)+3, 2*n + nPOM &
+           + nCopepod*(size(mAdultPassive)+size(mAdultActive)), 3,errorio,errorstr)
+     IF ( errorio ) RETURN 
    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
      IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
@@ -254,7 +267,8 @@ contains
    character(c_char), dimension(*) :: errorstr
    integer:: iCopepod
  
-   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3)
+   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3,errorio,errorstr)
+     IF ( errorio ) RETURN 
    call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
      IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom_simple, n, 1.0d0,errorio,errorstr)
@@ -279,7 +293,8 @@ contains
    character(c_char), dimension(*) :: errorstr
    integer:: iCopepod
  
-   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3)
+   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3,errorio,errorstr)
+     IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom, n, 0.0d0,errorio,errorstr)
      IF ( errorio ) RETURN 
    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
@@ -304,12 +319,21 @@ contains
   !    nnGroups: number of size spectrum groups
   !    nnGrid: total length of the grid (excl nnNutrients points for N, DOC, etc.)
   ! -----------------------------------------------
-  subroutine parametersInit(nnGroups, nnGrid, nnNutrients)
+  subroutine parametersInit(nnGroups, nnGrid, nnNutrients,errorio,errorstr)
     integer, intent(in):: nnGrid, nnGroups, nnNutrients
+    logical(1), intent(out):: errorio 
+    character(c_char), dimension(*), intent(out) :: errorstr
+    !
+    ! read general input parameters:
+    !
+    errorio=.false.
+    call read_input(inputfile,'general','rhoCN',rhoCN,errorio,errorstr)
+    call read_input(inputfile,'general','fracHTL_to_N',fracHTL_to_N,errorio,errorstr)
+    call read_input(inputfile,'general','fracHTL_to_POM',fracHTL_to_POM,errorio,errorstr)
+    !call read_input(inputfile,'general')
     !
     ! Set groups:
     !
-    call read_input(inputfile,'general')
 
     nGroups = nnGroups
     iCurrentGroup = 0

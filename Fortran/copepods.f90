@@ -7,11 +7,12 @@ module copepods
   use globals
   use spectrum
   use read_input_module
-  use read_input_module2 
   implicit none
 
   integer, parameter :: passive = 1
   integer, parameter :: active = 2
+  real(dp) :: epsilonR, kBasal, kSDA
+  real(dp) :: DiatomsPreference
 
   private
 
@@ -55,21 +56,22 @@ contains
     end if
     
     print*, 'Loading parameter for copepods from ', inputfile, ':'
-    call read_input2(inputfile,this_listname,'alphaF',alphaF,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'q',q,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'h',h,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'hExponent',hExponent,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'AdultOffspring',AdultOffspring,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'vulnerability',vulnerability,errorio,errorstr)
+    call read_input(inputfile,this_listname,'alphaF',alphaF,errorio,errorstr)
+    call read_input(inputfile,this_listname,'q',q,errorio,errorstr)
+    call read_input(inputfile,this_listname,'h',h,errorio,errorstr)
+    call read_input(inputfile,this_listname,'hExponent',hExponent,errorio,errorstr)
+    call read_input(inputfile,this_listname,'AdultOffspring',AdultOffspring,errorio,errorstr)
+    call read_input(inputfile,this_listname,'vulnerability',vulnerability,errorio,errorstr)
     
-    call read_input2(inputfile,this_listname,'epsilonF',this%epsilonF,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'epsilonR',this%epsilonR,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'beta',this%beta,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'sigma',this%sigma,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'kBasal',this%kBasal,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'kSDA',this%kSDA,errorio,errorstr)
-    call read_input2(inputfile,this_listname,'DiatomsPreference',this%DiatomsPreference,errorio,errorstr)
+    call read_input(inputfile,this_listname,'epsilonR',epsilonR,errorio,errorstr)
+    call read_input(inputfile,this_listname,'kBasal',kBasal,errorio,errorstr)
+    call read_input(inputfile,this_listname,'kSDA',kSDA,errorio,errorstr)
+    call read_input(inputfile,this_listname,'DiatomsPreference',DiatomsPreference,errorio,errorstr)
     
+    call read_input(inputfile,this_listname,'epsilonF',this%epsilonF,errorio,errorstr)
+    call read_input(inputfile,this_listname,'beta',this%beta,errorio,errorstr)
+    call read_input(inputfile,this_listname,'sigma',this%sigma,errorio,errorstr)
+    this%DiatomsPreference=DiatomsPreference
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
@@ -84,7 +86,7 @@ contains
 
     this%AF = alphaF*this%m**q
     this%JFmax = h*this%m**hExponent
-    this%JrespFactor = epsilonF*this%JFmax
+    this%JrespFactor = this%epsilonF*this%JFmax
     this%mort2constant = 0.d0 ! No quadratic mortality
     this%mort2 = 0.d0
     this%palatability = vulnerability

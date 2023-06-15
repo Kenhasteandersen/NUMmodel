@@ -7,10 +7,11 @@ module diatoms
      use globals
      use spectrum
      use read_input_module
-     use read_input_module2 
      implicit none
  
      private
+     real(dp) :: bN, bL, bDOC, bSi, bg, epsilonL
+     real(dp) :: rhoCSi, remin2
      
      type, extends(spectrumUnicellular) :: spectrumDiatoms
      real(dp), dimension(:), allocatable:: JSi,JSireal
@@ -44,26 +45,27 @@ module diatoms
        errorio=.false.
        
        print*, 'Loading parameter for diatoms from ', inputfile, ':'
-       call read_input2(inputfile,'diatoms','mMinDiatom',mMinDiatom,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','mMaxDiatom',mMaxDiatom,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','rhoCSi',this%rhoCSi,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','v',v,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','epsilonL',this%epsilonL,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','alphaL',alphaL,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','rLstar',rLstar,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','bL',this%bL,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','alphaN',alphaN,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','rNstar',rNstar,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','bN',this%bN,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','bDOC',this%bDOC,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','bSi',this%bSi,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','cLeakage',cLeakage,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','delta',delta,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','alphaJ',alphaJ,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','cR',cR,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','bg',this%bg,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','remin2',this%remin2,errorio,errorstr)
-       call read_input2(inputfile,'diatoms','palatability',palatability,errorio,errorstr)
+       call read_input(inputfile,'diatoms','mMinDiatom',mMinDiatom,errorio,errorstr)
+       call read_input(inputfile,'diatoms','mMaxDiatom',mMaxDiatom,errorio,errorstr)
+       call read_input(inputfile,'diatoms','rhoCSi',rhoCSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms','v',v,errorio,errorstr)
+       call read_input(inputfile,'diatoms','epsilonL',epsilonL,errorio,errorstr)
+       call read_input(inputfile,'diatoms','alphaL',alphaL,errorio,errorstr)
+       call read_input(inputfile,'diatoms','rLstar',rLstar,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bL',bL,errorio,errorstr)
+       call read_input(inputfile,'diatoms','alphaN',alphaN,errorio,errorstr)
+       call read_input(inputfile,'diatoms','rNstar',rNstar,errorio,errorstr)
+       
+       call read_input(inputfile,'diatoms','bN',bN,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bDOC',bDOC,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bSi',bSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms','cLeakage',cLeakage,errorio,errorstr)
+       call read_input(inputfile,'diatoms','delta',delta,errorio,errorstr)
+       call read_input(inputfile,'diatoms','alphaJ',alphaJ,errorio,errorstr)
+       call read_input(inputfile,'diatoms','cR',cR,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bg',bg,errorio,errorstr)
+       call read_input(inputfile,'diatoms','remin2',remin2,errorio,errorstr)
+       call read_input(inputfile,'diatoms','palatability',palatability,errorio,errorstr)
        
        
        call this%initUnicellular(n, mMinDiatom, mMaxDiatom)
@@ -109,27 +111,27 @@ module diatoms
           !
           this%JN(i) =  ftemp15* gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
           this%JDOC(i) = ftemp15*gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
-          this%JSi(i) = ftemp15* gammaSi * this%AN(i)*Si*this%rhoCSi! Diffusive Si uptake, units of C/time
-          this%JL(i) =  this%epsilonL * this%AL(i)*L  ! Photoharvesting
+          this%JSi(i) = ftemp15* gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
+          this%JL(i) =  epsilonL * this%AL(i)*L  ! Photoharvesting
           JmaxT = fTemp2*this%Jmax(i)
 
          ! write(*,*) this%JL(i)
           jlim(i)=0.0
           !
           ! Potential net uptake
-          Jnetp(i)=this%JL(i)*(1-this%bL)+this%JDOC(i)*(1-this%bDOC)-ftemp2*this%Jresp(i)
-          !Jnet(i)  = max(0.,1./(1+this%bg)*(jnetp(i)-(this%bN*dN(i)*this%jN(i)+this%bSi*dSi(i)*this%JSi(i))))
+          Jnetp(i)=this%JL(i)*(1-bL)+this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
+          !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
           !
           ! Calculation of down-regulation factors for
           ! N-uptake
           if (this%JN(i).gt.0) then
-            dN(i) = min(1., 1./this%JN(i)*Jnetp(i)/(1+this%bg +this%bN+this%bSi))
+            dN(i) = min(1., 1./this%JN(i)*Jnetp(i)/(1+bg +bN+bSi))
           else 
             dN(i)=1.
           end if  
           ! Si-uptake
           if (this%JSi(i).gt.0.) then
-            dSi(i) = min(1., 1./this%JSi(i)*Jnetp(i)/(1+this%bg +this%bN+this%bSi))
+            dSi(i) = min(1., 1./this%JSi(i)*Jnetp(i)/(1+bg +bN+bSi))
           else 
             dSi(i)=1.
           end if 
@@ -169,16 +171,16 @@ module diatoms
            !
            if  ( dSi(i)<1 .and. dN(i)<1 ) then  ! this check might be redundant, but just to make sure
               dL(i)=1
-             Jnetp(i) = dL(i)*this%jL(i)*(1-this%bL)+dDOC(i)*this%JDOC(i)*(1-this%bDOC)-ftemp2*this%Jresp(i)
-             Jnet(i)  = max(0.,1./(1+this%bg)*(jnetp(i)-(this%bN*dN(i)*this%jN(i)+this%bSi*dSi(i)*this%JSi(i))))
+             Jnetp(i) = dL(i)*this%jL(i)*(1-bL)+dDOC(i)*this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
+             Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
             jlim(i)=Jnet(i)
            end if
            if (this%JL(i)>0.) then
-             dL(i) = min(1., 1./(this%jL(i)*(1-this%bL))*(jlim(i)*(1+this%bg+this%bSi+this%bN) &
-             -(1-this%bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
+             dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN) &
+             -(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
 
 
-             !write(*,*) 1./(this%jL(i)*(1-this%bL))*(jlim(i)*(1+this%bg+this%bSi+this%bN)-(1-this%bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) 
+             !write(*,*) 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)-(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) 
            
            else 
              dL(i)=-1.
@@ -187,11 +189,11 @@ module diatoms
            !
            if (dL(i)<0.) then ! It means that there's is too much C taken up 
              dL(i) = 0       ! We set light uptake to 0 and downregulate DOC uptake
-             dDOC(i) = min(1., 1./(this%JDOC(i)*(1-this%bDOC))*(Jlim(i)*(1+this%bg+this%bSi+this%bN) + ftemp2*this%Jresp(i)))  
+             dDOC(i) = min(1., 1./(this%JDOC(i)*(1-bDOC))*(Jlim(i)*(1+bg+bSi+bN) + ftemp2*this%Jresp(i)))  
            end if
-             Jnetp(i) = dL(i)*this%jL(i)*(1-this%bL)+dDOC(i)*this%JDOC(i)*(1-this%bDOC)-ftemp2*this%Jresp(i)
-             !Jnet(i)  = max(0.,1./(1+this%bg)*(jnetp(i)-(this%bN*dN(i)*this%jN(i)+this%bSi*dSi(i)*this%JSi(i))))
-             Jnet(i)  = 1./(1+this%bg)*(jnetp(i)-(this%bN*dN(i)*this%jN(i)+this%bSi*dSi(i)*this%JSi(i)))
+             Jnetp(i) = dL(i)*this%jL(i)*(1-bL)+dDOC(i)*this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
+             !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
+             Jnet(i)  = 1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i)))
 
              !write(*,*) i, Jnetp(i)/this%m(i),dL(i)
              if ( dSi(i)<1 .and. dN(i)<1 ) then
@@ -209,8 +211,8 @@ module diatoms
           !
           ! update jnetp with delta's
           !
-          !Jnetp  = this%JL(i)*(1-this%bL)+dDOC(i)*this%jDOC(i)*(1-this%bDOC)-this%Jresp(i)   
-          !Jnet = max(0., 1./(1+this%bg)*(Jnetp - (this%bN*dN(i)*this%JN(i)+this%bSi*dSi(i)*this%JSi(i)))) 
+          !Jnetp  = this%JL(i)*(1-bL)+dDOC(i)*this%jDOC(i)*(1-bDOC)-this%Jresp(i)   
+          !Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*dN(i)*this%JN(i)+bSi*dSi(i)*this%JSi(i)))) 
           !
           ! Saturation of net growth
           !
@@ -230,19 +232,19 @@ module diatoms
         !
         ! (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i) )&
         ! - (1-f)*fTemp2*this%Jresp(i) &
-        ! - ( (1-f)*(this%bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*this%bL+this%bN*dN(i)*this%JN(i)+this%bN*dSi(i)*this%JSi(i))&
-        ! + (1-f)*this%bg*Jnet(i) )
+        ! - ( (1-f)*(bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+bN*dN(i)*this%JN(i)+bN*dSi(i)*this%JSi(i))&
+        ! + (1-f)*bg*Jnet(i) )
           (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)- fTemp2*this%Jresp(i) &
-         - this%bN*dN(i)*this%JN(i)-this%bSi*dSi(i)*this%JSi(i) -this%bg*Jnet(i) &
-         -this%bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*this%bL)
+         - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) &
+         -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
              
-          this%JCloss_photouptake(i) = (1.-this%epsilonL)/this%epsilonL * this%JLreal(i)
+          this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
           this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + & !
-               (1-f)*(this%bDOC*dDOC(i)*this%JDOC(i) + &
-                      this%bL*dL(i)*this%JL(i) + &
-                      this%bN*dN(i)*this%JN(i) + &
-                      this%bSi*dSi(i)*this%JSi(i) + &
-                      this%bg*Jnet(i))
+               (1-f)*(bDOC*dDOC(i)*this%JDOC(i) + &
+                      bL*dL(i)*this%JL(i) + &
+                      bN*dN(i)*this%JN(i) + &
+                      bSi*dSi(i)*this%JSi(i) + &
+                      bg*Jnet(i))
           !
           !write(*,*) jlim(i),dN(i),dSi(i)
 
@@ -270,17 +272,17 @@ module diatoms
        integer:: i
    
        this%mort2 = this%mort2constant*u
-       this%jPOM = (1-this%remin2)*this%mort2 ! non-remineralized mort2 => POM
+       this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
        do i = 1, this%n
-        ! mortloss = u(i)*(this%remin2*this%mort2(i) +reminHTL* this%mortHTL(i))
+        ! mortloss = u(i)*(remin2*this%mort2(i) +reminHTL* this%mortHTL(i))
          !
          ! Update nitrogen:
          !
          dNdt = dNdt  &
          + ((-this%JNreal(i) &!+ (this%JN(i)- this%JlossPassive(i) -this%Jtot(i)) &
          + (1-this%f(i))*this%JlossPassive(i))/this%m(i) &
-         + this%remin2*this%mort2(i) &
+         + remin2*this%mort2(i) &
          !+ reminHTL*this%mortHTL(i) &
          )* u(i)/rhoCN
          !
@@ -290,14 +292,14 @@ module diatoms
          + ((-this%JDOCreal(i) &
          +  (1-this%f(i))*this%JlossPassive(i) &
          +  this%JCloss_photouptake(i))/this%m(i) &
-         +  this%remin2*this%mort2(i) &
+         +  remin2*this%mort2(i) &
          !+  reminHTL*this%mortHTL(i) &
          ) * u(i)
          ! update Si
          dSidt = dSidt &
          + ((-this%JSireal(i) &
          +   (1-this%f(i))*this%JlossPassive(i) )/this%m(i) &
-         +  this%remin2*this%mort2(i) &
+         +  remin2*this%mort2(i) &
          !+  reminHTL*this%mortHTL(i) &
          ) * u(i)/rhoCSi
          !
