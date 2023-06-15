@@ -23,7 +23,7 @@ module POM
       procedure, pass :: initPOM
       procedure :: calcDerivativesPOM
       procedure :: printRates => printRatesPOM
-      procedure :: getCbalance
+      !procedure :: getCbalance
     end type spectrumPOM
    
     public initPOM, spectrumPOM, calcDerivativesPOM, printRatesPOM
@@ -61,13 +61,13 @@ module POM
     dDOCdt = dDOCdt ! remineralized carbon is respired, so lost
   end subroutine calcDerivativesPOM
 
-  function getCbalance(this, u, dudt) result(Cbalance)
-    real(dp):: Cbalance
-    class(spectrumPOM), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
+  !function getCbalance(this, u, dudt) result(Cbalance)
+  !  real(dp):: Cbalance
+  !  class(spectrumPOM), intent(in):: this
+  !  real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = sum(dudt + this%Jresptot/this%m*u)
-  end function getCbalance
+  !  Cbalance = sum(dudt + this%Jresptot/this%m*u)
+  !end function getCbalance
 
   subroutine printRatesPOM(this)
     class(spectrumPOM), intent(in):: this

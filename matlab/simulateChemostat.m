@@ -8,9 +8,10 @@
 % Options:
 %  bUnicellularloss - determines whether unicellular groups are subject to
 %      mixing losses
-%  bCalculateNloss - determines whether to calculate the variation of Nitrogen per day in the Chemostat layer (takes time)
-%                    Adds to the output : NDeepTot - N gain from the deep throughout the simulation in µg/L
-%                                         deltaNdt - Variation of Nitrogen per day in the Chemostat layer in µg/L/day
+%  bCalculateNgain - determines whether to calculate the variation of Nitrogen per day in the Chemostat layer
+%                    Adds to the output : Ngain - N gained from the deep throughout the simulation minus the losses in µg/L
+%                                         deltaNdt - Variation of N per day in the Chemostat layer in µg/L/day
+%  bVerbose - displays the nutrients balances
 %
 % Out:
 %  sim - simulation object
@@ -22,7 +23,8 @@ arguments
     L double = 100;
     T double = 10;
     options.bUnicellularloss logical = true;
-    options.bCalculateNloss logical = false;
+    options.bCalculateNgain logical = false;
+    options.bVerbose logical = false;
 end
 %
 % Get the chemostat parameters if they are not already set:
@@ -64,17 +66,17 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 sLibname = loadNUMmodelLibrary();
 
 % Initial conditions
-if options.bCalculateNloss
+if options.bCalculateNgain
     u0=[p.u0 0];
 else 
     u0=p.u0;
 end
 
-sim.rhoCN=5.68;
+rhoCN = search_namelist('../input/input.nlm','general','rhoCN');
 [t,u] = ode23s(@fDeriv, [0 p.tEnd], u0); 
 
-if options.bCalculateNloss
-    sim.NDeepTot=u(:,end); % N gain from the deep throughout the simulation
+if options.bCalculateNgain
+    sim.Ngain=u(:,end); % N gained from the deep minus the losses
     u=u(:,1:p.n);
 end
 %
@@ -117,14 +119,40 @@ sim.bUnicellularloss = options.bUnicellularloss;
 %
 % Calculate N variations
 %
-if options.bCalculateNloss
-    sim.deltaNdt = (sim.N(end)+sum(sim.B(end,:))/sim.rhoCN - ...
-        (p.u0(p.idxN)+sum(p.u0(p.idxB:end))/sim.rhoCN + ...
-        sim.NDeepTot(end)))/ t(end); % Variation of Nitrogen per day in the Chemostat layer
+if options.bCalculateNgain
+    sim.deltaNdt = (sim.N(end)+sum(sim.B(end,:))/rhoCN - ...
+        (p.u0(p.idxN)+sum(p.u0(p.idxB:end))/rhoCN + ...
+        sim.Ngain(end)))/ t(end); % Variation of Nitrogen per day in the Chemostat layer
 end
 
 [sim.Cbalance,sim.Nbalance,sim.Sibalance] = getBalance(sim.u(end,:), mean(sim.L), sim.T); % in units per day
 
+%
+% Display rates
+%
+if options.bVerbose
+    %Rate
+    Crate=sim.Cbalance/(sim.DOC(end)+sum(sim.B(end,:)))*100;
+    Nrate=sim.Nbalance/(sim.N(end)+sum(sim.B(end,:))/rhoCN)*100;
+    fprintf("----------------------------------------------\n")
+    fprintf("Rate of gain of C: %8.3f %% per day \n", Crate);
+    fprintf("Rate of gain of N in the last derivative calculation: %8.3f  %% per day \n", Nrate);
+    %Presence of Diatoms 
+    ixDiatoms = find(p.typeGroups==3);
+    if ~isempty(ixDiatoms)
+        ixDiatoms = (p.ixStart(ixDiatoms):p.ixEnd(ixDiatoms))-p.idxSi;
+        rhoCSi = search_namelist('../input/input.nlm','Diatoms','rhoCSi');
+        Sirate=sim.Sibalance/(sim.Si(end)+sum(sim.B(end,ixDiatoms))/rhoCSi)*100;
+        fprintf("Rate of gain of Si: %8.3f %% per day \n", Sirate);
+    end
+    %N losses
+    if options.bCalculateNgain
+        changes=sim.deltaNdt/(sim.N(end)+sum(sim.B(end,:))/5.68)*100;
+        fprintf("Total gain of N throughout the simulation: %8.3f µg/L \n", sim.Ngain(end));
+        fprintf("Average rate of N change over the entire simulation: %8.3f %% per day \n", changes)
+    end
+    fprintf("----------------------------------------------\n")
+end
 
 
     % -------------------------------------------------------------------------
@@ -145,20 +173,20 @@ end
             %
             % Calculate N gain from the deep
             %
-            if options.bCalculateNloss
+            if options.bCalculateNgain
                 
                 % Extract the losses
                 Clost=0;
                 Nlost = 0;
                 SiLost=0;
 
-                [~,~, Nlost, ~] = calllib(loadNUMmodelLibrary(), 'f_getlost', ...
+                [~,~, Nlost, ~] = calllib(sLibname, 'f_getlost', ...
                     u, Clost, Nlost, SiLost);
            
-                dudt(end+1) = (uDeep(1)-u(1))*p.d-Nlost; 
+                dudt(end+1) = (uDeep(1)-u(1))*p.d-Nlost;
             
                 if options.bUnicellularloss 
-                    dudt(end)=dudt(end)-p.d*sum(u(p.idxB:end))/sim.rhoCN; %takes B's losses to the deep into account
+                    dudt(end)=dudt(end)-p.d*sum(u(p.idxB:end))/rhoCN; %takes B's losses to the deep into account
                 end
             end
 

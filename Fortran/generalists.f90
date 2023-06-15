@@ -107,7 +107,7 @@ contains
     real(dp), intent(in):: gammaN, gammaDOC
     real(dp), intent(in):: L, N, DOC
     real(dp):: f, JmaxT
-    real(dp):: Jnetp(this%n), Jnet(this%n),Jlim(this%n)
+    real(dp):: Jnetp(this%n), Jnet(this%n)
     integer:: i
 
     do i = 1, this%n

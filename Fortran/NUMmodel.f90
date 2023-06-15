@@ -1,5 +1,11 @@
 !
 ! The NUM model framework
+! 
+! This module consists of three parts:
+!  1) Setting up a new simulation. This handled by all the subroutines starting with
+!     setupXXX and parametersXXX.
+!  2) The core routines to make a derivative and simulate with Euler integration
+!  3) The remaining subroutines are getting information out about parameters or the simulation
 !
 module NUMmodel
   use iso_c_binding, only: c_char, c_null_char
@@ -31,10 +37,10 @@ module NUMmodel
   ! Variables that contain the size spectrum groups
   !
   integer:: nGroups ! Number of groups
-  integer:: iCurrentGroup ! The current group to be added
+  integer:: iCurrentGroup ! The current group to be added (used in the parametersXX subroutines)
   integer:: nNutrients ! Number of nutrient state variables
   integer:: idxB ! First index into non-nutrient groups (=nNutrients+1)
-  integer:: nGrid ! Total number of grid points incl.  points for nutrients
+  integer:: nGrid ! Total number of state variables in u incl. variables for nutrients
   type(spectrumContainer), allocatable :: group(:) ! Structure pointing to each group
   integer, dimension(:), allocatable :: ixStart, ixEnd ! Indices into u for each group
 
@@ -385,7 +391,6 @@ contains
     type(spectrumGeneralistsSimple) :: specGeneralistsSimple
     type(spectrumDiatoms_simple):: specDiatoms_simple
     type(spectrumDiatoms):: specDiatoms
-    !type(spectrumGeneralists_csp):: specGeneralists_csp
     type(spectrumCopepod):: specCopepod
     type(spectrumPOM):: specPOM
     !
@@ -425,7 +430,7 @@ contains
       call initPOM(specPOM, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
       idxPOM = iCurrentGroup 
-    end select
+   end select
 
   end subroutine parametersAddGroup
   ! -----------------------------------------------
@@ -1140,14 +1145,14 @@ end subroutine getLost
   ! ---------------------------------------------------
   ! Returns the rates calculated from last call to calcDerivatives
   ! ---------------------------------------------------
-  subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal, f,&
+  subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal, ff,&
     jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
     jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
     use globals
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
-    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
+    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), ff(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
     real(dp), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
@@ -1180,15 +1185,15 @@ end subroutine getLost
         jMax( i1:i2 ) = fTemp2 * spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
-        f( i1:i2 ) = group(iGroup)%spec%f
+        ff( i1:i2 ) = group(iGroup)%spec%f
       class is (spectrumMulticellular)
-        jN( i1:i2 ) = 0
-        jDOC( i1:i2 ) = 0
-        jL( i1:i2 ) = 0
-        jMax( i1:i2 ) = 0
-        jLossPassive( i1:i2 ) = 0
-        jLreal( i1:i2 ) = 0
-        f( i1:i2 ) = 0
+        jN( i1:i2 ) = 0.d0
+        jDOC( i1:i2 ) = 0.d0
+        jL( i1:i2 ) = 0.d0
+        jMax( i1:i2 ) = 0.d0
+        jLossPassive( i1:i2 ) = 0.d0
+        jLreal( i1:i2 ) = 0.d0
+        ff( i1:i2 ) = 0.d0
       end select
 
       select type (spectrum => group(iGroup)%spec)

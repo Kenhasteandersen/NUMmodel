@@ -10,7 +10,7 @@ module NUMmodel_wrap
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
-       setHTL, setmortHTL, setSinking, getRates, getBalance, getLost
+       setHTL, setmortHTL, setSinking, getRates, getBalance, getLost, theta
 
   use globals
 
@@ -121,13 +121,6 @@ contains
     call setupGenDiatCope(n,nCopepod,nPOM,mAdult,errorio, errorstr)
   end subroutine f_setupGenDiatCope
 
-  !subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
-  !  integer(c_int), intent(in), value:: nCopepods
-  !  real(c_double), intent(in):: mAdult(nCopepods)
-
-  !  call setupGeneric_csp(mAdult)
-  !end subroutine f_setupGeneric_csp
-
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
     logical, intent(in), value:: bQuadraticHTL, bDecliningHTL
@@ -228,15 +221,15 @@ contains
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
     use NUMmodel, only: nNutrients, getRates
-    real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
-    real(dp), intent(out):: jSi(nGrid-nNutrients)
-    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
-    real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
-    real(dp), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
-    real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
-    real(dp), intent(out):: jPOM(nGrid-nNutrients)
-    real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
-    real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
+    real(c_double), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
+    real(c_double), intent(out):: jSi(nGrid-nNutrients)
+    real(c_double), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
+    real(c_double), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
+    real(c_double), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
+    real(c_double), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(c_double), intent(out):: jPOM(nGrid-nNutrients)
+    real(c_double), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
+    real(c_double), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
    call getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
    jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
@@ -244,4 +237,10 @@ contains
    mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates
   
+  subroutine f_getTheta(thetaMatrix) bind(c)
+    real(c_double), intent (inout) :: thetaMatrix(nGrid,nGrid)
+
+    thetaMatrix = theta
+  end subroutine
+
 end module NUMmodel_wrap

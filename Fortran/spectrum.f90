@@ -75,8 +75,8 @@ module spectrum
   type, abstract, extends(typeSpectrum) :: spectrumMulticellular
   contains
     procedure :: initMulticellular
-    procedure :: printRatesMulticellular
-    procedure :: getCbalance => getCbalanceMulticellular
+    !procedure :: printRatesMulticellular
+    !procedure :: getCbalance => getCbalanceMulticellular
   end type spectrumMulticellular
   ! ------------------------------------------------
   ! Type needed to make an array of spectra:
@@ -167,13 +167,13 @@ contains
   this%mort2constant = 0.004/log(this%m(2) / this%m(1))
 end subroutine calcGrid
 
-function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
-    real(dp):: Nbalance, rhoCN
-    class(typeSpectrum), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
+!function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
+!    real(dp):: Nbalance
+!    class(typeSpectrum), intent(in):: this
+!    real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Nbalance = sum( dudt ) / rhoCN
-  end function getNbalanceSpectrum
+!    Nbalance = sum( dudt ) / rhoCN
+!  end function getNbalanceSpectrum
 
   subroutine getLossesSpectrum(this, u, Nloss, Closs, SiLoss)
     class(typeSpectrum), intent(in):: this
@@ -289,17 +289,17 @@ function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
     write(*,99) "jLossPass.", this%JlossPassive / this%m
   end subroutine printRatesUnicellular
 
-  function getCbalanceUnicellular(this, u, dudt) result(Cbalance)
-    real(dp):: Cbalance
-    class(spectrumUnicellular), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
+  !function getCbalanceUnicellular(this, u, dudt) result(Cbalance)
+  !  real(dp):: Cbalance
+  !  class(spectrumUnicellular), intent(in):: this
+  !  real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = sum(dudt &
-    - this%JLreal*u/this%m &
-    - this%JCloss_photouptake*u/this%m &
-    + this%Jresptot*u/this%m &
-    )
-  end function getCbalanceUnicellular
+  !  Cbalance = sum(dudt &
+  !  - this%JLreal*u/this%m &
+  !  - this%JCloss_photouptake*u/this%m &
+  !  + this%Jresptot*u/this%m &
+  !  )
+  !end function getCbalanceUnicellular
   !
   ! Returns the net primary production calculated as the total amount of carbon fixed
   ! by photsynthesis minus the respiration. Units: mugC/day/m3
@@ -361,17 +361,17 @@ function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
     this%mort2constant = 0.004/log(this%m(2) / this%m(1))
   end subroutine initMulticellular
   
-  function getCbalanceMulticellular(this, u, dudt) result(Cbalance)
-    class(spectrumMulticellular), intent(in):: this
-    real(dp):: Cbalance
-    real(dp), intent(in):: u(this%n), dudt(this%n)
+  !function getCbalanceMulticellular(this, u, dudt) result(Cbalance)
+  !  class(spectrumMulticellular), intent(in):: this
+  !  real(dp):: Cbalance
+  !  real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = sum( dudt & ! Change in standing stock of N
-          + this%Jresptot*u/this%m )  ! Losses from respiration
-  end function getCbalanceMulticellular
+  !  Cbalance = sum( dudt & ! Change in standing stock of N
+  !        + this%Jresptot*u/this%m )  ! Losses from respiration
+  !end function getCbalanceMulticellular
 
-  subroutine printRatesMulticellular(this)
-    class(spectrumMulticellular), intent(in) :: this
-  end subroutine printRatesMulticellular
+  !subroutine printRatesMulticellular(this)
+  !  class(spectrumMulticellular), intent(in) :: this
+  !end subroutine printRatesMulticellular
 
  end module spectrum
