@@ -19,6 +19,7 @@ try
     p = parametersChemostat(p);
     p.tEnd = 1;
     sim = simulateChemostat(p);
+    %plotSimulation(sim);
     fprintf('N balance: %e\n', checkBalanceDerivative(sim));
     %
     % Then check the value of the derivative:
