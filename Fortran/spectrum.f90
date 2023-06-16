@@ -21,6 +21,7 @@ module spectrum
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width
      real(dp):: epsilonF ! Assimilation efficiency
+     real(dp):: epsilonL ! Light Assimilation efficiency
      real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), f(:)
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
@@ -316,7 +317,6 @@ end subroutine calcGrid
                    (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
     end do
   end function getProdNet
-
   !
   ! Returns the net bacterial production calculated as the total amount of DOC
   ! taken up minus the respiration. Units: mugC/day/m3

@@ -16,8 +16,8 @@ end
 %
 % Check that input files are available:
 %
-if ~exist('../input/input.nlm','file')
-    error('The input file ../input/input.nlm is not available.');
+if ~exist('../input/input.h','file')
+    error('The input file ../input/input.h is not available.');
 end
 %
 % Find the correct library for the OS:

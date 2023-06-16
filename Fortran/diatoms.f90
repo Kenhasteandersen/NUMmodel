@@ -6,56 +6,12 @@
 module diatoms
      use globals
      use spectrum
-     use input
+     use read_input_module
      implicit none
  
      private
-     !
-     ! Stoichiometry:
-     !
-     !real(dp), parameter:: rhoCN = 5.68
-     real(dp) :: rhoCSi
-     !cell properties
-     !real(dp), parameter:: cm = 6d-7 ! rhoCmem 6*d.-7 ! Carbon content in cell membrane mugC(mum^-3)
-     !real(dp), parameter:: cb = 1.25d-7 ! rhoCcyt 1.25*d.-7 ! Carbon content in cell cytoplasm mugC(mum^-3)  
-     real(dp) :: v ! Vacuole fraction
-     !
-     ! Light uptake:
-     !
-     real(dp) :: epsilonL ! Light uptake efficiency
-     real(dp) :: alphaL
-     real(dp) :: rLstar
-     real(dp) :: bL ! cost of light harvesting mugC(mugC)^-1
-
-     !real(dp), parameter :: cL=0.18 ! photosynthetic affinity constant
-     !
-     ! Dissolved nutrient uptake:
-     !
-     real(dp) :: alphaN ! L/d/mugC/mum^2
-     real(dp) :: rNstar ! mum
-     real(dp) :: bN ! cost of N uptake mugC(mugN)^-1
-     real(dp) :: bDOC ! cost of DOC uptake mugC(mugN)^-1
-     real(dp) :: bSi ! cost of Si uptake mugC(mugSi)^-1
-     !
-     ! Metabolism
-     !
-     real(dp) :: cLeakage ! passive leakage of C and N
-     !real(dp) :: c ! Parameter for cell wall fraction of mass.
-     real(dp) :: delta ! Thickness of cell wall in mum
-     real(dp) :: alphaJ ! Constant for jmax.  per day
-     real(dp) :: cR
-     real(dp) :: bg ! cost of biosynthsesis -- parameter from literature pending
-    !
-    ! Predation risk:
-    !
-    real(dp) :: palatability
-     !
-     ! Bio-geo:
-     !
-     real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
-     !real(dp) :: reminHTL ! fraction of HTL mortality remineralized
-     real(dp) :: mMinDiatom
-     real(dp) :: mMaxDiatom
+     real(dp) :: bN, bL, bDOC, bSi, bg, epsilonL
+     real(dp) :: rhoCSi, remin2
      
      type, extends(spectrumUnicellular) :: spectrumDiatoms
      real(dp), dimension(:), allocatable:: JSi,JSireal
@@ -72,32 +28,46 @@ module diatoms
 
    contains
        
-     subroutine read_namelist()
-        integer :: file_unit,io_err
-
-        namelist /input_diatoms / &
-             & RhoCSi, v, &
-             & epsilonL, alphaL, rLstar, bL, &
-             & alphaN,rNstar, bN, bDOC, &
-             & bSi, &
-             & cLeakage, delta, alphaJ, cR, bg, &
-             & palatability, &
-             & remin2,mMinDiatom, mMaxDiatom
-
-        call open_inputfile(file_unit, io_err)
-        read(file_unit, nml=input_diatoms, iostat=io_err)
-        call close_inputfile(file_unit, io_err)
-     end subroutine read_namelist
-
-     subroutine initDiatoms(this, n)
+     subroutine initDiatoms(this, n,errorio,errorstr)
+       use iso_c_binding, only: c_char
        class(spectrumDiatoms):: this
        integer, intent(in):: n
+       logical(1), intent(out):: errorio 
+       character(c_char), dimension(*), intent(out) :: errorstr
        integer:: i
        real(dp), parameter:: mMin = 3.1623d-9
        real(dp), parameter:: rho = 0.4*1d-6
+       real(dp) :: mMinDiatom, mMaxDiatom, v, alphaL, rLstar,  alphaN
+       real(dp) :: rNstar, cLeakage, delta, alphaJ, cR, palatability
        !real(dp) :: fl
-
-       call read_namelist()
+       
+       ! no errors to begin with
+       errorio=.false.
+       
+       print*, 'Loading parameter for diatoms from ', inputfile, ':'
+       call read_input(inputfile,'diatoms','mMinDiatom',mMinDiatom,errorio,errorstr)
+       call read_input(inputfile,'diatoms','mMaxDiatom',mMaxDiatom,errorio,errorstr)
+       call read_input(inputfile,'diatoms','rhoCSi',rhoCSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms','v',v,errorio,errorstr)
+       call read_input(inputfile,'diatoms','epsilonL',epsilonL,errorio,errorstr)
+       call read_input(inputfile,'diatoms','alphaL',alphaL,errorio,errorstr)
+       call read_input(inputfile,'diatoms','rLstar',rLstar,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bL',bL,errorio,errorstr)
+       call read_input(inputfile,'diatoms','alphaN',alphaN,errorio,errorstr)
+       call read_input(inputfile,'diatoms','rNstar',rNstar,errorio,errorstr)
+       
+       call read_input(inputfile,'diatoms','bN',bN,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bDOC',bDOC,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bSi',bSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms','cLeakage',cLeakage,errorio,errorstr)
+       call read_input(inputfile,'diatoms','delta',delta,errorio,errorstr)
+       call read_input(inputfile,'diatoms','alphaJ',alphaJ,errorio,errorstr)
+       call read_input(inputfile,'diatoms','cR',cR,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bg',bg,errorio,errorstr)
+       call read_input(inputfile,'diatoms','remin2',remin2,errorio,errorstr)
+       call read_input(inputfile,'diatoms','palatability',palatability,errorio,errorstr)
+       
+       
        call this%initUnicellular(n, mMinDiatom, mMaxDiatom)
        allocate(this%JSi(this%n))
        allocate(this%JSireal(this%n))
@@ -206,7 +176,8 @@ module diatoms
             jlim(i)=Jnet(i)
            end if
            if (this%JL(i)>0.) then
-             dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)-(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
+             dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN) &
+             -(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
 
 
              !write(*,*) 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)-(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) 
@@ -264,7 +235,8 @@ module diatoms
         ! - ( (1-f)*(bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+bN*dN(i)*this%JN(i)+bN*dSi(i)*this%JSi(i))&
         ! + (1-f)*bg*Jnet(i) )
           (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)- fTemp2*this%Jresp(i) &
-         - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
+         - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) &
+         -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
              
           this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
           this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + & !

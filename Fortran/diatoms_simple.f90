@@ -10,51 +10,11 @@
 module diatoms_simple
     use globals
     use spectrum
+    use read_input_module
     implicit none
 
     private
-    !
-    ! Stoichiometry:
-    !
-    real(dp) :: rhoCSi
-    !
-    ! Cell properties
-    !
-     real(dp) :: v ! Vacuole fraction. Could be estimated by comparing the density of flagellages and diatoms in Menden-Deuer (2000)
-    !
-    ! Light uptake:
-    !
-    real(dp) :: epsilonL = 0.8 ! Light uptake efficiency
-    real(dp) :: alphaL = 0.3
-    real(dp) :: rLstar = 7.5
-    !
-    ! Costs
-    !
-    real(dp) :: bN ! cost of N uptake mugC(mugN)^-1
-    real(dp) :: bSi ! cost of Si uptake mugC(mugSi)^-1
-    !
-    ! Dissolved nutrient uptake:
-    !
-    real(dp):: alphaN ! L/d/mugC/mum^2
-    real(dp):: rNstar ! mum
-    !
-    ! Metabolism
-    !
-    real(dp) :: cLeakage! passive leakage of C and N
-    real(dp) :: delta ! Thickness of cell wall in mum
-    real(dp) :: alphaJ ! Constant for jmax.  per day
-    real(dp) :: cR
-    !
-    ! Predation risk:
-    !
-    real(dp) :: palatability
-    !
-    ! Bio-geo:
-    !
-    !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-    real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
-    !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
-    real(dp) :: mMin
+    real(dp) :: rhoCSi, epsilonL, bN, bSi, remin2
 
     type, extends(spectrumUnicellular) :: spectrumDiatoms_simple
       real(dp), dimension(:), allocatable:: JSi
@@ -70,29 +30,38 @@ module diatoms_simple
     public calcDerivativesDiatoms_simple, printRatesDiatoms_simple
   contains
       
-     subroutine read_namelist()
-       integer :: file_unit,io_err
-
-        namelist /input_diatoms_simple / &
-             & RhoCSi, v, &
-             & epsilonL, alphaL, rLstar, bN, bSi, &
-             & alphaN,rNstar, &
-             & cLeakage, delta, alphaJ, cR, &
-             & palatability, &
-             & remin2, mMin
-
-        call open_inputfile(file_unit, io_err)
-        read(file_unit, nml=input_diatoms_simple, iostat=io_err)
-        call close_inputfile(file_unit, io_err)
-     end subroutine read_namelist
-
-    subroutine initDiatoms_simple(this, n, mMax)
+    subroutine initDiatoms_simple(this, n, mMax,errorio,errorstr)
+      use iso_c_binding, only: c_char
       class(spectrumDiatoms_simple):: this
       real(dp), intent(in):: mMax
       integer, intent(in):: n
+      logical(1), intent(out):: errorio 
+      character(c_char), dimension(*), intent(out) :: errorstr
       real(dp), parameter:: rho = 0.4*1d6*1d-12
-  
-      call read_namelist()
+      real(dp) :: mMin, v, alphaL, rLstar,  alphaN
+      real(dp) :: rNstar, cLeakage, delta, alphaJ, cR
+      real(dp) :: palatability
+      ! no errors to begin with
+       errorio=.false.
+       
+       print*, 'Loading parameter for diatoms simple from ', inputfile, ':'
+       call read_input(inputfile,'diatoms_simple','mMin',mMin,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','rhoCSi',rhoCSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','v',v,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','epsilonL',epsilonL,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','alphaL',alphaL,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','rLstar',rLstar,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','alphaN',alphaN,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','rNstar',rNstar,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','bN',bN,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','bSi',bSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','cLeakage',cLeakage,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','delta',delta,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','alphaJ',alphaJ,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','cR',cR,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','remin2',remin2,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','palatability',palatability,errorio,errorstr)
+      
       call this%initUnicellular(n, mMin, mMax)
       allocate(this%JSi(this%n))
       !
