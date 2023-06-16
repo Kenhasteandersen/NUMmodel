@@ -4,10 +4,12 @@
 module generalists_simple
   use globals
   use spectrum
-  use read_input_module 
+  use read_input_module
   implicit none
 
   private 
+  
+  real(dp) :: epsilonL, remin2, reminF
 
   type, extends(spectrumUnicellular) :: spectrumGeneralistsSimple
     real(dp), allocatable :: JFreal(:)
@@ -23,20 +25,49 @@ module generalists_simple
   public initGeneralistsSimple, spectrumGeneralistsSimple, calcRatesGeneralistsSimple, calcDerivativesGeneralistsSimple
   public printRatesGeneralistsSimple
 
+
 contains
 
-  subroutine initGeneralistsSimple(this, n)
+ subroutine initGeneralistsSimple(this, n,errorio,errorstr)
+    use iso_c_binding, only: c_char
     class(spectrumGeneralistsSimple):: this
     integer, intent(in):: n
+    logical(1), intent(out):: errorio 
+    character(c_char), dimension(*), intent(out) :: errorstr
     integer:: i
     real(dp), parameter:: rho = 0.4*1d6*1d-12
-    call read_input(inputfile,'generalists_simple')
+    real(dp) :: ii
+    real(dp) :: mMinGeneralist, mMaxGeneralist
+    real(dp) :: alphaN, rNstar  
+    real(dp) :: alphaL, rLstar
+    real(dp) :: alphaF, cF  
+    real(dp) :: cLeakage, delta, alphaJ, cR  
+    
+    ! no errors to begin with
+    errorio=.false.
+
+    print*, 'Loading parameter for generalist simple from ', inputfile, ':'
+    call read_input(inputfile,'generalists_simple','mMinGeneralist',mMinGeneralist,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaN',alphaN,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','rNstar',rNstar,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaL',alphaL,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaF',alphaF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','cF',cF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','cLeakage',cLeakage,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaJ',alphaJ,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','cR',cR,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','rLstar',rLstar,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','delta',delta,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','epsilonL',epsilonL,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','remin2',remin2,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','reminF',reminF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','beta',this%beta,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','sigma',this%sigma,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','epsilonF',this%epsilonF,errorio,errorstr)
+    
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
-
-    this%beta = beta
-    this%sigma = sigma
-    this%epsilonF = epsilonF
 
     this%r = (3./(4.*pi)*this%m/rho)**onethird
     
@@ -54,6 +85,7 @@ contains
 
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
     this%Jresp = cR*alphaJ*this%m
+
   end subroutine initGeneralistsSimple
 
   subroutine calcRatesGeneralistsSimple(this, L, N, DOC, gammaN, gammaDOC)
@@ -107,7 +139,7 @@ contains
       !
       ! Losses:
       !
-      this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
+      this%JCloss_feeding(i) = (1.-this%epsilonF)/this%epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
       this%JNlossLiebig(i) = max( 0.d0, this%JNtot(i)-this%Jtot(i))  ! In units of C
       this%JClossLiebig(i) = max( 0.d0, this%JCtot(i)-this%Jtot(i)) ! C losses from Liebig, not counting losses from photoharvesting

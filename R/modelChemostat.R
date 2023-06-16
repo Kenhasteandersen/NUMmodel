@@ -880,6 +880,20 @@ plotLeaks = function(sim, t=max(sim$t)) {
          lwd=4, bty="n")
 }
 
+plotDeltas = function(sim) {
+  rates = sim$rates
+  deltaL = rates$jLreal/((1-rates$f)*rates$jL)
+  deltaF = rates$jFreal/((1-rates$f)*rates$jF)
+  
+  defaultplot()
+  semilogxpanel(xlim=sim$p$m, ylim=c(0,1),
+                xlab="Cell mass ($\\mu$gC)",
+                ylab="$\\delta$")
+  
+  lines(sim$p$m, deltaL, col="green", lwd=4)
+  lines(sim$p$m, deltaF, col="red", lwd=4)
+}
+
 plotComplexRates = function(sim, t=max(sim$t)) {
   p = sim$p
   

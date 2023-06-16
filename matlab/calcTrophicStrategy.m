@@ -17,25 +17,26 @@ for i = 1:length(rates.jL)
     
     if rates.jN(i)*rhoCN > rates.jL(i)
         strategy{i} = 'Light limited';
-        col(i,:) = [0,1,0];
+        col(i,:) = [0.749,1,0.749];
     else
         strategy{i} = 'Nutrient limited';
-        col(i,:) = [0,0,1];
+        col(i,:) = [0.749,0.749,1];
     end
     
     if rates.jDOC(i) > rates.jLreal(i)
         strategy{i} = 'Osmoheterotroph';
-        col(i,:) = [0.5,0,0.5];
+        col(i,:) = [0.9,0.71,0.71];
     end
     
     if (rates.jFreal(i)/rates.jL(i) > 0.25) || (rates.jF(i) > rates.jN(i)*rhoCN)
         strategy{i} = 'Mixotroph';
-        col(i,:) = [1,0.5,0.5];
+        col(i,:) = [1,0.749,0.749];
+        
     end
     
     if (rates.jNloss(i) > 1e-5) && (rates.jN(i) < rates.jF(i)/rhoCN)
         strategy{i} = 'Heterotroph';
-        col(i,:) = [1,0,0];
+        col(i,:) = [1,0.6,0.6];
     end
       
 end

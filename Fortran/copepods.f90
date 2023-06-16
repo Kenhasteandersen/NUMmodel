@@ -11,6 +11,8 @@ module copepods
 
   integer, parameter :: passive = 1
   integer, parameter :: active = 2
+  real(dp) :: epsilonR, kBasal, kSDA
+  real(dp) :: DiatomsPreference
 
   private
 
@@ -28,25 +30,48 @@ module copepods
 
 contains
 
-  subroutine initCopepod(this, feedingmode, n, mAdult)
+  subroutine initCopepod(this, feedingmode, n, mAdult,errorio,errorstr)
+    use iso_c_binding, only: c_char
     class(spectrumCopepod), intent(inout):: this
     integer, intent(in) :: feedingmode ! Whether the copepods is active or passive
     integer, intent(in):: n
     real(dp), intent(in):: mAdult
+    logical(1), intent(out):: errorio 
+    character(c_char), dimension(*), intent(out) :: errorstr
     integer:: i
+    real(dp) :: alphaF, q, h, hExponent, AdultOffspring
+    real(dp) :: vulnerability
+    
+    character(len=20)::this_listname
+    
+    this%feedingmode = feedingmode
     
     if (feedingmode .eq. active) then
-       call read_input(inputfile,'copepods_active')
+      this_listname='copepods_active'
     else if (feedingmode .eq. passive) then
-       call read_input(inputfile,'copepods_passive')
+      this_listname='copepods_passive'
     else
        print*, 'no feeding mode defined'
        stop
     end if
     
-    this%feedingmode = feedingmode
+    print*, 'Loading parameter for copepods from ', inputfile, ':'
+    call read_input(inputfile,this_listname,'alphaF',alphaF,errorio,errorstr)
+    call read_input(inputfile,this_listname,'q',q,errorio,errorstr)
+    call read_input(inputfile,this_listname,'h',h,errorio,errorstr)
+    call read_input(inputfile,this_listname,'hExponent',hExponent,errorio,errorstr)
+    call read_input(inputfile,this_listname,'AdultOffspring',AdultOffspring,errorio,errorstr)
+    call read_input(inputfile,this_listname,'vulnerability',vulnerability,errorio,errorstr)
     
-    this%DiatomsPreference = DiatomsPreference
+    call read_input(inputfile,this_listname,'epsilonR',epsilonR,errorio,errorstr)
+    call read_input(inputfile,this_listname,'kBasal',kBasal,errorio,errorstr)
+    call read_input(inputfile,this_listname,'kSDA',kSDA,errorio,errorstr)
+    call read_input(inputfile,this_listname,'DiatomsPreference',DiatomsPreference,errorio,errorstr)
+    
+    call read_input(inputfile,this_listname,'epsilonF',this%epsilonF,errorio,errorstr)
+    call read_input(inputfile,this_listname,'beta',this%beta,errorio,errorstr)
+    call read_input(inputfile,this_listname,'sigma',this%sigma,errorio,errorstr)
+    this%DiatomsPreference=DiatomsPreference
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
@@ -58,12 +83,10 @@ contains
     allocate(this%mort(n))
     allocate(this%JrespFactor(n))
 
-    this%beta = beta
-    this%sigma = sigma
-    this%epsilonF = epsilonF
+
     this%AF = alphaF*this%m**q
     this%JFmax = h*this%m**hExponent
-    this%JrespFactor = epsilonF*this%JFmax
+    this%JrespFactor = this%epsilonF*this%JFmax
     this%mort2constant = 0.d0 ! No quadratic mortality
     this%mort2 = 0.d0
     this%palatability = vulnerability
@@ -108,7 +131,7 @@ contains
     b = epsilonR * this%g(this%n) ! Birth rate
     ! Production of POM:
     this%jPOM = &
-          (1-epsilonF)*this%JF/(this%m * epsilonF) & ! Unassimilated food (fecal pellets)
+          (1-this%epsilonF)*this%JF/(this%m * this%epsilonF) & ! Unassimilated food (fecal pellets)
         + this%mortStarve                            ! Copepods dead from starvation
     this%jPOM(this%n) = this%jPOM(this%n) + (1.d0-epsilonR)*this%g(this%n) ! Lost reproductive flux
   

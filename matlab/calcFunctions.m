@@ -68,9 +68,15 @@ switch sim.p.nameModel
 
     case 'watercolumn'
         sLibName = loadNUMmodelLibrary();
-        nTime = length(sim.t);
+        ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
         nZ = length(sim.z);
-        for iTime = 1:nTime
+        % Find plankton groups:
+        if isfield(sim.p,'ixPOM')
+            ixPlankton = sim.p.idxB:(sim.p.ixStart(sim.p.ixPOM)-1);
+        else
+            ixPlankton = sim.p.idxB:sim.p.nGrid;
+        end
+        for iTime = ixTime
             ProdGross = 0;
             ProdNet = 0;
             ProdHTL = 0;
@@ -78,6 +84,7 @@ switch sim.p.nameModel
             Bpico = 0;
             Bnano = 0;
             Bmicro = 0;
+            Bplankton = 0;
             ChlArea = 0; 
             ChlVolume = zeros(1, nZ); 
             % Integrate over depth:
@@ -106,6 +113,7 @@ switch sim.p.nameModel
                     Bpico = Bpico + Bpico1*conv; % mgC/m2
                     Bnano = Bnano + Bnano1*conv;
                     Bmicro = Bmicro + Bmicro1*conv;
+                    Bplankton = Bplankton + sum(u(ixPlankton))*conv;
                     % Chl:
                     rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
                     tmp =  calcChl( squeeze(sim.B(iTime,k,:)), rates, sim.L(iTime,k));
@@ -113,28 +121,30 @@ switch sim.p.nameModel
                     ChlVolume(k) = tmp;
                 end
             end
-            sim.ProdGross(iTime) = ProdGross;
-            sim.ProdNet(iTime) = ProdNet;
-            sim.ProdHTL(iTime) = ProdHTL;
-            sim.ProdBact(iTime) = ProdBact;
+            iTimenow = iTime - ixTime(1)+1;
+            sim.ProdGross(iTimenow) = ProdGross;
+            sim.ProdNet(iTimenow) = ProdNet;
+            sim.ProdHTL(iTimenow) = ProdHTL;
+            sim.ProdBact(iTimenow) = ProdBact;
             %%sim.eHTL(i,j,iTime) = eHTL;
-            sim.Bpico(iTime) = Bpico;
-            sim.Bnano(iTime) = Bnano;
-            sim.Bmicro(iTime) = Bmicro;
+            sim.Bpico(iTimenow) = Bpico;
+            sim.Bnano(iTimenow) = Bnano;
+            sim.Bmicro(iTimenow) = Bmicro;
+            sim.Bplankton(iTimenow) = Bplankton;
             sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro; %mgC/m^2
-            sim.ChlArea(iTime) = ChlArea; 
-            sim.ChlVolume(iTime,:) = ChlVolume;
+            sim.ChlArea(iTimenow) = ChlArea; 
+            sim.ChlVolume(iTimenow,:) = ChlVolume;
         end
         sim.eHTL = sim.ProdHTL./sim.ProdNet;
         sim.ePP = sim.ProdNet./sim.ProdGross;
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Average total biomass:  %8.3f mgC/m2\n", mean(sim.Btotal));
-            fprintf("Average Chl:            %8.3f gChl/m2\n", mean(sim.ChlArea)) %units corrected (there was a time dimension)
-            fprintf("Average gross PP:       %8.3f mgC/m2/day\n", mean(sim.ProdGross))
-            fprintf("Average net PP:         %8.3f mgC/m2/day\n", mean(sim.ProdNet))
-            fprintf("Average HTL production: %8.3f mgC/m2/day\n", mean(sim.ProdHTL))
+            fprintf("Average plankton biomass: %9.3f mgC/m2\n", mean(sim.Bplankton));
+            fprintf("Average Chl:              %9.3f gChl/m2\n", mean(sim.ChlArea)) %units corrected (there was a time dimension)
+            fprintf("Average gross PP:         %9.3f mgC/m2/day\n", mean(sim.ProdGross))
+            fprintf("Average net PP:           %9.3f mgC/m2/day\n", mean(sim.ProdNet))
+            fprintf("Average HTL production:   %9.3f mgC/m2/day\n", mean(sim.ProdHTL))
             fprintf("----------------------------------------------\n")
         end
 

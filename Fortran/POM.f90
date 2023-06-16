@@ -23,21 +23,25 @@ module POM
       procedure, pass :: initPOM
       procedure :: calcDerivativesPOM
       procedure :: printRates => printRatesPOM
-      procedure :: getCbalance
+      !procedure :: getCbalance
     end type spectrumPOM
    
     public initPOM, spectrumPOM, calcDerivativesPOM, printRatesPOM
   
   contains
 
-  subroutine initPOM(this, n, mMax)
+  subroutine initPOM(this, n, mMax,errorio,errorstr)
+    use iso_c_binding, only: c_char
     class(spectrumPOM):: this
     integer, intent(in):: n
     real(dp), intent(in):: mMax
+    logical(1), intent(out):: errorio 
+    character(c_char), dimension(*), intent(out) :: errorstr
     integer:: file_unit,io_err
-
-    call read_input(inputfile,'POM')
-    this%remin = remin
+    real(dp) :: mMin
+    print*, 'Loading parameter for POM from ', inputfile, ':'
+    call read_input(inputfile,'POM','mMin',mMin,errorio,errorstr)
+    call read_input(inputfile,'POM','remin',this%remin,errorio,errorstr)
 
     call this%initSpectrum(n)
     call this%calcGrid(mMin, mMax)
@@ -57,13 +61,13 @@ module POM
     dDOCdt = dDOCdt ! remineralized carbon is respired, so lost
   end subroutine calcDerivativesPOM
 
-  function getCbalance(this, u, dudt) result(Cbalance)
-    real(dp):: Cbalance
-    class(spectrumPOM), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
+  !function getCbalance(this, u, dudt) result(Cbalance)
+  !  real(dp):: Cbalance
+  !  class(spectrumPOM), intent(in):: this
+  !  real(dp), intent(in):: u(this%n), dudt(this%n)
 
-    Cbalance = sum(dudt + this%Jresptot/this%m*u)
-  end function getCbalance
+  !  Cbalance = sum(dudt + this%Jresptot/this%m*u)
+  !end function getCbalance
 
   subroutine printRatesPOM(this)
     class(spectrumPOM), intent(in):: this

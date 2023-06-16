@@ -1,9 +1,9 @@
 module NUMmodel_wrap
-  use iso_c_binding, only: c_double, c_int, c_bool
+  use iso_c_binding, only: c_double, c_int, c_bool, c_char, c_null_char
   use NUMmodel, only:  nGrid, idxB, nGrid, &
        setupGeneralistsSimpleOnly, setupGeneralistsSimple_two, &
        setupGeneralistsSimplePOM, &
-       setupGeneralistsOnly,  &
+       setupGeneralistsOnly,setupGeneralistsPOM, setupNUMmodel2, &
        setupDiatomsOnly, &
        setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
@@ -11,7 +11,7 @@ module NUMmodel_wrap
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, getFunctions, &
-       setHTL, setmortHTL, setSinking, getRates, getBalance, getLost
+       setHTL, setmortHTL, setSinking, getRates, getBalance, getLost, theta
 
   use globals
 
@@ -19,84 +19,113 @@ module NUMmodel_wrap
 
 contains
 
-  subroutine f_setupGeneralistsOnly(n) bind(c)
+  subroutine f_setupGeneralistsOnly(n, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n
-    call setupGeneralistsOnly(n)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGeneralistsOnly(n,errorio, errorstr)
   end subroutine f_setupGeneralistsOnly
 
-  subroutine f_setupGeneralistsSimplePOM(n, nPOM) bind(c)
+  subroutine f_setupGeneralistsSimplePOM(n, nPOM, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n, nPOM
-    call setupGeneralistsSimplePOM(n, nPOM)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGeneralistsSimplePOM(n, nPOM,errorio, errorstr)
   end subroutine f_setupGeneralistsSimplePOM
-
-  subroutine f_setupGeneralistsSimpleOnly(n) bind(c)
-    integer(c_int), intent(in), value:: n
-    call setupGeneralistsSimpleOnly(n)
-  end subroutine f_setupGeneralistsSimpleOnly
   
+  
+  subroutine f_setupGeneralistsPOM(n, nPOM, errorio, errorstr) bind(c)
+    integer(c_int), intent(in), value:: n, nPOM
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGeneralistsPOM(n, nPOM,errorio, errorstr)
+  end subroutine f_setupGeneralistsPOM
+
   subroutine f_setupGeneralistsSimple_two(n1, n2) bind(c)
     integer(c_int), intent(in), value:: n1, n2
     call setupGeneralistsSimple_two(n1, n2)
   end subroutine f_setupGeneralistsSimple_two
 
-  subroutine f_setupDiatomsOnly(n) bind(c)
+  subroutine f_setupGeneralistsSimpleOnly(n, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n
-    call setupDiatomsOnly(n)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGeneralistsSimpleOnly(n,errorio, errorstr)
+  end subroutine f_setupGeneralistsSimpleOnly
+
+  subroutine f_setupNUMmodel2(n, errorio, errorstr) bind(c)
+    integer(c_int), intent(in), value :: n
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupNUMmodel2(n,errorio, errorstr)
+  end subroutine f_setupNUMmodel2
+ 
+  subroutine f_setupDiatomsOnly(n, errorio, errorstr) bind(c)
+    integer(c_int), intent(in), value:: n
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupDiatomsOnly(n,errorio, errorstr)
   end subroutine f_setupDiatomsOnly
 
-  subroutine f_setupDiatoms_simpleOnly(n) bind(c)
+  subroutine f_setupDiatoms_simpleOnly(n, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n
-    call setupDiatoms_simpleOnly(n)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupDiatoms_simpleOnly(n,errorio, errorstr)
   end subroutine f_setupDiatoms_simpleOnly
 
-  subroutine f_setupGeneralistsDiatoms(n) bind(c)
+  subroutine f_setupGeneralistsDiatoms(n, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n
-    call setupGeneralistsDiatoms(n)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGeneralistsDiatoms(n,errorio, errorstr)
   end subroutine f_setupGeneralistsDiatoms
 
-  subroutine f_setupGeneralistsDiatoms_simple(n) bind(c)
+  subroutine f_setupGeneralistsDiatoms_simple(n, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n
-    call setupGeneralistsDiatoms_simple(n)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGeneralistsDiatoms_simple(n,errorio, errorstr)
   end subroutine f_setupGeneralistsDiatoms_simple
 
-  subroutine f_setupGeneralistsSimpleCopepod() bind(c)
-    call setupGeneralistsSimpleCopepod()
+  subroutine f_setupGeneralistsSimpleCopepod(errorio, errorstr) bind(c)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGeneralistsSimpleCopepod(errorio, errorstr)
   end subroutine f_setupGeneralistsSimpleCopepod
 
-  subroutine f_setupGeneric(nCopepods, mAdult) bind(c)
+  subroutine f_setupGeneric(nCopepods, mAdult, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: nCopepods
     real(c_double), intent(in):: mAdult(nCopepods)
-
-    call setupGeneric(mAdult)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGeneric(mAdult,errorio, errorstr)
   end subroutine f_setupGeneric
 
-  subroutine f_setupNUMmodel(n,nCopepod,nPOM, nCopepodsPassive, mAdultPassive, nCopepodsActive, mAdultActive) bind(c)
+  subroutine f_setupNUMmodel(n,nCopepod,nPOM, nCopepodsPassive, mAdultPassive, &
+     nCopepodsActive, mAdultActive, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepodsPassive, nCopepodsActive
     real(c_double), intent(in):: mAdultPassive(nCopepodsPassive), mAdultActive(nCopepodsActive)
-
-    call setupNUMmodel(n,nCopepod,nPOM, mAdultPassive, mAdultActive)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupNUMmodel(n,nCopepod,nPOM, mAdultPassive, mAdultActive,errorio, errorstr)
   end subroutine f_setupNUMmodel
 
-    subroutine f_setupNUMmodelSimple(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
+    subroutine f_setupNUMmodelSimple(n,nCopepod,nPOM, nCopepods, mAdult, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
     real(c_double), intent(in):: mAdult(nCopepods)
-
-    call setupNUMmodelSimple(n,nCopepod,nPOM,mAdult)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupNUMmodelSimple(n,nCopepod,nPOM,mAdult,errorio, errorstr)
   end subroutine f_setupNUMmodelSimple
 
-  subroutine f_setupGenDiatCope(n,nCopepod,nPOM, nCopepods, mAdult) bind(c)
+  subroutine f_setupGenDiatCope(n,nCopepod,nPOM, nCopepods, mAdult, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
     real(c_double), intent(in):: mAdult(nCopepods)
-
-    call setupGenDiatCope(n,nCopepod,nPOM,mAdult)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGenDiatCope(n,nCopepod,nPOM,mAdult,errorio, errorstr)
   end subroutine f_setupGenDiatCope
-
-  !subroutine f_setupGeneric_csp(nCopepods, mAdult) bind(c)
-  !  integer(c_int), intent(in), value:: nCopepods
-  !  real(c_double), intent(in):: mAdult(nCopepods)
-
-  !  call setupGeneric_csp(mAdult)
-  !end subroutine f_setupGeneric_csp
 
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
@@ -198,15 +227,15 @@ contains
     mortpred, mortHTL, mort2, mort) bind(c)
     use globals
     use NUMmodel, only: nNutrients, getRates
-    real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
-    real(dp), intent(out):: jSi(nGrid-nNutrients)
-    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
-    real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
-    real(dp), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
-    real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
-    real(dp), intent(out):: jPOM(nGrid-nNutrients)
-    real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
-    real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
+    real(c_double), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
+    real(c_double), intent(out):: jSi(nGrid-nNutrients)
+    real(c_double), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
+    real(c_double), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
+    real(c_double), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
+    real(c_double), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
+    real(c_double), intent(out):: jPOM(nGrid-nNutrients)
+    real(c_double), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
+    real(c_double), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
    call getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
    jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
@@ -214,4 +243,10 @@ contains
    mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates
   
+  subroutine f_getTheta(thetaMatrix) bind(c)
+    real(c_double), intent (inout) :: thetaMatrix(nGrid,nGrid)
+
+    thetaMatrix = theta
+  end subroutine
+
 end module NUMmodel_wrap

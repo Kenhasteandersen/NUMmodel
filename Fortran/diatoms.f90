@@ -10,6 +10,8 @@ module diatoms
      implicit none
  
      private
+     real(dp) :: bN, bL, bDOC, bSi, bg, epsilonL
+     real(dp) :: rhoCSi, remin2
      
      type, extends(spectrumUnicellular) :: spectrumDiatoms
      real(dp), dimension(:), allocatable:: JSi,JSireal
@@ -26,14 +28,46 @@ module diatoms
 
    contains
        
-     subroutine initDiatoms(this, n)
+     subroutine initDiatoms(this, n,errorio,errorstr)
+       use iso_c_binding, only: c_char
        class(spectrumDiatoms):: this
        integer, intent(in):: n
+       logical(1), intent(out):: errorio 
+       character(c_char), dimension(*), intent(out) :: errorstr
        integer:: i
        real(dp), parameter:: mMin = 3.1623d-9
        real(dp), parameter:: rho = 0.4*1d-6
+       real(dp) :: mMinDiatom, mMaxDiatom, v, alphaL, rLstar,  alphaN
+       real(dp) :: rNstar, cLeakage, delta, alphaJ, cR, palatability
        !real(dp) :: fl
-       call read_input(inputfile,'diatoms')
+       
+       ! no errors to begin with
+       errorio=.false.
+       
+       print*, 'Loading parameter for diatoms from ', inputfile, ':'
+       call read_input(inputfile,'diatoms','mMinDiatom',mMinDiatom,errorio,errorstr)
+       call read_input(inputfile,'diatoms','mMaxDiatom',mMaxDiatom,errorio,errorstr)
+       call read_input(inputfile,'diatoms','rhoCSi',rhoCSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms','v',v,errorio,errorstr)
+       call read_input(inputfile,'diatoms','epsilonL',epsilonL,errorio,errorstr)
+       call read_input(inputfile,'diatoms','alphaL',alphaL,errorio,errorstr)
+       call read_input(inputfile,'diatoms','rLstar',rLstar,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bL',bL,errorio,errorstr)
+       call read_input(inputfile,'diatoms','alphaN',alphaN,errorio,errorstr)
+       call read_input(inputfile,'diatoms','rNstar',rNstar,errorio,errorstr)
+       
+       call read_input(inputfile,'diatoms','bN',bN,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bDOC',bDOC,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bSi',bSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms','cLeakage',cLeakage,errorio,errorstr)
+       call read_input(inputfile,'diatoms','delta',delta,errorio,errorstr)
+       call read_input(inputfile,'diatoms','alphaJ',alphaJ,errorio,errorstr)
+       call read_input(inputfile,'diatoms','cR',cR,errorio,errorstr)
+       call read_input(inputfile,'diatoms','bg',bg,errorio,errorstr)
+       call read_input(inputfile,'diatoms','remin2',remin2,errorio,errorstr)
+       call read_input(inputfile,'diatoms','palatability',palatability,errorio,errorstr)
+       
+       
        call this%initUnicellular(n, mMinDiatom, mMaxDiatom)
        allocate(this%JSi(this%n))
        allocate(this%JSireal(this%n))
@@ -142,7 +176,8 @@ module diatoms
             jlim(i)=Jnet(i)
            end if
            if (this%JL(i)>0.) then
-             dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)-(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
+             dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN) &
+             -(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
 
 
              !write(*,*) 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)-(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) 
@@ -200,7 +235,8 @@ module diatoms
         ! - ( (1-f)*(bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+bN*dN(i)*this%JN(i)+bN*dSi(i)*this%JSi(i))&
         ! + (1-f)*bg*Jnet(i) )
           (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)- fTemp2*this%Jresp(i) &
-         - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
+         - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) &
+         -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
              
           this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
           this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + & !
@@ -235,7 +271,6 @@ module diatoms
        class(spectrumDiatoms), intent(inout):: this
        real(dp), intent(in):: u(this%n)
        real(dp), intent(inout):: dNdt, dDOCdt,dSidt, dudt( this%n )
-       real(dp):: mortloss
        integer:: i
    
        this%mort2 = this%mort2constant*u

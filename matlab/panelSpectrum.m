@@ -3,12 +3,59 @@
 % the ratio between upper and lower masses in each bin
 % 
 function panelSpectrum(sim, ixTime)
-
     arguments
         sim struct;
         ixTime {mustBeInteger} = length(sim.t); % Defaults to last time step
     end
+
+
     p = sim.p;
+    rates=sim.rates;
+
+    % brackground depending on trophic strategies
+    [strategy, col] = calcTrophicStrategy(rates);
+    strategy
+    Ngroup=1; %select the group for which the background is drawn
+    ix = (p.ixStart(Ngroup):p.ixEnd(Ngroup));
+    m = p.m(ix);
+    color=col(ix-(p.idxB-1),:);
+    colori=color(1,:);
+    Xlim=calcXlim(p);
+    Xmin=Xlim(1);
+    Xmax=Xlim(2);
+    rectangle(Position=[Xmin,0.0001,(m(2)+m(1))/2-Xmin,500], FaceColor=colori, EdgeColor=colori);
+    hold on
+    stratn=strategy(ix-(p.idxB-1));
+    captionedstrat=[stratn(1)];
+    color2caption=[colori];
+    for i = 2:length(ix)-1
+        colori=color(i,:);
+        step=(m(i)+m(i+1))/2-(m(i-1)+m(i))/2;
+        rectangle(Position=[(m(i-1)+m(i))/2,0.0001,step,500], FaceColor=colori, EdgeColor=colori);
+
+        %color for the legend, removing duplicates
+        if ~ismember(stratn(i), captionedstrat)
+            captionedstrat=[captionedstrat,stratn(i)];
+            color2caption=cat(1,color2caption,colori);
+        end
+    end
+
+    colori=color(length(ix),:);
+    rectangle(Position=[(m(length(ix)-1)+m(length(ix)))/2,0.0001,Xmax-(m(length(ix)-1)+m(length(ix)))/2,500], FaceColor=colori, EdgeColor=colori);
+    if ~ismember(stratn(length(ix)), captionedstrat)
+        captionedstrat=[captionedstrat,stratn(length(ix))];
+        color2caption=cat(1,color2caption,colori);
+    end
+
+    %empty plots for setting legend
+    dum=[];
+    for i=1:length(captionedstrat)
+    dummyplot=plot(NaN, NaN, 's', 'MarkerSize', 10, 'MarkerFaceColor', color2caption(i,:));
+    dum=[dum,dummyplot];
+    end
+
+    
+    set(gca,'XScale', 'log', "Layer", "top")
     
     sLegend = {};
     
@@ -64,5 +111,11 @@ function panelSpectrum(sim, ixTime)
     
     xlabel('Mass ({\mu}gC)')
     ylabel('Sheldon biomass ({\mu}gC/L)')
+    legendentries=[dum,legendentries];
+    sLegend=[captionedstrat,sLegend];
     
-    legend(legendentries, sLegend, 'location','northeast','box','off')
+
+    lh = legend(legendentries, sLegend, 'box','off');
+    lh.Location='northeast';
+
+    

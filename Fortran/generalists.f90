@@ -8,6 +8,8 @@ module generalists
   implicit none
 
   private 
+  
+  real(dp) :: alphaL,epsilonL,bL,bN,bDOC,bF,bg,remin2,reminF
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
@@ -29,19 +31,53 @@ module generalists
 
 contains
   
-  subroutine initGeneralists(this, n)
+  subroutine initGeneralists(this, n,errorio,errorstr)
+    use iso_c_binding, only: c_char
     class(spectrumGeneralists):: this
     integer, intent(in):: n
+    logical(1), intent(out):: errorio 
+    character(c_char), dimension(*), intent(out) :: errorstr
     integer:: i
-    real(dp), parameter:: mMin = 3.1623d-9 !2.78d-8!
-    real(dp), parameter:: rho = 0.4*1d6*1d-12
-    call read_input(inputfile,'generalists')
+    !real(dp), parameter:: rho != 0.4*1d6*1d-12
+    real(dp) :: mMinGeneralist, mMaxGeneralist, rho
+    real(dp) :: alphaL, rLstar !Light uptake
+    real(dp) :: alphaN, rNstar !osmotrophic uptake
+    real(dp) :: alphaF, cF !Phagotrophy
+    real(dp) :: cLeakage, delta, alphaJ, cR !Metabolism
+
+    ! no errors to begin with
+    errorio=.false.
+    
+    print*, 'Loading parameter for generalist from ', inputfile, ':'
+    call read_input(inputfile,'generalists','mMinGeneralist',mMinGeneralist,errorio,errorstr)
+    call read_input(inputfile,'generalists','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
+    call read_input(inputfile,'generalists','alphaL',alphaL,errorio,errorstr)
+    call read_input(inputfile,'generalists','rLstar',rLstar,errorio,errorstr)
+    call read_input(inputfile,'generalists','alphaN',alphaN,errorio,errorstr)
+    call read_input(inputfile,'generalists','rNstar',rNstar,errorio,errorstr)
+    call read_input(inputfile,'generalists','alphaF',alphaF,errorio,errorstr)
+    call read_input(inputfile,'generalists','cF',cF,errorio,errorstr)
+    call read_input(inputfile,'generalists','cLeakage',cLeakage,errorio,errorstr)
+    call read_input(inputfile,'generalists','delta',delta,errorio,errorstr)
+    call read_input(inputfile,'generalists','alphaJ',alphaJ,errorio,errorstr)
+    call read_input(inputfile,'generalists','cR',cR,errorio,errorstr)
+    call read_input(inputfile,'generalists','epsilonL',epsilonL,errorio,errorstr)
+    call read_input(inputfile,'generalists','bL',bL,errorio,errorstr)
+    call read_input(inputfile,'generalists','bN',bN,errorio,errorstr)
+    call read_input(inputfile,'generalists','bDOC',bDOC,errorio,errorstr)
+    call read_input(inputfile,'generalists','bF',bF,errorio,errorstr)
+    call read_input(inputfile,'generalists','bg',bg,errorio,errorstr)
+    call read_input(inputfile,'generalists','remin2',remin2,errorio,errorstr)
+    call read_input(inputfile,'generalists','reminF',reminF,errorio,errorstr)
+    call read_input(inputfile,'generalists','rho',rho,errorio,errorstr)
+
+    call read_input(inputfile,'generalists','epsilonF',this%epsilonF,errorio,errorstr)
+    call read_input(inputfile,'generalists','beta',this%beta,errorio,errorstr)
+    call read_input(inputfile,'generalists','sigma',this%sigma,errorio,errorstr)
+    
+
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
-
-    this%beta = beta
-    this%sigma = sigma
-    this%epsilonF = epsilonF
 
     this%r = (3./(4.*pi)*this%m/rho)**onethird
     
@@ -71,7 +107,7 @@ contains
     real(dp), intent(in):: gammaN, gammaDOC
     real(dp), intent(in):: L, N, DOC
     real(dp):: f, JmaxT
-    real(dp):: Jnetp(this%n), Jnet(this%n),Jlim(this%n)
+    real(dp):: Jnetp(this%n), Jnet(this%n)
     integer:: i
 
     do i = 1, this%n
@@ -144,7 +180,8 @@ contains
         this%JCtot(i) = & 
         (1-f)*(this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i) + this%JF(i) )&
         - (1-f)*fTemp2*this%Jresp(i) &
-        - ( (1-f)*(bDOC*this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i)*bL+ this%JF(i)*bF+bN*this%dN(i)*this%JN(i))&
+        - ( (1-f)&
+        *(bDOC*this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i)*bL+ this%JF(i)*bF+bN*this%dN(i)*this%JN(i))&
         +(1-f)*bg*Jnet(i) )
       !
        ! Apply saturation to uptake rates
@@ -165,7 +202,7 @@ contains
       !
       ! Losses:
       !
-      this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
+      this%JCloss_feeding(i) = (1.-this%epsilonF)/this%epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
       this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + &
             (1-f)*(bDOC*this%dDOC(i)*this%JDOC(i) + &
