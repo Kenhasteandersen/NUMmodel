@@ -1,2 +1,0 @@
-/home/trine/Documents/GitHub/NUMmodel/Fortran/../lib/libNUMmodel_matlab.so
-/home/trine/Documents/GitHub/NUMmodel/Fortran/../lib/libNUMmodel_R.so

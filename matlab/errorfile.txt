@@ -1,1 +1,0 @@
- parameter rho not defined for generalists_simple in ../input/input.h.
