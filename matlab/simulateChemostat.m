@@ -72,7 +72,7 @@ else
     u0=p.u0;
 end
 
-rhoCN = search_namelist('../input/input.nlm','general','rhoCN');
+rhoCN = search_namelist('../input/input.h','general','rhoCN');
 [t,u] = ode23s(@fDeriv, [0 p.tEnd], u0); 
 
 if options.bCalculateNgain

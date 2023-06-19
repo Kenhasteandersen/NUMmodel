@@ -14,8 +14,6 @@ Try the [online simulator of the unicellular model](http://oceanlife.dtuaqua.dk/
 https://user-images.githubusercontent.com/13268353/148120839-6bbfc0ac-69f1-445b-9b9f-b3880436bf2f.mp4
 
 
-
-
 The core library is written in Fortran2008 and is interfaced from matlab or R.
 
 ### Installation

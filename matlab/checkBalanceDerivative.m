@@ -13,8 +13,9 @@ function Nbalance = checkBalanceDerivative(sim)
 %
 % Constants:
 %
-fracHTL_to_N = search_namelist('../input/input.nlm','general','fracHTL_to_N');
-rhoCN = search_namelist('../input/input.nlm','general','rhoCN');
+fracHTL_to_N = search_namelist('../input/input.h','general','fracHTL_to_N');
+rhoCN = search_namelist('../input/input.h','general','rhoCN');
+
 %
 % Extract u, dudt, and rates from the last time step:
 %

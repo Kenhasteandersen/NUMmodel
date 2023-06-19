@@ -16,7 +16,12 @@ end
 
 loadNUMmodelLibrary(bParallel);
 
-calllib(loadNUMmodelLibrary(), 'f_setupgeneralistspom', int32(n), int32(nPOM) );
+errortext ='';
+errorio=false;
+
+[errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupgeneralistspom', int32(n), int32(nPOM),errorio, errortext);
+
+
 if bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
@@ -24,6 +29,15 @@ if bParallel
         calllib(loadNUMmodelLibrary(), 'f_setupgeneralistspom',int32(n), int32(nPOM));
     end
 end
+
+
+    if errorio
+        disp(['Error loading ',errortext,'. Execution terminated'])
+        return
+    else
+        disp('done loading input parameters')
+    end
+
 
 % Nutrients:
 p = setupNutrients_N_DOC;

@@ -1,24 +1,33 @@
 
-subroutine f_setupGeneralistsSimpleOnly(n)
+subroutine f_setupGeneralistsSimpleOnly(n, errorio, errorstr)
   use NUMmodel, only:  setupGeneralistsSimpleOnly
   use globals
+  use iso_c_binding, only: c_bool, c_char
   integer, intent(in):: n
-  call setupGeneralistsSimpleOnly(n)
+  logical(c_bool), intent(out) :: errorio
+  character(c_char), dimension(*) :: errorstr
+  call setupGeneralistsSimpleOnly(n, errorio, errorstr)
 end subroutine f_setupGeneralistsSimpleOnly
 
-subroutine f_setupGeneralistsOnly(n)
+subroutine f_setupGeneralistsOnly(n, errorio, errorstr)
   use NUMmodel, only:  setupGeneralistsOnly
   use globals
+  use iso_c_binding, only: c_bool, c_char
   integer, intent(in):: n
-  call setupGeneralistsOnly(n)
+  logical(c_bool), intent(out) :: errorio
+  character(c_char), dimension(*) :: errorstr
+  call setupGeneralistsOnly(n, errorio, errorstr)
 end subroutine f_setupGeneralistsOnly
 
-subroutine f_setupGeneric(nAdult, mAdult)
+subroutine f_setupGeneric(nAdult, mAdult, errorio, errorstr)
   use NUMmodel, only:  setupGeneric
   use globals
+  use iso_c_binding, only: c_bool, c_char
   integer, intent(in):: nAdult
   real(dp), intent(in):: mAdult(nAdult)
-  call setupGeneric(mAdult)
+  logical(c_bool), intent(out) :: errorio
+  character(c_char), dimension(*) :: errorstr
+  call setupGeneric(mAdult, errorio, errorstr)
 end subroutine 
 
 !!$  subroutine f_setupGeneralistsCopepod()
