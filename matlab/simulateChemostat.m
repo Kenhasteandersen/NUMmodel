@@ -169,26 +169,6 @@ end
             % Chemostat dynamics for nutrients and unicellulars:
             %
             dudt(ix) = dudt(ix) + p.d*(uDeep(ix)-u(ix)');
-    
-            %
-            % Calculate N gain from the deep
-            %
-            if options.bCalculateNgain
-                
-                % Extract the losses
-                Clost=0;
-                Nlost = 0;
-                SiLost=0;
-
-                [~,~, Nlost, ~] = calllib(sLibname, 'f_getlost', ...
-                    u, Clost, Nlost, SiLost);
-           
-                dudt(end+1) = (uDeep(1)-u(1))*p.d-Nlost;
-            
-                if options.bUnicellularloss 
-                    dudt(end)=dudt(end)-p.d*sum(u(p.idxB:end))/rhoCN; %takes B's losses to the deep into account
-                end
-            end
 
         else % Incorporate the time dependency if necessary
             t_int = floor(mod(t,365))+1;
@@ -201,6 +181,25 @@ end
             % Chemostat dynamics for nutrients and unicellulars:
             %
             dudt(ix) = dudt(ix) + p.d(t_int)*(uDeep(ix)-u(ix)');
+        end
+        %
+        % Calculate N gain from the deep
+        %
+        if options.bCalculateNgain
+            
+            % Extract the losses
+            Clost=0;
+            Nlost = 0;
+            SiLost=0;
+
+            [~,~, Nlost, ~] = calllib(sLibname, 'f_getlost', ...
+                u, Clost, Nlost, SiLost);
+       
+            dudt(end+1) = (uDeep(1)-u(1))*p.d-Nlost;
+        
+            if options.bUnicellularloss 
+                dudt(end)=dudt(end)-p.d*sum(u(p.idxB:end))/rhoCN; %takes B's losses to the deep into account
+            end
         end
         %
         % Sinking of POM:
