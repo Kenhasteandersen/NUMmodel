@@ -8,8 +8,8 @@ program NUMmodeltest
   integer:: i
   real(dp):: Nbalance,Cbalance, Sibalance
   !real(dp):: myout
-  character(len=5) :: mystr
-  logical(1):: myout=.false. ! Whether to losses to the deep
+  character(len=20) :: errorstr
+  logical(1):: errorio=.false. ! Whether to losses to the deep
   !call setupNUMmodel( (/0.1d0, 1.0d0 /) )
 
   !call setupGeneralistsOnly(10)
@@ -41,10 +41,13 @@ program NUMmodeltest
   !call setupGeneralistsDiatoms(10)
   !call setupGeneric( (/0.1d0/) )
   !call setupGeneralistsDiatoms(10)
-  !call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
-  !myout=1.0d0
-  
-  call setupNUMmodel2(2,myout,mystr) 
+  call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/),errorio,errorstr)
+  if (errorio .eqv. .false.) then
+    print*, 'Parameters loaded correctly'
+  else
+    print*, 'Error loading parameter ', errorstr
+  end if
+
   call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))
