@@ -20,7 +20,8 @@ end
 %     nPOM = 10;
 %     p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
 %     
-p = setupGeneralistsSimpleOnly;
+%p = setupGeneralistsSimpleOnly;
+p = setupGeneralistsSimpleK;
 
 p = parametersChemostat(p);
 p.tEnd = 200;

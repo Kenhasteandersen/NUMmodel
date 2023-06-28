@@ -8,7 +8,7 @@ void f_setupgeneralistssimpleonly(const int n, bool *Clost, char *errorstr);
 
 void f_setupnummodel2(const int n, bool *Clost, char *errorstr);
 
-void f_setupgeneralistssimple_two(const int n1, const int n2);
+void f_setupgeneralistssimple_two(const int n1, const int k, bool *Clost, char *errorstr);
 
 //void f_setupgeneralistsonly_csp();
 

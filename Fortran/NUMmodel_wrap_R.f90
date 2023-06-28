@@ -19,11 +19,14 @@ subroutine f_setupGeneralistsOnly(n, errorio, errorstr)
   call setupGeneralistsOnly(n, errorio, errorstr)
 end subroutine f_setupGeneralistsOnly
 
-subroutine f_setupGeneralistsSimple_two(n1, n2)
+subroutine f_setupGeneralistsSimple_two(n1, k,errorio, errorstr)
   use NUMmodel, only:  setupGeneralistsSimple_two
   use globals
-  integer, intent(in):: n1, n2
-  call setupGeneralistsSimple_two(n1,n2)
+  use iso_c_binding, only: c_bool, c_char
+  integer, intent(in):: n1, k
+  logical(c_bool), intent(out) :: errorio
+  character(c_char), dimension(*) :: errorstr
+  call setupGeneralistsSimple_two(n1,k, errorio, errorstr)
 end subroutine f_setupGeneralistsSimple_two
 
 subroutine f_setupGeneric(nAdult, mAdult, errorio, errorstr)

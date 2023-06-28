@@ -41,9 +41,11 @@ contains
     call setupGeneralistsPOM(n, nPOM,errorio, errorstr)
   end subroutine f_setupGeneralistsPOM
 
-  subroutine f_setupGeneralistsSimple_two(n1, n2) bind(c)
-    integer(c_int), intent(in), value:: n1, n2
-    call setupGeneralistsSimple_two(n1, n2)
+  subroutine f_setupGeneralistsSimple_two(n1, k, errorio, errorstr) bind(c)
+    integer(c_int), intent(in), value:: n1, k
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGeneralistsSimple_two(n1, k, errorio, errorstr)
   end subroutine f_setupGeneralistsSimple_two
 
   subroutine f_setupGeneralistsSimpleOnly(n, errorio, errorstr) bind(c)

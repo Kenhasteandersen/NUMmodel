@@ -5,16 +5,19 @@ program NUMmodeltest
 
   real(dp), allocatable:: u0(:), u00(:), dudt(:)
   real(dp):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
-  integer:: i
+  integer:: i,k
   real(dp):: Nbalance,Cbalance, Sibalance
   !real(dp):: myout
-  character(len=5) :: mystr
-  logical(1):: myout=.false. ! Whether to losses to the deep
+  character(len=100) :: errorstr
+  logical(1):: errorio=.false. ! Whether to losses to the deep
   !call setupNUMmodel( (/0.1d0, 1.0d0 /) )
   !call setupNUMmodel( (/0.1d0, 1.0d0 /) )
 
   !call setupGeneralistsOnly(10)
   !call setupGeneralistsSimpleOnly(10)
+  k=1
+  call setupGeneralistsSimple_two(10,k,errorio,errorstr)
+  !call setupGeneralistssimpleOnly(10,errorio,errorstr)
 
   !call parametersFinalize(0.d0, .false.)
   
@@ -47,8 +50,8 @@ program NUMmodeltest
   !call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
   !myout=1.0d0
   
-  call setupNUMmodel2(2,myout,mystr) 
-  call setHTL(0.1d0, 0.1d0, .false., .false.)
+  !call setupNUMmodel2(2,myout,mystr) 
+  !call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -61,14 +64,14 @@ program NUMmodeltest
   end do
   dudt = 0.d0
 
-  call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
+  call simulateEuler(u00, 60.d0, 100.d0, 365.d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
   
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
   !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
-  !call printRates()
+  call printRates()
   !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
   !call printRates()
 

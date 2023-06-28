@@ -6,11 +6,11 @@ function plotSimulation(sim)
 switch sim.p.nameModel
     
     case 'chemostat'
-        figure
+        figure('Color','w')
         clf
         plotGroupsTime(sim);
 
-        figure
+        figure('Color','w')
         clf
         plotSizespectrum(sim);
 

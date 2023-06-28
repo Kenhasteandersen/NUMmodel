@@ -107,12 +107,26 @@ contains
   ! -----------------------------------------------
   ! A basic setup with 2 simple generalists
   ! -----------------------------------------------
-  subroutine setupGeneralistsSimple_two(n1,n2)
-    integer, intent(in):: n1, n2
-    call parametersInit(2, n1+n2, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralistSimple, n1, 0.d0) ! generalists with n size classes
-    call parametersAddGroup(typeGeneralistSimple, n2, 0.d0) ! generalists with n size classes
+  subroutine setupGeneralistsSimple_two(n1,k,errorio,errorstr)
+    integer, intent(in):: n1, k
+    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    character(c_char), dimension(*) :: errorstr
+    integer :: iGeneralist, ntot, myGroups
+    ntot=n1*k
+    myGroups=k
+    print*, 'k=',k
+    call parametersInit(myGroups, ntot, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
+    print*, 'done init'
+    do iGeneralist = 1, myGroups
+    print*, 'add group ',iGeneralist
+      call parametersAddGroupX(typeGeneralistSimple, n1, 0.d0,iGeneralist,errorio,errorstr) ! generalists with n size classes
+       IF ( errorio ) RETURN
+    end do
+    print*, 'done with that?'
+    !call parametersAddGroup(typeGeneralistSimple, n1, 0.d0,errorio,errorstr) ! generalists with n size classes
+    print*, 'enter parameters finalize'
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    print*, 'done parameters finalize'
   end subroutine setupGeneralistsSimple_two
   ! -----------------------------------------------
   ! A basic setup with generalists simple and POM
@@ -344,6 +358,7 @@ contains
     call read_input(inputfile,'general','fracHTL_to_POM',fracHTL_to_POM,errorio,errorstr)
     !call read_input(inputfile,'general')
     !
+
     ! Set groups:
     !
 
@@ -368,7 +383,7 @@ contains
          idxPOM = 0
        endif
     end if
-
+    
     allocate( group(nGroups) )
     allocate(ixStart(nGroups))
     allocate(ixEnd(nGroups))
@@ -376,6 +391,7 @@ contains
     allocate(F(nGrid))
     allocate(pHTL(nGrid))
     allocate(theta(nGrid,nGrid))     ! Interaction matrix:
+    
   end subroutine parametersInit
   
  
@@ -439,6 +455,59 @@ contains
    end select
 
   end subroutine parametersAddGroup
+  
+  subroutine parametersAddGroupX(typeGroup, n, mMax,k,errorio,errorstr)
+    integer, intent(in):: typeGroup, n,k
+    real(dp), intent(in):: mMax
+    logical(1), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+
+    type(spectrumGeneralists) :: specGeneralists
+    type(spectrumGeneralistsSimple) :: specGeneralistsSimple
+    type(spectrumDiatoms_simple):: specDiatoms_simple
+    type(spectrumDiatoms):: specDiatoms
+    type(spectrumCopepod):: specCopepod
+    type(spectrumPOM):: specPOM
+    !
+    ! Find the group number and grid location:
+    !
+    iCurrentGroup = iCurrentGroup + 1
+
+    if (iCurrentGroup.eq.1) then
+      ixStart(iCurrentGroup) = idxB
+    else
+      ixStart(iCurrentGroup) = ixEnd(iCurrentGroup-1)+1
+    end if
+    ixEnd(iCurrentGroup) = ixStart(iCurrentGroup)+n-1
+    !
+    ! Add the group
+    !
+    select case (typeGroup)
+    case (typeGeneralistSimple)
+      call initGeneralistsSimpleX(specGeneralistsSimple, n,k,errorio, errorstr)
+      allocate( group( iCurrentGroup )%spec, source=specGeneralistsSimple )
+    case (typeGeneralist)
+      call initGeneralists(specGeneralists, n, errorio, errorstr)
+      allocate( group( iCurrentGroup )%spec, source=specGeneralists )
+    case (typeDiatom_simple)
+      call initDiatoms_simple(specDiatoms_simple, n, mMax, errorio, errorstr)
+      allocate( group( iCurrentGroup )%spec, source=specDiatoms_simple )
+    case (typeDiatom)
+      call initDiatoms(specDiatoms, n, errorio, errorstr)
+      allocate( group( iCurrentGroup )%spec, source=specDiatoms )
+   case(typeCopepodPassive)
+      call initCopepod(specCopepod, passive, n, mMax, errorio, errorstr)
+      allocate (group( iCurrentGroup )%spec, source=specCopepod)
+   case(typeCopepodActive)
+      call initCopepod(specCopepod, active, n, mMax, errorio, errorstr)
+      allocate (group( iCurrentGroup )%spec, source=specCopepod)
+   case(typePOM)
+      call initPOM(specPOM, n, mMax, errorio, errorstr)
+      allocate (group( iCurrentGroup )%spec, source=specPOM)
+      idxPOM = iCurrentGroup 
+   end select
+
+  end subroutine parametersAddGroupX
   ! -----------------------------------------------
   !  Finalize the setting of parameters. Must be called when
   !  all groups have been added.

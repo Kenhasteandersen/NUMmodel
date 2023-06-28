@@ -24,6 +24,7 @@ module generalists_simple
  
   public initGeneralistsSimple, spectrumGeneralistsSimple, calcRatesGeneralistsSimple, calcDerivativesGeneralistsSimple
   public printRatesGeneralistsSimple
+  public initGeneralistsSimpleX
 
 
 contains
@@ -87,6 +88,87 @@ contains
     this%Jresp = cR*alphaJ*this%m
 
   end subroutine initGeneralistsSimple
+  
+  subroutine initGeneralistsSimpleX(this, n,k,errorio,errorstr)
+    use iso_c_binding, only: c_char
+    class(spectrumGeneralistsSimple):: this
+    integer, intent(in):: n,k
+    logical(1), intent(out):: errorio 
+    character(c_char), dimension(*), intent(out) :: errorstr
+    integer:: i
+    real(dp), parameter:: rho = 0.4*1d6*1d-12
+    real(dp) :: ii
+    real(dp) :: mMinGeneralist, mMaxGeneralist
+    real(dp) :: alphaN, rNstar  
+    real(dp) :: alphaL, rLstar
+    real(dp) :: alphaF, cF  
+    real(dp) :: cLeakage, delta, alphaJ, cR  
+    
+    ! no errors to begin with
+    errorio=.false.
+    inputfile='../input/input_generalists_simpleX.h'
+
+    print*, 'Loading parameter for generalist simple from ', inputfile, ':'
+    call read_inputX(inputfile,'generalists_simple','mMinGeneralist',mMinGeneralist,k,errorio,errorstr)
+    print*, '    *mMinGeneralist=',mMinGeneralist
+    call read_inputX(inputfile,'generalists_simple','mMaxGeneralist',mMaxGeneralist,k,errorio,errorstr)
+    print*, '    *mMaxGeneralist=',mMaxGeneralist
+    call read_inputX(inputfile,'generalists_simple','alphaN',alphaN,k,errorio,errorstr)
+    print*, '    *alphaN=',alphaN
+    call read_inputX(inputfile,'generalists_simple','rNstar',rNstar,k,errorio,errorstr)
+    print*, '    *rNstar=',rNstar
+    call read_inputX(inputfile,'generalists_simple','alphaL',alphaL,k,errorio,errorstr)
+    print*, '    *alphaL=',alphaL
+    call read_inputX(inputfile,'generalists_simple','alphaF',alphaF,k,errorio,errorstr)
+    print*, '    *alphaF=',alphaF
+    call read_inputX(inputfile,'generalists_simple','cF',cF,k,errorio,errorstr)
+    print*, '    *cF=',cF
+    call read_inputX(inputfile,'generalists_simple','cLeakage',cLeakage,k,errorio,errorstr)
+    print*, '    *cLeakage=',cLeakage
+    call read_inputX(inputfile,'generalists_simple','alphaJ',alphaJ,k,errorio,errorstr)
+    print*, '    *alphaJ=',alphaJ
+    call read_inputX(inputfile,'generalists_simple','cR',cR,k,errorio,errorstr)
+    print*, '    *cR=',cR
+    call read_inputX(inputfile,'generalists_simple','rLstar',rLstar,k,errorio,errorstr)
+    print*, '    *rLstar=',rLstar
+    call read_inputX(inputfile,'generalists_simple','delta',delta,k,errorio,errorstr)
+    print*, '    *delta=',delta
+    call read_inputX(inputfile,'generalists_simple','epsilonL',epsilonL,k,errorio,errorstr)
+    print*, '    *epsilonL=',epsilonL
+    call read_inputX(inputfile,'generalists_simple','remin2',remin2,k,errorio,errorstr)
+    print*, '    *remin2=',remin2
+    call read_inputX(inputfile,'generalists_simple','reminF',reminF,k,errorio,errorstr)
+    print*, '    *reminF=',reminF
+    call read_inputX(inputfile,'generalists_simple','beta',this%beta,k,errorio,errorstr)
+    print*, '    *beta=',this%beta
+    call read_inputX(inputfile,'generalists_simple','sigma',this%sigma,k,errorio,errorstr)
+    print*, '    *sigma=',this%sigma
+    call read_inputX(inputfile,'generalists_simple','epsilonF',this%epsilonF,k,errorio,errorstr)
+    print*, '    *epsilonF=',this%epsilonF
+    
+    
+    
+    call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
+    allocate(this%JFreal(n))
+
+    this%r = (3./(4.*pi)*this%m/rho)**onethird
+    
+    this%nu = 3*delta/this%r
+    do i = 1,this%n
+      this%nu(i) = min(1.d0, this%nu(i))
+    enddo
+
+    this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
+    this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu)
+    this%AF = alphaF*this%m
+    this%JFmax = cF/this%r * this%m
+    
+    this%JlossPassive = cLeakage/this%r * this%m ! in units of C
+
+    this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
+    this%Jresp = cR*alphaJ*this%m
+
+  end subroutine initGeneralistsSimpleX
 
   subroutine calcRatesGeneralistsSimple(this, L, N, DOC, gammaN, gammaDOC)
     class(spectrumGeneralistsSimple), intent(inout):: this

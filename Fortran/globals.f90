@@ -13,8 +13,6 @@ module globals
 
   ! Temperature scalings parameters:
   real(dp) :: fTemp2, fTemp15 ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
-  ! Temperature scalings parameters:
-  real(dp) :: fTemp2, fTemp15 ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
   real(dp), parameter:: Tref = 10. ! Reference temperature
   
   !
@@ -26,7 +24,8 @@ module globals
   ! CN mass ratio:
   real(dp) :: rhoCN 
   
-  character(len=16) :: inputfile='../input/input.h'
+  !character(len=16) :: inputfile='../input/input.h'
+  character(len=100) :: inputfile='../input/input.h'
   
  
 

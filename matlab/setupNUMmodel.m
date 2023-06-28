@@ -9,7 +9,7 @@ arguments
     n = 10;
     nCopepods = 10;
     nPOM = 1;
-    options.bParallel = false;
+    options.bParallel = true;
 end
 
 loadNUMmodelLibrary(options.bParallel);
