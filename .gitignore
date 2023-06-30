@@ -131,3 +131,20 @@ Fortran/CMakeFiles/NUMmodeltest.dir/fortran.internal
 Fortran/CMakeFiles/NUMmodeltest.dir/link.txt
 Fortran/CMakeFiles/NUMmodeltest.dir/progress.make
 Fortran/CMakeFiles/progress.marks
+Fortran/NUMmodeltest.exe
+        Fortran/libNUMmodel.dll
+        Fortran/libNUMmodel.dll.a
+        Fortran/libNUMmodel_R.dll
+        Fortran/libNUMmodel_R.dll.a
+        Fortran/libNUMmodel_matlab.dll
+        Fortran/libNUMmodel_matlab.dll.a
+        TMs/
+        install_manifest.txt
+        matlab/Watercolumn_MITgcm_ECCO_lat060_lon-40.mat
+        matlab/combine.m
+        matlab/compareField.m
+        matlab/compareSimulation.m
+        matlab/panelGlobalTransect.m
+        matlab/plotGlobalTransect.m
+        matlab/runBifurcationBis.m
+
