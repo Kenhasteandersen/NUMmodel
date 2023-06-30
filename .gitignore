@@ -132,8 +132,8 @@ Fortran/CMakeFiles/NUMmodeltest.dir/link.txt
 Fortran/CMakeFiles/NUMmodeltest.dir/progress.make
 Fortran/CMakeFiles/progress.marks
 Fortran/NUMmodeltest.exe
-        Fortran/libNUMmodel.dll
-        Fortran/libNUMmodel.dll.a
+Fortran/libNUMmodel.dll
+Fortran/libNUMmodel.dll.a
         Fortran/libNUMmodel_R.dll
         Fortran/libNUMmodel_R.dll.a
         Fortran/libNUMmodel_matlab.dll
