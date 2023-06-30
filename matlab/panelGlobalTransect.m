@@ -50,17 +50,19 @@ end
 xyz=table('Size',[length(lat) 3],'VariableTypes',["double" "double" "cell"],'VariableNames',["x" "y" "z"]);
 for i=1:length(lat)
     idx=calcGlobalWatercolumn(lat(i), lon(i), sim);
-    idx.z(sim.bathy(idx.x, idx.y,:)==0)=find((sim.bathy(idx.x, idx.y,:)==0));
+    %idx.z(sim.bathy(idx.x, idx.y,:)==0)=find((sim.bathy(idx.x, idx.y,:)==0));
     xyz(i,:)=struct2table(idx,"AsArray",true);
 end
 idx=unique(xyz(:,1:2),"stable");
 idx=table2struct(idx,"ToScalar",true);
-idx.z=cell2mat(table2array(xyz(1,3)));
+idx.z=1:length(sim.z);
+%idx.z=cell2mat(table2array(xyz(1,3)));
 clear xyz;
 %
 % Extract data from field:
 %
-z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
+%z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
+z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
 data=zeros(length(idx.x),length(idx.z));
 coor=cell(length(idx.x),1);
 
