@@ -57,6 +57,8 @@ switch sim.p.nameModel
         
         lat = 60;
         lon = -15;
+        Lat=[54 15.8 -33];
+        Lon=[-21 -41 -8.7];
         
         figure(2)
         clf
@@ -70,8 +72,11 @@ switch sim.p.nameModel
         title(sprintf('Size spectrum at (%3.0f,%3.0f).\n',[lat,lon]));
         
         figure(5)
-        plotSizespectrum(sim,150,1,60,-15);
+        plotSizespectrum(sim,150,1,lat,lon);
         
+        figure(6)
+        plotGlobalTransect(sim,-1,Lat,Lon);
+
     otherwise
         error('Simulation type %s not supported.', sim.p.nameModel);
 end
