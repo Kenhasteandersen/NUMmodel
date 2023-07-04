@@ -3,34 +3,35 @@
 %
 % In:
 %   sim - simulation structure
-%   tDay - time (in days)
 %   field - data to plot
 %   Lat,Lon - latitude and longitude
+%   tDay - time (in days), equals to -1 by default
+%          If tDay<0, plots the average over the last year of the simulation
 %   Optional:
 %   options.depthMax - max depth for ylimit
-%   options.distMax - approximativ distance max between two plotting points (in km)
+%   options.distMax - approximate distance between two plotting points (in km)
+%                     (adds points beetewen the points defined by Lat and Lon)
 %
 % To change the color to log scale do : set(gca,'colorscale','log')
 %
-% If tDay<0, plots the average over the last year of the simulation
 %
-function []=panelGlobalTransect(sim,tDay,field,Lat,Lon,options)
+function []=panelGlobalTransect(sim,field,Lat,Lon,tDay,options)
 
 
 arguments
     sim struct;
-    tDay double;
     field (:,:,:,:);
     Lat double = [];
     Lon double = [];
+    tDay double = -1;
     options.depthMax {mustBePositive} = [];
-    options.distMax {mustBePositive} = [];
+    options.distMax {mustBePositive} = 100;
 end
 
 lat=Lat;
 lon=Lon;
 %
-%Adds Points
+% Adds Points
 %
 if ~isempty(options.distMax)
     dist=distance(Lat(1:end-1),Lon(1:end-1),Lat(2:end),Lon(2:end)).*pi/180*6371;
@@ -38,30 +39,27 @@ if ~isempty(options.distMax)
     nPoints(nPoints==0)=1;
     nPoints=nPoints-1;
     for i=find(nPoints>0)
-        x=(1:nPoints(i)-1)*((Lon(i+1)-Lon(i))/nPoints(i))+Lon(i);
-        y=(1:nPoints(i)-1)*((Lat(i+1)-Lat(i))/nPoints(i))+Lat(i);
+        x=(1:nPoints(i)-1).*((Lon(i+1)-Lon(i))/nPoints(i))+Lon(i);
+        y=(1:nPoints(i)-1).*((Lat(i+1)-Lat(i))/nPoints(i))+Lat(i);
         lon=[lon(1:i+sum(nPoints(1:i-1))) x lon(sum(nPoints(1:i-1))+1:end)];
         lat=[lat(1:i+sum(nPoints(1:i-1))) y lat(sum(nPoints(1:i-1))+1:end)];
     end
 end
 %
-%
+% 
 %
 xyz=table('Size',[length(lat) 3],'VariableTypes',["double" "double" "cell"],'VariableNames',["x" "y" "z"]);
 for i=1:length(lat)
     idx=calcGlobalWatercolumn(lat(i), lon(i), sim);
-    %idx.z(sim.bathy(idx.x, idx.y,:)==0)=find((sim.bathy(idx.x, idx.y,:)==0));
     xyz(i,:)=struct2table(idx,"AsArray",true);
 end
 idx=unique(xyz(:,1:2),"stable");
 idx=table2struct(idx,"ToScalar",true);
 idx.z=1:length(sim.z);
-%idx.z=cell2mat(table2array(xyz(1,3)));
 clear xyz;
 %
 % Extract data from field:
 %
-%z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
 z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
 data=zeros(length(idx.x),length(idx.z));
 coor=cell(length(idx.x),1);
@@ -89,10 +87,17 @@ data=[data(:,1) data]; % Add dummy layer on top
 %
 contourf(1:length(idx.x),-z(:,1),data','linestyle','none')
 colorbar;
-xticks(1:length(idx.x))
-xticklabels(coor)
 xlabel('Coordinates')
 ylabel('Depth (m)')
+
+if length(idx.x)>10
+    xticks(2:round(length(idx.x)/10):length(idx.x)) 
+    xticklabels(coor(2:round(length(idx.x)/10):length(idx.x)))
+else
+    xticks(1:length(idx.x))
+    xticklabels(coor)
+end
+
 if ~isempty(options.depthMax)
     ylim([-options.depthMax, 0]);
 end

@@ -3,19 +3,24 @@
 %
 % In:
 %   sim - Global simulation structure
-%   tDay - time (in days)
 %   Lat,Lon - latitude and longitude
+%   tDay - time (in days), equals to -1 by default
+%          If tDay<0, plots the average over the last year of the simulation
+% Optional:
+%   options.depthMax - max depth for ylimit
+%   options.distMax - approximate distance between two plotting points (in km)
+%                     (adds points beetewen the points defined by Lat and Lon)
 %
-% If tDay<0, plots the average over the last year of the simulation
 %
-
-function []=plotGlobalTransect(sim,tDay,Lat,Lon)
+function []=plotGlobalTransect(sim,Lat,Lon,tDay,options)
 
 arguments
     sim struct;
-    tDay double;
     Lat double = [];
     Lon double = [];
+    tDay double = -1;
+    options.depthMax {mustBePositive} = [];
+    options.distMax {mustBePositive} = 100;
 end
 
 clf
@@ -28,7 +33,7 @@ end
 %Nitrogen
 %
 nexttile
-panelGlobalTransect(sim,tDay,sim.N,Lat,Lon,distMax=100)
+panelGlobalTransect(sim,sim.N,Lat,Lon,tDay,distMax=options.distMax,depthMax=options.depthMax)
 c=colorbar;
 c.Label.String =strcat(sim.p.nameNutrientsShort(1),' ( ',sim.p.nameNutrientsUnits(1),')');
 xlabel('')
@@ -37,7 +42,7 @@ set(gca,'XTickLabel','');
 %DOC
 %
 nexttile
-panelGlobalTransect(sim,tDay,sim.DOC,Lat,Lon,distMax=100,depthMax=500)
+panelGlobalTransect(sim,sim.DOC,Lat,Lon,tDay,distMax=options.distMax,depthMax=options.depthMax)
 c=colorbar;
 c.Label.String =strcat(sim.p.nameNutrientsShort(2),' ( ',sim.p.nameNutrientsUnits(2),')');
 xlabel('')
@@ -47,7 +52,7 @@ set(gca,'XTickLabel','');
 %
 if isfield(sim,'Si')
     nexttile
-    panelGlobalTransect(sim,tDay,sim.Si,Lat,Lon,distMax=100,depthMax=2000)
+    panelGlobalTransect(sim,sim.Si,Lat,Lon,tDay,distMax=options.distMax,depthMax=options.depthMax)
     c=colorbar;
     c.Label.String =strcat(sim.p.nameNutrientsShort(3),' ( ',sim.p.nameNutrientsUnits(3),')');
     xlabel('')
@@ -58,6 +63,6 @@ end
 %
 B=sum(sim.B,5);
 nexttile
-panelGlobalTransect(sim,tDay,B,Lat,Lon,distMax=100,depthMax=500)
+panelGlobalTransect(sim,B,Lat,Lon,tDay,distMax=options.distMax,depthMax=options.depthMax)
 c=colorbar;
 c.Label.String ='Biomass ({\mu}C/l';
