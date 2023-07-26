@@ -49,7 +49,6 @@ if ~isempty(options.distMax)
         y=(1:nPoints(i)).*((Lat(i+1)-Lat(i))/(nPoints(i)+1))+Lat(i);
         lon=[lon(1:i+sum(nPoints(1:i-1))) x lon(sum(nPoints(1:i-1))+i+1:end)];
         lat=[lat(1:i+sum(nPoints(1:i-1))) y lat(sum(nPoints(1:i-1))+i+1:end)];
-        stop=1;
     end
 end
 %
@@ -111,6 +110,14 @@ end
 if ~isempty(options.depthMax)
     ylim([-options.depthMax, 0]);
 end
+
+%
+% Mask
+%
+mask=isnan(data);
+hold on
+contour(1:length(idx.x),-z(:,1),mask',[.01 .01],'k','LineWidth',0.1)
+hold off 
 
 lon = sim.x(idx.x);
 lat = sim.y(idx.y);
