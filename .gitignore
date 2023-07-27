@@ -141,8 +141,5 @@ Fortran/libNUMmodel_matlab.dll.a
 TMs/
 install_manifest.txt
 matlab/Watercolumn_MITgcm_ECCO_lat060_lon-40.mat
-matlab/combine.m
-matlab/compareField.m
-matlab/compareSimulation.m
-matlab/runBifurcationBis.m
+
 
