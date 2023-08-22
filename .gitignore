@@ -131,3 +131,13 @@ Fortran/CMakeFiles/NUMmodeltest.dir/fortran.internal
 Fortran/CMakeFiles/NUMmodeltest.dir/link.txt
 Fortran/CMakeFiles/NUMmodeltest.dir/progress.make
 Fortran/CMakeFiles/progress.marks
+Fortran/libNUMmodel.so
+Fortran/libNUMmodel_matlab.so
+Fortran/libNUMmodel_R.so
+Fortran/NUMmodeltest
+install_manifest.txt
+lib/libNUMmodel_matlab.so
+lib/libNUMmodel_R.so
+lib/libNUMmodel_matlab.so
+lib/libNUMmodel_R.so
+*.so
