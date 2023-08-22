@@ -10,7 +10,7 @@ end
 
 loadNUMmodelLibrary(bParallel);
 
-errortext ='';
+errortext ='                    ';
 errorio=false;
 
 [~,errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult,errorio, errortext);
@@ -22,7 +22,7 @@ if bParallel
     errortext = repmat({''}, [1 poolsize]);
 
     parfor i=1:poolsize
-        this_errortext ='';
+        this_errortext ='                    ';
         [~,errorio(i),this_errortext]=calllib(loadNUMmodelLibrary(), 'f_setupgeneric', int32(length(mAdult)), mAdult, errorio(i), this_errortext);
         errortext(i)={this_errortext}
     end

@@ -13,7 +13,7 @@ if bParallel
     errorio=false(1,poolsize);
     errortext = repmat({''}, [1 poolsize]);
     parfor i=1:poolsize
-        this_errortext ='';
+        this_errortext ='                    ';
         [errorio(i),this_errortext]=calllib(loadNUMmodelLibrary(), 'f_setupdiatoms_simpleonly',int32(n),errorio(i), this_errortext);
         errortext(i)={this_errortext}
     end
@@ -26,7 +26,7 @@ if bParallel
         disp('done loading input parameters')
     end
 else
-    errortext ='';
+    errortext ='                    ';
     errorio=false;
     [errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupdiatoms_simpleonly', int32(n),errorio, errortext);
     p.bParallel = false;
