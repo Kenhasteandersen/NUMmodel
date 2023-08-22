@@ -15,7 +15,7 @@ end
 loadNUMmodelLibrary(options.bParallel);
 
 
-errortext ='';
+errortext ='                    ';
 errorio=false;
 
 [~,~,errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
