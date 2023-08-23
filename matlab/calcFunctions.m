@@ -74,7 +74,7 @@ switch sim.p.nameModel
         if isfield(sim.p,'ixPOM')
             ixPlankton = sim.p.idxB:(sim.p.ixStart(sim.p.ixPOM)-1);
         else
-            ixPlankton = sim.p.idxB:sim.p.nGrid;
+            ixPlankton = sim.p.idxB:sim.p.n;
         end
         for iTime = ixTime
             ProdGross = 0;
