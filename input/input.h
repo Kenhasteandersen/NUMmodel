@@ -227,7 +227,7 @@
 
 !***********************************************************************
 ! COPEPODS PASSIVE INPUT PARAMETERS
-! - Values taken from Serra-Pompei et al (2020) for actively feeding copepods
+! - Values taken from Serra-Pompei et al (2020) for passively feeding copepods
 !***********************************************************************
 
    epsilonF = 0.67               ! Assimilation efficiency

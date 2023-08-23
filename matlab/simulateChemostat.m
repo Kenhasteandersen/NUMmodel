@@ -141,7 +141,7 @@ if options.bVerbose
     ixDiatoms = find(p.typeGroups==3);
     if ~isempty(ixDiatoms)
         ixDiatoms = (p.ixStart(ixDiatoms):p.ixEnd(ixDiatoms))-p.idxSi;
-        rhoCSi = search_namelist('../input/input.nlm','Diatoms','rhoCSi');
+        rhoCSi = search_namelist('../input/input.h','diatoms','rhoCSi');
         Sirate=sim.Sibalance/(sim.Si(end)+sum(sim.B(end,ixDiatoms))/rhoCSi)*100;
         fprintf("Rate of gain of Si: %8.3f %% per day \n", Sirate);
     end
