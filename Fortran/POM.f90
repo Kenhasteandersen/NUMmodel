@@ -35,19 +35,22 @@ module POM
     class(spectrumPOM):: this
     integer, intent(in):: n
     real(dp), intent(in):: mMax
+    real(dp) :: mMin
     logical(1), intent(out):: errorio 
     character(c_char), dimension(*), intent(out) :: errorstr
-    integer:: file_unit,io_err
-    real(dp) :: mMin
+
+    call this%initSpectrum(n)
+
     print*, 'Loading parameter for POM from ', inputfile, ':'
     call read_input(inputfile,'POM','mMin',mMin,errorio,errorstr)
     call read_input(inputfile,'POM','remin',this%remin,errorio,errorstr)
+    call read_input(inputfile,'POM','palatability',this%palatability,errorio,errorstr)
 
-    call this%initSpectrum(n)
     call this%calcGrid(mMin, mMax)
 
     this%velocity = 400*this%m**0.513 ! Copepod fecal pellets from Serra-Pompei (2022)
     this%mort2 = 0.d0 ! No virulysis of POM
+
   end subroutine initPOM
 
   subroutine calcDerivativesPOM(this, u, dNdt, dDOCdt, dudt)
@@ -57,7 +60,7 @@ module POM
 
     this%Jresptot = fTemp2*this%remin*this%m
     dudt = dudt - fTemp2*this%remin*u - this%mortpred*u
-    dNdt = dNdt + sum(fTemp2*this%remin*u)/rhoCN
+    dNdt = dNdt + fTemp2*this%remin*sum(u)/rhoCN
     dDOCdt = dDOCdt ! remineralized carbon is respired, so lost
   end subroutine calcDerivativesPOM
 
