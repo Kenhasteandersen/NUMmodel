@@ -46,12 +46,8 @@ else
     end
 end
 
-p.idxN = 1;
-p.idxDOC = 2;
-p.idxSi=3;
-p.idxB = 4; % We have two nutrient groups so biomass groups starts at index 3.
+p = setupNutrients_N_DOC_Si;
 
-p.n = 3;
 % Diatoms :
 p = parametersAddgroup(3,p,n);
 % Generalists :
