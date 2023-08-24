@@ -7,25 +7,35 @@
 % Out:
 %  sim: Structure holding the results of the simulation
 %
-function sim = baserunChemostat(mAdult)
+function sim = baserunChemostat_SlowFast(mAdult)
 
 arguments
     mAdult double = []
 end
-%   
-% Set parameters:
-%
-%     n = 10;
-%     nCopepods = 10;
-%     nPOM = 10;
-%     p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
-%     
-%p = setupGeneralistsSimpleOnly;
-p = setupGeneralistsSimpleK;
+
+%Set parameters:
+
+n = 10;
+k = 2;
+bParallel = false;
+
+p = setupGeneralistsSimpleK(n,k, bParallel);
 
 p = parametersChemostat(p);
 p.tEnd = 200;
 p.d = 0.1;
+
+% Change colors for groups of Generalists:
+j=linspace(0.3,0.9,k);
+for i=1:k
+    p.colGroup{i}=[0,0,j(i)];
+end
+%Change color of N so I can see generalists
+
+p.colNutrients{1}=[0,1,1];
+
+%p.umin=p.umin.*0.5;
+%p.u0(p.idxB:p.n) = 0.5;
 %
 % Set to "normal" HTL mortality if there are no copepods:
 %
@@ -43,5 +53,5 @@ toc
 %
 % Plot
 %
-plotSimulation(sim);
+plotSimulation_SlowFast(sim);
 checkConservation(sim);
