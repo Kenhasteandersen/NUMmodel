@@ -227,7 +227,7 @@
 
 !***********************************************************************
 ! COPEPODS PASSIVE INPUT PARAMETERS
-! - Values taken from Serra-Pompei et al (2020) for actively feeding copepods
+! - Values taken from Serra-Pompei et al (2020) for passively feeding copepods
 !***********************************************************************
 
    epsilonF = 0.67               ! Assimilation efficiency
@@ -260,5 +260,6 @@
 !*********************************************************************** 
   mMin = 1d-9                   ! Smallest POM mass
   remin = 0.07d0                ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
+  palatability = 1.0d0          ! Preference of other groups for eating POM
 
   

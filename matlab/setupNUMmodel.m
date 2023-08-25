@@ -15,7 +15,7 @@ end
 loadNUMmodelLibrary(options.bParallel);
 
 
-errortext ='';
+errortext ='                    ';
 errorio=false;
 
 [~,~,errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
@@ -73,7 +73,7 @@ end
 
 % POM:
 p = parametersAddgroup(100, p, nPOM);
-setSinkingPOM(p, 10); % Since there is only one group, set a slow sinking
+setSinkingPOM(p, 20); % Since there is only one group, set a slow sinking
 
 p = getMass(p);
 

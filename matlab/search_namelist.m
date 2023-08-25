@@ -4,7 +4,7 @@
 function [parval] = search_namelist(filename,namelist,parameter)
 load(fullfile('..','input','input_parameter_headers.mat'));
 
-headernumber=find(strcmp(namelist,erase(thelists,"input_"))==1);
+headernumber=find(strcmp(lower(namelist),erase(thelists,"input_"))==1);
 if isempty(headernumber)
     disp('No namelist by that name. Please check again')
     return
