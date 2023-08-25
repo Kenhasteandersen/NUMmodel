@@ -32,6 +32,7 @@ module spectrum
      real(dp) :: mort2constant
      ! Sinking:
      real(dp), dimension(:), allocatable:: velocity ! sinking velocity m/day
+     real(dp), dimension(:), allocatable:: uType ! total biomass in group
  
      contains 
 
@@ -125,6 +126,8 @@ contains
     allocate(this%mort2(n))
 
     allocate(this%velocity(n))
+    
+    allocate(this%uType(n))
     ! Set feeding to dummy values. Relevant for non-feeding groups (diatoms)
     this%AF = 0.d0
     this%JFmax = 0.d0
@@ -143,6 +146,7 @@ contains
     this%JNlossLiebig = 0.d0
     this%JNloss = 0.d0
     this%jCloss = 0.d0
+    this%uType = 0.d0
   end subroutine initSpectrum
 
   !

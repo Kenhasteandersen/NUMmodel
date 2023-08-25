@@ -723,6 +723,16 @@ contains
     do i = 1, nGrid
        upositive(i) = max( 0.d0, u(i) )
     end do
+    print*, 'upositive is:', upositive
+    
+
+    do iGroup=1, nGroups
+       group(iGroup)%spec%uType = upositive(ixStart(1):ixEnd(1))
+       if (nGroups.gt.1) then
+       group(iGroup)%spec%uType = group(iGroup)%spec%uType + upositive(ixStart(2):ixEnd(2))
+       endif
+    end do
+    
     !
     ! Update temperature corrections (in global.f90):
     !

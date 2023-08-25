@@ -15,7 +15,7 @@ program NUMmodeltest
 
   !call setupGeneralistsOnly(10)
   !call setupGeneralistsSimpleOnly(10)
-  k=1
+  k=2
   call setupGeneralistsSimple_two(10,k,errorio,errorstr)
   !call setupGeneralistssimpleOnly(10,errorio,errorstr)
 
@@ -60,18 +60,19 @@ program NUMmodeltest
   u00(idxDOC) = 10.d0
   u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 10! + 0.1*(i-2)
+     u00(i) = 10.0d0! + 0.1*(i-2)
   end do
   dudt = 0.d0
+  print*, 'u00 is', u00
 
-  call simulateEuler(u00, 60.d0, 100.d0, 365.d0, 0.1d0)
+  call simulateEuler(u00, 60.d0, 300.d0, 0.4d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
   
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
   !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
-  call printRates()
+  !call printRates()
   !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
   !call printRates()
 
@@ -82,10 +83,10 @@ program NUMmodeltest
   !end select
   
   
-  call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
-  write(*,*) dudt
-  call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
-  write(*,*) dudt
+  !call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
+  !write(*,*) dudt
+  !call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
+  !write(*,*) dudt
   !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
   !write(*,*) 'nbutrients',nNutrients
@@ -115,10 +116,11 @@ program NUMmodeltest
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
  !write(*,*) Bpico, Bnano, Bmicro
-  call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
-    write(*,*) 'Nbalance:', Nbalance
-    write(*,*) 'Cbalance:', Cbalance
-    write(*,*) 'Sibalance:', Sibalance
+  
+  !call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
+  !  write(*,*) 'Nbalance:', Nbalance
+  !  write(*,*) 'Cbalance:', Cbalance
+  !  write(*,*) 'Sibalance:', Sibalance
    
 
 !do i = 5,9

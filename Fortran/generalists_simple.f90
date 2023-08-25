@@ -254,8 +254,12 @@ end subroutine calcRatesGeneralistsSimple
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
     !real(dp):: mortloss
     integer:: i
+    
+    print*, 'uType is:',this%uType
+    
 
-    this%mort2 = 0*u !this%mort2constant*u ! "quadratic" mortality
+    !this%mort2 = 0*u !this%mort2constant*u ! "quadratic" mortality
+    this%mort2 = this%mort2constant*this%uType ! "quadratic" mortality
     this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
     do i = 1, this%n
