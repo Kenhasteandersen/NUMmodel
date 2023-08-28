@@ -43,6 +43,7 @@ module NUMmodel
   integer:: nGrid ! Total number of state variables in u incl. variables for nutrients
   type(spectrumContainer), allocatable :: group(:) ! Structure pointing to each group
   integer, dimension(:), allocatable :: ixStart, ixEnd ! Indices into u for each group
+  integer, dimension(:), allocatable :: ixType ! Type of organism for each group
 
   real(dp), dimension(:,:), allocatable:: theta ! Interaction matrix
   real(dp), dimension(:), allocatable:: upositive ! State variable constrained to be positive
@@ -123,6 +124,9 @@ contains
        IF ( errorio ) RETURN
     end do
     print*, 'done with that?'
+    print*, 'the vector',ixType
+    
+    
     !call parametersAddGroup(typeGeneralistSimple, n1, 0.d0,errorio,errorstr) ! generalists with n size classes
     print*, 'enter parameters finalize'
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
@@ -374,6 +378,7 @@ contains
        deallocate(group)
        deallocate(ixStart)
        deallocate(ixEnd)
+       deallocate(ixType)
        deallocate(upositive)
        deallocate(F)
        deallocate(theta)
@@ -387,6 +392,7 @@ contains
     allocate( group(nGroups) )
     allocate(ixStart(nGroups))
     allocate(ixEnd(nGroups))
+    allocate(ixType(nGroups))
     allocate(upositive(nGrid))
     allocate(F(nGrid))
     allocate(pHTL(nGrid))
@@ -433,25 +439,32 @@ contains
     case (typeGeneralistSimple)
       call initGeneralistsSimple(specGeneralistsSimple, n, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specGeneralistsSimple )
+      ixType(iCurrentGroup) = 1
     case (typeGeneralist)
       call initGeneralists(specGeneralists, n, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specGeneralists )
+      ixType(iCurrentGroup) = 5
     case (typeDiatom_simple)
       call initDiatoms_simple(specDiatoms_simple, n, mMax, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms_simple )
+      ixType(iCurrentGroup) = 4
     case (typeDiatom)
       call initDiatoms(specDiatoms, n, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms )
+      ixType(iCurrentGroup) = 3
    case(typeCopepodPassive)
       call initCopepod(specCopepod, passive, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
+      ixType(iCurrentGroup) = 10
    case(typeCopepodActive)
       call initCopepod(specCopepod, active, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
+      ixType(iCurrentGroup) = 11
    case(typePOM)
       call initPOM(specPOM, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
-      idxPOM = iCurrentGroup 
+      idxPOM = iCurrentGroup
+      ixType(iCurrentGroup) = 100 
    end select
 
   end subroutine parametersAddGroup
@@ -486,25 +499,32 @@ contains
     case (typeGeneralistSimple)
       call initGeneralistsSimpleX(specGeneralistsSimple, n,k,errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specGeneralistsSimple )
+      ixType(iCurrentGroup) = 1
     case (typeGeneralist)
       call initGeneralists(specGeneralists, n, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specGeneralists )
+      ixType(iCurrentGroup) = 5
     case (typeDiatom_simple)
       call initDiatoms_simple(specDiatoms_simple, n, mMax, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms_simple )
+      ixType(iCurrentGroup) = 4
     case (typeDiatom)
       call initDiatoms(specDiatoms, n, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms )
+      ixType(iCurrentGroup) = 3
    case(typeCopepodPassive)
       call initCopepod(specCopepod, passive, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
+      ixType(iCurrentGroup) = 10
    case(typeCopepodActive)
       call initCopepod(specCopepod, active, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
+      ixType(iCurrentGroup) = 11
    case(typePOM)
       call initPOM(specPOM, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
       idxPOM = iCurrentGroup 
+      ixType(iCurrentGroup) = 100 
    end select
 
   end subroutine parametersAddGroupX
@@ -713,7 +733,7 @@ contains
   subroutine calcDerivatives(u, L, T, dt, dudt)
     real(dp), intent(in):: L, T, dt, u(nGrid)
     real(dp), intent(inout) :: dudt(nGrid)
-    integer:: i, j, iGroup, ix
+    integer:: i, j, iGroup, ix, counttr,jGroup
     real(dp):: gammaN, gammaDOC, gammaSi
 
     dudt = 0.d0
@@ -723,13 +743,18 @@ contains
     do i = 1, nGrid
        upositive(i) = max( 0.d0, u(i) )
     end do
-    print*, 'upositive is:', upositive
-    
+   
+   
 
     do iGroup=1, nGroups
-       group(iGroup)%spec%uType = upositive(ixStart(1):ixEnd(1))
-       if (nGroups.gt.1) then
-       group(iGroup)%spec%uType = group(iGroup)%spec%uType + upositive(ixStart(2):ixEnd(2))
+       group(iGroup)%spec%uType = upositive(ixStart(iGroup):ixEnd(iGroup))
+       counttr = COUNT(ixType == ixType(iGroup))
+       if (counttr.gt.1) then
+         do jGroup=1, nGroups
+           if (jGroup /= iGroup .and. ixType(jGroup) == ixType(iGroup)) then
+            group(iGroup)%spec%uType = group(iGroup)%spec%uType + upositive(ixStart(jGroup):ixEnd(jGroup))
+           endif
+         end do
        endif
     end do
     
