@@ -14,7 +14,6 @@ end
 
 loadNUMmodelLibrary(options.bParallel);
 
-
 errortext ='                    ';
 errorio=false;
 
@@ -30,7 +29,7 @@ if options.bParallel
     errortext = repmat({''}, [1 poolsize]);
 
     parfor i=1:poolsize
-        this_errortext ='';
+        this_errortext ='                    ';
         [~,~,errorio(i),this_errortext]=calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
             int32(n), int32(nCopepods), int32(nPOM),...
             length(mAdultPassive), mAdultPassive, length(mAdultActive), mAdultActive ,...
