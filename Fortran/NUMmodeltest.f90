@@ -24,22 +24,23 @@ program NUMmodeltest
   !call setupGenDiatCope(3,5,1,(/0.1d0, 1.0d0 /))
    !               2 gens cop POM   mAdult     
    !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /), (/1.d0 /))
-   !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /))
+  !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /), errorio, errorstr)
 
    !              gen-diat-cop      POM      mAdult    
   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
   !call setupGeneralistssimpleOnly(10)
   !call setupDiatoms_simpleOnly(10)
-  !call setupDiatomsOnly(10)
+  !call setupDiatomsOnly(10,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
   !call setHTL(0.1d0, 0.1d0, .false., .false.)
-  !call setupGeneralistsOnly(5)
+  !call setupGeneralistsOnly(5,errorio,errorstr)
+  !call setupGeneralistsPOM(5,1, errorio, errorstr)
   !call setupGeneralistsDiatoms_simple(10)
   !call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
   !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
-  !call setupGeneralistsDiatoms(10)
-  !call setupGeneric( (/0.1d0/) )
+  !call setupGeneralistsDiatoms(10, errorio, errorstr)
+  !call setupGeneric( (/0.1d0/), errorio, errorstr )
   !call setupGeneralistsDiatoms(10)
   call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/),errorio,errorstr)
   if (errorio .eqv. .false.) then
@@ -61,7 +62,7 @@ program NUMmodeltest
   end do
   dudt = 0.d0
 
-  call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
+  !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt

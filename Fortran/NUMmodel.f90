@@ -1064,14 +1064,15 @@ subroutine getBalance(u, dudt, Cbalance,Nbalance,SiBalance)
    Cbalance = dudt(idxDOC) + sum( dudt(idxB:nGrid) )       + Clost
    Nbalance = dudt(idxN)   + sum( dudt(idxB:nGrid) )/rhoCN + Nlost 
    ! Only diatom groups for silicate
-   Sibalance = dudt(idxSi) + SiLost ! rhoC:Si hardcoded here
+   Sibalance = dudt(idxSi) + SiLost 
+
    do iGroup = 1, nGroups
       select type ( spec => group(iGroup)%spec )
          type is (spectrumDiatoms)
-            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0 ! rhoC:Si hardcoded here
             
          type is (spectrumDiatoms_simple)
-            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0 ! rhoC:Si hardcoded here
       end select
    end do
    !
@@ -1079,7 +1080,12 @@ subroutine getBalance(u, dudt, Cbalance,Nbalance,SiBalance)
    !
    Cbalance = Cbalance / u(idxDOC)
    Nbalance = Nbalance / u(idxN)
-   Sibalance = Sibalance / u(idxSi)
+   if (nNutrients .gt. 2) then
+     Sibalance = Sibalance / u(idxSi)
+   else
+     Sibalance = 0.d0
+   endif
+
 end subroutine getBalance
 !
 ! Return what is lost (or gained) of carbon, nutrients and silicate from the system:
@@ -1089,6 +1095,7 @@ subroutine getLost(u, Clost, Nlost, SiLost)
    real(dp), intent(out):: Clost, Nlost, SiLost
    integer:: iGroup
    real(dp) :: HTLloss, POMloss
+   real(dp),parameter :: rhoCSi = 3.4d0 ! Hard coded here
 
    Clost = 0.d0
    Nlost = 0.d0
@@ -1115,6 +1122,15 @@ subroutine getLost(u, Clost, Nlost, SiLost)
       
          Nlost = Nlost + POMloss / rhoCN
          Clost = Clost + POMloss
+         !
+         ! POM from diatoms is lost:
+         !
+         select type ( spec => group(iGroup)%spec )
+            type is (spectrumDiatoms)
+               Silost = Silost + POMloss / rhoCSi
+            type is (spectrumDiatoms_simple)
+               Silost = Silost + POMloss / rhoCSi
+         end select
       else
          !
          ! If there is POM then just account for the respiration
@@ -1129,13 +1145,13 @@ subroutine getLost(u, Clost, Nlost, SiLost)
             ! Consumed silicate is considered lost:
             SiLost = SiLost + ( &
                sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
-               + HTLloss ) / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + HTLloss ) / rhoCSi ! All HTL silicate is lost. rhoCSi is hard-coded here
             
          type is (spectrumDiatoms_simple)
            ! NOT IMPLEMENTED
             SiLost = SiLost + ( &
                sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
-               + HTLloss ) / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + HTLloss ) / rhoCSi ! All HTL silicate is lost. rhoCSi is hard-coded here
 
       end select
 
