@@ -37,7 +37,7 @@ program NUMmodeltest
   !call setupGeneralistsOnly(5,errorio,errorstr)
   !call setupGeneralistsPOM(5,1, errorio, errorstr)
   !call setupGeneralistsDiatoms_simple(10)
-  call setupNUMmodel(5,5,2, (/1.d0 /), (/10.d0/) ,errorio,errorstr)
+  call setupNUMmodel(5,5,1, (/1.d0 /), (/10.d0/) ,errorio,errorstr)
   !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
   !call setupGeneralistsDiatoms(10, errorio, errorstr)
   !call setupGeneric( (/0.1d0, 1.0d0/), errorio, errorstr )
@@ -50,7 +50,7 @@ program NUMmodeltest
     print*, 'Error loading parameter ', errorstr
   end if
 
-  call setHTL(0.1d0, 0.1d0, .false., .false.)
+  !call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -59,7 +59,7 @@ program NUMmodeltest
   u00(idxDOC) = 10.d0
   u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 10! + 0.1*(i-2)
+     u00(i) = 10.d0
   end do
   dudt = 0.d0
   !u00(8:11) = 0.d0

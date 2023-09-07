@@ -1,5 +1,6 @@
 %
-% Get the carbon, nitrogen and silicate balances.
+% Get the carbon, nitrogen and silicate balances in the calculation of the
+% derivatives.
 %
 % In:
 %  u - state variable vector (nutrients and biomasses of all groups).
@@ -10,7 +11,7 @@
 %  N balance, C balance, and Si balance in units 1/day
 
 %
-function [Cbalance, Nbalance, Sibalance] = getBalance(u, L, T)
+function [Cbalance, Nbalance, Sibalance, dudt] = getBalance(u, L, T)
 arguments
     u double;
     L double;
@@ -28,4 +29,4 @@ Nbalance = 0;
 Sibalance= 0;
 
 [~, ~,Cbalance, Nbalance,Sibalance] = calllib(loadNUMmodelLibrary(), 'f_getbalance', ...
-    u, dudt, Cbalance, Nbalance,Sibalance);
+    u, dudt, Cbalance, Nbalance, Sibalance);

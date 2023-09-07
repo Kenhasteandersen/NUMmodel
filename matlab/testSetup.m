@@ -16,6 +16,9 @@ try
     % by making a short simulation
     %
     p = eval( sSetup ); % Initialize the setup
+    %[Cbalance, Nbalance, Sibalance] = getBalance(p.u0, 100, 10);
+
+
     p = parametersChemostat(p);
     p.tEnd = 1;
     sim = simulateChemostat(p);
