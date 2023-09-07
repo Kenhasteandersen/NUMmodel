@@ -81,21 +81,6 @@ contains
     call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimpleOnly
   
-  subroutine setupNUMmodel2(n,errorio,errorstr)
-    integer, intent(in):: n ! number of size classes
-    logical(1), intent(out):: errorio ! Whether to losses to the deep
-    character(c_char), dimension(*) :: errorstr
-
-   
-    call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
-      IF ( errorio ) RETURN 
-    call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
-
-  end subroutine setupNUMmodel2
-  
-
- 
   ! -----------------------------------------------
   ! A basic setup with only generalists
   ! -----------------------------------------------
@@ -247,6 +232,7 @@ contains
    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
      IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
+   IF ( errorio ) RETURN 
 
    do iCopepod = 1, size(mAdultPassive)
       call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod),errorio,errorstr) ! add copepod
@@ -262,6 +248,42 @@ contains
    call parametersFinalize(0.001d0, .true., .true.)
 
   end subroutine setupNUMmodel
+
+
+! -----------------------------------------------
+  ! Full NUM model setup with generalists, copepods, and POM
+  ! -----------------------------------------------
+  subroutine setupNUMmodelNOPOM(n, nCopepod, nPOM, mAdultPassive, mAdultActive,errorio,errorstr)
+   integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
+   real(dp), intent(in):: mAdultPassive(:), mAdultActive(:)
+   logical(1), intent(out):: errorio ! Whether to losses to the deep
+   character(c_char), dimension(*) :: errorstr
+   integer:: iCopepod
+
+   call parametersInit( &
+    2+size(mAdultActive)+size(mAdultPassive), &
+    2*n + nCopepod*(size(mAdultPassive)+size(mAdultActive)), &
+    3,errorio,errorstr)
+   IF ( errorio ) RETURN 
+   call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
+   IF ( errorio ) RETURN 
+   call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
+   IF ( errorio ) RETURN 
+
+   do iCopepod = 1, size(mAdultPassive)
+      call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
+   end do
+   
+   do iCopepod = 1, size(mAdultActive)
+      call parametersAddGroup(typeCopepodActive, nCopepod, mAdultActive(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
+   end do
+   
+   !call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
+   call parametersFinalize(0.001d0, .true., .true.)
+
+  end subroutine setupNUMmodelNOPOM
 
   ! -----------------------------------------------
   ! Full NUM model setup with generalistsSImple, copepods, and POM
@@ -1111,26 +1133,17 @@ subroutine getLost(u, Clost, Nlost, SiLost)
       ! Deal with higher trophic level losses and POM:
       !
       HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
+      POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
+
       if (idxPOM .eq. 0) then
          !
          ! If there is no POM, then POM is lost from the system:
          !
          Nlost = Nlost + (1-fracHTL_to_N) * HTLloss/rhoCN ! The part of POM which is not respired
          Clost = Clost +  HTLloss  ! Both respiration losses and POM losses
-
-         POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
       
          Nlost = Nlost + POMloss / rhoCN
-         Clost = Clost + POMloss
-         !
-         ! POM from diatoms is lost:
-         !
-         select type ( spec => group(iGroup)%spec )
-            type is (spectrumDiatoms)
-               Silost = Silost + POMloss / rhoCSi
-            type is (spectrumDiatoms_simple)
-               Silost = Silost + POMloss / rhoCSi
-         end select
+         Clost = Clost + POMloss   
       else
          !
          ! If there is POM then just account for the respiration
@@ -1145,16 +1158,17 @@ subroutine getLost(u, Clost, Nlost, SiLost)
             ! Consumed silicate is considered lost:
             SiLost = SiLost + ( &
                sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
-               + HTLloss ) / rhoCSi ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + HTLloss & ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + POMloss) / rhoCSi ! POM from diatoms is lost:
             
          type is (spectrumDiatoms_simple)
            ! NOT IMPLEMENTED
             SiLost = SiLost + ( &
                sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
-               + HTLloss ) / rhoCSi ! All HTL silicate is lost. rhoCSi is hard-coded here
-
+               + HTLloss & ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + POMloss) / rhoCSi ! POM from diatoms is lost:
+      
       end select
-
    end do
 end subroutine getLost
 
