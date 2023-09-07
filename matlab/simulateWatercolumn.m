@@ -91,7 +91,7 @@ end
 versionTMcolumnCurrent = 2; % Current version of the water column
 if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extract water column if the loaded one is too old
     versionTMcolumn = versionTMcolumnCurrent;
-    fprintf('-> Extracting water column from transport matrix')
+    fprintf('-> Extracting water column from transport matrix\n')
     %
     % Check that transport matrix files exist:
     %

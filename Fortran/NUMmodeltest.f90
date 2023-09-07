@@ -29,20 +29,21 @@ program NUMmodeltest
    !              gen-diat-cop      POM      mAdult    
   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
-  !call setupGeneralistssimpleOnly(10)
+  !call setupGeneralistssimpleOnly(2,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
   !call setupDiatomsOnly(10,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
-  !call setHTL(0.1d0, 0.1d0, .false., .false.)
+  
   !call setupGeneralistsOnly(5,errorio,errorstr)
   !call setupGeneralistsPOM(5,1, errorio, errorstr)
   !call setupGeneralistsDiatoms_simple(10)
-  !call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
+  call setupNUMmodel(5,5,2, (/1.d0 /), (/10.d0/) ,errorio,errorstr)
   !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
   !call setupGeneralistsDiatoms(10, errorio, errorstr)
-  !call setupGeneric( (/0.1d0/), errorio, errorstr )
+  !call setupGeneric( (/0.1d0, 1.0d0/), errorio, errorstr )
   !call setupGeneralistsDiatoms(10)
-  call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/),errorio,errorstr)
+  !call setupNUMmodelNOPOM(5,5,1, (/1.d0 /), (/10.d0/),errorio,errorstr)
+
   if (errorio .eqv. .false.) then
     print*, 'Parameters loaded correctly'
   else
@@ -61,6 +62,7 @@ program NUMmodeltest
      u00(i) = 10! + 0.1*(i-2)
   end do
   dudt = 0.d0
+  !u00(8:11) = 0.d0
 
   !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
@@ -76,7 +78,6 @@ program NUMmodeltest
   !      write(*,*) getNbalanceGeneralists(spec, u00(idxN), dudt(idxN), u00(idxB:nGrid), dudt(idxB:nGrid))    
   !      write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
   !end select
-  
   
   call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
   write(*,*) dudt

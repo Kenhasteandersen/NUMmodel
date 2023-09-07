@@ -37,7 +37,7 @@ n = length(range);
 %
 for i = 1:n
     pp(i) = p;
-    if ~strcmp(sField, 'mortHTL')
+    if ~strcmp(sField, 'mortHTL') && ~strcmp(sField, 'sinking')
         eval( strcat('pp(i).',sField, '= range(i);') );
     end
 end
@@ -67,6 +67,10 @@ if options.bParallel
         %
         if strcmp(sField, 'mortHTL')
             setHTL(range(i), options.mHTL, options.bQuadraticHTL, options.bDecliningHTL);
+        end
+
+        if strcmp(sField, 'sinking')
+            setSinkingPOM(ppp, range(i));
         end
         sim = simulateChemostat(ppp, L, T);
         %

@@ -7,7 +7,7 @@
 %  T - temperature
 %
 % Out
-%  N balance, C balance in units 1/day
+%  N balance, C balance, and Si balance in units 1/day
 
 %
 function [Cbalance, Nbalance, Sibalance] = getBalance(u, L, T)

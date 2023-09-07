@@ -259,7 +259,7 @@
 ! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS
 !*********************************************************************** 
   mMin = 1d-9                   ! Smallest POM mass
-  remin = 0.07d0                ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
-  palatability = 1.0d0          ! Preference of other groups for eating POM
+  remin = 0.0d0                ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
+  palatability = 0.d0          ! Preference of other groups for eating POM
 
   

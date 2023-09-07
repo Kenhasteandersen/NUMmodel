@@ -2,7 +2,7 @@ module NUMmodel_wrap
   use iso_c_binding, only: c_double, c_int, c_bool, c_char, c_null_char
   use NUMmodel, only:  nGrid, idxB, nGrid, &
        setupGeneralistsSimpleOnly, setupGeneralistsSimplePOM, &
-       setupGeneralistsOnly,setupGeneralistsPOM, setupNUMmodel2, &
+       setupGeneralistsOnly,setupGeneralistsPOM,  &
        setupDiatomsOnly, &
        setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
@@ -46,13 +46,6 @@ contains
     character(c_char), dimension(*) :: errorstr
     call setupGeneralistsSimpleOnly(n,errorio, errorstr)
   end subroutine f_setupGeneralistsSimpleOnly
-
-  subroutine f_setupNUMmodel2(n, errorio, errorstr) bind(c)
-    integer(c_int), intent(in), value :: n
-    logical(c_bool), intent(out) :: errorio
-    character(c_char), dimension(*) :: errorstr
-    call setupNUMmodel2(n,errorio, errorstr)
-  end subroutine f_setupNUMmodel2
  
   subroutine f_setupDiatomsOnly(n, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n
