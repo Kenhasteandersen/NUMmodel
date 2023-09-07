@@ -55,12 +55,18 @@ contains
        stop
     end if
     
-    print*, 'Loading parameter for copepods from ', inputfile, ':'
+    print*, 'Loading parameter for ',this_listname,' from ', inputfile, ':'
+
+    !
+    ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
+    !
+    call read_input(inputfile,this_listname,'AdultOffspring',AdultOffspring,errorio,errorstr)
+    call this%initMulticellular(n, mAdult/AdultOffspring, mAdult)
+
     call read_input(inputfile,this_listname,'alphaF',alphaF,errorio,errorstr)
     call read_input(inputfile,this_listname,'q',q,errorio,errorstr)
     call read_input(inputfile,this_listname,'h',h,errorio,errorstr)
     call read_input(inputfile,this_listname,'hExponent',hExponent,errorio,errorstr)
-    call read_input(inputfile,this_listname,'AdultOffspring',AdultOffspring,errorio,errorstr)
     call read_input(inputfile,this_listname,'vulnerability',vulnerability,errorio,errorstr)
     
     call read_input(inputfile,this_listname,'epsilonR',epsilonR,errorio,errorstr)
@@ -72,10 +78,7 @@ contains
     call read_input(inputfile,this_listname,'beta',this%beta,errorio,errorstr)
     call read_input(inputfile,this_listname,'sigma',this%sigma,errorio,errorstr)
     this%DiatomsPreference=DiatomsPreference
-    !
-    ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
-    !
-    call this%initMulticellular(n, mAdult/AdultOffspring, mAdult)
+    
 
     allocate(this%gamma(n))
     allocate(this%g(n))
