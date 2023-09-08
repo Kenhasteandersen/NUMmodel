@@ -249,42 +249,6 @@ contains
 
   end subroutine setupNUMmodel
 
-
-! -----------------------------------------------
-  ! Full NUM model setup with generalists, copepods, and POM
-  ! -----------------------------------------------
-  subroutine setupNUMmodelNOPOM(n, nCopepod, nPOM, mAdultPassive, mAdultActive,errorio,errorstr)
-   integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
-   real(dp), intent(in):: mAdultPassive(:), mAdultActive(:)
-   logical(1), intent(out):: errorio ! Whether to losses to the deep
-   character(c_char), dimension(*) :: errorstr
-   integer:: iCopepod
-
-   call parametersInit( &
-    2+size(mAdultActive)+size(mAdultPassive), &
-    2*n + nCopepod*(size(mAdultPassive)+size(mAdultActive)), &
-    3,errorio,errorstr)
-   IF ( errorio ) RETURN 
-   call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
-   IF ( errorio ) RETURN 
-   call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
-   IF ( errorio ) RETURN 
-
-   do iCopepod = 1, size(mAdultPassive)
-      call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod),errorio,errorstr) ! add copepod
-        IF ( errorio ) RETURN 
-   end do
-   
-   do iCopepod = 1, size(mAdultActive)
-      call parametersAddGroup(typeCopepodActive, nCopepod, mAdultActive(iCopepod),errorio,errorstr) ! add copepod
-        IF ( errorio ) RETURN 
-   end do
-   
-   !call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.001d0, .true., .true.)
-
-  end subroutine setupNUMmodelNOPOM
-
   ! -----------------------------------------------
   ! Full NUM model setup with generalistsSImple, copepods, and POM
   ! -----------------------------------------------
