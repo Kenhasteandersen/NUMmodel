@@ -113,6 +113,7 @@ contains
        this%Jresptot(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i)
        ! Available energy:
        nu = this%JF(i) - this%Jresptot(i)
+       !this%Jresptot(i) = this%Jresptot(i) - min(0.d0, nu) ! Limit respiration to the energy available
        ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
        ! Starvation:
@@ -134,10 +135,10 @@ contains
     b = epsilonR * this%g(this%n) ! Birth rate
     ! Production of POM:
     this%jPOM = &
-          (1-this%epsilonF)*this%JF/(this%m * this%epsilonF) & ! Unassimilated food (fecal pellets)
-        + this%mortStarve                            ! Copepods dead from starvation
+          (1-this%epsilonF)*this%JF/(this%m * this%epsilonF) !& ! Unassimilated food (fecal pellets)
+       ! + this%mortStarve                            ! Copepods dead from starvation are not counted here, because
+                                                      ! the starvation is already respired
     this%jPOM(this%n) = this%jPOM(this%n) + (1.d0-epsilonR)*this%g(this%n) ! Lost reproductive flux
-  
     !
     ! Assemble derivatives:
     !
