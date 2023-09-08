@@ -49,6 +49,7 @@ contains
     print*, 'Loading parameter for generalist simple from ', inputfile, ':'
     call read_input(inputfile,'generalists_simple','mMinGeneralist',mMinGeneralist,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
+    call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     call read_input(inputfile,'generalists_simple','alphaN',alphaN,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','rNstar',rNstar,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','alphaL',alphaL,errorio,errorstr)
@@ -66,7 +67,7 @@ contains
     call read_input(inputfile,'generalists_simple','sigma',this%sigma,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','epsilonF',this%epsilonF,errorio,errorstr)
     
-    call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
+    
     allocate(this%JFreal(n))
 
     this%r = (3./(4.*pi)*this%m/rho)**onethird

@@ -38,7 +38,6 @@ contains
     real(dp), intent(in):: mAdult
     logical(1), intent(out):: errorio 
     character(c_char), dimension(*), intent(out) :: errorstr
-    integer:: i
     real(dp) :: alphaF, q, h, hExponent, AdultOffspring
     real(dp) :: vulnerability
     

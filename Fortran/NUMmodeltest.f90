@@ -40,8 +40,8 @@ program NUMmodeltest
   call setupNUMmodel(5,5,1, (/1.d0 /), (/10.d0/) ,errorio,errorstr)
   !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
   !call setupGeneralistsDiatoms(10, errorio, errorstr)
-  !call setupGeneric( (/0.1d0, 1.0d0/), errorio, errorstr )
-  !call setupGeneralistsDiatoms(10)
+  !call setupGeneric( (/1.d0 /), errorio, errorstr )
+  !call setupGeneralistsDiatoms(10, errorio, errorstr)
   !call setupNUMmodelNOPOM(5,5,1, (/1.d0 /), (/10.d0/),errorio,errorstr)
 
   if (errorio .eqv. .false.) then
@@ -50,7 +50,7 @@ program NUMmodeltest
     print*, 'Error loading parameter ', errorstr
   end if
 
-  !call setHTL(0.1d0, 0.1d0, .false., .false.)
+  call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -59,10 +59,13 @@ program NUMmodeltest
   u00(idxDOC) = 10.d0
   u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 10.d0
+     u00(i) = .005d0 + 0.01*i
   end do
   dudt = 0.d0
-  !u00(8:11) = 0.d0
+
+  !call getSinking(u00)
+  !write(*,*) u00
+  !u00(8:12) = 5.d0
 
   !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )

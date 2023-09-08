@@ -125,7 +125,9 @@ if options.bCalculateNgain
         (p.u0(p.idxN)+sum(p.u0(p.idxB:end))/rhoCN + ...
         sim.Ngain(end)))/ t(end); % Variation of Nitrogen per day in the Chemostat layer
 end
-
+%
+% Get the balance of the derivative:
+%
 [sim.Cbalance,sim.Nbalance,sim.Sibalance] = getBalance(sim.u(end,:), mean(sim.L), sim.T); % in units per day
 
 %
