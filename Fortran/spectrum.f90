@@ -21,6 +21,7 @@ module spectrum
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width
      real(dp):: epsilonF ! Assimilation efficiency
+     real(dp):: epsilonL ! Light Assimilation efficiency
      real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), f(:)
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
@@ -39,31 +40,8 @@ module spectrum
      procedure :: calcFeeding
      procedure :: printRates => printRatesSpectrum
      procedure :: printRatesSpectrum
-     procedure(getNbalanceInterface), deferred :: getNbalance
-     procedure(getCbalanceInterface), deferred :: getCbalance
+     procedure :: getClost => getClostSpectrum
   end type typeSpectrum
-
-interface
-  !
-  ! Functions to determine whether the N and DOC balances are calculated correct 
-  !
-  function getNbalanceInterface(this, u, dudt) result(Nbalance)
-    use globals
-    import typeSpectrum
-    class(typeSpectrum), intent(in) :: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-    real(dp) :: Nbalance
-  end function getNbalanceInterface
-    
-  function getCbalanceInterface(this, u, dudt) result(Cbalance)
-    use globals
-    import typeSpectrum
-    class(typeSpectrum), intent(in) :: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-    real(dp) :: Cbalance
-  end function getCbalanceInterface
-
-end interface
 
   ! ------------------------------------------------
   ! Abstract class for all unicellular spectra:
@@ -86,6 +64,7 @@ end interface
 
     procedure, pass :: initUnicellular
     procedure :: printRatesUnicellular
+    procedure :: getCLost => getClostUnicellular
     procedure :: getProdNet
     procedure :: getProdBact => getProdBactUnicellular
   end type spectrumUnicellular
@@ -96,7 +75,8 @@ end interface
   type, abstract, extends(typeSpectrum) :: spectrumMulticellular
   contains
     procedure :: initMulticellular
-    procedure :: printRatesMulticellular
+    !procedure :: printRatesMulticellular
+    !procedure :: getCbalance => getCbalanceMulticellular
   end type spectrumMulticellular
   ! ------------------------------------------------
   ! Type needed to make an array of spectra:
@@ -187,6 +167,26 @@ contains
   this%mort2constant = 0.004/log(this%m(2) / this%m(1))
 end subroutine calcGrid
 
+!function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
+!    real(dp):: Nbalance
+!    class(typeSpectrum), intent(in):: this
+!    real(dp), intent(in):: u(this%n), dudt(this%n)
+
+!    Nbalance = sum( dudt ) / rhoCN
+!  end function getNbalanceSpectrum
+
+  subroutine getLossesSpectrum(this, u, Nloss, Closs, SiLoss)
+    class(typeSpectrum), intent(in):: this
+    real(dp), intent(in):: u(this%n)
+    real(dp), intent(out) :: Nloss, Closs, SiLoss
+
+    Nloss = 0.d0
+    Closs = sum( this%Jresptot * u / this%m )
+    SiLoss = 0.d0
+  end subroutine getLossesSpectrum
+  !
+  ! Returns the amount of encounter and potentially assimilated food available for a group, JF
+  !
   subroutine calcFeeding(this, F)
     class (typeSpectrum), intent(inout):: this
     real(dp), intent(in):: F(this%n)
@@ -195,6 +195,18 @@ end subroutine calcGrid
       ((this%AF*F+eps) + fTemp2*this%JFmax)   ! demonominator to avoid negative values if F = JFmax = 0.
     this%JF = this%flvl * fTemp2*this%JFmax
   end subroutine calcFeeding
+
+  !
+  ! Returns the carbon that is lost from the system (by default only respiration, but 
+  !  spectrumUnicellular overrides this function to also account for imports of carbon by photosynthesis)
+  !
+  function getClostSpectrum(this, u) result(Clost)
+    class (typeSpectrum), intent(in):: this
+    real(dp), intent(in):: u(this%n)
+    real(dp) :: Clost
+
+    Clost = sum( this%Jresptot*u/this%m )
+  end function getClostSpectrum
 
   subroutine printRatesSpectrum(this)
     class (typeSpectrum), intent(in):: this
@@ -243,8 +255,22 @@ end subroutine calcGrid
     allocate(this%JDOCreal(n))
 
     this%mPOM = this%m ! Assume that POM created by dead cells are 
-                       !the same size as the cells
+                       ! the same size as the cells
   end subroutine initUnicellular
+  !
+  ! Carbon lost from the system (with gains being negative):
+  !
+  function getClostUnicellular(this, u) result(Clost)
+    class (spectrumUnicellular), intent(in):: this
+    real(dp), intent(in):: u(this%n)
+    real(dp) :: Clost
+
+    Clost = sum( ( &
+      - this%JLreal & ! Fixed carbon
+      - this%JCloss_photouptake & !Fixed carbon which is later exudated
+      + this%Jresptot & ! Respiration
+      )/this%m * u )
+  end function getClostUnicellular
 
   subroutine printRatesUnicellular(this)
     class (spectrumUnicellular), intent(in):: this 
@@ -263,6 +289,17 @@ end subroutine calcGrid
     write(*,99) "jLossPass.", this%JlossPassive / this%m
   end subroutine printRatesUnicellular
 
+  !function getCbalanceUnicellular(this, u, dudt) result(Cbalance)
+  !  real(dp):: Cbalance
+  !  class(spectrumUnicellular), intent(in):: this
+  !  real(dp), intent(in):: u(this%n), dudt(this%n)
+
+  !  Cbalance = sum(dudt &
+  !  - this%JLreal*u/this%m &
+  !  - this%JCloss_photouptake*u/this%m &
+  !  + this%Jresptot*u/this%m &
+  !  )
+  !end function getCbalanceUnicellular
   !
   ! Returns the net primary production calculated as the total amount of carbon fixed
   ! by photsynthesis minus the respiration. Units: mugC/day/m3
@@ -324,8 +361,17 @@ end subroutine calcGrid
     this%mort2constant = 0.004/log(this%m(2) / this%m(1))
   end subroutine initMulticellular
   
-  subroutine printRatesMulticellular(this)
-    class(spectrumMulticellular), intent(in) :: this
-  end subroutine printRatesMulticellular
+  !function getCbalanceMulticellular(this, u, dudt) result(Cbalance)
+  !  class(spectrumMulticellular), intent(in):: this
+  !  real(dp):: Cbalance
+  !  real(dp), intent(in):: u(this%n), dudt(this%n)
+
+  !  Cbalance = sum( dudt & ! Change in standing stock of N
+  !        + this%Jresptot*u/this%m )  ! Losses from respiration
+  !end function getCbalanceMulticellular
+
+  !subroutine printRatesMulticellular(this)
+  !  class(spectrumMulticellular), intent(in) :: this
+  !end subroutine printRatesMulticellular
 
  end module spectrum

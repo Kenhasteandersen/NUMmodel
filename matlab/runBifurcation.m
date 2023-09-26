@@ -8,17 +8,25 @@
 %  sField - String with the field to do the bifurcation over
 %  range - The value to do the bifurcation over.
 %
+% Out:
+%  mc, Bc - community spectra from calls to calcCommunitySpectrum
+%
 % Example:
 %  p = parametersChemostat( setupGeneric([0.1, 100], true));
 %  runBifurcation(p,'d',logspace(-4,-1,10));
 %
-function runBifurcation(p, sField, range, options)
+function [mc, Bc] = runBifurcation(p, sField, range, options)
 
 arguments
     p struct;
     sField char = 'd';
     range double = logspace(-5, 0, 10);
     options.bParallel = false;
+    options.bPlotSpectra = true; % Plot also the community size spectrum
+    % These options are only for the HTL bifurcation:
+    options.mHTL double = 1/500^1.5; % Suits simulations with only generalists
+    options.bQuadraticHTL logical = false;
+    options.bDecliningHTL logical = false;
 end
 
 L = 30;
@@ -29,7 +37,7 @@ n = length(range);
 %
 for i = 1:n
     pp(i) = p;
-    if ~strcmp(sField, 'mortHTL')
+    if ~strcmp(sField, 'mortHTL') && ~strcmp(sField, 'sinking')
         eval( strcat('pp(i).',sField, '= range(i);') );
     end
 end
@@ -43,6 +51,9 @@ B = zeros(n, p.nGroups);
 Blower = B;
 Bupper = B;
 nGroups = p.nGroups;
+mc = NaN;
+Bc = NaN;
+
 
 if options.bParallel
     parfor i = 1:n
@@ -55,7 +66,11 @@ if options.bParallel
         % Simulate:
         %
         if strcmp(sField, 'mortHTL')
-            setHTL(range(i));
+            setHTL(range(i), options.mHTL, options.bQuadraticHTL, options.bDecliningHTL);
+        end
+
+        if strcmp(sField, 'sinking')
+            setSinkingPOM(ppp, range(i));
         end
         sim = simulateChemostat(ppp, L, T);
         %
@@ -75,7 +90,7 @@ if options.bParallel
 
         for iGroup = 1:nGroups
             ix = (ppp.ixStart(iGroup):ppp.ixEnd(iGroup)) - ppp.idxB + 1;
-            B(i,iGroup) = exp(mean(log(sum(sim.B(ixAve,ix),2))));
+            B(i,iGroup) = max(1e-20, exp(mean(log(sum(sim.B(ixAve,ix),2)))));
             Blower(i,iGroup) = min(sum( sim.B(ixAve,ix),2 ));
             Bupper(i,iGroup) = max(sum( sim.B(ixAve,ix),2 ));
         end
@@ -94,6 +109,12 @@ end
 %
 % Nutrients:
 %
+if options.bPlotSpectra
+    tiledlayout(1,2)
+    nexttile
+end
+
+% Bifurcation plot of biomasses:
 semilogy(range, N,'--','linewidth',2,'color',p.colNutrients{p.idxN});
 hold on
 patch([range range(end:-1:1)], [Nlower, Nupper(end:-1:1)], 0.75*[0,0,1], ...
@@ -110,6 +131,7 @@ if isfield(p,'idxSi')
     legendentries(2) = semilogy(range, Si,'--','linewidth',2,'color',p.colNutrients{p.idxSi});
     sLegend{2} = 'Si';
 end
+
 %
 % Biomass:
 %
@@ -119,8 +141,9 @@ for iGroup = 1:nGroups
 
     lwd = 1;
     if (p.typeGroups(iGroup) >= 10)
-        lwd = 1 + log10( max(p.m(p.ixStart(iGroup):p.ixEnd(iGroup))));
+        lwd = max(1, 1 + log10( max(p.m(p.ixStart(iGroup):p.ixEnd(iGroup)))));
     end
+    %% 
     legendentries(p.idxB-2+iGroup) = ...
         semilogy(range, B(:,iGroup),'color', p.colGroup{iGroup},...
         'linewidth',lwd);
@@ -136,6 +159,21 @@ legend(legendentries, sLegend, 'location','northwest','box','off')
 xlabel(sField)
 ylabel('Biomass ({\mu}g/l)')
 ylim([1e-4 1e3])
+xlim([min(range), max(range)])
+%
+% Spectra
+%
+if options.bPlotSpectra
+    nexttile
+    surface(mc,range,log10(Bc))
+    shading flat
+    set(gca,'xscale','log','yscale','log')
+    ylabel(sField)
+    xlabel('Cell mass ({\mu}g_C)')
+    xlim('tight')
+    ylim('tight')
+    colorbar
+end
 
     function runSim(i)
         %
@@ -147,7 +185,7 @@ ylim([1e-4 1e3])
         % Simulate:
         %
         if strcmp(sField, 'mortHTL')
-            setHTL(range(i));
+            setHTL(range(i), options.mHTL, options.bQuadraticHTL, options.bDecliningHTL);
         end
         sim = simulateChemostat(ppp, L, T);
         %
@@ -172,6 +210,11 @@ ylim([1e-4 1e3])
             Bupper(i,iGroup) = max(sum( sim.B(ixAve,ix),2 ));
         end
 
+        if isnan(mc)
+            [mc, Bc] = calcCommunitySpectrum(sim.B, sim);
+        else
+            [mc, Bc(i,:)] = calcCommunitySpectrum(sim.B, sim);
+        end
         %Bpnm(i,:) = calcPicoNanoMicro(sim);
     end
 end

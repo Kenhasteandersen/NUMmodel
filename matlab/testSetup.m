@@ -9,6 +9,7 @@ arguments
 end
 
 fprintf('Testing %s ... \n', sDescription);
+bSuccess = true;
 
 try  
     %
@@ -16,10 +17,17 @@ try
     % by making a short simulation
     %
     p = eval( sSetup ); % Initialize the setup
+    p.u0(2) = 10; % Add some DOC
+    [Cbalance, Nbalance, Sibalance] = getBalance(p.u0, 100, 10, true);
+    if abs(Cbalance) + abs(Nbalance) + abs(Sibalance) < 1e-14
+        fprintf('Balance ok\n');
+    else
+        fprintf(2,'Balance failed\n');
+    end
+
     p = parametersChemostat(p);
     p.tEnd = 1;
     sim = simulateChemostat(p);
-    fprintf('N balance: %e\n', checkBalanceDerivative(sim));
     %
     % Then check the value of the derivative:
     %
@@ -30,11 +38,9 @@ try
     [~, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
         u, 60, 15, 0.1, dudt);
         
-    if round(sum(dudt)*1000) == value
-        bSuccess = true;
-    else
+    if round(sum(dudt)*1000) ~= value
         bSuccess = false;
-        fprintf(2,'sum(dudt) = %4.0f\n.',round(sum(dudt)*1000));
+        fprintf(2,'sum(dudt) = %4.0f\n',round(sum(dudt)*1000));
     end
 catch ME
     fprintf(2,'Error: %s\n', ME.identifier);

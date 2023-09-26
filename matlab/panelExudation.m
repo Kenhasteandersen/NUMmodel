@@ -21,8 +21,8 @@ ymax = max(rates.jR);
 switch p.nameGroup{iGroup}
     case 'Generalists'
 
-        eL = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'epsilonL');
-        eF = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'epsilonF');
+        eL = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'epsilonL');
+        eF = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'epsilonF');
 
         jCloss_L=(1-eL)/eL*rates.jLreal(ix);
         jCloss_F=(1-eF)/eF*rates.jFreal(ix);
@@ -37,7 +37,7 @@ switch p.nameGroup{iGroup}
         legend({'Passive losses','Photouptake losses','Feeding losses','Total growth'})
     case 'Diatoms'
         
-        eL = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'epsilonL');
+        eL = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'epsilonL');
         
         jCloss_L=(1-eL)/eL*rates.jLreal(ix);
 

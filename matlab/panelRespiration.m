@@ -23,11 +23,11 @@ switch p.nameGroup{iGroup}
     case 'Generalists'
 
         % Find beta parameters from the input file:
-        betaL = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bL');
-        betaN = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bN');
-        betaDOC = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bDOC');
-        betaF = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bF');
-        betaG = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bg');
+        betaL = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bL');
+        betaN = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bN');
+        betaDOC = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bDOC');
+        betaF = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bF');
+        betaG = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bg');
 
         jR_L = betaL*rates.jLreal(ix);
         jR_N = betaN*rates.jN(ix);
@@ -49,11 +49,11 @@ switch p.nameGroup{iGroup}
         legend({'Basal','DOC','Light','Nutrients','Feeding','Growth','Total growth'})
     case 'Diatoms'
         % Find beta parameters from the input file:
-        betaL = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bL');
-        betaN = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bN');
-        betaDOC = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bDOC');
-        betaSi = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bSi');
-        betaG = search_namelist('../input/input.nlm', p.nameGroup{iGroup}, 'bg');
+        betaL = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bL');
+        betaN = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bN');
+        betaDOC = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bDOC');
+        betaSi = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bSi');
+        betaG = search_namelist('../input/input.h', p.nameGroup{iGroup}, 'bg');
 
         jR_L = betaL*rates.jLreal(ix);
         jR_N = betaN*rates.jN(ix);
@@ -68,9 +68,9 @@ switch p.nameGroup{iGroup}
         fillbetweenlines(m, jR+jR_DOC+jR_L, jR+jR_DOC+jR_L+jR_N, [0 0.6 0]);
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N, jR+jR_DOC+jR_L+jR_N+jR_Si, [0 0.4 0]);
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_Si, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g, [0.6 0 0]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot, [0.8 0 0] );
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g, jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+max(0,jTot), [0.8 0 0] );
 
-        ymax = max(jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+jTot);
+        ymax = 1.05*max(jR+jR_DOC+jR_L+jR_N+jR_Si+jR_g+max(0,jTot));
         legend({'Basal','DOC','Light','Nutrients','Silicate','Growth','Total growth'})
 end
 
@@ -78,7 +78,7 @@ title(append('Respiration of ',lower(p.nameGroup{iGroup})))
 %semilogx(m, rates.jTot,'k-','linewidth',2);
 set(gca,'xscale','log')
 
-xlim([min(m) max(m)])
+xlim([min(p.m(p.idxB:end)) max(m)])
 ylim([0 ymax])
 
 xlabel('Cell mass ({\mu}g_C)')

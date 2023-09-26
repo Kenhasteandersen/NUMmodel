@@ -18,3 +18,4 @@ Bnano = calcBiomassRange(B, m, m2,m20);
 Bmicro = calcBiomassRange(B, m, m20,m200);
 
 Bpnm = [Bpico, Bnano, Bmicro];
+plotGlobalBiomass(sim, sProjection)

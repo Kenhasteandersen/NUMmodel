@@ -61,11 +61,15 @@ end
 
 s.p = sim.p;
 s.t = sim.t;
+if ~isfield('sim','rates')
+    sim.rates = getRates(sim.p, u, s.L, s.T);
+end
+s.rates = sim.rates;
 %
 % Setup tiles:
 %
 clf
-tiledlayout(3,1,'tilespacing','compact','padding','compact')
+tiledlayout(4,1,'tilespacing','compact','padding','compact')
 %
 % Spectrum
 %
@@ -78,9 +82,6 @@ set(gca,'XTickLabel','');
 %
 nexttile
 
-if ~isfield('sim','rates')
-    sim.rates = getRates(sim.p, u, s.L, s.T);
-end
 %panelGains(sim.p,rates)
 panelGains(sim.p, sim.rates);
 set(gca,'XTickLabel','');
@@ -89,8 +90,12 @@ set(gca,'XTickLabel','');
 %
 nexttile
 panelLosses(sim.p, sim.rates);
+set(gca,'XTickLabel','');
+xlabel('')
 
-s.rates = sim.rates;
+nexttile
+panelTrophicLevel(sim,sim.rates,lat,lon);
+
 
 if strcmp(sim.p.nameModel, 'watercolumn')
 

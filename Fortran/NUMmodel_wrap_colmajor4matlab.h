@@ -1,32 +1,33 @@
-void f_setupgeneralistsonly(const int n);
+void f_setupgeneralistsonly(const int n, bool *Clost, char *errorstr);
 
-void f_setupgeneralistssimplepom(const int n, const int nPOM);
+void f_setupgeneralistssimplepom(const int n, const int nPOM, bool *Clost, char *errorstr);
 
-void f_setupgeneralistssimpleonly(const int n);
+void f_setupgeneralistspom(const int n, const int nPOM, bool *Clost, char *errorstr);
 
-//void f_setupgeneralistsonly_csp();
+void f_setupgeneralistssimpleonly(const int n, bool *Clost, char *errorstr);
 
-void f_setupdiatomsonly(const int n);
+void f_setupdiatomsonly(const int n, bool *Clost, char *errorstr);
 
-void f_setupdiatoms_simpleonly(const int n);
+void f_setupdiatoms_simpleonly(const int n, bool *Clost, char *errorstr);
 
-void f_setupgeneralistsdiatoms(const int n);
+void f_setupgeneralistsdiatoms(const int n, bool *Clost, char *errorstr);
 
-void f_setupgeneralistsdiatoms_simple(const int n);
+void f_setupgeneralistsdiatoms_simple(const int n, bool *Clost, char *errorstr);
 
-void f_setupgeneralistssimplecopepod();
+void f_setupgeneralistssimplecopepod(bool *Clost, char *errorstr);
 
-void f_setupgeneric(const int nCopepods, const double mAdult[]);
+void f_setupgeneric(const int nCopepods, const double mAdult[], bool *Clost, char *errorstr);
 
 void f_setupnummodel(const int n, const int nCopepod, const int nPOM, 
 					const int nCopepodsPassive, const double mAdultPassive[], 
-					const int nCopepodsActive, const double mAdultActive[]);
+					const int nCopepodsActive, const double mAdultActive[], 
+					bool *Clost, char *errorstr);
 
-void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
+void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, const int nCopepods, 
+                                        const double mAdult[], bool *Clost, char *errorstr);
 
-void f_setupgendiatcope(const int n,const int nCopepod, const int nPOM, const int nCopepods, const double mAdult[]);
-
-//void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
+void f_setupgendiatcope(const int n,const int nCopepod, const int nPOM, const int nCopepods, 
+                                        const double mAdult[], bool *Clost, char *errorstr);
 
 void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
 
@@ -92,9 +93,15 @@ void f_getfunctions(
 void f_getbalance(
 	const double u[],
 	const double dudt[],
-	double *Nbalance,
 	double *Cbalance,
+	double *Nbalance,
 	double *Sibalance);
+
+void f_getlost(
+	const double u[],
+	double *Clost,
+	double *Nlost,
+	double *SiLost);
 				  
 void f_getrates(
 		double *jN,
@@ -117,3 +124,7 @@ void f_getrates(
 		double *mortHTL,
 		double *mort2,
 		double *mort);
+
+void f_gettheta(
+		double *thetaMatrix
+);

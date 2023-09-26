@@ -63,7 +63,7 @@ t = sim.t;
 z = [0; z];
 N = [N(1,:); N];
 if isfield(sim,'Si')
-    Si = [Si(1,:); Si];
+    Si = max(0,[Si(1,:); Si]);
 end
 DOC = [DOC(1,:); DOC];
 B(:,2:length(z),:) = B;

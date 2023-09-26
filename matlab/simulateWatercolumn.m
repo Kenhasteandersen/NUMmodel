@@ -91,7 +91,7 @@ end
 versionTMcolumnCurrent = 2; % Current version of the water column
 if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extract water column if the loaded one is too old
     versionTMcolumn = versionTMcolumnCurrent;
-    fprintf('-> Extracting water column from transport matrix')
+    fprintf('-> Extracting water column from transport matrix\n')
     %
     % Check that transport matrix files exist:
     %
@@ -398,8 +398,9 @@ for i = 1:nGrid
         Asink(:,i,i-1) = -k;
     end
 end
-% Bottom BC:
-Asink(end) = 1;
+% Bottom BC: 
+% Asink(:,end,end) = 1; % If this is uncommented, the bottom BC will be closed.
+% If it is commented out, the bottom BC is open
 %
 % Invert matrix to make it ready for use:
 %

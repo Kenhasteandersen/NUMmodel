@@ -11,24 +11,43 @@ arguments
     bParallel = false;
 end
 
-loadNUMmodelLibrary();
-calllib(loadNUMmodelLibrary(), 'f_setupgendiatcope', ...
-    int32(n), int32(nCopepods), int32(nPOM),length(mAdult), mAdult );
+errortext ='                    ';
+errorio=false;
+
+[~,errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupgendiatcope', ...
+    int32(n), int32(nCopepods), int32(nPOM),length(mAdult), mAdult, errorio, errortext);
+
 if bParallel
     h = gcp('nocreate');
     poolsize = h.NumWorkers;
+
+    errorio=false(1,poolsize);
+    errortext = repmat({''}, [1 poolsize]);
+
     parfor i=1:poolsize
-        calllib(loadNUMmodelLibrary(), 'f_setupgendiatcope', ...
-            int32(n), int32(nCopepods), int32(nPOM),length(mAdult), mAdult );
+        this_errortext ='                    ';
+        [~,errorio(i),this_errortext]=calllib(loadNUMmodelLibrary(), 'f_setupdiatomsonly', ...
+            int32(n), int32(nCopepods), int32(nPOM),length(mAdult), mAdult, errorio(i), this_errortext);
+        errortext(i)={this_errortext}
+    end
+    if any(errorio)
+        i=find(errorio==true,1);
+        disp(['Error loading ',errortext{i},'. Execution terminated'])
+        return
+    else
+        disp('done loading input parameters')
+    end
+else
+    if errorio
+        disp(['Error loading ',errortext,'. Execution terminated'])
+        return
+    else
+        disp('done loading input parameters')
     end
 end
 
-p.idxN = 1;
-p.idxDOC = 2;
-p.idxSi=3;
-p.idxB = 4; % We have two nutrient groups so biomass groups starts at index 3.
+p = setupNutrients_N_DOC_Si;
 
-p.n = 3;
 % Diatoms :
 p = parametersAddgroup(3,p,n);
 % Generalists :

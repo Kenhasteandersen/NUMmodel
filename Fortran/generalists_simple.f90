@@ -4,70 +4,12 @@
 module generalists_simple
   use globals
   use spectrum
-  use input
+  use read_input_module
   implicit none
 
   private 
-
-  !real(dp) :: rhoCN ! SHOULD BE MOVED TO GLOBALS
-  !real(dp), parameter:: rhoCN = 5.68 ! SHOULD BE MOVED TO GLOBALS
-  !
-  ! Light uptake:
-  !
-  real(dp) :: epsilonL  ! Light uptake efficiency
-  real(dp) :: alphaL  ! 0.206
-  real(dp) :: rLstar  !8.25
-  !real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
-  !real(dp), parameter:: alphaL = 0.13 ! 0.206
-  !real(dp), parameter:: rLstar = 7.5 !8.25
-
-  !
-  ! Dissolved nutrient uptake:
-  !
-
-  real(dp) :: alphaN !0.682 ! L/d/mugC/mum^2
-  real(dp) :: rNstar ! mum
-  !real(dp), parameter:: alphaN = 0.972 !0.682 ! L/d/mugC/mum^2
-  !real(dp), parameter:: rNstar = 2 ! mum
-  !
-  ! Phagotrophy:
-  !
-
-  real(dp) :: epsilonF ! Assimilation efficiency
-  real(dp) :: alphaF 
-  real(dp) :: cF 
-  real(dp) :: beta 
-  real(dp) :: sigma 
-  !real(dp), parameter:: epsilonF = 0.8 ! Assimilation efficiency
-  !real(dp), parameter:: alphaF = 0.018 
-  !real(dp), parameter:: cF = 30.
-  !real(dp), parameter:: beta = 500.d0
-  !real(dp), parameter:: sigma = 1.3d0
-  !
-  ! Metabolism
-  !
-  real(dp) :: cLeakage  ! passive leakage of C and N
-  real(dp) :: delta     ! Thickness of cell wall in mum
-  real(dp) :: alphaJ    ! Constant for jmax.  per day
-  real(dp) :: cR 
-  !real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
-  !real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
-            !The constant is increased a bit to limit the lower cell size
-  !real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
-  !real(dp), parameter:: cR = 0.1
-  !
-  ! Biogeo:
-  !
-  !real(dp) :: remin ! fraction of mortality losses reminerilized to DOC
-  real(dp) :: remin2 ! fraction of virulysis remineralized to N and DOC
-  real(dp) :: reminF ! fraction of feeding losses to DOC
-  !real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to DOC
-  !real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
-  !real(dp), parameter:: reminF = 0.1d0 ! fraction of feeding losses to DOC
-  !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized to N and DOC
-
-  real(dp) :: mMinGeneralist
-  real(dp) :: mMaxGeneralist
+  
+  real(dp) :: epsilonL, remin2, reminF
 
   type, extends(spectrumUnicellular) :: spectrumGeneralistsSimple
     real(dp), allocatable :: JFreal(:)
@@ -77,42 +19,56 @@ module generalists_simple
     procedure :: calcRates => calcRatesGeneralistsSimple
     procedure :: calcDerivativesGeneralistsSimple
     procedure :: printRates => printRatesGeneralistsSimple
-    procedure :: getNbalance
-    procedure :: getCbalance
     procedure :: getProdBact => getProdBactGeneralistsSimple
   end type spectrumGeneralistsSimple
  
   public initGeneralistsSimple, spectrumGeneralistsSimple, calcRatesGeneralistsSimple, calcDerivativesGeneralistsSimple
-  public printRatesGeneralistsSimple, getNbalance, getCbalance
+  public printRatesGeneralistsSimple
+
 
 contains
 
-  subroutine read_namelist()
-    integer :: file_unit,io_err
-
-    namelist /input_generalists_simple / epsilonL, alphaL, rLstar, alphaN,rNstar, epsilonF, &
-             & alphaF, cF, beta, sigma, cLeakage, delta, alphaJ, cR, &
-             & remin2, reminF, mMinGeneralist, mMaxGeneralist
-
-    call open_inputfile(file_unit, io_err)
-        read(file_unit, nml=input_generalists_simple, iostat=io_err)
-        call close_inputfile(file_unit, io_err)
-
-  end subroutine read_namelist
-
-  subroutine initGeneralistsSimple(this, n)
+ subroutine initGeneralistsSimple(this, n,errorio,errorstr)
+    use iso_c_binding, only: c_char
     class(spectrumGeneralistsSimple):: this
     integer, intent(in):: n
+    logical(1), intent(out):: errorio 
+    character(c_char), dimension(*), intent(out) :: errorstr
     integer:: i
     real(dp), parameter:: rho = 0.4*1d6*1d-12
+    real(dp) :: ii
+    real(dp) :: mMinGeneralist, mMaxGeneralist
+    real(dp) :: alphaN, rNstar  
+    real(dp) :: alphaL, rLstar
+    real(dp) :: alphaF, cF  
+    real(dp) :: cLeakage, delta, alphaJ, cR  
+    
+    ! no errors to begin with
+    errorio=.false.
 
-    call read_namelist()
+    print*, 'Loading parameter for generalist simple from ', inputfile, ':'
+    call read_input(inputfile,'generalists_simple','mMinGeneralist',mMinGeneralist,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
+    call read_input(inputfile,'generalists_simple','alphaN',alphaN,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','rNstar',rNstar,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaL',alphaL,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaF',alphaF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','cF',cF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','cLeakage',cLeakage,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','alphaJ',alphaJ,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','cR',cR,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','rLstar',rLstar,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','delta',delta,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','epsilonL',epsilonL,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','remin2',remin2,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','reminF',reminF,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','beta',this%beta,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','sigma',this%sigma,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','epsilonF',this%epsilonF,errorio,errorstr)
+    
+    
     allocate(this%JFreal(n))
-
-    this%beta = beta
-    this%sigma = sigma
-    this%epsilonF = epsilonF
 
     this%r = (3./(4.*pi)*this%m/rho)**onethird
     
@@ -130,6 +86,7 @@ contains
 
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
     this%Jresp = cR*alphaJ*this%m
+
   end subroutine initGeneralistsSimple
 
   subroutine calcRatesGeneralistsSimple(this, L, N, DOC, gammaN, gammaDOC)
@@ -183,7 +140,7 @@ contains
       !
       ! Losses:
       !
-      this%JCloss_feeding(i) = (1.-epsilonF)/epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
+      this%JCloss_feeding(i) = (1.-this%epsilonF)/this%epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
       this%JNlossLiebig(i) = max( 0.d0, this%JNtot(i)-this%Jtot(i))  ! In units of C
       this%JClossLiebig(i) = max( 0.d0, this%JCtot(i)-this%Jtot(i)) ! C losses from Liebig, not counting losses from photoharvesting
@@ -230,7 +187,6 @@ end subroutine calcRatesGeneralistsSimple
            +  this%JNlossLiebig(i) &
            +  this%JCloss_feeding(i))/this%m(i) & ! All feeding losses are reminineralized
            +  remin2*this%mort2(i) & 
-           !+ reminHTL*this%mortHTL(i)& ! Now done in NUMmodel.f90
            ) * u(i)/rhoCN
       !
       ! Update DOC:
@@ -242,13 +198,11 @@ end subroutine calcRatesGeneralistsSimple
            +   this%JCloss_photouptake(i) &
            +   reminF*this%JCloss_feeding(i))/this%m(i) &
            +   remin2*this%mort2(i) & 
-           !+  reminHTL*this%mortHTL(i)&  ! Now done in NUMmodel.f90
            ) * u(i)
       !
       ! Update the generalists:
       !
       dudt(i) = (this%Jtot(i)/this%m(i)  &
-           !- mort(i) &
            - this%mortpred(i) &
            - this%mort2(i) &
            - this%mortHTL(i))*u(i)
@@ -262,33 +216,6 @@ subroutine printRatesGeneralistsSimple(this)
   write(*,*) "Generalists Simple with ", this%n, " size classes:"
   call this%printRatesUnicellular()
 end subroutine printRatesGeneralistsSimple
- 
-  function getNbalance(this, u, dudt) result(Nbalance)
-    real(dp):: Nbalance
-    class(spectrumGeneralistsSimple), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Nbalance = sum( dudt & ! Change in standing stock of N
-    + (1-fracHTL_to_N)*this%mortHTL*u & ! HTL not remineralized
-    + (1-remin2)*this%mort2*u & ! Viral mortality not remineralized
-    !+ (1-reminF)*this%JCloss_feeding/this%m * u & ! Feeding losses not remineralized
-       )/rhoCN
-  end function getNbalance
-
-  function getCbalance(this, u, dudt) result(Cbalance)
-    real(dp):: Cbalance
-    class(spectrumGeneralistsSimple), intent(in):: this
-    real(dp), intent(in):: u(this%n), dudt(this%n)
-
-    Cbalance = sum(dudt &
-    + this%mortHTL*u &
-    + (1-remin2)*this%mort2*u &
-    - this%JLreal*u/this%m &
-    - this%JCloss_photouptake*u/this%m &
-    + fTemp2*this%Jresp*u/this%m &
-    + (1-reminF)*this%JCloss_feeding/this%m * u &
-    )
-  end function getCbalance
 
   function getProdBactGeneralistsSimple(this, u) result(ProdBact)
     real(dp):: ProdBact
