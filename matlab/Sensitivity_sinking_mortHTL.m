@@ -6,6 +6,8 @@
 %
 
 
+function [tiles]=Sensitivity_sinking_mortHTL(NPP_extracted, newSinkingPOM, MortHTLS, runningTime,lat_to_find,lon_to_find,depth_layer)
+
 name_png = 'sensitivityNPP_';
 directory = 'C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\Trophic efficiency\Compare Biomass\Comparisons with data\';
     
@@ -18,11 +20,8 @@ bHTLquadratic = true;
 runningTime = 15*365;
 
 % newSinkingPOM = logspace(log10(0.1), log10(100), 8);
-newSinkingPOM = 0.78622;%logspace(log10(0.4), log10(0.8), 8);
+newSinkingPOM = logspace(log10(0.4), log10(0.8), 8);
 
-
-% newSinkingPOM = linspace(0.5, 100, 10);
-% MortHTLs = [0.05, 0.1 0.2 0.4];
 MortHTLs = 0.1;
 
 Ntotal = zeros(length(newSinkingPOM), runningTime);
@@ -65,7 +64,7 @@ for i = 1:length(MortHTLs)
 
     for j = 1:length(newSinkingPOM)
 
-        matr_NPP = reshape(NPP(i,j,end-359:end), 30, 12) % every column is a month (30, 146)
+        matr_NPP = reshape(NPP(i,j,end-2159:end), 30, 2160/30) % every column is a month (30, 146)
         NPP_cell{j} = matr_NPP;
         NPP_cell_month_mean{i,j} = mean(matr_NPP, 1)
 
@@ -86,7 +85,7 @@ for i = 1:length(MortHTLs)
     for j = 1:length(newSinkingPOM)
 
 
-        % plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
+        % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
         % % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)
         hold on
         plot(NPP_extracted(1,:), 'ob--')
@@ -126,9 +125,8 @@ for i = 1:length(MortHTLs)
 
     for j = 1:length(newSinkingPOM)
 
-nexttile                              % without this
-        % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
-        plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
+nexttile
+        plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
         % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)
         hold on
         plot(NPP_extracted(1,:), 'ob--')
@@ -152,14 +150,11 @@ lg.Layout.Tile = 'South'; % <-- Legend placement with tiled layout
 exportgraphics(gcf,[saved_png2])       
 
 %%  GROUP CONTRIBUTIONS
-% depth_layer=1;
-day = sim.p.tEnd - 200;
-% Bnum=squeeze(mean(sim.B(:,depth_layer,:),1)); % average Biomass at specific depth layer
+depth_layer=1;
+Bnum=squeeze(mean(sim.B(:,depth_layer,:),1)); % average Biomass at specific depth layer
 
-Bnum=squeeze(sim.B(day,depth_layer,:)); % average Biomass at specific depth layer
-figure
 PicoNanoMicroBarplots(sim,Bnum,depth_layer)
-%%
+
 exportgraphics(gcf,[append(directory,name_png,'_layer',num2str(depth_layer),'_barplots.png')])       
 
 

@@ -18,9 +18,9 @@ bHTLquadratic = true;
 runningTime = 15*365;
 
 % newSinkingPOM = logspace(log10(0.1), log10(100), 8);
-newSinkingPOM = 0.78622;%logspace(log10(0.4), log10(0.8), 8);
-
-
+newSinkingPOM = 0.78;%logspace(log10(0.4), log10(0.8), 8);
+nPop=2:10;
+nStages=2:15;
 % newSinkingPOM = linspace(0.5, 100, 10);
 % MortHTLs = [0.05, 0.1 0.2 0.4];
 MortHTLs = 0.1;
@@ -65,7 +65,7 @@ for i = 1:length(MortHTLs)
 
     for j = 1:length(newSinkingPOM)
 
-        matr_NPP = reshape(NPP(i,j,end-359:end), 30, 12) % every column is a month (30, 146)
+        matr_NPP = reshape(NPP(i,j,end-2159:end), 30, 2160/30) % every column is a month (30, 146)
         NPP_cell{j} = matr_NPP;
         NPP_cell_month_mean{i,j} = mean(matr_NPP, 1)
 
@@ -81,12 +81,12 @@ clf(1)
 tiledlayout(1,2)
 
 nexttile
-for i = 1:length(MortHTLs)
+for i = 1:length(nPop)
 
-    for j = 1:length(newSinkingPOM)
+    for j = 1:length(nStages)
 
 
-        % plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
+        plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
         % % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)
         hold on
         plot(NPP_extracted(1,:), 'ob--')
@@ -97,7 +97,7 @@ legend('NUM','Eppley model', 'Standard VGPM', 'CAFE','Location','best')
 xlabel('Time (month)')
 ylabel('NPP (mgC / m^2 /day)')
  mTitle = append('Lat: ', string(lat_to_find), ', Lon: ', string(lon_to_find));
- my_title = append('mort = ', string(MortHTLs(i)), ' / sinking = ', string(newSinkingPOM(j)))
+ my_title = append('#pop = ', string(nPop(i)), ' / stages = ', string(nStages(j)))
         title(mTitle)
 
     end
@@ -122,13 +122,12 @@ saved_png2 = append(directory,name_png,'_details.png');
 figure(2)
 clf(2)
 t=tiledlayout(2,4)
-for i = 1:length(MortHTLs)
+for i = 1:length(nPop)
 
-    for j = 1:length(newSinkingPOM)
+    for j = 1:length(nStages)
 
-nexttile                              % without this
-        % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
-        plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
+nexttile
+        plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
         % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)
         hold on
         plot(NPP_extracted(1,:), 'ob--')
@@ -139,7 +138,7 @@ nexttile                              % without this
 xlabel('Time (month)')
 ylabel('NPP (mgC / m^2 /day)')
  mTitle = append('Lat: ', string(lat_to_find), ', Lon: ', string(lon_to_find));
- my_title = append('mort = ', string(MortHTLs(i)), ' / sinking = ', string(newSinkingPOM(j)));
+ my_title = append('#Pop = ', string(nPop(i)), ' / nStages = ', string(nStages(j)));
         title(my_title)
 
     end
@@ -152,14 +151,11 @@ lg.Layout.Tile = 'South'; % <-- Legend placement with tiled layout
 exportgraphics(gcf,[saved_png2])       
 
 %%  GROUP CONTRIBUTIONS
-% depth_layer=1;
-day = sim.p.tEnd - 200;
-% Bnum=squeeze(mean(sim.B(:,depth_layer,:),1)); % average Biomass at specific depth layer
+depth_layer=1;
+Bnum=squeeze(mean(sim.B(:,depth_layer,:),1)); % average Biomass at specific depth layer
 
-Bnum=squeeze(sim.B(day,depth_layer,:)); % average Biomass at specific depth layer
-figure
 PicoNanoMicroBarplots(sim,Bnum,depth_layer)
-%%
+
 exportgraphics(gcf,[append(directory,name_png,'_layer',num2str(depth_layer),'_barplots.png')])       
 
 

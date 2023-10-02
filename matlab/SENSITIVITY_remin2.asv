@@ -13,44 +13,62 @@ saved_png = append(directory,name_png,'.png');
 
 mHTL = 1;
 % mortHTL = .15;
+MortHTLs = 0.1;
 bHTLdecline = true;
-bHTLquadratic = true;
+bHTLquadratic = true;   
 runningTime = 15*365;
 
 % newSinkingPOM = logspace(log10(0.1), log10(100), 8);
 newSinkingPOM = 0.78622;%logspace(log10(0.4), log10(0.8), 8);
-
+newRemin2= logspace(log10(0.01), log10(0.8), 8);
 
 % newSinkingPOM = linspace(0.5, 100, 10);
 % MortHTLs = [0.05, 0.1 0.2 0.4];
-MortHTLs = 0.1;
 
 Ntotal = zeros(length(newSinkingPOM), runningTime);
-NPP = zeros(length(MortHTLs), length(newSinkingPOM), runningTime);
+NPP = zeros(length(newRemin2), length(newSinkingPOM), runningTime);
 NPP_annual = zeros(length(newSinkingPOM));
 %%
 %--------------------------------------------
 %        Initialize coordinates
 %--------......................--------
-        lat_to_find = 60;
-        lon_to_find = -40;
+        lat_to_find = 0;
+        lon_to_find = -172;
 %
 %--------------------------------------------
-for iMortHTL = 1:length(MortHTLs)
+for iRemin2 = 1:length(newRemin2)
+       % which parameters needs to be changed
+        paramToReplace={'remin2';'remin2'};
 
-    mortHTL = MortHTLs(iMortHTL);
+        % which input list do they belong to?
+        InputListName={'input_generalists';'input_diatoms'};
 
+        % what are the new values?
+        % remin2=0.5;
+        remin2 = newRemin2(iRemin2);
+        remin2d=remin2;
+
+        % change to cell array
+        combinedvalues=[remin2,remin2d];
+        newvalue=cell(length(combinedvalues),1);
+    for i=1:length(combinedvalues)
+        newvalue{i}=[num2str(combinedvalues(i)),'d0'];
+    end
+
+    % run the script
+    substituteInputParameters(paramToReplace,InputListName,newvalue) 
+    
     for i = 1:length(newSinkingPOM)
 
         p = parametersWatercolumn( setupNUMmodel );
-        setHTL(mortHTL, mHTL, bHTLquadratic, bHTLdecline)
+        % setHTL(mortHTL, mHTL, bHTLquadratic, bHTLdecline)
         setSinkingPOM(p, newSinkingPOM(i))
         p.tEnd = runningTime;
         sim = simulateWatercolumn(p,lat_to_find,lon_to_find);
         simWCSeason = calcFunctionsTh(sim);
 
         Ntotal(i,:) = simWCSeason.Ntot;
-        NPP(iMortHTL,i,:) = simWCSeason.ProdNet; % (mgC / m2 / day)
+        NPP(iRemin2,i,:) = simWCSeason.ProdNet; % (mgC / m2 / day)
         % NPP_annual(i) = simWCSeason.ProdNetAnnual;
 
     end
@@ -61,13 +79,13 @@ end
 NPP_cell = {};
 NPP_cell_month_mean = {};
 
-for i = 1:length(MortHTLs)
+for i = 1:length(newRemin2)
 
     for j = 1:length(newSinkingPOM)
 
-        matr_NPP = reshape(NPP(i,j,end-359:end), 30, 12) % every column is a month (30, 146)
+        matr_NPP = reshape(NPP(i,j,end-359:end), 30, 12);% every column is a month (30, 146)
         NPP_cell{j} = matr_NPP;
-        NPP_cell_month_mean{i,j} = mean(matr_NPP, 1)
+        NPP_cell_month_mean{i,j} = mean(matr_NPP, 1);
 
     end
 end
@@ -81,13 +99,13 @@ clf(1)
 tiledlayout(1,2)
 
 nexttile
-for i = 1:length(MortHTLs)
+for i = 1:length(newRemin2)
 
     for j = 1:length(newSinkingPOM)
 
 
         % plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
-        % % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)
+        plot(NPP_cell_month_mean{1, 1}(end-11:end), 'o-r', 'LineWidth', 1)
         hold on
         plot(NPP_extracted(1,:), 'ob--')
         plot(NPP_extracted(2,:), 'og--')
@@ -97,7 +115,7 @@ legend('NUM','Eppley model', 'Standard VGPM', 'CAFE','Location','best')
 xlabel('Time (month)')
 ylabel('NPP (mgC / m^2 /day)')
  mTitle = append('Lat: ', string(lat_to_find), ', Lon: ', string(lon_to_find));
- my_title = append('mort = ', string(MortHTLs(i)), ' / sinking = ', string(newSinkingPOM(j)))
+ my_title = append('remin2 = ', string(newRemin2(i)), ' / sinking = ', string(newSinkingPOM(j)));
         title(mTitle)
 
     end
@@ -122,7 +140,7 @@ saved_png2 = append(directory,name_png,'_details.png');
 figure(2)
 clf(2)
 t=tiledlayout(2,4)
-for i = 1:length(MortHTLs)
+for i = 1:length(newRemin2)
 
     for j = 1:length(newSinkingPOM)
 
@@ -139,7 +157,7 @@ nexttile                              % without this
 xlabel('Time (month)')
 ylabel('NPP (mgC / m^2 /day)')
  mTitle = append('Lat: ', string(lat_to_find), ', Lon: ', string(lon_to_find));
- my_title = append('mort = ', string(MortHTLs(i)), ' / sinking = ', string(newSinkingPOM(j)));
+ my_title = append('remin2 = ', string(newRemin2(i)), ' / sinking = ', string(newSinkingPOM(j)));
         title(my_title)
 
     end

@@ -15,10 +15,10 @@ mHTL = 1;
 % mortHTL = .15;
 bHTLdecline = true;
 bHTLquadratic = true;
-runningTime = 15*365;
+runningTime = 9*365;
 
 % newSinkingPOM = logspace(log10(0.1), log10(100), 8);
-newSinkingPOM = 0.78622;%logspace(log10(0.4), log10(0.8), 8);
+newSinkingPOM = 0.78;%logspace(log10(0.4), log10(0.8), 8);
 
 
 % newSinkingPOM = linspace(0.5, 100, 10);
@@ -86,7 +86,7 @@ for i = 1:length(MortHTLs)
     for j = 1:length(newSinkingPOM)
 
 
-        % plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
+        % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
         % % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)
         hold on
         plot(NPP_extracted(1,:), 'ob--')
@@ -126,9 +126,8 @@ for i = 1:length(MortHTLs)
 
     for j = 1:length(newSinkingPOM)
 
-nexttile                              % without this
-        % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
-        plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
+nexttile
+        plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
         % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)
         hold on
         plot(NPP_extracted(1,:), 'ob--')
@@ -157,7 +156,7 @@ day = sim.p.tEnd - 200;
 % Bnum=squeeze(mean(sim.B(:,depth_layer,:),1)); % average Biomass at specific depth layer
 
 Bnum=squeeze(sim.B(day,depth_layer,:)); % average Biomass at specific depth layer
-figure
+
 PicoNanoMicroBarplots(sim,Bnum,depth_layer)
 %%
 exportgraphics(gcf,[append(directory,name_png,'_layer',num2str(depth_layer),'_barplots.png')])       
