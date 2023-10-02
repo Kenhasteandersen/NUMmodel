@@ -45,7 +45,7 @@ end
 for i=1:length(paramToReplace)
     whichline = find(contains(S,paramToReplace{i}));
     %which input file does it belong to
-    whichInputList = contains(thelists,InputListName{i});
+    whichInputList = strcmp(thelists,InputListName{i});
     theline=whichline(find(whichline>headerLineNr(whichInputList),1));
     thisline=S{theline};
     idx = find(thisline == '=');
