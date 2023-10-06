@@ -1,14 +1,20 @@
 %
 % Sensitivity analysis of a Water column simulation for specific
 % coordinates.
-% First extract NPP from satellite data by running
+% First extract NPP from satellite data by running or
+% load('NPP_extracted.mat')
 % EXTRACT_files_NPP_latlon.m
 %
+%--------------------------------------------
+%        Initialize coordinates
+%--------......................--------
+        lat_to_find = 55;
+        lon_to_find = -40;
+%
+%--------------------------------------------
 
-
-name_png = 'sensitivityNPP_';
-directory = 'C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\Trophic efficiency\Compare Biomass\Comparisons with data\';
-    
+name_png = 'sensitivityNPP_seasonal_';
+directory = 'C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\Trophic efficiency\Compare Biomass\Comparisons with data\';   
 saved_png = append(directory,name_png,'.png');
 
 mHTL = 1;
@@ -16,26 +22,18 @@ mHTL = 1;
 MortHTLs = 0.1;
 bHTLdecline = true;
 bHTLquadratic = true;   
-runningTime = 15*365;
+runningTime = 30*365;
 
-% newSinkingPOM = logspace(log10(0.1), log10(100), 8);
 newSinkingPOM = 0.78622;%logspace(log10(0.4), log10(0.8), 8);
-newRemin2= logspace(log10(0.01), log10(0.8), 8);
+newRemin2= 0.01;%logspace(log10(0.01), log10(0.8), 8);
 
 % newSinkingPOM = linspace(0.5, 100, 10);
-% MortHTLs = [0.05, 0.1 0.2 0.4];
 
 Ntotal = zeros(length(newSinkingPOM), runningTime);
 NPP = zeros(length(newRemin2), length(newSinkingPOM), runningTime);
 NPP_annual = zeros(length(newSinkingPOM));
 %%
-%--------------------------------------------
-%        Initialize coordinates
-%--------......................--------
-        lat_to_find = 0;
-        lon_to_find = -172;
-%
-%--------------------------------------------
+
 for iRemin2 = 1:length(newRemin2)
        % which parameters needs to be changed
         paramToReplace={'remin2';'remin2'};
@@ -74,26 +72,26 @@ for iRemin2 = 1:length(newRemin2)
     end
 end
 
-%%
-
+%
 NPP_cell = {};
 NPP_cell_month_mean = {};
+% Number of years to display
+noYears=5;
 
 for i = 1:length(newRemin2)
 
     for j = 1:length(newSinkingPOM)
-
-        matr_NPP = reshape(NPP(i,j,end-359:end), 30, 12);% every column is a month (30, 146)
+        %take the last 3 years
+        matr_NPP = reshape(NPP(i,j,end-noYears*360+1:end), 30, noYears*12);% every column is a month (30, 146)
+        % matr_NPP = reshape(NPP(i,j,end-359:end), 30, 12);% every column is a month (30, 146)
         NPP_cell{j} = matr_NPP;
-        NPP_cell_month_mean{i,j} = mean(matr_NPP, 1);
+        % Calculate the average NPP of each month
+        NPP_cell_month_mean{i,j} = mean(matr_NPP, 1); 
 
     end
 end
 
-
-
 %%
-% load('NPP_extracted.mat')
 figure(1)
 clf(1)
 tiledlayout(1,2)
@@ -105,7 +103,7 @@ for i = 1:length(newRemin2)
 
 
         % plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
-        plot(NPP_cell_month_mean{1, 1}(end-11:end), 'o-r', 'LineWidth', 1)
+        % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)
         hold on
         plot(NPP_extracted(1,:), 'ob--')
         plot(NPP_extracted(2,:), 'og--')
@@ -126,34 +124,31 @@ geoscatter(lat_to_find, lon_to_find, 'filled')
 
 save('NPP_cell_month_mean.mat');
 
-% exportgraphics(gcf,['C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\...' ...
-    % 'Trophic efficiency\Compare Biomass\Comparisons with data\NPPsensitivity1.png'])
-
 exportgraphics(gcf,[saved_png])       
 
-
 %%
-   
+  
 saved_png2 = append(directory,name_png,'_details.png');
 % uplim=max(max(NPP_cell_month_mean),max(NPP_extracted));
                 
 figure(2)
 clf(2)
+set(gcf, 'Position', get(0, 'Screensize'))
+set(gcf,'color','w');
+
 t=tiledlayout(2,4)
 for i = 1:length(newRemin2)
 
     for j = 1:length(newSinkingPOM)
 
 nexttile                              % without this
-        % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
-        plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
-        % plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)
+        plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
+        % plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
         hold on
         plot(NPP_extracted(1,:), 'ob--')
         plot(NPP_extracted(2,:), 'og--')
         plot(NPP_extracted(3,:), 'om--')
 
-% legend('NUM','Eppley model', 'Standard VGPM', 'CAFE','Location','best')
 xlabel('Time (month)')
 ylabel('NPP (mgC / m^2 /day)')
  mTitle = append('Lat: ', string(lat_to_find), ', Lon: ', string(lon_to_find));
@@ -174,7 +169,7 @@ exportgraphics(gcf,[saved_png2])
 day = sim.p.tEnd - 200;
 % Bnum=squeeze(mean(sim.B(:,depth_layer,:),1)); % average Biomass at specific depth layer
 
-Bnum=squeeze(sim.B(day,depth_layer,:)); % average Biomass at specific depth layer
+Bnum=squeeze(sim.B(day,depth_layer,:)); % Biomass at specific depth layer and day
 figure
 PicoNanoMicroBarplots(sim,Bnum,depth_layer)
 %%

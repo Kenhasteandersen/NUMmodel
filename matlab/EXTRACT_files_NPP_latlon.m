@@ -28,8 +28,8 @@ for j = 1:length(dataSet_names)
 %--------------------------------------------
 %        Initialize coordinates
 %--------......................--------
-        lat_to_find = 0;
-        lon_to_find = -172;
+        lat_to_find = 55;
+        lon_to_find = -40;
 %
 %--------------------------------------------
        

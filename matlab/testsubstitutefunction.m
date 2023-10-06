@@ -6,7 +6,7 @@
 InputListName={'input_generalists';'input_diatoms'};
 
 % what are the new values?
-remin2=0.5;
+remin2=0.01;
 remin2d=remin2;
 
 % change to cell array
@@ -21,11 +21,11 @@ substituteInputParameters(paramToReplace,InputListName,newvalue)
 
 %% Example with 1 parameter that needs to be changed
 % which parameter needs to be changed
- paramToReplace='remin2';
+ paramToReplace='palatability';
  % which input list does it belong to?
-InputListName='input_diatoms_simple';
+InputListName='input_POM';
 % what is the new values?
-remin2=0.5;
+palatability=0.1;
 % change to cell array
-newvalue=[num2str(remin2),'d0'];
+newvalue=[num2str(palatability),'d0'];
 substituteInputParameters(paramToReplace,InputListName,newvalue)

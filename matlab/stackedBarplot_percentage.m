@@ -36,7 +36,7 @@ th2 = text(xbarCnt2(:), ybarCnt2(:), txt2(:), ...
 % xlabels
 legend(legend_namesAll,'Location','bestoutside');
 title(mTitle)
-ylabel('Biomass (\mugC/L)')
+ylabel('Concentration (\mugC/L)')
 xticklabels(xlabel_names)
 % axis tight
 colororder(newcolors);

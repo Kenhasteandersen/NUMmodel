@@ -129,7 +129,7 @@ switch sim.p.nameModel
                     Bplankton = Bplankton + sum(u(ixPlankton))*conv;
                     % Chl:
                     rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
-                    tmp =  calcChl( squeeze(sim.B(iTime,k,:)), rates, sim.L(iTime,k));
+                    tmp =  calcChl( squeeze(sim.B(iTime,k,:)), rates, sim.L(iTime,k)) / 1000; % Convert to g
                     if ~isnan(tmp)
                         jLreal(iTime,k,:) = rates.jLreal;
                         ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
@@ -138,7 +138,6 @@ switch sim.p.nameModel
                     ratePOM(iTime, k, :) = rates.jPOM;
                 end
             end
-            %iTimenow = iTime - ixTime(1)+1; % newest version uses this instead of iTime
             sim.ProdGross(iTime) = ProdGross;
             sim.ProdNet(iTime) = ProdNet;
             sim.ProdHTL(iTime) = ProdHTL;
@@ -157,11 +156,11 @@ switch sim.p.nameModel
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Average plankton biomass: %9.3f mgC/m2\n", mean(sim.Bplankton));
-            fprintf("Average Chl:              %9.3f gChl/m2\n", mean(sim.ChlArea)) %units corrected (there was a time dimension)
-            fprintf("Average gross PP:         %9.3f mgC/m2/day\n", mean(sim.ProdGross))
-            fprintf("Average net PP:           %9.3f mgC/m2/day\n", mean(sim.ProdNet))
-            fprintf("Average HTL production:   %9.3f mgC/m2/day\n", mean(sim.ProdHTL))
+            fprintf("Average total biomass:  %8.3f gC/m2\n", mean(sim.Bpico+sim.Bnano+sim.Bmicro));
+            fprintf("Average Chl:            %8.3f gChl/m2/yr\n", mean(sim.ChlArea))
+            fprintf("Average gross PP:       %8.3f gC/m2/yr\n", mean(sim.ProdGross))
+            fprintf("Average net PP:         %8.3f mgC/m2/d\n", mean(sim.ProdNet)) % changed-- the others should too
+            fprintf("Average HTL production: %8.3f gC/m2/yr\n", mean(sim.ProdHTL))
             fprintf("----------------------------------------------\n")
         end
 
@@ -278,13 +277,13 @@ switch sim.p.nameModel
                     sim.Btotal(i) = sim.Btotal(i) + calcTotal(sim.B(i,:,:,:,j)); % mugC
                 end
 
-                sim.ProdNetTotal(i) = sum(sum(squeeze(sim.ProdNet(i,:,:)).*dx.*dy)); % mgC/day
-                sim.ProdGrossTotal(i) = sum(sum(squeeze(sim.ProdGross(i,:,:)).*dx.*dy)); % mgC/day
-                sim.ProdHTLTotal(i) = sum(sum(squeeze(sim.ProdHTL(i,:,:)).*dx.*dy));% mgC/day
+                sim.ProdNetTotal(i) = sum(sum(squeeze(sim.ProdNet(i,:,:)).*dx.*dy)); % gC/yr
+                sim.ProdGrossTotal(i) = sum(sum(squeeze(sim.ProdGross(i,:,:)).*dx.*dy)); % gC/yr
+                sim.ProdHTLTotal(i) = sum(sum(squeeze(sim.ProdHTL(i,:,:)).*dx.*dy));
             end
 
             sim.ChlTotal = ChlArea.*dx.*dy;
-            sim.ChlTotal = sum(sim.ChlTotal(:)); %mgChl
+            sim.ChlTotal = sum(sim.ChlTotal(:));%/ 1000; %gChl
         end
         %
         % Watercolumn totals:
@@ -318,4 +317,4 @@ switch sim.p.nameModel
         disp('Model unknown; functions not calculated');
 
 end
-%sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro;
+sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro;

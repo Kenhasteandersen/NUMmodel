@@ -21,7 +21,7 @@ switch sim.p.nameModel
         
     case 'watercolumn'
         % day = sim.p.tEnd - 180;
-        day = sim.p.tEnd - 200;
+        day = 10718;
 
                 
         figure(1)

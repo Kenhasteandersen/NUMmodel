@@ -26,20 +26,33 @@ if day==0
     Bphyto4plots = squeeze(mean(Bphyto(:,depth_layer,:),1));
     Bph4plots = squeeze(mean(Bph(:,depth_layer,:),1));
     Bnum=squeeze(mean(sim.B(:,depth_layer,:),1));
+    N=squeeze(mean(sim.N(:,depth_layer),1));
+    DOC=squeeze(mean(sim.DOC(:,depth_layer),1));
+    Si=squeeze(mean(sim.Si(:,depth_layer),1)); % take care of this if no diatoms
+
    else
     Bphyto4plots = squeeze( mean(mean(Bphyto(:,:,:),2),1));
     Bph4plots = squeeze(mean(mean(Bph(:,:,:),2),1));
     Bnum=squeeze(mean(mean(sim.B(:,:,:),2),1));
+    N=squeeze(mean(mean(sim.N(:,:),2),1));
+    DOC=squeeze(mean(mean(sim.DOC(:,:),2),1));
+    Si=squeeze(mean(mean(sim.Si(:,:),2),1));
    end
 else
    if (depth_layer~=0)
     Bphyto4plots = squeeze(Bphyto(day,depth_layer,:));
     Bph4plots = squeeze(Bph(day,depth_layer,:));
     Bnum=squeeze(sim.B(day,depth_layer,:));
+    N=squeeze(sim.N(day,depth_layer));
+    DOC=squeeze(sim.DOC(day,depth_layer));
+    Si=squeeze(sim.Si(day,depth_layer));
    else
     Bphyto4plots = squeeze( mean(Bphyto(day,:,:),2));
     Bph4plots = squeeze(mean(Bph(day,:,:),2));
     Bnum=squeeze(mean(sim.B(day,:,:),2));
+    N=squeeze(mean(sim.N(day,:),2));
+    DOC=squeeze(mean(sim.DOC(day,:),2));    
+    Si=squeeze(mean(sim.Si(day,:),2));
    end
 end
 
@@ -126,8 +139,8 @@ BpnmNUMgeneral = [BpnmU; BpnmM;BpnmPOM];
 RR=BpnmNUM./sum(BpnmNUM);
 rr=BpnmNUM;
 RRR=sum(BpnmNUMgeneral,2);%./sum(BpnmNUMgeneral,"all");
-
-tiles = tiledlayout(2,3);
+set(gcf, 'Position', get(0, 'Screensize'))
+tiles = tiledlayout(3,3);
     legend_namesVec=[{'Phyto_{0.6}'},{'U-Phyto_{0.6}'},{'M'},{'POM'}];
     legend_names=[{'Phyto_{0.6}'},{'U'},{'U-Phyto_{0.6}'},{'M'},{'POM'},{'\SigmaB'}];
     legend_namesNUM=[{'U'},{'M'},{'POM'}];
@@ -166,6 +179,12 @@ nexttile
     xticklabels(size_names)
     axis tight
     title(append('Relative biomass of general groups (%) '))
+
+legend_namesNUMnn=[{'N'},{'DOC'},{'Si'}];
+nexttile % TEST ADDING NUTRIENTS
+    stackedBarplot_percentage([N/5.68; DOC; Si/3.4]',... % convert to C-units
+        legend_namesNUMnn,"",'NUtrient concentrations')
+    axis tight
     
 if day==0
    day_str='average';

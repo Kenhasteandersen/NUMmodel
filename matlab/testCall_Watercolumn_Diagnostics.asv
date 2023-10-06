@@ -6,7 +6,7 @@
  lon=-172;
  p=setupNUMmodel;
  p=parametersWatercolumn(p);
- p.tEnd= 5*365;
+ p.tEnd= 15*365;
  sim=simulateWatercolumn(p,lat,lon);
  simR=getSimRates(sim);
 %%

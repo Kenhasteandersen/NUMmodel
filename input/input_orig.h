@@ -110,7 +110,7 @@
 
 ! Biogeo:
 !--------
-  remin2 = 0.42778d0                ! Fraction of virulysis remineralized to DOC
+  remin2 = 0.01d0                ! Fraction of virulysis remineralized to DOC
   reminF = 0.1d0
 
 !***********************************************************************
@@ -189,7 +189,7 @@
 ! Biogeo:
 !--------
 ! remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
-  remin2 = 0.42778d0                ! Fraction of virulysis remineralized to DOC
+  remin2 = 0.01d0                ! Fraction of virulysis remineralized to DOC
 
 ! Vulnerability to predation:
 !----------------------------
@@ -260,6 +260,6 @@
 !*********************************************************************** 
   mMin = 1.d-9                  ! Smallest POM mass
   remin = 0.07d0                ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
-  palatability = 0.1d0          ! Preference of other groups for eating POM
+  palatability = 0d0          ! Preference of other groups for eating POM
 
   
