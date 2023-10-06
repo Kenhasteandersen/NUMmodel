@@ -132,8 +132,8 @@ switch sim.p.nameModel
                     tmp =  calcChl( squeeze(sim.B(iTime,k,:)), rates, sim.L(iTime,k));
                     if ~isnan(tmp)
                         jLreal(iTime,k,:) = rates.jLreal;
-                        ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
-                        ChlVolume(iTime,k) = ChlVolume(iTime,k) + sum(tmp);
+                        % ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
+                        % ChlVolume(iTime,k) = ChlVolume(iTime,k) + sum(tmp);
                     end
                     ratePOM(iTime, k, :) = rates.jPOM;
                 end
@@ -157,8 +157,6 @@ switch sim.p.nameModel
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
-            fprintf("Average plankton biomass: %9.3f mgC/m2\n", mean(sim.Bplankton));
-            fprintf("Average Chl:              %9.3f gChl/m2\n", mean(sim.ChlArea)) %units corrected (there was a time dimension)
             fprintf("Average gross PP:         %9.3f mgC/m2/day\n", mean(sim.ProdGross))
             fprintf("Average net PP:           %9.3f mgC/m2/day\n", mean(sim.ProdNet))
             fprintf("Average HTL production:   %9.3f mgC/m2/day\n", mean(sim.ProdHTL))
@@ -240,7 +238,7 @@ switch sim.p.nameModel
                                 tmp =  calcChl( squeeze(B(iTime,i,j,k,:)), rates, L(iTime,i,j,k)) ;%/ 1000; % Convert to mg
                                 if ~isnan(tmp)
                                     %ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
-                                    ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp;
+                                    % ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp;
                                 end
                             end
                         end
