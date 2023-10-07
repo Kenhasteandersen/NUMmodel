@@ -5,9 +5,9 @@
 % EXTRACT_files_NPP_latlon.m
 %
 % load('NPP_extracted_seasonal.mat')
-% lat_to_find=55; lon_to_find=-40;name_png='sensitivityNPP';noYears=20;
+% lat_to_find=55; lon_to_find=-40;name_png='sensitivityNPP';noYears=5;
 
-function Sensitivity_paramRemin2(lat_to_find,lon_to_find,name_png,NPP_extracted,noYears)
+function Sensitivity_1fracHTL(lat_to_find,lon_to_find,name_png,NPP_extracted,noYears)
    
 saved_png = append(name_png,'.png');
 
@@ -17,25 +17,29 @@ bHTLdecline = true;
 bHTLquadratic = true;   
 runningTime = noYears*365;
 newSinkingPOM = 0.78622;
-newRemin2= logspace(log10(0.01), log10(0.5), 10);
+newFracHTL= logspace(log10(0.1), log10(1), 10);
+newParameter=newFracHTL;
+param_str='fracHTL_to_N';
+param_str4plots='fracHTL\_to\_N';
 
-Ntotal = zeros(length(newRemin2), runningTime);
-NPP = zeros(length(newRemin2), runningTime);
-NPP_annual = zeros(length(newRemin2));
 
-for  iparam = 1:length(newRemin2)
+Ntotal = zeros(length(newParameter), runningTime);
+NPP = zeros(length(newParameter), runningTime);
+NPP_annual = zeros(length(newParameter));
+
+for  iparam = 1:length(newParameter)
        % which parameters needs to be changed
-        paramToReplace={'remin2';'remin2'};
+        paramToReplace={'fracHTL_to_N';'fracHTL_to_POM'};
 
         % which input list do they belong to?
-        InputListName={'input_generalists';'input_diatoms'};
+        InputListName={'input_general';'input_general'};
 
         % what are the new values?
-        remin2 = newRemin2(iparam);
-        remin2d=remin2;
+        fracHTL_to_N = newParameter(iparam);
+        fracHTL_to_POM=1-newParameter(iparam);
 
         % change to cell array
-        combinedvalues=[remin2,remin2d];
+        combinedvalues=[fracHTL_to_N,fracHTL_to_POM];
         newvalue=cell(length(combinedvalues),1);
     for i=1:length(combinedvalues)
         newvalue{i}=[num2str(combinedvalues(i)),'d0'];
@@ -50,8 +54,8 @@ for  iparam = 1:length(newRemin2)
         p.tEnd = runningTime;
         sim = simulateWatercolumn(p,lat_to_find,lon_to_find);
         simWCSeason = calcFunctionsTh(sim);
-        save(['sim_remin2_',num2str(remin2),'lat',num2str(lat_to_find),'.mat'],'sim');    
-        save(['simWC_remin2_',num2str(remin2),'lat',num2str(lat_to_find),'.mat'],'simWCSeason');    
+        save(['sim',param_str,'_',num2str(newParameter(iparam)),'lat',num2str(lat_to_find),'.mat'],'sim');    
+        save(['simWC',param_str,'_',num2str(newParameter(iparam)),'lat',num2str(lat_to_find),'.mat'],'simWCSeason');    
         Ntotal(iparam,:) = simWCSeason.Ntot;
         NPP(iparam,:) = simWCSeason.ProdNet; % (mgC / m2 / day)
         % NPP_annual(i) = simWCSeason.ProdNetAnnual;
@@ -59,17 +63,19 @@ end
 
 %%
 final_years=3;
-monthly_NPP=zeros(length(newRemin2),noYears,12);
-monthly_NPP_mean=zeros(length(newRemin2),12);
+monthly_NPP=zeros(length(newParameter),noYears,12);
+monthly_NPP_mean=zeros(length(newParameter),12);
 
-for iparam = 1:length(newRemin2)
+for iparam = 1:length(newParameter)
     for i=noYears-3:noYears
          monthly_NPP(iparam,i,:)=reshapeCellToArrayAvg(NPP(iparam,:),i);
     end
   % monthly NPP averaged over the last 3 years of the simulation
     monthly_NPP_mean(iparam,:)=squeeze(mean(monthly_NPP(iparam,noYears-3:noYears,:),2));
 end
-save(['NPP_monthly_mean_remin2',num2str(remin2),'lat',num2str(lat_to_find),'.mat'],'monthly_NPP_mean');    
+% Save matrix with monthly NPP averaged over the last 3 years, for every
+% parameter
+save(['NPP_monthly_mean_',param_str,'lat',num2str(lat_to_find),'.mat'],'monthly_NPP_mean');    
 
 %% -------------------------------------------
 %                  PLOTS
@@ -78,9 +84,8 @@ save(['NPP_monthly_mean_remin2',num2str(remin2),'lat',num2str(lat_to_find),'.mat
 figure(1)
 clf(1)
 tiledlayout(1,2)
-
 nexttile
-for i = 1:length(newRemin2)
+for i = 1:length(newParameter)
         plot(monthly_NPP_mean(i,:), 'o-r', 'LineWidth', 1)
         hold on
         plot(NPP_extracted(1,:), 'ob--')
@@ -90,7 +95,7 @@ for i = 1:length(newRemin2)
 legend('NUM_{last3year.avg}','Eppley model', 'Standard VGPM', 'CAFE','Location','best')
 xlabel('Time (month)')
 ylabel('NPP (mgC / m^2 /day)')
-my_title = append('remin2 = ', string(newRemin2(i)));
+my_title = append(param_str4plots,' = ', string(newParameter(i)));
 mTitle = append('Lat: ', string(lat_to_find), ', Lon: ', string(lon_to_find),', ', my_title);
 title(mTitle)
 end
@@ -104,8 +109,8 @@ saved_png2 = append(name_png,'_details.png');
 figure(2)
 clf(2)
 set(gcf,'Position',get(0,'ScreenSize'))
-t=tiledlayout(2,round(length(newRemin2)/2))
-for iparam = 1:length(newRemin2)
+t=tiledlayout(round(length(newParameter)/2),round(length(newParameter)/2))
+for iparam = 1:length(newParameter)
 
     nexttile                                   
         plot(squeeze(monthly_NPP_mean(iparam,:)), 'o-r', 'LineWidth', 1)% mgC/m2/day
@@ -116,7 +121,7 @@ for iparam = 1:length(newRemin2)
     xlabel('Time (month)')
     ylabel('NPP (mgC / m^2 /day)')
     mTitle = append('Lat: ', string(lat_to_find), ', Lon: ', string(lon_to_find));
-    my_title = append('remin2 = ', string(newRemin2(iparam)));
+    my_title = append(param_str4plots,' = ', string(newParameter(iparam)));
     title(my_title)
 end
 title(t,mTitle, 'FontSize', 24)
