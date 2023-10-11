@@ -12,6 +12,7 @@
 %         sim.ProdHTL   - amount of carbon extracted from the HTL mortality
 %         sim.Bpico, sim.Bnano, sim.Bmicro - pico, micro, and nano plankton
 %                         biomasses (mgC/m2)
+%         sim.Bplankton - All planktion, except (dead) POM (mgC/m2)
 %         sim.ChlArea (mgChl/m2)
 %         
 %         For global simulations additional fields are:
