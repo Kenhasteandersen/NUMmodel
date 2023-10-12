@@ -392,7 +392,7 @@ p.idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
 %
 Asink = zeros(p.n,nGrid,nGrid);
 for i = 1:nGrid
-    k = p.velocity/(sim.dznom(i)*p.dtTransport);
+    k = p.velocity*p.dtTransport/sim.dznom(i);
     Asink(:,i,i) = 1+k;
     if (i ~= 1)
         Asink(:,i,i-1) = -k;
