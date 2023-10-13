@@ -22,6 +22,7 @@ matlab/.DS_Store
 matlab/calcPicoNanoMicroRate.asv
 matlab/compareEulerAndMatlab.m
 matlab/deriv.m
+matlab/Sensitivity analysis
 matlab/setupGeneralists_csp.m
 matlab/test.m
 matlab/tmp_generalistsdiatoms_simple.mat

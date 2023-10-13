@@ -23,7 +23,7 @@
 %         sim.ProdNetAnnual - annual average NPP (mgC/m2/d)
 %         sim.ProdHTLAnnual - annual avearge HTL production (mgc/m2/d)
 %
-function sim = calcFunctions(sim, options)
+function sim = calcFunctionsTh(sim, options)
 
 arguments
     sim struct;
@@ -72,6 +72,10 @@ switch sim.p.nameModel
         ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
         nTime = length(sim.t);
         nZ = length(sim.z);
+        % find Unicellular plankton groups
+        [~,idxU]=find(sim.p.typeGroups<10);
+        ixUPlankton = sim.p.ixStart(idxU(1)):sim.p.ixEnd(idxU(end));
+        Bph=sim.B(:,:,ixUPlankton);
         % Find plankton groups:
         if isfield(sim.p,'ixPOM')
             ixPlankton = sim.p.idxB:(sim.p.ixStart(sim.p.ixPOM)-1);
@@ -81,6 +85,9 @@ switch sim.p.nameModel
         ChlArea = zeros(nTime,1);
         ChlVolume = zeros(nTime, nZ);
         jLreal = zeros(nTime,nZ,sim.p.n-sim.p.idxB+1);
+        jF = zeros(nTime,nZ,sim.p.n-sim.p.idxB+1);
+        jDOC = zeros(nTime,nZ,sim.p.n-sim.p.idxB+1);
+
          %for iTime = ixTime % this one is used in newest version
         for iTime = 1:nTime
             ProdGross = 0;
@@ -129,13 +136,19 @@ switch sim.p.nameModel
                     Bplankton = Bplankton + sum(u(ixPlankton))*conv;
                     % Chl:
                     rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
-                    tmp =  calcChl( squeeze(sim.B(iTime,k,:)), rates, sim.L(iTime,k));
-                    if ~isnan(tmp)
-                        jLreal(iTime,k,:) = rates.jLreal;
+                    jLreal(iTime,k,:) = rates.jLreal;
+                    jF(iTime,k,:) = rates.jF;
+                    jDOC(iTime,k,:) = rates.jDOC;
                         % ChlArea(iTime) = ChlArea(iTime) + sum(tmp) * sim.dznom(k);
                         % ChlVolume(iTime,k) = ChlVolume(iTime,k) + sum(tmp);
-                    end
                     ratePOM(iTime, k, :) = rates.jPOM;
+                    Bphyto_frac(iTime,k,:)=calcBphytoFrac( jLreal(iTime,k,:),...
+                    jF(iTime,k,:),jDOC(iTime,k,:),ixUPlankton);
+                    for i=1:length(ixUPlankton)
+                        if Bphyto_frac(iTime,k,i)<0.6
+                            Bph(iTime,k,i)=0;
+                        end
+                    end
                 end
             end
             %iTimenow = iTime - ixTime(1)+1; % newest version uses this instead of iTime
@@ -154,6 +167,7 @@ switch sim.p.nameModel
         sim.ChlVolume = ChlVolume;
         sim.jLreal = jLreal;
         sim.ratePOM = ratePOM;
+        sim.Bph = Bph;
 
         if options.bPrintSummary
             fprintf("----------------------------------------------\n")
@@ -180,11 +194,18 @@ switch sim.p.nameModel
             Bmicro = ProdGross;
             ChlArea = 0*dx;
             ChlVolume = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z));
+            jLreal = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z),sim.p.n-sim.p.idxB+1);
+            jF = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z),sim.p.n-sim.p.idxB+1);
+            jDOC = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z),sim.p.n-sim.p.idxB+1);
 
             nTime = length(sim.t);
             nX = length(sim.x);
             nY = length(sim.y);
             nZ = length(sim.z);
+            % find Unicellular plankton groups
+            [~,idxU]=find(sim.p.typeGroups<10);
+            ixUPlankton = sim.p.ixStart(idxU(1)):sim.p.ixEnd(idxU(end));
+            Bph=sim.B(:,:,:,:,ixUPlankton);
             %
             % Extract fields from sim:
             %
@@ -236,9 +257,19 @@ switch sim.p.nameModel
                                 % Chl:
                                 rates = getRates(p, u, L(iTime,i,j,k), T(iTime,i,j,k), sLibName);
                                 tmp =  calcChl( squeeze(B(iTime,i,j,k,:)), rates, L(iTime,i,j,k)) ;%/ 1000; % Convert to mg
+                                jLreal(iTime,i,j,k,:) = rates.jLreal;
+                                jF(iTime,i,j,k,:) = rates.jF;
+                                jDOC(iTime,i,j,k,:) = rates.jDOC;
                                 if ~isnan(tmp)
                                     %ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
                                     % ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp;
+                                end
+                                Bphyto_frac(iTime,i,j,k,:)=calcBphytoFrac( jLreal(iTime,i,j,k,:),...
+                                jF(iTime,i,j,k,:),jDOC(iTime,i,j,k,:),ixUPlankton);
+                                for iU=1:length(ixUPlankton)
+                                    if Bphyto_frac(iTime,i,j,k,iU)<0.6
+                                        Bph(iTime,i,j,k,iU)=0;
+                                    end
                                 end
                             end
                         end
@@ -263,6 +294,7 @@ switch sim.p.nameModel
             sim.ePP = sim.ProdNet./sim.ProdGross;
             sim.ChlArea = ChlArea/length(sim.t);
             sim.ChlVolume = ChlVolume/length(sim.t);
+            sim.Bph = Bph;
             %
             % Global totals
             %
@@ -316,4 +348,6 @@ switch sim.p.nameModel
         disp('Model unknown; functions not calculated');
 
 end
+
+
 %sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro;

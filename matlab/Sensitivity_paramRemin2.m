@@ -18,12 +18,15 @@ bHTLquadratic = true;
 runningTime = noYears*365;
 newSinkingPOM = 0.78622;
 newRemin2= logspace(log10(0.01), log10(0.5), 10);
+newParameter=newRemin2;
+param_str='remin2';
+param_str4plots=param_str;
 
-Ntotal = zeros(length(newRemin2), runningTime);
-NPP = zeros(length(newRemin2), runningTime);
-NPP_annual = zeros(length(newRemin2));
+Ntotal = zeros(length(newParameter), runningTime);
+NPP = zeros(length(newParameter), runningTime);
+NPP_annual = zeros(length(newParameter));
 
-for  iparam = 1:length(newRemin2)
+for  iparam = 1:length(newParameter)
        % which parameters needs to be changed
         paramToReplace={'remin2';'remin2'};
 
@@ -31,7 +34,7 @@ for  iparam = 1:length(newRemin2)
         InputListName={'input_generalists';'input_diatoms'};
 
         % what are the new values?
-        remin2 = newRemin2(iparam);
+        remin2 = newParameter(iparam);
         remin2d=remin2;
 
         % change to cell array
@@ -50,26 +53,43 @@ for  iparam = 1:length(newRemin2)
         p.tEnd = runningTime;
         sim = simulateWatercolumn(p,lat_to_find,lon_to_find);
         simWCSeason = calcFunctionsTh(sim);
-        save(['sim_remin2_',num2str(remin2),'lat',num2str(lat_to_find),'.mat'],'sim');    
-        save(['simWC_remin2_',num2str(remin2),'lat',num2str(lat_to_find),'.mat'],'simWCSeason');    
+        save(['sim',param_str,'_',num2str(newParameter(iparam)),'lat',num2str(lat_to_find),'.mat'],'sim');    
+        save(['simWC',param_str,'_',num2str(newParameter(iparam)),'lat',num2str(lat_to_find),'.mat'],'sim');    
         Ntotal(iparam,:) = simWCSeason.Ntot;
         NPP(iparam,:) = simWCSeason.ProdNet; % (mgC / m2 / day)
+        Bph_orig(iparam,:,:,:) = simWCSeason.Bph;
         % NPP_annual(i) = simWCSeason.ProdNetAnnual;
 end
 
 %%
 final_years=3;
-monthly_NPP=zeros(length(newRemin2),noYears,12);
-monthly_NPP_mean=zeros(length(newRemin2),12);
+monthly_NPP=zeros(length(newParameter),noYears,12);
+monthly_NPP_mean=zeros(length(newParameter),12);
+monthly_Bphyto=zeros(length(newParameter),noYears,12,length(sim.z));
+monthly_Bph_mean=zeros(length(newParameter),12,length(sim.z));
+% z = sim.z + 0.5*sim.dznom;
+% Make a layer at z = 0 with the same value as in the first grid point:
+%
+% t = sim.t;
+% z = [0; sim.z];
 
-for iparam = 1:length(newRemin2)
+for iparam = 1:length(newParameter)
+    % Bph(iparam,:,2:length(z),:) = Bph;
+    % Bph(iparam,:,1,:) = Bph(iparam,:,2,:);
+    Bph_allSizes=squeeze(sum(Bph_orig(iparam,:,:,:),4));
     for i=noYears-3:noYears
          monthly_NPP(iparam,i,:)=reshapeCellToArrayAvg(NPP(iparam,:),i);
+         for k=1:length(sim.z)
+            monthly_Bphyto(iparam,i,:,k)=reshapeCellToArrayAvg(Bph_allSizes(:,k),i);
+         end
     end
   % monthly NPP averaged over the last 3 years of the simulation
     monthly_NPP_mean(iparam,:)=squeeze(mean(monthly_NPP(iparam,noYears-3:noYears,:),2));
+    monthly_Bph_mean(iparam,:,:)=squeeze(mean(monthly_Bphyto(iparam,noYears-3+1:noYears,:),2));
+
 end
-save(['NPP_monthly_mean_remin2',num2str(remin2),'lat',num2str(lat_to_find),'.mat'],'monthly_NPP_mean');    
+save(['NPP_monthly_mean_',param_str,'lat',num2str(lat_to_find),'.mat'],'monthly_NPP_mean');    
+save(['Bph_monthly_mean_',param_str,'lat',num2str(lat_to_find),'.mat'],'monthly_Bph_mean');    
 
 %% -------------------------------------------
 %                  PLOTS

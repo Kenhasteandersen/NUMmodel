@@ -39,6 +39,7 @@ for  iparam = 1:length(newParameter)
         save(['simWC',param_str,'_',num2str(newParameter(iparam)),'lat',num2str(lat_to_find),'.mat'],'simWCSeason');    
         Ntotal(iparam,:) = simWCSeason.Ntot;
         NPP(iparam,:) = simWCSeason.ProdNet; % (mgC / m2 / day)
+        Bph_orig(iparam,:,:,:) = simWCSeason.Bph;
         % NPP_annual(i) = simWCSeason.ProdNetAnnual;
 end
 
@@ -46,17 +47,25 @@ end
 final_years=3;
 monthly_NPP=zeros(length(newParameter),noYears,12);
 monthly_NPP_mean=zeros(length(newParameter),12);
+monthly_Bphyto=zeros(length(newParameter),noYears,12,length(sim.z));
+monthly_Bph_mean=zeros(length(newParameter),12,length(sim.z));
 
 for iparam = 1:length(newParameter)
+    Bph_allSizes=squeeze(sum(Bph_orig(iparam,:,:,:),4));
     for i=noYears-3:noYears
          monthly_NPP(iparam,i,:)=reshapeCellToArrayAvg(NPP(iparam,:),i);
+         for k=1:length(sim.z)
+            monthly_Bphyto(iparam,i,:,k)=reshapeCellToArrayAvg(Bph_allSizes(:,k),i);
+         end
     end
   % monthly NPP averaged over the last 3 years of the simulation
     monthly_NPP_mean(iparam,:)=squeeze(mean(monthly_NPP(iparam,noYears-3:noYears,:),2));
+    monthly_Bph_mean(iparam,:,:)=squeeze(mean(monthly_Bphyto(iparam,noYears-3+1:noYears,:),2));
 end
 % Save matrix with monthly NPP averaged over the last 3 years, for every
 % parameter
 save(['NPP_monthly_mean_',param_str,'lat',num2str(lat_to_find),'.mat'],'monthly_NPP_mean');    
+save(['Bph_monthly_mean_',param_str,'lat',num2str(lat_to_find),'.mat'],'monthly_Bph_mean');    
 
 %% -------------------------------------------
 %                  PLOTS
