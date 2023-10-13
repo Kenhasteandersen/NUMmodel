@@ -29,7 +29,7 @@ program NUMmodeltest
    !              gen-diat-cop      POM      mAdult    
   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
-  !call setupGeneralistssimpleOnly(2,errorio,errorstr)
+  call setupGeneralistssimpleOnly(5,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
   !call setupDiatomsOnly(10,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
@@ -37,7 +37,7 @@ program NUMmodeltest
   !call setupGeneralistsOnly(5,errorio,errorstr)
   !call setupGeneralistsPOM(5,1, errorio, errorstr)
   !call setupGeneralistsDiatoms_simple(10)
-  call setupNUMmodel(5,5,1, (/1.d0 /), (/10.d0/) ,errorio,errorstr)
+  !call setupNUMmodel(5,5,1, (/1.d0 /), (/10.d0/) ,errorio,errorstr)
   !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
   !call setupGeneralistsDiatoms(10, errorio, errorstr)
   !call setupGeneric( (/1.d0 /), errorio, errorstr )
@@ -50,16 +50,16 @@ program NUMmodeltest
     print*, 'Error loading parameter ', errorstr
   end if
 
-  call setHTL(0.1d0, 0.1d0, .false., .false.)
+  !call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
   allocate(dudt(nGrid))
-  u00(idxN) = 50.d0
+  u00(idxN) = 150.d0
   u00(idxDOC) = 10.d0
-  u00(idxSi) = 10.d0
+  !u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = .005d0 + 0.01*i
+     u00(i) = 10 + 0.1*(i-2)
   end do
   dudt = 0.d0
 
@@ -82,8 +82,8 @@ program NUMmodeltest
   !      write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
   !end select
   
-  call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
-  write(*,*) dudt
+  call calcDerivatives(u00, 30.d0, 10.d0, 0.0d0, dudt)
+  call printRates()
   !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
   !write(*,*) 'nbutrients',nNutrients
@@ -99,7 +99,7 @@ program NUMmodeltest
 
  ! call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
   !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
-  !write(*,*) u00
+  write(*,*) dudt
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()
   !!$  u0=u00

@@ -112,7 +112,7 @@ for i = 1:730
     end
 end
 %
-% Calculate sinking matrices:
+% Calculate sinking matrices. Uses an explicit first-order upwind scheme:
 %
 sim = load(p.pathGrid,'x','y','z','dznom','bathy');
 % Get sinking velocities from libNUMmodel:
@@ -130,7 +130,6 @@ if ~isempty(idxSinking)
     end
     % Find the indices into the grid
     xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid);
-    idxLower = zeros(1,nb);
     % Run through all latitudes and longitudes:
     for i = 1:size(xx,1)
         for j = 1:size(xx,2)
@@ -149,8 +148,27 @@ if ~isempty(idxSinking)
                         % ... and receives mass from the level above
                         Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
                     end
+                    if p.BC_POMclosed
+                        Asink{l}(idxGrid(k),idxGrid(k)) = 1; % Closed BC; no loss of mass at the bottom
+                    end
                 end
             end
+        end
+    end
+end
+%%
+% Find indices of bottom cells for bottom boundary condition:
+%
+xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid); % Find the indices into the grid
+ixBottom = []; % Indices to all the bottom cells
+dzBottom = []; % The width of all the bottom cells.
+for i = 1:size(xx,1)
+    for j = 1:size(xx,2)
+        ixZ = isnan( xx(i,j,:) );
+        if ~ixZ(1)
+            idx = find(ixZ==0,1,'last'); % Find the last cell
+            ixBottom = [ixBottom xx(i,j,idx)];
+            dzBottom = [dzBottom sim.dznom(idx)];
         end
     end
 end
@@ -233,7 +251,7 @@ for i=1:simtime
                 u(k,:), L(k), T(k), dtTransport, dt);
         end
     else
-        for k = 1:nb
+        for k = 1:nb %[4257        8663       13019       17318       21504]
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
                 u(k,:),L(k), T(k), dtTransport, dt);
             %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
@@ -249,6 +267,16 @@ for i=1:simtime
         for l = 1:length(idxSinking)
             u(:,idxSinking(l)) = Asink{l}*u(:,idxSinking(l));
         end
+    end
+    %
+    % Bottom BC for nutrient fields. The boundary allows diffusion from the
+    % bottom into the cell. The diffusivity is controlled by p.BCdiffusion
+    % and the bottom value by p.BCvalue. These parameters are set in
+    % parametersGlobal:
+    %
+    for k = 1:p.nNutrients
+        u(ixBottom, k) = u(ixBottom, k) +  p.dtTransport* ...
+        p.BCdiffusion(k)./dzBottom'.*(p.BCvalue(k)-u(ixBottom,k));
     end
     %
     % Transport

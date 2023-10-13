@@ -86,7 +86,13 @@ check(p.pathTemp);
 %
 p.tEnd = 365; % In days
 p.tSave = 365/12; % How often to save results (monthly)
-p.bTransport = true;
+p.bTransport = true; % Whether to do the transport with the transport matrix
+%
+% Bottom BC for nutrients:
+%
+p.BCdiffusion = [0, 0, 10]; % Diffusivity of nutrients out of the bottom m^2/day
+p.BCvalue = p.u0; % Use the initial value concentration of the bottom concentration
+p.BC_POMclosed = true; % Whether the bottom BC for POM is open or closed
 %
 % Set minimum concentrations:
 %

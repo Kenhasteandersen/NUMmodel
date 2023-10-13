@@ -10,4 +10,3 @@ p = parametersGlobal(p,nTMmodel);
 p.nameModel = 'watercolumn';
 
 p.tSave = 1;
-p.DiffBottom = 10; % Diffusivity of N out of the bottom m^2/day

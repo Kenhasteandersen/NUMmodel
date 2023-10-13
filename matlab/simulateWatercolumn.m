@@ -280,13 +280,18 @@ for i = 1:simtime
         u(:,j) = squeeze(Asink(j,:,:)) * u(:,j);
     end
     % Bottom BC for nutrients:
-    u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
-        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+    u(end, 1:p.nNutrients) = u(end, 1:p.nNutrients) +  ...
+        p.BCdiffusion(1:p.nNutrients)*p.dtTransport/sim.dznom(nGrid) .* ...
+        ( p.BCvalue(1:p.nNutrients) - u(end,1:p.nNutrients) );
 
-    if bSilicate
-        u(end, p.idxSi) = u(end, p.idxSi) +  p.dtTransport* ...
-        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxSi)-u(end,p.idxSi));
-    end
+    %u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
+    %    p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+
+    %if bSilicate
+    %    u(end, p.idxSi) = u(end, p.idxSi) +  p.dtTransport* ...
+    %    p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxSi)-u(end,p.idxSi));
+    %end
+
     %
     % Enforce minimum concentration
     %
@@ -359,7 +364,7 @@ sim.lon = lon;
 
 sim.Ntot = (sum(sim.N'.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
     sum(squeeze(sum(sim.B,3))'.*(sim.dznom*ones(1,length(sim.t))))/rhoCN)/1000; % gN/m2 in biomass
-sim.Nprod = p.DiffBottom*(p.u0(p.idxN)-sim.N(:,end))/1000; % Diffusion in from the bottom; gN/m2/day
+sim.Nprod = p.BCdiffusion(p.idxN)*(p.BCvalue(p.idxN)-sim.N(:,end))/1000; % Diffusion in from the bottom; gN/m2/day
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
 %     sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
@@ -378,7 +383,7 @@ end
 
 
 %
-% Setup matrix for sinking
+% Setup matrix for sinking. Uses an implicit first-order upwind scheme
 %
 function [Asink,p] = calcSinkingMatrix(p, sim, nGrid)
 %
@@ -399,8 +404,9 @@ for i = 1:nGrid
     end
 end
 % Bottom BC: 
-% Asink(:,end,end) = 1; % If this is uncommented, the bottom BC will be closed.
-% If it is commented out, the bottom BC is open
+if p.BC_POMclosed
+    Asink(:,end,end) = 1;
+end
 %
 % Invert matrix to make it ready for use:
 %

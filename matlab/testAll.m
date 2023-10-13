@@ -1,6 +1,7 @@
 
 loadNUMmodelLibrary
 
+testSetup('setupGeneralistsSimpleOnly',  4168);
 testSetup('setupGeneralistsOnly',  3814);
 testSetup('setupGeneralistsDiatoms_simple', 5487);
 testSetup('setupGeneralistsDiatoms', 8409);
