@@ -8,6 +8,7 @@ arguments
     sDescription string = sSetup;
 end
 
+fprintf('----------------------------------------\n');
 fprintf('Testing %s ... \n', sDescription);
 bSuccess = true;
 
