@@ -25,7 +25,6 @@ module generalists_simple
   public initGeneralistsSimple, spectrumGeneralistsSimple, calcRatesGeneralistsSimple, calcDerivativesGeneralistsSimple
   public printRatesGeneralistsSimple
 
-
 contains
 
  subroutine initGeneralistsSimple(this, n,errorio,errorstr)
@@ -36,7 +35,6 @@ contains
     character(c_char), dimension(*), intent(out) :: errorstr
     integer:: i
     real(dp), parameter:: rho = 0.4*1d6*1d-12
-    real(dp) :: ii
     real(dp) :: mMinGeneralist, mMaxGeneralist
     real(dp) :: alphaN, rNstar  
     real(dp) :: alphaL, rLstar

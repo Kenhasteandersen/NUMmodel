@@ -96,16 +96,16 @@ p.BC_POMclosed = true; % Whether the bottom BC for POM is open or closed
 %
 % Set minimum concentrations:
 %
-p.umin = 0*p.u0;
-for iGroup = 1:p.nGroups
-    ix = p.ixStart(iGroup):p.ixEnd(iGroup);
-    if p.typeGroups(iGroup) < 10
-        p.umin(ix) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Minimum B concentration for unicellular groups
-    end
-    if p.typeGroups(iGroup)>=10 && p.typeGroups(iGroup)<100
-        p.umin(ix(1)) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Send in some nauplii in copepod groups
-    end
-end
+% p.umin = 0*p.u0;
+% for iGroup = 1:p.nGroups
+%     ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+%     if p.typeGroups(iGroup) < 10
+%         p.umin(ix) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Minimum B concentration for unicellular groups
+%     end
+%     if p.typeGroups(iGroup)>=10 && p.typeGroups(iGroup)<100
+%         p.umin(ix(1)) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Send in some nauplii in copepod groups
+%     end
+% end
 %
 % Light environment:
 %

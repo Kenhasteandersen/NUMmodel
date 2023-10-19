@@ -190,7 +190,7 @@ else
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
     u = u(idxGrid,:); % Use only the specific water column
 end
-p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
+%p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
 if bSilicate
     p.u0(ixSi) = u(nGrid,ixSi);
 end
@@ -265,6 +265,9 @@ for i = 1:simtime
         u(k,:) = calllib(sLibName, 'f_simulateeuler', ...
             u(k,:),L(k), T(k), dtTransport, dt);
     end
+
+    %if sum(u(:)<0)
+    %    fprintf("Time step %i, #i\n", [i, sum(u(:)<0)]);
     %end
 
     if any(isnan(u))
@@ -295,9 +298,9 @@ for i = 1:simtime
     %
     % Enforce minimum concentration
     %
-    for k = 1:nGrid
-        u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
-    end
+    %for k = 1:nGrid
+    %    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+    %end
     %
     % Save timeseries in grid format
     %

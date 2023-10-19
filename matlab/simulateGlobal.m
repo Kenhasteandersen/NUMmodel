@@ -233,9 +233,9 @@ for i=1:simtime
     %
     % Enforce minimum B concentration
     %
-    for k = 1:n
-        u(u(:,k)<p.umin(k),k) = p.umin(k);
-    end
+    %for k = 1:n
+    %    u(u(:,k)<p.umin(k),k) = p.umin(k);
+    %end
     %
     % Run Euler time step for dtTransport days:
     %

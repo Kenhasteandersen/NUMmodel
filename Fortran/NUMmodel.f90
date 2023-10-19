@@ -888,16 +888,13 @@ contains
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
     real(dp) :: dudt(nGrid)
-    integer:: i, iEnd
+    integer:: i
 
-    iEnd = floor(tEnd/dt)
-
-    do i=1, iEnd
+    do i = 1, floor(tEnd/dt)
        call calcDerivatives(u, L, T, dt, dudt)
        u = u + dudt*dt
     end do
   end subroutine simulateEuler
-
 
   !=========================================
   ! Diagnostic functions

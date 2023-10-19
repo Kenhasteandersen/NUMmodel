@@ -80,19 +80,6 @@ if options.bCalculateNgain
     sim.Ngain=u(:,end); % N gained from the deep minus the losses
     u=u(:,1:p.n);
 end
-%
-% Enforce minimum concentration
-%
-for k = 1:size(u,1)
-    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
-end
-%
-% Enforce minimum concentration
-%
-for k = 1:size(u,1)
-    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
-end
-
 
 %
 % Assemble result:

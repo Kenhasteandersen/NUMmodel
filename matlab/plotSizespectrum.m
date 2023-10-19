@@ -1,6 +1,7 @@
 %
-% Plot a size spectrum at a given lat, lon, index of depth, and time
-% (day).
+% Plot a size spectrum at a given time (day).
+% If the simulation is a watercolumn then indicate also the depth layer.
+% If the simulation is global then indicate depth layer, and latitude and longitude.
 % 
 function s = plotSizespectrum(sim, time, iDepth, lat, lon)
 arguments
