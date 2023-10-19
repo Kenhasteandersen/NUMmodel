@@ -658,7 +658,7 @@ contains
     if (bQuadraticHTL) then
        do iGroup = 1, nGroups
          group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) &
-            * u(ixStart(iGroup):ixEnd(iGroup))
+            * upositive(ixStart(iGroup):ixEnd(iGroup))
        end do
      end if
     !
@@ -708,11 +708,11 @@ contains
                ix = ixStart(iGroup)+i-1
                if (thetaPOM(ix) .ne. 0) then
                   j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
-                  dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*u(ix) 
+                  dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*upositive(ix) 
                end if
                ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
-                 (1-fracHTL_to_N) * u(ix) * group(iGroup)%spec%mortHTL(i)
+                 (1-fracHTL_to_N) * upositive(ix) * group(iGroup)%spec%mortHTL(i)
             end do
          end if
       end do
@@ -732,7 +732,7 @@ contains
     do iGroup = 1, nGroups
       if (iGroup .ne. idxPOM) then
         dudt(idxN) = dudt(idxN) + &
-            fracHTL_to_N * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
+            fracHTL_to_N * sum( upositive(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
       end if
     end do
     !
