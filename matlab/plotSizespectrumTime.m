@@ -18,7 +18,7 @@ switch sim.p.nameModel
     case 'watercolumn'
         % Extract from a single water column:
         s.B = squeeze(sim.B(:,iDepth,:));
-        sTitle = sprintf("Community sheldon spectrum at depth of max biomass: %3.0f m", sim.z(iDepth));
+        sTitle = sprintf("Community sheldon spectrum at depth of max biomass: %3.0f m (log_{10} {\mu}g_C/l)", sim.z(iDepth));
 
     case 'global'
         if isempty(lat)
@@ -28,7 +28,7 @@ switch sim.p.nameModel
             % Extract from global run:
             idx = calcGlobalWatercolumn(lat,lon,sim);
             s.B = squeeze(sim.B(:, idx.x, idx.y, iDepth, :));
-            sTitle = sprintf("Sheldon spectrum at %3.0f m", sim.z(iDepth));
+            sTitle = sprintf("Sheldon spectrum at %3.0f m (log_{10} {\mu}g_N/l)", sim.z(iDepth));
         end
 
     otherwise

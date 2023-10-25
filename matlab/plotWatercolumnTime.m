@@ -90,7 +90,7 @@ nexttile
 %panelField([t t(end)], -z, N');
 %surface(t,-z, N)
 contourf(t,-z,log10(N),linspace(-2,3,options.nLevels),'LineStyle','none')
-title('Nitrogen')
+title('Nitrogen (log_{10} {\mu}g_N/l)')
 ylabel('Depth (m)')
 %set(gca,'ColorScale','log')
 %shading interp
@@ -106,7 +106,7 @@ if isfield(sim,'Si')
     %surface(t,-z, Si)
     contourf(t,-z,log10(Si),linspace(-2,3,options.nLevels),'LineStyle','none')
     % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
-    title('Silicate')
+    title('Silicate (log_{10} {\mu}g_{Si}/l)')
     ylabel('Depth (m)')
     %set(gca,'ColorScale','log')
     %shading interp
@@ -121,7 +121,7 @@ end
 nexttile
 contourf(t,-z,log10(DOC),options.nLevels,'LineStyle','none')
 %surface(t,-z, DOC)
-title('DOC')
+title('DOC (log_{10} {\mu}g_C/l)')
 ylabel('Depth (m)')
 %xlabel('Concentration (\mugC l^{-1})')
 %set(gca,'colorscale','log')
@@ -139,7 +139,7 @@ for i = 1:sim.p.nGroups
     %surface(t,-z, squeeze(B(i,:,:)))
     B(B < 0.01) = 0.01; % Set low biomasses to the lower limit to avoid white space in plot
     contourf(t,-z,log10(squeeze(B(i,:,:))),[linspace(-2,3,options.nLevels)],'LineStyle','none')
-    title(sim.p.nameGroup(i))
+    title(strcat(sim.p.nameGroup(i), ' (log_{10} {\mu}g_C/l)'));
     ylabel('Depth (m)')
     %set(gca,'ColorScale','log')
     %shading interp
