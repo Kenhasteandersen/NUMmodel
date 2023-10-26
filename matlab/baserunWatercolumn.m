@@ -19,10 +19,10 @@ p = setupNUMmodel();
 p = parametersWatercolumn(p);
 p.tEnd = 5*365;
 
-setHTL(0.1, 1, true, true)
-setSinkingPOM(p, 0.78622);
+setHTL(0.15, 1, true, true)
+setSinkingPOM(p, 1);
 sim = simulateWatercolumn(p, lat,lon);
 
-plotSimulation(sim)
+% plotSimulation(sim)
 
-checkConservation(sim);
+% checkConservation(sim);

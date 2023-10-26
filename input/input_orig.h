@@ -25,8 +25,8 @@
 
 ! Variables for HTL mortalities:
 !-------------------------------
-  fracHTL_to_N = 0.5            ! Half becomes urine that is routed back to N
-  fracHTL_to_POM = 0.5          ! Another half is fecal pellets that are routed back to the largest POM size class
+  fracHTL_to_N = 0.5d0            ! Half becomes urine that is routed back to N
+  fracHTL_to_POM = 0.5d0          ! Another half is fecal pellets that are routed back to the largest POM size class
 
 !
 !***********************************************************************
@@ -110,7 +110,7 @@
 
 ! Biogeo:
 !--------
-  remin2 = 0.01d0                ! Fraction of virulysis remineralized to DOC
+  remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
   reminF = 0.1d0
 
 !***********************************************************************
@@ -189,7 +189,7 @@
 ! Biogeo:
 !--------
 ! remin = 0.0                   ! Fraction of mortality losses reminerilized to DOC
-  remin2 = 0.01d0                ! Fraction of virulysis remineralized to DOC
+  remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
 
 ! Vulnerability to predation:
 !----------------------------
@@ -260,6 +260,6 @@
 !*********************************************************************** 
   mMin = 1.d-9                  ! Smallest POM mass
   remin = 0.07d0                ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
-  palatability = 0d0          ! Preference of other groups for eating POM
+  palatability = 0.1d0          ! Preference of other groups for eating POM
 
   

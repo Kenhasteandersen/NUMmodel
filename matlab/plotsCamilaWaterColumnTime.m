@@ -1,7 +1,9 @@
 % First we have to run SENSITIVITY_remin2.m
 % Calculate phyoplankton 60% photosynthetic
-simR=getSimRates(sim);
+% simR=getSimRates(sim);
 Bph_orig=calcPhyto(sim,simR);
+noYears=20;
+
 %%
 
 figure(1)
@@ -9,36 +11,31 @@ clf(1)
 set(gcf,'color','w');
 
 for i = 1:length(newRemin2)
-
-    for j = 1:length(newSinkingPOM)
-
-        plot(NPP_cell_month_mean{i, j}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
+        plot(NPP_cell_month_mean{i}(end-11:end), 'o-r', 'LineWidth', 1)% mgC/m2/day
         % plot(NPP_cell_month_mean{i, j}, 'o-r', 'LineWidth', 1)% mgC/m2/day
         hold on
         plot(NPP_extracted(1,:), 'ob--')
         plot(NPP_extracted(2,:), 'og--')
         plot(NPP_extracted(3,:), 'om--')
-
+        % plot(monthly_NPP(noYears,:), 'o-r', 'LineWidth', 1)cd% mgC/m2/day
 xlabel('Time (month)')
 ylabel('NPP (mgC / m^2 /day)')
  mTitle = append('Lat: ', string(lat_to_find), ', Lon: ', string(lon_to_find));
- my_title = append('remin2 = ', string(newRemin2(i)), ' / sinking = ', string(newSinkingPOM(j)));
-        title(my_title)
-
-    end
+ my_title = append('remin2 = ', string(newRemin2(i)));
+        title(my_title) 
 end
 title(t,mTitle, 'FontSize', 24)
 lg  = legend('NUM','Eppley model', 'Standard VGPM', 'CAFE','NumColumns',2); 
 
 %%
 %  Compare NPP over the last years in the model   
-noYears=30;
+monthly_NPP=zeros(noYears,12);
 for i=noYears-3:noYears
     monthly_NPP(i,:)=reshapeCellToArrayAvg(NPP,i);
 end
 figure(2)
 clf(2)
-set(gcf,'color','w');
+% set(gcf,'color','w');
 
         % total_months=size(matr_NPP,2;)  % last year= 4th year
         plot(monthly_NPP(noYears,:), 'o-r', 'LineWidth', 1)% mgC/m2/day

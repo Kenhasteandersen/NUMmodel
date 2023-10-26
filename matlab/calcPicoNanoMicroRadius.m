@@ -2,7 +2,8 @@
 % Returns the biomass of pico, nano and micro plankton in mugC/liter.
 % Only works with generalists.
 % Example: call calcPicoNanoMicroRadius(sim.B(end,:), sim.p.pGeneralists, groups);
-%
+% or B=squeeze(mean(simNUM.B(:,1,:),1));
+
 % options: select group, all groups,...
 function Bpnm = calcPicoNanoMicroRadius(B,p,groups)
 % arguments

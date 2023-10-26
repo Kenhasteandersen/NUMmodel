@@ -1,6 +1,6 @@
 % Runs sensitivity analysis for 5 parameters in 4 water columns
 % over noYear number of years
-noYears= 25;
+noYears= 4;%25;
 
 % Oligotrophic - HOT station
 lat_to_find = 24;

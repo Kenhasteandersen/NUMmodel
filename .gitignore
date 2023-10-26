@@ -18,12 +18,16 @@ Fortran/NUMmodel_matlab.so
 Fortran/NUMmodel_R.so
 Fortran/server.csr
 Fortran/server.key
+matlab/**.mat
 matlab/.DS_Store
+matlab/biomass mats
 matlab/calcPicoNanoMicroRate.asv
 matlab/compareEulerAndMatlab.m
 matlab/deriv.m
+matlab/fracHTL sensitivity
 matlab/Sensitivity analysis
 matlab/setupGeneralists_csp.m
+matlab/sinkingPOM sensitivity
 matlab/test.m
 matlab/tmp_generalistsdiatoms_simple.mat
 matlab/tmp.m

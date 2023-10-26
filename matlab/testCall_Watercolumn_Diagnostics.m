@@ -16,7 +16,6 @@
  Bph=calcPhyto(sim,simR);
 
 
-
  % Consider adding NPP
 %%
 day=10718;%p.tEnd-170; % set this to average over time

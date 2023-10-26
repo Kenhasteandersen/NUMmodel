@@ -35,7 +35,7 @@ function Bphyto=calcPhytoplanktonBiomass(sim)
         end
 % Bpnmphyto = [Bpico, Bnano, Bmicro];
 
-% I must set a ration of what is autotroph
+% I must set a ratio of what is autotroph
 function Bphyto = calcBphyto(B,rates,ix) %check units!
         Bphyto_frac = rates.jLreal(ix)./(rates.jLreal(ix)+rates.jF(ix)+rates.jDOC(ix));
         Bphyto = rates.jLreal(ix)./(rates.jLreal(ix)+rates.jF(ix)+rates.jDOC(ix)).*B(ix);
