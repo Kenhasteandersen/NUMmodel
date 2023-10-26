@@ -1,5 +1,6 @@
 %
-% Calculate the functions from any simulation.
+% Calculate the functions from any simulation. Only the last year is
+% calculated for watercolumn and global simulations.
 %
 % In:
 %   sim - simulation structure
@@ -153,6 +154,7 @@ switch sim.p.nameModel
         
         if ~isfield(sim,'ProdGross')
             sLibName = loadNUMmodelLibrary();
+            ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
             % Get grid volumes:
             load(sim.p.pathGrid,'dv','dz','dx','dy');
             ix = ~isnan(sim.N(1,:,:,1)); % Find all relevant grid cells
@@ -186,7 +188,7 @@ switch sim.p.nameModel
             T = sim.T;
             p = sim.p;
             
-            for iTime = 1:nTime
+            for iTime = ixTime
                 for i = 1:nX
                     for j = 1:nY
                         ProdGrosstmp = 0;
