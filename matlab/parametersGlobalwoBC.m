@@ -86,26 +86,20 @@ check(p.pathTemp);
 %
 p.tEnd = 365; % In days
 p.tSave = 365/12; % How often to save results (monthly)
-p.bTransport = true; % Whether to do the transport with the transport matrix
-%
-% Bottom BC for nutrients:
-%
-p.BCdiffusion = [0, 0, 10]; % Diffusivity of nutrients out of the bottom m^2/day
-p.BCvalue = p.u0; % Use the initial value concentration of the bottom concentration
-p.BC_POMclosed = true; % Whether the bottom BC for POM is open or closed
+p.bTransport = true;
 %
 % Set minimum concentrations:
 %
-% p.umin = 0*p.u0;
-% for iGroup = 1:p.nGroups
-%     ix = p.ixStart(iGroup):p.ixEnd(iGroup);
-%     if p.typeGroups(iGroup) < 10
-%         p.umin(ix) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Minimum B concentration for unicellular groups
-%     end
-%     if p.typeGroups(iGroup)>=10 && p.typeGroups(iGroup)<100
-%         p.umin(ix(1)) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Send in some nauplii in copepod groups
-%     end
-% end
+p.umin = 0*p.u0;
+for iGroup = 1:p.nGroups
+    ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+    if p.typeGroups(iGroup) < 10
+        p.umin(ix) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Minimum B concentration for unicellular groups
+    end
+    if p.typeGroups(iGroup)>=10 && p.typeGroups(iGroup)<100
+        p.umin(ix(1)) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Send in some nauplii in copepod groups
+    end
+end
 %
 % Light environment:
 %
