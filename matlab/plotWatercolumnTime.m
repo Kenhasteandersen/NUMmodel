@@ -71,6 +71,7 @@ B(:,1,:) = B(:,2,:);
 
 if options.bNewPlot
     clf
+    set(gcf, 'Color', 'white')
     tiledlayout(2+isfield(sim,'Si')+sim.p.nGroups,1,'tilespacing','tight','padding','tight')
 end
 
@@ -95,7 +96,8 @@ ylabel('Depth (m)')
 %set(gca,'ColorScale','log')
 %shading interp
 axis tight
-colorbar('ticks',-2:3)
+c=colorbar('ticks',-2:3);
+c.Label.String='log_{10}\mugNl^{-1}';
 %caxis([-1 2])
 ylim(ylimit)
 xlim(xlimit)
@@ -111,7 +113,8 @@ if isfield(sim,'Si')
     %set(gca,'ColorScale','log')
     %shading interp
     axis tight
-    colorbar('ticks',-2:3)
+    c=colorbar('ticks',-2:3);
+    c.Label.String='log_{10}\mugSil^{-1}';
     %caxis([0.1 1000])
     ylim(ylimit)
     xlim(xlimit)
@@ -128,7 +131,8 @@ ylabel('Depth (m)')
 %set(gca,'ColorScale','log')
 shading interp
 axis tight
-colorbar
+c=colorbar;
+c.Label.String='log_{10}\mugCl^{-1}';
 %caxis([0.1,2])
 ylim(ylimit)
 xlim(xlimit)
@@ -146,7 +150,8 @@ for i = 1:sim.p.nGroups
     axis tight
     colorbar
     %caxis([0.1 100])
-    colorbar('ticks',-2:3,'limits',[-2 3])
+    c=colorbar('ticks',-2:3,'limits',[-2 3]);
+    c.Label.String='log_{10}\mugCl^{-1}';
     ylim(ylimit)
     xlim(xlimit)
     if i ~= sim.p.nGroups

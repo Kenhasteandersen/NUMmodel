@@ -2,7 +2,7 @@
 % load('C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\Trophic efficiency\Compare Biomass\simGlobal.mat')
 % load('C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\Trophic efficiency\Compare Biomass\simGlobalF.mat')
 % load('C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\Trophic efficiency\Develop-matrices\simGlobal5yearsF.mat')
-load('C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\Trophic efficiency\Compare Biomass\simNUMFun.mat')
+% load('C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\Trophic efficiency\Compare Biomass\simNUMFun.mat')
 %%
 % sim=simGlobalF;
 % sim=simGlobal5yearsF;
@@ -195,7 +195,7 @@ leg.NumColumns=3;
 %-------------------------------------------------
 %*************************************************
 
-dat=importdata('data_lopez_anadon.xlsx');
+dat=importdata('C:\Users\ampap\OneDrive - Danmarks Tekniske Universitet\Trophic efficiency\Compare Biomass\data_lopez_anadon.xlsx');
 sim=simGlobalF;
 % integrated over depth - top 5 layers (top 60m)
 simInt=calcIntegrateGlobal(simGlobalF,simGlobalF.B , false);
