@@ -53,7 +53,7 @@ end
 p = setupNutrients_N_DOC;
 
 % Generalists:
-p = parametersAddgroup(1,p,n);
+p = parametersAddgroup(5,p,n);
 p.u0(p.ixStart(1):p.ixEnd(1)) = 1; % Initial conditions
 
 % POM:
