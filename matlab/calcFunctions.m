@@ -23,7 +23,7 @@
 %         sim.ProdNetTotal - total NPP (mgC/d)
 %
 %         sim.ProdNetAnnual - annual average NPP (mgC/m2/d)
-%         sim.ProdHTLAnnual - annual avearge HTL production (mgc/m2/d)
+%         sim.ProdHTLAnnual - annual avearge HTL production (mgC/m2/d)
 %
 function sim = calcFunctions(sim, options)
 
@@ -252,11 +252,11 @@ switch sim.p.nameModel
             sim.ChlArea = ChlArea/length(sim.t);
             sim.ChlVolume = ChlVolume/length(sim.t);
             %
-            % Global totals
+            % Global totals over the last year
             %
             calcTotal = @(u) sum(u(ix(:)).*dv(ix(:))); % mug/day
 
-            for i = 1:length(sim.t)
+            for i = 1:length(ixTime)
                 sim.Ntotal(i) = calcTotal(sim.N(i,:,:,:));
                 sim.DOCtotal(i) = calcTotal(sim.DOC(i,:,:,:)); % mugC
                 sim.Btotal(i) = 0;
@@ -284,12 +284,11 @@ switch sim.p.nameModel
         %     end
         % end
         %
-        % Annual global totals. Less accurate than calculating them via the flag
-        % "bCalcGlobalAnnual" in simulateGlobal()
+        % Annual global means:
         %
         if (~isfield(sim, 'ProdNetAnnual'))
-            sim.ProdNetAnnual = mean(sim.ProdNet,1);
-            sim.ProdHTLAnnual(i,:,:) = mean(sim.ProdHTL,1);
+            sim.ProdNetAnnual = mean(sim.ProdNet(ixTime,:,:),1);
+            sim.ProdHTLAnnual = mean(sim.ProdHTL(ixtime,:,:),1);
             %zeros(length(sim.x), length(sim.y), floor(sim.t(end)/365));
             %for i = 1:sim.t(end)/365
             %    ixTime = sim.t>365*(i-1) & sim.t<=365*i;
