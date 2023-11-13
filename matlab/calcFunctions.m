@@ -288,7 +288,7 @@ switch sim.p.nameModel
         %
         if (~isfield(sim, 'ProdNetAnnual'))
             sim.ProdNetAnnual = mean(sim.ProdNet(ixTime,:,:),1);
-            sim.ProdHTLAnnual = mean(sim.ProdHTL(ixtime,:,:),1);
+            sim.ProdHTLAnnual = mean(sim.ProdHTL(ixTime,:,:),1);
             %zeros(length(sim.x), length(sim.y), floor(sim.t(end)/365));
             %for i = 1:sim.t(end)/365
             %    ixTime = sim.t>365*(i-1) & sim.t<=365*i;
