@@ -99,6 +99,7 @@ colorbar('ticks',-2:3)
 %caxis([-1 2])
 ylim(ylimit)
 xlim(xlimit)
+clim([-2,3])
 set(gca,'XTickLabel','')
 
 if isfield(sim,'Si')
@@ -115,6 +116,7 @@ if isfield(sim,'Si')
     %caxis([0.1 1000])
     ylim(ylimit)
     xlim(xlimit)
+    clim([-2,3])
     set(gca,'XTickLabel','')
 end
 
@@ -149,6 +151,7 @@ for i = 1:sim.p.nGroups
     colorbar('ticks',-2:3,'limits',[-2 3])
     ylim(ylimit)
     xlim(xlimit)
+    clim([-2,3])
     if i ~= sim.p.nGroups
         set(gca,'XTickLabel','')
     else
