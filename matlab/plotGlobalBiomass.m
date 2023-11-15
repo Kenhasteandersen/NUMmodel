@@ -4,7 +4,7 @@ arguments
     sProjection string = 'fast';
 end
 %
-% Calculate pico-nano-micro in each water column and average over the year (assuming monthly data):
+% Calculate pico-nano-micro in each water column and average over the year:
 %
 if ~isfield(sim,'Bpnm')
     sim.Bpnm = zeros(length(sim.x), length(sim.y), 3);

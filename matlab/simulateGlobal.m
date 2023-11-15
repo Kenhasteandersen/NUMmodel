@@ -80,11 +80,16 @@ else
         load(p.pathN0, 'N');
         u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
     else
-        u(:, ixN) = 150*ones(nb,1);
+        u(:, ixN) = p.u0(p.idxN)*ones(nb,1);
     end
     u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
     if bSilicate
-        u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+        if exist(strcat(p.pathSi0,'.mat'),'file')
+            load(p.pathSi0, 'Si');
+            u(:, ixSi) = gridToMatrix(Si, [], p.pathBoxes, p.pathGrid);
+        else
+            u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+        end
     end
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
 end
@@ -139,14 +144,14 @@ if ~isempty(idxSinking)
             if ~isempty(idxGrid)
                 % Run through all sinking state variables
                 for l = 1:length(idxSinking)
-                    % Top level loses mass
-                    Asink{l}(idxGrid(1),idxGrid(1)) = 1-min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(1));
-                    for k = 2:length(idxGrid)
+                    for k = 1:length(idxGrid)
                         flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(k));
-                        % Other levels loses mass:
+                        % Loss of mass ...
                         Asink{l}(idxGrid(k),idxGrid(k)) = 1-flx;
-                        % ... and receives mass from the level above
-                        Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
+                        % Gain from above
+                        if (k > 1)
+                            Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
+                        end
                     end
                     if p.BC_POMclosed
                         Asink{l}(idxGrid(k),idxGrid(k)) = 1; % Closed BC; no loss of mass at the bottom
@@ -170,6 +175,17 @@ for i = 1:size(xx,1)
             ixBottom = [ixBottom xx(i,j,idx)];
             dzBottom = [dzBottom sim.dznom(idx)];
         end
+    end
+end
+% Set BCvalue:
+BCvalue = p.BCvalue;
+if size(BCvalue,1)==1
+    BCvalue = ones(length(ixBottom),1)*BCvalue;
+end
+% If BCvalue == -1 then use the bottom value from the initial conditions:
+for i = 1:size(BCvalue,2)
+    if BCvalue(1,i)==-1
+        BCvalue(:,i) = u(ixBottom,i)';
     end
 end
 %%
@@ -242,6 +258,8 @@ for i=1:simtime
     L = L0(:,mod(i,365/p.dtTransport)+1);
     dt = p.dt;
 
+    %N = calc_tot_n(p,u);
+
     if ~isempty(gcp('nocreate'))
         parfor k = 1:nb
             %
@@ -251,15 +269,14 @@ for i=1:simtime
                 u(k,:), L(k), T(k), dtTransport, dt);
         end
     else
-        for k = 1:nb %[4257        8663       13019       17318       21504]
+        for k = 1:nb
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
                 u(k,:),L(k), T(k), dtTransport, dt);
-            %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
-            % If we use ode23:
-            %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
-            %u(k,:) = utmp(end,:);
         end
     end
+
+    %calc_tot_n(p,u)/N - 1
+    %N = calc_tot_n(p,u);
     %
     % Sinking:
     %
@@ -268,6 +285,8 @@ for i=1:simtime
             u(:,idxSinking(l)) = Asink{l}*u(:,idxSinking(l));
         end
     end
+    %calc_tot_n(p,u)/N - 1
+    %N = calc_tot_n(p,u);
     %
     % Bottom BC for nutrient fields. The boundary allows diffusion from the
     % bottom into the cell. The diffusivity is controlled by p.BCdiffusion
@@ -276,14 +295,19 @@ for i=1:simtime
     %
     for k = 1:p.nNutrients
         u(ixBottom, k) = u(ixBottom, k) +  p.dtTransport* ...
-        p.BCdiffusion(k)./dzBottom'.*(p.BCvalue(k)-u(ixBottom,k));
+            p.BCdiffusion(k)./dzBottom'.*(BCvalue(:,k)-u(ixBottom,k));
     end
+    %calc_tot_n(p,u)/N - 1
+    %N = calc_tot_n(p,u);
     %
     % Transport
     %
     if p.bTransport
         u =  Aimp*(Aexp*u);
     end
+    %calc_tot_n(p,u)/N - 1
+    %N = calc_tot_n(p,u);
+    %fprintf('---\n')
     %
     % Save timeseries in grid format
     %
@@ -351,4 +375,6 @@ if bCalcAnnualAverages
     tmp = single(matrixToGrid(sim.BmicroAnnualMean, [], p.pathBoxes, p.pathGrid));
     sim.BmicroAnnualMean = squeeze(tmp(:,:,1));
 end
-end
+
+%%%%%%%%%%%%%%%%%%%%%%
+
