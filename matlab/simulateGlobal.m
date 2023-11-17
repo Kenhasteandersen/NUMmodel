@@ -93,6 +93,7 @@ else
     end
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
 end
+sim = load(p.pathGrid,'x','y','z','dznom','bathy'); % Get grid
 %
 % Load temperature:
 %
@@ -105,7 +106,15 @@ end
 % Load Light:
 %
 if p.bUse_parday_light
-    load 'Transport Matrix/parday';
+    if exist(p.pathPARday,'file')
+        load(p.pathPARday);
+        for i = 1:length(sim.z)
+            parday(:,:,i,:) = parday(:,:,1,:);
+        end
+        parday = gridToMatrix(parday, [], p.pathBoxes, p.pathGrid);
+    else
+        error('PARday file does not exist. Set p.bUse_parday_light = false');
+    end
 end
 L0 = zeros(nb,365/p.dtTransport );
 for i = 1:730
@@ -119,7 +128,6 @@ end
 %
 % Calculate sinking matrices. Uses an explicit first-order upwind scheme:
 %
-sim = load(p.pathGrid,'x','y','z','dznom','bathy');
 % Get sinking velocities from libNUMmodel:
 p.velocity = 0*p.m;
 p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);

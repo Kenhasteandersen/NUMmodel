@@ -41,7 +41,8 @@ if (nargin==1 || nargin==0 || nTMmodel == 1)
     p.pathTemp      = strcat(path,'/../TMs/MITgcm_2.8deg/BiogeochemData/Theta_bc.mat'); 
     p.pathN0        = strcat(path,'/../TMs/MITgcm_2.8deg/N0');
     p.pathSi0       = strcat(path,'/../TMs/MITgcm_2.8deg/Si0');
-    p.pathInit      = strcat(sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0)));
+    p.pathInit      = strcat(sprintf('TMs/globalInitMITgcm_%02i',length(p.u0)));
+    p.pathPARday    = strcat(path,'/../TMs/MITgcm_2.8deg/parday.mat');
     
     p.dt = 0.1; % For Euler time stepping
     p.dtTransport = 0.5; % The TM time step (in units of days)
