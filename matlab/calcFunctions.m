@@ -169,7 +169,6 @@ switch sim.p.nameModel
             ChlArea = 0*dx;
             ChlVolume = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z));
 
-            nTime = length(sim.t);
             nX = length(sim.x);
             nY = length(sim.y);
             nZ = length(sim.z);
@@ -221,6 +220,7 @@ switch sim.p.nameModel
                                 Bpicotmp = Bpicotmp + Bpico1*dz(i,j,k); % gC/m2
                                 Bnanotmp = Bnanotmp + Bnano1*dz(i,j,k);
                                 Bmicrotmp = Bmicrotmp + Bmicro1*dz(i,j,k);
+                                %Bphytotmp = Bphytotmp + calcBphyto()
                                 % Chl:
                                 rates = getRates(p, u, L(iTime,i,j,k), T(iTime,i,j,k), sLibName);
                                 tmp =  calcChl( squeeze(B(iTime,i,j,k,:)), rates, L(iTime,i,j,k)) ;%/ 1000; % Convert to mg
@@ -301,5 +301,11 @@ switch sim.p.nameModel
 
     otherwise
         disp('Model unknown; functions not calculated');
+
+end
+
+function Bphyto = calcBphyto(B, rates) % Calculate the phytoplankton biomass
+    Bphyto = sum( B .* rates.jLreal./(rates.jLreal+rates.jFreal+rates.JDOCreal) );
+end
 
 end
