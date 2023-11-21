@@ -3,7 +3,7 @@ module NUMmodel_wrap
   use NUMmodel, only:  nGrid, idxB, nGrid, &
        setupGeneralistsSimpleOnly, setupGeneralistsSimple_two, &
        setupGeneralistsSimplePOM, &
-       setupGeneralistsOnly,setupGeneralistsPOM, setupNUMmodel2, &
+       setupGeneralistsOnly,setupGeneralistsPOM,  &
        setupDiatomsOnly, &
        setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
@@ -54,13 +54,6 @@ contains
     character(c_char), dimension(*) :: errorstr
     call setupGeneralistsSimpleOnly(n,errorio, errorstr)
   end subroutine f_setupGeneralistsSimpleOnly
-
-  subroutine f_setupNUMmodel2(n, errorio, errorstr) bind(c)
-    integer(c_int), intent(in), value :: n
-    logical(c_bool), intent(out) :: errorio
-    character(c_char), dimension(*) :: errorstr
-    call setupNUMmodel2(n,errorio, errorstr)
-  end subroutine f_setupNUMmodel2
  
   subroutine f_setupDiatomsOnly(n, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n

@@ -274,6 +274,7 @@ contains
    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
      IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
+   IF ( errorio ) RETURN 
 
    do iCopepod = 1, size(mAdultPassive)
       call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod),errorio,errorstr) ! add copepod
@@ -793,7 +794,7 @@ contains
     if (bQuadraticHTL) then
        do iGroup = 1, nGroups
          group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) &
-            * u(ixStart(iGroup):ixEnd(iGroup))
+            * upositive(ixStart(iGroup):ixEnd(iGroup))
        end do
      end if
     !
@@ -843,11 +844,11 @@ contains
                ix = ixStart(iGroup)+i-1
                if (thetaPOM(ix) .ne. 0) then
                   j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
-                  dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*u(ix) 
+                  dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*upositive(ix) 
                end if
                ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
-                 (1-fracHTL_to_N) * u(ix) * group(iGroup)%spec%mortHTL(i)
+                 (1-fracHTL_to_N) * upositive(ix) * group(iGroup)%spec%mortHTL(i)
             end do
          end if
       end do
@@ -867,7 +868,7 @@ contains
     do iGroup = 1, nGroups
       if (iGroup .ne. idxPOM) then
         dudt(idxN) = dudt(idxN) + &
-            fracHTL_to_N * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
+            fracHTL_to_N * sum( upositive(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
       end if
     end do
     !
@@ -1030,16 +1031,13 @@ contains
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
     real(dp) :: dudt(nGrid)
-    integer:: i, iEnd
+    integer:: i
 
-    iEnd = floor(tEnd/dt)
-
-    do i=1, iEnd
+    do i = 1, floor(tEnd/dt)
        call calcDerivatives(u, L, T, dt, dudt)
        u = u + dudt*dt
     end do
   end subroutine simulateEuler
-
 
   !=========================================
   ! Diagnostic functions
@@ -1192,14 +1190,15 @@ subroutine getBalance(u, dudt, Cbalance,Nbalance,SiBalance)
    Cbalance = dudt(idxDOC) + sum( dudt(idxB:nGrid) )       + Clost
    Nbalance = dudt(idxN)   + sum( dudt(idxB:nGrid) )/rhoCN + Nlost 
    ! Only diatom groups for silicate
-   Sibalance = dudt(idxSi) + SiLost ! rhoC:Si hardcoded here
+   Sibalance = dudt(idxSi) + SiLost 
+
    do iGroup = 1, nGroups
       select type ( spec => group(iGroup)%spec )
          type is (spectrumDiatoms)
-            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0 ! rhoC:Si hardcoded here
             
          type is (spectrumDiatoms_simple)
-            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0 ! rhoC:Si hardcoded here
       end select
    end do
    !
@@ -1207,7 +1206,12 @@ subroutine getBalance(u, dudt, Cbalance,Nbalance,SiBalance)
    !
    Cbalance = Cbalance / u(idxDOC)
    Nbalance = Nbalance / u(idxN)
-   Sibalance = Sibalance / u(idxSi)
+   if (nNutrients .gt. 2) then
+     Sibalance = Sibalance / u(idxSi)
+   else
+     Sibalance = 0.d0
+   endif
+
 end subroutine getBalance
 !
 ! Return what is lost (or gained) of carbon, nutrients and silicate from the system:
@@ -1217,6 +1221,7 @@ subroutine getLost(u, Clost, Nlost, SiLost)
    real(dp), intent(out):: Clost, Nlost, SiLost
    integer:: iGroup
    real(dp) :: HTLloss, POMloss
+   real(dp),parameter :: rhoCSi = 3.4d0 ! Hard coded here
 
    Clost = 0.d0
    Nlost = 0.d0
@@ -1232,17 +1237,17 @@ subroutine getLost(u, Clost, Nlost, SiLost)
       ! Deal with higher trophic level losses and POM:
       !
       HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
+      POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
+
       if (idxPOM .eq. 0) then
          !
          ! If there is no POM, then POM is lost from the system:
          !
          Nlost = Nlost + (1-fracHTL_to_N) * HTLloss/rhoCN ! The part of POM which is not respired
          Clost = Clost +  HTLloss  ! Both respiration losses and POM losses
-
-         POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
       
          Nlost = Nlost + POMloss / rhoCN
-         Clost = Clost + POMloss
+         Clost = Clost + POMloss   
       else
          !
          ! If there is POM then just account for the respiration
@@ -1257,16 +1262,17 @@ subroutine getLost(u, Clost, Nlost, SiLost)
             ! Consumed silicate is considered lost:
             SiLost = SiLost + ( &
                sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
-               + HTLloss ) / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + HTLloss & ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + POMloss) / rhoCSi ! POM from diatoms is lost:
             
          type is (spectrumDiatoms_simple)
            ! NOT IMPLEMENTED
             SiLost = SiLost + ( &
                sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
-               + HTLloss ) / 3.4d0 ! All HTL silicate is lost. rhoCSi is hard-coded here
-
+               + HTLloss & ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + POMloss) / rhoCSi ! POM from diatoms is lost:
+      
       end select
-
    end do
 end subroutine getLost
 

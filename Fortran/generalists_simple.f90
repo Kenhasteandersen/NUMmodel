@@ -26,7 +26,6 @@ module generalists_simple
   public printRatesGeneralistsSimple
   public initGeneralistsSimpleX
 
-
 contains
 
  subroutine initGeneralistsSimple(this, n,errorio,errorstr)
@@ -37,7 +36,6 @@ contains
     character(c_char), dimension(*), intent(out) :: errorstr
     integer:: i
     real(dp), parameter:: rho = 0.4*1d6*1d-12
-    real(dp) :: ii
     real(dp) :: mMinGeneralist, mMaxGeneralist
     real(dp) :: alphaN, rNstar  
     real(dp) :: alphaL, rLstar
@@ -50,6 +48,7 @@ contains
     print*, 'Loading parameter for generalist simple from ', inputfile, ':'
     call read_input(inputfile,'generalists_simple','mMinGeneralist',mMinGeneralist,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
+    call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     call read_input(inputfile,'generalists_simple','alphaN',alphaN,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','rNstar',rNstar,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','alphaL',alphaL,errorio,errorstr)
@@ -67,9 +66,6 @@ contains
     call read_input(inputfile,'generalists_simple','sigma',this%sigma,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','epsilonF',this%epsilonF,errorio,errorstr)
     
-    
-    
-    call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     allocate(this%JFreal(n))
 
     this%r = (3./(4.*pi)*this%m/rho)**onethird

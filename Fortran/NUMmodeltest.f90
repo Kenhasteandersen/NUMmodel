@@ -33,43 +33,53 @@ program NUMmodeltest
    !               2 gens cop POM   mAdult     
    !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /), (/1.d0 /))
    !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /), (/1.d0 /))
-   !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /))
+   !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /), (/1.d0 /))
+  !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /), errorio, errorstr)
 
    !              gen-diat-cop      POM      mAdult    
   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
-  !call setupGeneralistssimpleOnly(10)
+  call setupGeneralistssimpleOnly(5,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
-  !call setupDiatomsOnly(10)
+  !call setupDiatomsOnly(10,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
-  !call setHTL(0.1d0, 0.1d0, .false., .false.)
-  !call setupGeneralistsOnly(5)
-  !call setupGeneralistsDiatoms_simple(10)
-  !call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
-  !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
-  !call setupGeneralistsDiatoms(10)
-  !call setupGeneric( (/0.1d0/) )
-  !call setupGeneralistsDiatoms(10)
-  !call setupNUMmodel(2,2,2, (/1.d0 /), (/10.d0/) )
-  !myout=1.0d0
   
-  !call setupNUMmodel2(2,myout,mystr) 
+  !call setupGeneralistsOnly(5,errorio,errorstr)
+  !call setupGeneralistsPOM(5,1, errorio, errorstr)
+  !call setupGeneralistsDiatoms_simple(10)
+  !call setupNUMmodel(5,5,1, (/1.d0 /), (/10.d0/) ,errorio,errorstr)
+  !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
+  !call setupGeneralistsDiatoms(10, errorio, errorstr)
+  !call setupGeneric( (/1.d0 /), errorio, errorstr )
+  !call setupGeneralistsDiatoms(10, errorio, errorstr)
+  !call setupNUMmodelNOPOM(5,5,1, (/1.d0 /), (/10.d0/),errorio,errorstr)
+
+  if (errorio .eqv. .false.) then
+    print*, 'Parameters loaded correctly'
+  else
+    print*, 'Error loading parameter ', errorstr
+  end if
+
   !call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
   allocate(dudt(nGrid))
-  u00(idxN) = 50.d0
+  u00(idxN) = 150.d0
   u00(idxDOC) = 10.d0
-  u00(idxSi) = 10.d0
+  !u00(idxSi) = 10.d0
   do i = idxB, nGrid
-     u00(i) = 10.0d0! + 0.1*(i-2)
+     u00(i) = 10 + 0.1*(i-2)
   end do
   dudt = 0.d0
   print*, 'u00 is', u00
 
-  call simulateEuler(u00, 60.d0, 300.d0, 0.4d0, 0.1d0)
+  !call getSinking(u00)
+  !write(*,*) u00
+  !u00(8:12) = 5.d0
+
+  !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
   !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
@@ -86,11 +96,8 @@ program NUMmodeltest
   !      write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
   !end select
   
-  
-  !call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
-  !write(*,*) dudt
-  !call calcDerivatives(u00, 100.d0, 10.d0, 0.0d0, dudt)
-  !write(*,*) dudt
+  call calcDerivatives(u00, 30.d0, 10.d0, 0.0d0, dudt)
+  call printRates()
   !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
   !write(*,*) 'nbutrients',nNutrients
@@ -106,7 +113,7 @@ program NUMmodeltest
 
  ! call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
   !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
-  !write(*,*) u00
+  write(*,*) dudt
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()
   !!$  u0=u00
