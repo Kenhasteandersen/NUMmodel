@@ -40,9 +40,9 @@ switch sim.p.nameModel
             end
             rates = getRates(p, u, mean(sim.L), sim.T );
             ixUni = findIxUnicellular(sim.p);
-            
+
             if ~sum(ismember(p.typeGroups,100))
-                % 
+                %
                 % If pom is not present:
                 %
                 B = squeeze(0.5*sum(sim.B(iTime:iTime+1,:))); % Interpolate B
@@ -57,8 +57,8 @@ switch sim.p.nameModel
                 %
                 ixPOM = p.ixStart(p.ixPOM):p.ixEnd(p.ixPOM);
                 loss = loss + p.velocity(ixPOM).*u(ixPOM)/p.widthProductiveLayer /rhoCN*dt(iTime);
-    %ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
-     %           loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);
+                %ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
+                %           loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);
             end
 
             % Losses from diffusion:
@@ -72,7 +72,7 @@ switch sim.p.nameModel
         %
         accumulation = (sim.N(end)+sum(sim.B(end,:)/rhoCN)) - ...
             (sim.N(1)+sum(sim.B(1,:)/rhoCN));
-        
+
         dNdt = (accumulation - gains + lossHTL + loss)/1000*p.widthProductiveLayer/sim.t(end)*365; %gN/m2/yr
         dNdt_per_N = (accumulation - gains + lossHTL+loss) / sim.N(end)/sim.t(end)*365; % Fraction per year
         lossHTL = lossHTL/1000*p.widthProductiveLayer/sim.t(end)*365;
@@ -103,14 +103,19 @@ switch sim.p.nameModel
                             %u = [sim.N(j,k,iDepth,iTime), sim.DOC(j,k,iDepth,iTime), ...
                             %    squeeze(sim.B(j,k,iDepth,:,iTime))' ];
                             %rates = getRates(p, u, sim.L(j,k,iDepth,iTime), sim.T(j,k,iDepth,iTime) );
-                            % Losses from HTL:
-                            lossHTL(iTime) = lossHTL(iTime) + ...
-                                sum((1-fracHTL_to_N)*rates.mortHTL.*squeeze(sim.B(iTime,j,k,iDepth,:)))/rhoCN ...
-                                * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
-                            % Quadratic losses:
-                            losses(iTime) = losses(iTime) + ...
-                                (1-remin2)*sum(rates.mort2.*squeeze(sim.B(iTime,j,k,iDepth,:)))/rhoCN ...
-                                * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
+                            if isfield(p,'ixPOM')
+                                lossHTL(iTime) = 0;
+                                losses(iTime) = 0;
+                            else
+                                % Losses from HTL:
+                                lossHTL(iTime) = lossHTL(iTime) + ...
+                                    sum((1-fracHTL_to_N)*rates.mortHTL.*squeeze(sim.B(iTime,j,k,iDepth,:)))/rhoCN ...
+                                    * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
+                                % Quadratic losses:
+                                losses(iTime) = losses(iTime) + ...
+                                    (1-remin2)*sum(rates.mort2.*squeeze(sim.B(iTime,j,k,iDepth,:)))/rhoCN ...
+                                    * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
+                            end
                         end
                     end
                 end

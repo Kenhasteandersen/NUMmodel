@@ -3,6 +3,7 @@
 %
 % In:
 %  lat, lon - latitude and longitude
+%  sim
 %
 % Out:
 %  structure with fields 'x" and "y" and closest to lat and lon. Also includes the

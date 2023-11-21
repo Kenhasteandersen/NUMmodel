@@ -6,7 +6,7 @@ function bSuccess = testFunction(sEvaluation, value)
 sDescription = sEvaluation;
 %end
 
-
+fprintf('-----------------------------------\n');
 fprintf('Testing %s ... ', sDescription);
 
 try

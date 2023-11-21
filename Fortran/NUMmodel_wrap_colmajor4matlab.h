@@ -35,8 +35,6 @@ void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, cons
 void f_setupgendiatcope(const int n,const int nCopepod, const int nPOM, const int nCopepods, 
                                         const double mAdult[], bool *Clost, char *errorstr);
 
-//void f_setupgeneric_csp(const int nCopepods, const double mAdult[]);
-
 void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
 
 void f_setmorthtl(const double mortHTL[]);

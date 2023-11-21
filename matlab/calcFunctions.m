@@ -1,5 +1,6 @@
 %
-% Calculate the functions from any simulation.
+% Calculate the functions from any simulation. Only the last year is
+% calculated for watercolumn and global simulations.
 %
 % In:
 %   sim - simulation structure
@@ -12,6 +13,7 @@
 %         sim.ProdHTL   - amount of carbon extracted from the HTL mortality
 %         sim.Bpico, sim.Bnano, sim.Bmicro - pico, micro, and nano plankton
 %                         biomasses (mgC/m2)
+%         sim.Bplankton - All planktion, except (dead) POM (mgC/m2)
 %         sim.ChlArea (mgChl/m2)
 %         
 %         For global simulations additional fields are:
@@ -21,7 +23,7 @@
 %         sim.ProdNetTotal - total NPP (mgC/d)
 %
 %         sim.ProdNetAnnual - annual average NPP (mgC/m2/d)
-%         sim.ProdHTLAnnual - annual avearge HTL production (mgc/m2/d)
+%         sim.ProdHTLAnnual - annual avearge HTL production (mgC/m2/d)
 %
 function sim = calcFunctions(sim, options)
 
@@ -152,6 +154,7 @@ switch sim.p.nameModel
         
         if ~isfield(sim,'ProdGross')
             sLibName = loadNUMmodelLibrary();
+            ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
             % Get grid volumes:
             load(sim.p.pathGrid,'dv','dz','dx','dy');
             ix = ~isnan(sim.N(1,:,:,1)); % Find all relevant grid cells
@@ -166,7 +169,6 @@ switch sim.p.nameModel
             ChlArea = 0*dx;
             ChlVolume = zeros(length(sim.t),length(sim.x), length(sim.y), length(sim.z));
 
-            nTime = length(sim.t);
             nX = length(sim.x);
             nY = length(sim.y);
             nZ = length(sim.z);
@@ -185,7 +187,7 @@ switch sim.p.nameModel
             T = sim.T;
             p = sim.p;
             
-            for iTime = 1:nTime
+            for iTime = ixTime
                 for i = 1:nX
                     for j = 1:nY
                         ProdGrosstmp = 0;
@@ -218,6 +220,7 @@ switch sim.p.nameModel
                                 Bpicotmp = Bpicotmp + Bpico1*dz(i,j,k); % gC/m2
                                 Bnanotmp = Bnanotmp + Bnano1*dz(i,j,k);
                                 Bmicrotmp = Bmicrotmp + Bmicro1*dz(i,j,k);
+                                %Bphytotmp = Bphytotmp + calcBphyto()
                                 % Chl:
                                 rates = getRates(p, u, L(iTime,i,j,k), T(iTime,i,j,k), sLibName);
                                 tmp =  calcChl( squeeze(B(iTime,i,j,k,:)), rates, L(iTime,i,j,k)) ;%/ 1000; % Convert to mg
@@ -249,11 +252,11 @@ switch sim.p.nameModel
             sim.ChlArea = ChlArea/length(sim.t);
             sim.ChlVolume = ChlVolume/length(sim.t);
             %
-            % Global totals
+            % Global totals over the last year
             %
             calcTotal = @(u) sum(u(ix(:)).*dv(ix(:))); % mug/day
 
-            for i = 1:length(sim.t)
+            for i = 1:length(ixTime)
                 sim.Ntotal(i) = calcTotal(sim.N(i,:,:,:));
                 sim.DOCtotal(i) = calcTotal(sim.DOC(i,:,:,:)); % mugC
                 sim.Btotal(i) = 0;
@@ -281,12 +284,11 @@ switch sim.p.nameModel
         %     end
         % end
         %
-        % Annual global totals. Less accurate than calculating them via the flag
-        % "bCalcGlobalAnnual" in simulateGlobal()
+        % Annual global means:
         %
         if (~isfield(sim, 'ProdNetAnnual'))
-            sim.ProdNetAnnual = mean(sim.ProdNet,1);
-            sim.ProdHTLAnnual(i,:,:) = mean(sim.ProdHTL,1);
+            sim.ProdNetAnnual = mean(sim.ProdNet(ixTime,:,:),1);
+            sim.ProdHTLAnnual = mean(sim.ProdHTL(ixTime,:,:),1);
             %zeros(length(sim.x), length(sim.y), floor(sim.t(end)/365));
             %for i = 1:sim.t(end)/365
             %    ixTime = sim.t>365*(i-1) & sim.t<=365*i;
@@ -299,5 +301,11 @@ switch sim.p.nameModel
 
     otherwise
         disp('Model unknown; functions not calculated');
+
+end
+
+function Bphyto = calcBphyto(B, rates) % Calculate the phytoplankton biomass
+    Bphyto = sum( B .* rates.jLreal./(rates.jLreal+rates.jFreal+rates.JDOCreal) );
+end
 
 end

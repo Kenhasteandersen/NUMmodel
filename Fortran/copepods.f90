@@ -38,7 +38,6 @@ contains
     real(dp), intent(in):: mAdult
     logical(1), intent(out):: errorio 
     character(c_char), dimension(*), intent(out) :: errorstr
-    integer:: i
     real(dp) :: alphaF, q, h, hExponent, AdultOffspring
     real(dp) :: vulnerability
     
@@ -55,12 +54,18 @@ contains
        stop
     end if
     
-    print*, 'Loading parameter for copepods from ', inputfile, ':'
+    print*, 'Loading parameter for ',this_listname,' from ', inputfile, ':'
+
+    !
+    ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
+    !
+    call read_input(inputfile,this_listname,'AdultOffspring',AdultOffspring,errorio,errorstr)
+    call this%initMulticellular(n, mAdult/AdultOffspring, mAdult)
+
     call read_input(inputfile,this_listname,'alphaF',alphaF,errorio,errorstr)
     call read_input(inputfile,this_listname,'q',q,errorio,errorstr)
     call read_input(inputfile,this_listname,'h',h,errorio,errorstr)
     call read_input(inputfile,this_listname,'hExponent',hExponent,errorio,errorstr)
-    call read_input(inputfile,this_listname,'AdultOffspring',AdultOffspring,errorio,errorstr)
     call read_input(inputfile,this_listname,'vulnerability',vulnerability,errorio,errorstr)
     
     call read_input(inputfile,this_listname,'epsilonR',epsilonR,errorio,errorstr)
@@ -72,10 +77,7 @@ contains
     call read_input(inputfile,this_listname,'beta',this%beta,errorio,errorstr)
     call read_input(inputfile,this_listname,'sigma',this%sigma,errorio,errorstr)
     this%DiatomsPreference=DiatomsPreference
-    !
-    ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
-    !
-    call this%initMulticellular(n, mAdult/AdultOffspring, mAdult)
+    
 
     allocate(this%gamma(n))
     allocate(this%g(n))
@@ -110,6 +112,7 @@ contains
        this%Jresptot(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i)
        ! Available energy:
        nu = this%JF(i) - this%Jresptot(i)
+       !this%Jresptot(i) = this%Jresptot(i) - min(0.d0, nu) ! Limit respiration to the energy available
        ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
        ! Starvation:
@@ -131,10 +134,10 @@ contains
     b = epsilonR * this%g(this%n) ! Birth rate
     ! Production of POM:
     this%jPOM = &
-          (1-this%epsilonF)*this%JF/(this%m * this%epsilonF) & ! Unassimilated food (fecal pellets)
-        + this%mortStarve                            ! Copepods dead from starvation
+          (1-this%epsilonF)*this%JF/(this%m * this%epsilonF) !& ! Unassimilated food (fecal pellets)
+       ! + this%mortStarve                            ! Copepods dead from starvation are not counted here, because
+                                                      ! the starvation is already respired
     this%jPOM(this%n) = this%jPOM(this%n) + (1.d0-epsilonR)*this%g(this%n) ! Lost reproductive flux
-  
     !
     ! Assemble derivatives:
     !

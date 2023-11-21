@@ -46,6 +46,7 @@ module diatoms_simple
        
        print*, 'Loading parameter for diatoms simple from ', inputfile, ':'
        call read_input(inputfile,'diatoms_simple','mMin',mMin,errorio,errorstr)
+       call this%initUnicellular(n, mMin, mMax)
        call read_input(inputfile,'diatoms_simple','rhoCSi',rhoCSi,errorio,errorstr)
        call read_input(inputfile,'diatoms_simple','v',v,errorio,errorstr)
        call read_input(inputfile,'diatoms_simple','epsilonL',epsilonL,errorio,errorstr)
@@ -62,7 +63,7 @@ module diatoms_simple
        call read_input(inputfile,'diatoms_simple','remin2',remin2,errorio,errorstr)
        call read_input(inputfile,'diatoms_simple','palatability',palatability,errorio,errorstr)
       
-      call this%initUnicellular(n, mMin, mMax)
+      
       allocate(this%JSi(this%n))
       !
       ! Radius:

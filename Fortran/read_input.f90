@@ -106,7 +106,7 @@ module read_input_module
          
             IF ( trim(key) == trim(keyword) ) then
               read(val,*) keyval
-              print*, '    ', trim(keyword), '= ', keyval
+              !print*, '    ', trim(keyword), '= ', keyval
               strfind=.true.
             END IF
            END IF

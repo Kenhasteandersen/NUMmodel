@@ -1,3 +1,4 @@
+
 %
 % Simulate the chemostat.
 % In:
@@ -79,19 +80,6 @@ if options.bCalculateNgain
     sim.Ngain=u(:,end); % N gained from the deep minus the losses
     u=u(:,1:p.n);
 end
-%
-% Enforce minimum concentration
-%
-for k = 1:size(u,1)
-    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
-end
-%
-% Enforce minimum concentration
-%
-for k = 1:size(u,1)
-    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
-end
-
 
 %
 % Assemble result:
@@ -126,7 +114,9 @@ if options.bCalculateNgain
         (p.u0(p.idxN)+sum(p.u0(p.idxB:end))/rhoCN + ...
         sim.Ngain(end)))/ t(end); % Variation of Nitrogen per day in the Chemostat layer
 end
-
+%
+% Get the balance of the derivative:
+%
 [sim.Cbalance,sim.Nbalance,sim.Sibalance] = getBalance(sim.u(end,:), mean(sim.L), sim.T); % in units per day
 
 %

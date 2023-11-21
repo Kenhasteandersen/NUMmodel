@@ -47,6 +47,7 @@ module diatoms
        print*, 'Loading parameter for diatoms from ', inputfile, ':'
        call read_input(inputfile,'diatoms','mMinDiatom',mMinDiatom,errorio,errorstr)
        call read_input(inputfile,'diatoms','mMaxDiatom',mMaxDiatom,errorio,errorstr)
+       call this%initUnicellular(n, mMinDiatom, mMaxDiatom)
        call read_input(inputfile,'diatoms','rhoCSi',rhoCSi,errorio,errorstr)
        call read_input(inputfile,'diatoms','v',v,errorio,errorstr)
        call read_input(inputfile,'diatoms','epsilonL',epsilonL,errorio,errorstr)
@@ -67,8 +68,6 @@ module diatoms
        call read_input(inputfile,'diatoms','remin2',remin2,errorio,errorstr)
        call read_input(inputfile,'diatoms','palatability',palatability,errorio,errorstr)
        
-       
-       call this%initUnicellular(n, mMinDiatom, mMaxDiatom)
        allocate(this%JSi(this%n))
        allocate(this%JSireal(this%n))
        !

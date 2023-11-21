@@ -207,7 +207,7 @@
   alphaF = 0.011                ! Clearance rate coefficient
   q = 0.75                      ! Exponent of clearance rate
   h = 1.37                      ! Coefficient for maximum ingestion rate
-  hExponent = 0.75              ! Exponent for maximum ingestions rate
+  hExponent = 0.75              ! Exponent for maximum ingestion rate
 
 ! kBasal  is a factor for basal metabolism {0.006}. This value represents basal metabolism at 
 ! starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
@@ -223,7 +223,7 @@
    
   AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
   vulnerability = 1.            ! Active copepods have full risk of predation
-  DiatomsPreference = 1.0       ! Feeding preference on diatoms (Less feeding on diatoms)
+  DiatomsPreference = 1.0       ! Feeding preference on diatoms
 
 !***********************************************************************
 ! COPEPODS PASSIVE INPUT PARAMETERS
@@ -237,7 +237,7 @@
    alphaF = 0.0052               ! Clearance rate coefficient
    q = 0.75                      ! Exponent of clearance rate
    h = 0.4                       ! Coefficient for maximum ingestion rate
-   hExponent = 0.75              ! Exponent for maximum ingestions rate
+   hExponent = 0.75              ! Exponent for maximum ingestion rate
 
 ! kBasal  is a factor for basal metabolism {0.006}. This value represents basal metabolism at 
 ! starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
@@ -258,8 +258,8 @@
 !***********************************************************************
 ! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS
 !*********************************************************************** 
-  mMin = 1d-9                   ! Smallest POM mass
+  mMin = 1.d-9                  ! Smallest POM mass
   remin = 0.07d0                ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
-  palatability = 1.0d0          ! Preference of other groups for eating POM
+  palatability = 0.1d0          ! Preference of other groups for eating POM
 
   

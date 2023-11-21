@@ -91,7 +91,7 @@ end
 versionTMcolumnCurrent = 2; % Current version of the water column
 if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extract water column if the loaded one is too old
     versionTMcolumn = versionTMcolumnCurrent;
-    fprintf('-> Extracting water column from transport matrix')
+    fprintf('-> Extracting water column from transport matrix\n')
     %
     % Check that transport matrix files exist:
     %
@@ -190,7 +190,7 @@ else
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
     u = u(idxGrid,:); % Use only the specific water column
 end
-p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
+%p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
 if bSilicate
     p.u0(ixSi) = u(nGrid,ixSi);
 end
@@ -265,6 +265,9 @@ for i = 1:simtime
         u(k,:) = calllib(sLibName, 'f_simulateeuler', ...
             u(k,:),L(k), T(k), dtTransport, dt);
     end
+
+    %if sum(u(:)<0)
+    %    fprintf("Time step %i, #i\n", [i, sum(u(:)<0)]);
     %end
 
     if any(isnan(u))
@@ -280,19 +283,24 @@ for i = 1:simtime
         u(:,j) = squeeze(Asink(j,:,:)) * u(:,j);
     end
     % Bottom BC for nutrients:
-    u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
-        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+    u(end, 1:p.nNutrients) = u(end, 1:p.nNutrients) +  ...
+        p.BCdiffusion(1:p.nNutrients)*p.dtTransport/sim.dznom(nGrid) .* ...
+        ( p.BCvalue(1:p.nNutrients) - u(end,1:p.nNutrients) );
 
-    if bSilicate
-        u(end, p.idxSi) = u(end, p.idxSi) +  p.dtTransport* ...
-        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxSi)-u(end,p.idxSi));
-    end
+    %u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
+    %    p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+
+    %if bSilicate
+    %    u(end, p.idxSi) = u(end, p.idxSi) +  p.dtTransport* ...
+    %    p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxSi)-u(end,p.idxSi));
+    %end
+
     %
     % Enforce minimum concentration
     %
-    for k = 1:nGrid
-        u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
-    end
+    %for k = 1:nGrid
+    %    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+    %end
     %
     % Save timeseries in grid format
     %
@@ -359,7 +367,7 @@ sim.lon = lon;
 
 sim.Ntot = (sum(sim.N'.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
     sum(squeeze(sum(sim.B,3))'.*(sim.dznom*ones(1,length(sim.t))))/rhoCN)/1000; % gN/m2 in biomass
-sim.Nprod = p.DiffBottom*(p.u0(p.idxN)-sim.N(:,end))/1000; % Diffusion in from the bottom; gN/m2/day
+sim.Nprod = p.BCdiffusion(p.idxN)*(p.BCvalue(p.idxN)-sim.N(:,end))/1000; % Diffusion in from the bottom; gN/m2/day
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
 %     sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
@@ -378,7 +386,7 @@ end
 
 
 %
-% Setup matrix for sinking
+% Setup matrix for sinking. Uses an implicit first-order upwind scheme
 %
 function [Asink,p] = calcSinkingMatrix(p, sim, nGrid)
 %
@@ -392,14 +400,16 @@ p.idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
 %
 Asink = zeros(p.n,nGrid,nGrid);
 for i = 1:nGrid
-    k = p.velocity/(sim.dznom(i)*p.dtTransport);
+    k = p.velocity*p.dtTransport/sim.dznom(i);
     Asink(:,i,i) = 1+k;
     if (i ~= 1)
         Asink(:,i,i-1) = -k;
     end
 end
-% Bottom BC:
-Asink(end) = 1;
+% Bottom BC: 
+if p.BC_POMclosed
+    Asink(:,end,end) = 1;
+end
 %
 % Invert matrix to make it ready for use:
 %
