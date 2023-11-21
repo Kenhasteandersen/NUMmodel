@@ -13,6 +13,7 @@ module NUMmodel
   use spectrum
   use generalists
   use generalists_simple
+  use prokaryote
   use diatoms_simple
   use copepods
   use diatoms
@@ -32,6 +33,7 @@ module NUMmodel
   integer, parameter :: typeDiatom_simple = 4
   integer, parameter :: typeCopepodActive = 10
   integer, parameter :: typeCopepodPassive = 11
+  integer, parameter :: typeProkaryote = 6
   integer, parameter :: typePOM = 100
   !
   ! Variables that contain the size spectrum groups
@@ -113,11 +115,12 @@ contains
     logical(1), intent(out):: errorio ! Whether to losses to the deep
     character(c_char), dimension(*) :: errorstr
     integer :: iGeneralist, ntot, myGroups
-    ntot=n1*k
+    ntot=n1*(k+1)
     myGroups=k
     print*, 'k=',k
-    call parametersInit(myGroups, ntot, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
+    call parametersInit(myGroups+1, ntot, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
     print*, 'done init'
+    call parametersAddGroupX(typeProkaryote, n1, 0.d0,1,errorio,errorstr) ! prokaryote with n size classes
     do iGeneralist = 1, myGroups
     print*, 'add group ',iGeneralist
       call parametersAddGroupX(typeGeneralistSimple, n1, 0.d0,iGeneralist,errorio,errorstr) ! generalists with n size classes
@@ -421,6 +424,7 @@ contains
     type(spectrumDiatoms):: specDiatoms
     type(spectrumCopepod):: specCopepod
     type(spectrumPOM):: specPOM
+    type(spectrumProkaryote) :: specProkaryote
     !
     ! Find the group number and grid location:
     !
@@ -481,6 +485,7 @@ contains
     type(spectrumDiatoms):: specDiatoms
     type(spectrumCopepod):: specCopepod
     type(spectrumPOM):: specPOM
+    type(spectrumProkaryote):: specProkaryote
     !
     ! Find the group number and grid location:
     !
@@ -524,7 +529,11 @@ contains
       call initPOM(specPOM, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
       idxPOM = iCurrentGroup 
-      ixType(iCurrentGroup) = 100 
+      ixType(iCurrentGroup) = 100
+   case (typeProkaryote)
+      call initProkaryoteX(specProkaryote, n,k,errorio, errorstr)
+      allocate( group( iCurrentGroup )%spec, source=specProkaryote )
+      ixType(iCurrentGroup) = 6
    end select
 
   end subroutine parametersAddGroupX
@@ -551,6 +560,7 @@ contains
                   calcPhi(group(iGroup)%spec%m(i)/group(jGroup)%spec%m(j), &
                      group(iGroup)%spec%beta, group(iGroup)%spec%sigma, &
                      group(iGroup)%spec%z(i))
+
                !
                ! Passive copepods have a lower preference for feeding on diatoms:
                !
@@ -682,8 +692,9 @@ contains
       !
       ! Standard HTL mortality that is constant over time:
       !
+      ! tfha: added palatability here
       do iGroup = 1, nGroups
-         group(iGroup)%spec%mortHTL = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
+         group(iGroup)%spec%mortHTL = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) ) * group(iGroup)%spec%palatability
       end do
     else
       !
@@ -897,6 +908,9 @@ contains
       type is (spectrumDiatoms)
          call calcRatesDiatoms(spec, &
                      L, upositive(idxN),  upositive(idxDOC), upositive(idxSi),gammaN, gammaDOC, gammaSi)
+      type is (spectrumProkaryote)
+         call calcRatesProkaryote(spec, &
+                     L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
       end select
    end do
    !
@@ -941,6 +955,10 @@ contains
          call calcDerivativesDiatoms(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
               dudt(idxN), dudt(idxDOC), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
+      type is (spectrumProkaryote)
+         call calcDerivativesProkaryote(spec, &
+              upositive(ixStart(iGroup):ixEnd(iGroup)), &
+              dudt(idxN), dudt(idxDOC), dudt(ixStart(iGroup):ixEnd(iGroup)))
       end select
    end do
  end subroutine calcDerivativesUnicellulars

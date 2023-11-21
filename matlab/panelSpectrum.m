@@ -7,13 +7,20 @@ arguments
     sim struct;
     ixTime {mustBeInteger} = length(sim.t); % Defaults to last time step
 end
-
 p = sim.p;
+f1=figure('Color','w','Name','Sheldon Biomass')
+clf
+%tiledlayout(f1,p.nGroups+1,1,'tilespacing','compact','padding','compact')
+%nexttile
+
 rates=sim.rates;
 %
 % Background color depending on trophic strategies:
 %
-[strategy, col] = calcTrophicStrategy(p,rates);
+%tfha: do not plot bagground
+%[strategy, col] = calcTrophicStrategy(p,rates);
+
+
 % iGroup = 1; %select the group for which the background is drawn
 % ix = (p.ixStart(iGroup):p.ixEnd(iGroup));
 % m = p.m(ix);
@@ -71,9 +78,10 @@ for iGroup = 1:p.nGroups
     if (length(sim.t) >1)
         Blower = min( sim.B(ixAve,ixB) )./ log(Delta);
         Bupper = max( sim.B(ixAve,ixB) )./ log(Delta);
-        patch([m, m(end:-1:1)], [Blower, Bupper(end:-1:1)] , ...
-            p.colGroup{iGroup},...
-            'edgecolor','none', 'facealpha',0.15);
+        %tfha: do not plot bagground
+        % patch([m, m(end:-1:1)], [Blower, Bupper(end:-1:1)] , ...
+            % p.colGroup{iGroup},...
+            % 'edgecolor','none', 'facealpha',0.15);
     end
     set(gca,'xscale','log','yscale','log')
     hold on
@@ -88,7 +96,10 @@ sLegend{1} = 'Community spectrum';
 %
 % Group spectra:
 %
+palatability = search_namelist('../input/input_generalists_simpleX.h','generalists_simple','palatability');
+alphaF = search_namelist('../input/input_generalists_simpleX.h','generalists_simple','alphaF');
 for iGroup = 1:p.nGroups
+    %nexttile
     ix = p.ixStart(iGroup):p.ixEnd(iGroup);
     m = p.m(ix);
     Delta = p.mUpper(ix)./p.mLower(ix);
@@ -103,7 +114,23 @@ for iGroup = 1:p.nGroups
     loglog(m, sim.B(ixTime, ixB)./log(Delta), ':','linewidth',1,...
         'color',p.colGroup{iGroup})
 
-    sLegend{iGroup+1} = p.nameGroup{iGroup};
+    if iGroup==1
+        sLegend{iGroup+1} = p.nameGroup{iGroup};
+    else
+    sLegend{iGroup+1} =[p.nameGroup{iGroup},' pal=',num2str(palatability(iGroup-1)),' alphaF=',num2str(alphaF(iGroup-1))];
+    end
+%     title(p.nameGroup{iGroup});
+%     if iGroup>1
+%         legend(num2str(palatability(iGroup-1)))
+%     end
+% 
+%     ylim([0.0001,500])
+% xlim(calcXlim(sim.p))
+% hold off
+% box off
+% xlabel('Mass ({\mu}gC)')
+% ylabel('Sheldon biomass ({\mu}gC/L)')
+
 end
 ylim([0.0001,500])
 xlim(calcXlim(sim.p))

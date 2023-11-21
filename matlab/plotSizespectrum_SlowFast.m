@@ -94,7 +94,7 @@ set(gca,'XTickLabel','');
 xlabel('')
 
 nexttile
-panelTrophicLevel(sim,sim.rates);
+panelTrophicLevel(sim,sim.rates,lat,lon);
 
 
 

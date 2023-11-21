@@ -51,6 +51,8 @@ end
 
 % Nutrients:
 p = setupNutrients_N_DOC;
+% Prokaryote
+p = parametersAddgroup(6,p,n);
 
 % Generalists:
 for i=1:k

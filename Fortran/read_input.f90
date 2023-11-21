@@ -19,6 +19,7 @@ module read_input_module
     character(len=100) :: str_Copepods_passive
     character(len=100) :: str_Copepods_active
     character(len=100) :: str_POM
+    character(len=100) :: str_Prokaryote
     integer:: ios, n, i
     real(dp):: keyval
     real(dp):: io
@@ -43,6 +44,7 @@ module read_input_module
     str_Copepods_passive='! COPEPODS PASSIVE INPUT PARAMETERS'
     str_Copepods_active='! COPEPODS ACTIVE INPUT PARAMETERS'
     str_POM='! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS'
+    str_Prokaryote='! PROKARYOTE INPUT PARAMETERS'
     thislist='no list defined yet'
     
     OPEN(1, file = filename)
@@ -70,6 +72,8 @@ module read_input_module
             thislist='copepods_active'
           else if (line(1:len(str_POM)).eq.str_POM) then
             thislist='POM'
+          else if (line(1:len(str_Prokaryote)).eq.str_Prokaryote) then
+            thislist='prokaryote'
           end if   
     !
     ! Remove leading blank spaces
@@ -150,6 +154,7 @@ module read_input_module
     character(len=100) :: str_Copepods_passive
     character(len=100) :: str_Copepods_active
     character(len=100) :: str_POM
+    character(len=100) :: str_Prokaryote
     integer:: ios, n, i
     real(dp):: keyval
     real(dp):: io
@@ -177,6 +182,7 @@ module read_input_module
     str_Copepods_passive='! COPEPODS PASSIVE INPUT PARAMETERS'
     str_Copepods_active='! COPEPODS ACTIVE INPUT PARAMETERS'
     str_POM='! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS'
+    str_Prokaryote='! PROKARYOTE INPUT PARAMETERS'
     thislist='no list defined yet'
     
     OPEN(1, file = filename)
@@ -204,6 +210,8 @@ module read_input_module
             thislist='copepods_active'
           else if (line(1:len(str_POM)).eq.str_POM) then
             thislist='POM'
+          else if (line(1:len(str_Prokaryote)).eq.str_Prokaryote) then
+            thislist='prokaryote'
           end if   
     !
     ! Remove leading blank spaces

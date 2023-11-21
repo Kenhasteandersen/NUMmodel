@@ -53,7 +53,28 @@ while ~feof(fid)
                 idx_comment = min([idx_comment-1,length(line)]);
                 value=strtrim(line(idx+1:idx_comment));
                 value = strrep(value,'d','e');
-                parval=str2double(value);
+                if ~contains(value,'*')
+                    % are there more than one value
+                    if ~contains(value,' ')
+                        parval=str2double(value);
+                        return
+                    else
+                        isspace=strfind(value,' ');
+                        isspace(length(isspace)+1)=length(value)+1;
+                        parval=str2double(value(1:(isspace(1)-1)));
+                        for i=1:length(isspace)-1
+                            parval(i+1)=str2double(value((isspace(i)+1):(isspace(i+1)-1)));
+
+                        end
+                        return
+                        
+                    end
+                else
+                    istar=strfind(value,'*');
+                    parval(1:str2double(value(istar-1)))=str2double(value(istar+1:end));
+                    return
+                end
+                    
             end
         end
     end

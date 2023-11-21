@@ -16,19 +16,28 @@ end
 %Set parameters:
 
 n = 10;
-k = 2;
+k = 3;
 bParallel = false;
 
 p = setupGeneralistsSimpleK(n,k, bParallel);
 
 p = parametersChemostat(p);
-p.tEnd = 200;
+p.tEnd = 720;
 p.d = 0.1;
 
 % Change colors for groups of Generalists:
+r=[13 15 56 119 189];
+g=[139 178 192 207 227];
+b=[217 242 242 242 242];
 j=linspace(0.3,0.9,k);
-for i=1:k
-    p.colGroup{i}=[0,0,j(i)];
+
+blue(1,:)=[58/255,67/255,186/255];
+blue(2,:)=[4/255,146/255,194/255];
+blue(3,:)=[130/255,237/255,253/255];
+
+for i=2:k+1
+    %p.colGroup{i}=[0,0,j(i-1)];
+    p.colGroup{i}=blue(i-1,:);
 end
 %Change color of N so I can see generalists
 
@@ -53,5 +62,7 @@ toc
 %
 % Plot
 %
-plotSimulation_SlowFast(sim);
+% plotSimulation_SlowFast(sim);
+%plotSimulation(sim);
+plotSimulation_trine(sim);
 checkConservation(sim);

@@ -68,32 +68,35 @@ s.rates = sim.rates;
 %
 % Setup tiles:
 %
-clf
-tiledlayout(4,1,'tilespacing','compact','padding','compact')
+%clf
+%tiledlayout(4,1,'tilespacing','compact','padding','compact')
 %
 % Spectrum
 %
-nexttile
+%nexttile
 panelSpectrum(s,iTime)
-xlabel('')
-set(gca,'XTickLabel','');
+% xlabel('')
+% set(gca,'XTickLabel','');
 %
 % Gains:
 %
-nexttile
+%nexttile
 
 %panelGains(sim.p,rates)
+fg1=figure('color','w','Name','Gains');
+tiledlayout(fg1,5,1,'tilespacing','compact','padding','compact')
 panelGains(sim.p, sim.rates);
-set(gca,'XTickLabel','');
+% set(gca,'XTickLabel','');
 %
 % Losses:
 %
-nexttile
+fg2=figure('color','w','Name','Losses');
+tiledlayout(fg2,6,1,'tilespacing','compact','padding','compact')
 panelLosses(sim.p, sim.rates);
-set(gca,'XTickLabel','');
-xlabel('')
+% set(gca,'XTickLabel','');
+% xlabel('')
 
-nexttile
+fg3=figure('color','w','Name','Losses');
 panelTrophicLevel(sim,sim.rates,lat,lon);
 
 

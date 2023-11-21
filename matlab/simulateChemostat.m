@@ -105,9 +105,11 @@ if isfield(p, 'idxSi')
 end
 sim.B = u(:,p.idxB:end);
 sim.p = p;
-sim.rates = getRates(p, u(end,:), mean(sim.L), T);
+for i=1:size(u,1)
+sim.rates(i) = getRates(p, u(end,:), mean(sim.L), T);
+end
 for iGroup = 1:p.nGroups
-    sim.Bgroup(:,iGroup) = sum( u(:, p.ixStart(iGroup):p.ixEnd(iGroup)),2);
+sim.Bgroup(:,iGroup) = sum( u(:, p.ixStart(iGroup):p.ixEnd(iGroup)),2);
 end
 sim.T = T;
 sim.bUnicellularloss = options.bUnicellularloss;

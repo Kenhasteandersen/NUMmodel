@@ -41,6 +41,10 @@ switch p.typeGroups(p.nGroups)
         p.nameGroup{p.nGroups} = 'POM';
         p.colGroup{p.nGroups} = [165 42 42]/256; % Brown
         p.ixPOM = p.nGroups;
+    case 6
+        p.nameGroup{p.nGroups} = 'Prokaryote';
+        p.colGroup{p.nGroups} = [25 255 0]/256; % Brown
+        p.ixPOM = p.nGroups;
 end
 
 %

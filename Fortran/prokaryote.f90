@@ -1,7 +1,7 @@
 !
-! Module to handle generalist unicellulars
+! Module to handle prokaryote. Based on generalist_simple
 !
-module generalists_simple
+module prokaryote
   use globals
   use spectrum
   use read_input_module
@@ -11,34 +11,34 @@ module generalists_simple
   
   real(dp) :: epsilonL, remin2, reminF
 
-  type, extends(spectrumUnicellular) :: spectrumGeneralistsSimple
+  type, extends(spectrumUnicellular) :: spectrumProkaryote
     real(dp), allocatable :: JFreal(:)
     
   contains
-    procedure, pass :: initGeneralistsSimple
-    procedure :: calcRates => calcRatesGeneralistsSimple
-    procedure :: calcDerivativesGeneralistsSimple
-    procedure :: printRates => printRatesGeneralistsSimple
-    procedure :: getProdBact => getProdBactGeneralistsSimple
-  end type spectrumGeneralistsSimple
+    procedure, pass :: initProkaryote
+    procedure :: calcRates => calcRatesProkaryote
+    procedure :: calcDerivativesProkaryote
+    procedure :: printRates => printRatesProkaryote
+    procedure :: getProdBact => getProdBactProkaryote
+  end type spectrumProkaryote
  
-  public initGeneralistsSimple, spectrumGeneralistsSimple, calcRatesGeneralistsSimple, calcDerivativesGeneralistsSimple
-  public printRatesGeneralistsSimple
-  public initGeneralistsSimpleX
+  public initProkaryote, spectrumProkaryote, calcRatesProkaryote, calcDerivativesProkaryote
+  public printRatesProkaryote
+  public initProkaryoteX
 
 
 contains
 
- subroutine initGeneralistsSimple(this, n,errorio,errorstr)
+ subroutine initProkaryote(this, n,errorio,errorstr)
     use iso_c_binding, only: c_char
-    class(spectrumGeneralistsSimple):: this
+    class(spectrumProkaryote):: this
     integer, intent(in):: n
     logical(1), intent(out):: errorio 
     character(c_char), dimension(*), intent(out) :: errorstr
     integer:: i
     real(dp), parameter:: rho = 0.4*1d6*1d-12
     real(dp) :: ii
-    real(dp) :: mMinGeneralist, mMaxGeneralist
+    real(dp) :: mMinProkaryote, mMaxProkaryote
     real(dp) :: alphaN, rNstar  
     real(dp) :: alphaL, rLstar
     real(dp) :: alphaF, cF  
@@ -47,29 +47,29 @@ contains
     ! no errors to begin with
     errorio=.false.
 
-    print*, 'Loading parameter for generalist simple from ', inputfile, ':'
-    call read_input(inputfile,'generalists_simple','mMinGeneralist',mMinGeneralist,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','alphaN',alphaN,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','rNstar',rNstar,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','alphaL',alphaL,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','alphaF',alphaF,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','cF',cF,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','cLeakage',cLeakage,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','alphaJ',alphaJ,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','cR',cR,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','rLstar',rLstar,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','delta',delta,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','epsilonL',epsilonL,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','remin2',remin2,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','reminF',reminF,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','beta',this%beta,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','sigma',this%sigma,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','epsilonF',this%epsilonF,errorio,errorstr)
+    print*, 'Loading parameter for prokaryote simple from ', inputfile, ':'
+    call read_input(inputfile,'prokaryote','mMinProkaryote',mMinProkaryote,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','mMaxProkaryote',mMaxProkaryote,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','alphaN',alphaN,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','rNstar',rNstar,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','alphaL',alphaL,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','alphaF',alphaF,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','cF',cF,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','cLeakage',cLeakage,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','alphaJ',alphaJ,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','cR',cR,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','rLstar',rLstar,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','delta',delta,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','epsilonL',epsilonL,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','remin2',remin2,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','reminF',reminF,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','beta',this%beta,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','sigma',this%sigma,errorio,errorstr)
+    call read_input(inputfile,'prokaryote','epsilonF',this%epsilonF,errorio,errorstr)
     
     
     
-    call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
+    call this%initUnicellular(n, mMinProkaryote, mMaxProkaryote)
     allocate(this%JFreal(n))
 
     this%r = (3./(4.*pi)*this%m/rho)**onethird
@@ -90,18 +90,18 @@ contains
     this%Jresp = cR*alphaJ*this%m
 
 
-  end subroutine initGeneralistsSimple
+  end subroutine initProkaryote
   
-  subroutine initGeneralistsSimpleX(this, n,k,errorio,errorstr)
+  subroutine initProkaryoteX(this, n,k,errorio,errorstr)
     use iso_c_binding, only: c_char
-    class(spectrumGeneralistsSimple):: this
+    class(spectrumProkaryote):: this
     integer, intent(in):: n,k
     logical(1), intent(out):: errorio 
     character(c_char), dimension(*), intent(out) :: errorstr
     integer:: i
     real(dp), parameter:: rho = 0.4*1d6*1d-12
     real(dp) :: ii
-    real(dp) :: mMinGeneralist, mMaxGeneralist
+    real(dp) :: mMinProkaryote, mMaxProkaryote
     real(dp) :: alphaN, rNstar  
     real(dp) :: alphaL, rLstar
     real(dp) :: alphaF, cF  
@@ -111,48 +111,48 @@ contains
     errorio=.false.
     inputfile='../input/input_generalists_simpleX.h'
 
-    print*, 'Loading parameter for generalist simple from ', inputfile, ':'
-    call read_inputX(inputfile,'generalists_simple','mMinGeneralist',mMinGeneralist,k,errorio,errorstr)
-    print*, '    *mMinGeneralist=',mMinGeneralist
-    call read_inputX(inputfile,'generalists_simple','mMaxGeneralist',mMaxGeneralist,k,errorio,errorstr)
-    print*, '    *mMaxGeneralist=',mMaxGeneralist
-    call read_inputX(inputfile,'generalists_simple','alphaN',alphaN,k,errorio,errorstr)
+    print*, 'Loading parameter for prokaryite from ', inputfile, ':'
+    call read_inputX(inputfile,'prokaryote','mMinProkaryote',mMinProkaryote,k,errorio,errorstr)
+    print*, '    *mMinProkaryote=',mMinProkaryote
+    call read_inputX(inputfile,'prokaryote','mMaxProkaryote',mMaxProkaryote,k,errorio,errorstr)
+    print*, '    *mMaxProkaryote=',mMaxProkaryote
+    call read_inputX(inputfile,'prokaryote','alphaN',alphaN,k,errorio,errorstr)
     print*, '    *alphaN=',alphaN
-    call read_inputX(inputfile,'generalists_simple','rNstar',rNstar,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','rNstar',rNstar,k,errorio,errorstr)
     print*, '    *rNstar=',rNstar
-    call read_inputX(inputfile,'generalists_simple','alphaL',alphaL,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','alphaL',alphaL,k,errorio,errorstr)
     print*, '    *alphaL=',alphaL
-    call read_inputX(inputfile,'generalists_simple','alphaF',alphaF,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','alphaF',alphaF,k,errorio,errorstr)
     print*, '    *alphaF=',alphaF
-    call read_inputX(inputfile,'generalists_simple','cF',cF,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','cF',cF,k,errorio,errorstr)
     print*, '    *cF=',cF
-    call read_inputX(inputfile,'generalists_simple','cLeakage',cLeakage,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','cLeakage',cLeakage,k,errorio,errorstr)
     print*, '    *cLeakage=',cLeakage
-    call read_inputX(inputfile,'generalists_simple','alphaJ',alphaJ,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','alphaJ',alphaJ,k,errorio,errorstr)
     print*, '    *alphaJ=',alphaJ
-    call read_inputX(inputfile,'generalists_simple','cR',cR,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','cR',cR,k,errorio,errorstr)
     print*, '    *cR=',cR
-    call read_inputX(inputfile,'generalists_simple','rLstar',rLstar,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','rLstar',rLstar,k,errorio,errorstr)
     print*, '    *rLstar=',rLstar
-    call read_inputX(inputfile,'generalists_simple','delta',delta,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','delta',delta,k,errorio,errorstr)
     print*, '    *delta=',delta
-    call read_inputX(inputfile,'generalists_simple','epsilonL',epsilonL,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','epsilonL',epsilonL,k,errorio,errorstr)
     print*, '    *epsilonL=',epsilonL
-    call read_inputX(inputfile,'generalists_simple','remin2',remin2,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','remin2',remin2,k,errorio,errorstr)
     print*, '    *remin2=',remin2
-    call read_inputX(inputfile,'generalists_simple','reminF',reminF,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','reminF',reminF,k,errorio,errorstr)
     print*, '    *reminF=',reminF
-    call read_inputX(inputfile,'generalists_simple','beta',this%beta,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','beta',this%beta,k,errorio,errorstr)
     print*, '    *beta=',this%beta
-    call read_inputX(inputfile,'generalists_simple','sigma',this%sigma,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','sigma',this%sigma,k,errorio,errorstr)
     print*, '    *sigma=',this%sigma
-    call read_inputX(inputfile,'generalists_simple','epsilonF',this%epsilonF,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','epsilonF',this%epsilonF,k,errorio,errorstr)
     print*, '    *epsilonF=',this%epsilonF
-    call read_inputX(inputfile,'generalists_simple','palatability',palatability,k,errorio,errorstr)
+    call read_inputX(inputfile,'prokaryote','palatability',palatability,k,errorio,errorstr)
     
     
     
-    call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
+    call this%initUnicellular(n, mMinProkaryote, mMaxProkaryote)
     allocate(this%JFreal(n))
 
     this%r = (3./(4.*pi)*this%m/rho)**onethird
@@ -174,10 +174,10 @@ contains
     this%palatability = palatability
 
 
-  end subroutine initGeneralistsSimpleX
+  end subroutine initProkaryoteX
 
-  subroutine calcRatesGeneralistsSimple(this, L, N, DOC, gammaN, gammaDOC)
-    class(spectrumGeneralistsSimple), intent(inout):: this
+  subroutine calcRatesProkaryote(this, L, N, DOC, gammaN, gammaDOC)
+    class(spectrumProkaryote), intent(inout):: this
     real(dp), intent(in):: gammaN, gammaDOC
     real(dp), intent(in):: L, N, DOC
     real(dp):: f, JmaxT
@@ -190,11 +190,6 @@ contains
        this%JN(i) =   gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
        this%JDOC(i) = gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
-       
-       if ( ( this%JN(i) .le. 0.0d0 ) .and. ( this%JL(i) .le. 0.0d0 )) then
-         this%JDOC(i) = 0.0d0
-       endif
-       
        ! Total nitrogen uptake:
        this%JNtot(i) = this%JN(i)+this%JF(i)-this%Jlosspassive(i) ! In units of C
        ! Total carbon uptake
@@ -257,10 +252,10 @@ contains
     !  -this%JNlossLiebig-this%JlossPassive)/this%m           ! Losses
     !write(*,*) 'C budget:',(-this%Jtot+this%JLreal+this%JDOC+this%JFreal & ! Gains
     !  -fTemp2*this%Jresp - this%JClossLiebig - this%JlossPassive)/this%m   ! Losses
-end subroutine calcRatesGeneralistsSimple
+end subroutine calcRatesProkaryote
 
-  subroutine calcDerivativesGeneralistsSimple(this, u, dNdt, dDOCdt, dudt)
-    class(spectrumGeneralistsSimple), intent(inout):: this
+  subroutine calcDerivativesProkaryote(this, u, dNdt, dDOCdt, dudt)
+    class(spectrumProkaryote), intent(inout):: this
     real(dp), intent(in):: u(this%n)
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
     !real(dp):: mortloss
@@ -269,8 +264,8 @@ end subroutine calcRatesGeneralistsSimple
     print*, 'uType is:',this%uType
     
 
-    this%mort2 = this%mort2constant*u ! "quadratic" mortality
-    !this%mort2 = this%mort2constant*this%uType ! "quadratic" mortality
+    !this%mort2 = 0*u !this%mort2constant*u ! "quadratic" mortality
+    this%mort2 = this%mort2constant*this%uType ! "quadratic" mortality
     this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
 
     do i = 1, this%n
@@ -296,7 +291,7 @@ end subroutine calcRatesGeneralistsSimple
            +   remin2*this%mort2(i) & 
            ) * u(i)
       !
-      ! Update the generalists:
+      ! Update the Prokaryote:
       !
       dudt(i) = (this%Jtot(i)/this%m(i)  &
            - this%mortpred(i) &
@@ -304,18 +299,18 @@ end subroutine calcRatesGeneralistsSimple
            - this%mortHTL(i))*u(i)
    end do
   
- end subroutine calcDerivativesGeneralistsSimple
+ end subroutine calcDerivativesProkaryote
 
-subroutine printRatesGeneralistsSimple(this)
-  class(spectrumGeneralistsSimple), intent(in):: this
+subroutine printRatesProkaryote(this)
+  class(spectrumProkaryote), intent(in):: this
 
-  write(*,*) "Generalists Simple with ", this%n, " size classes:"
+  write(*,*) "Prokaryote with ", this%n, " size classes:"
   call this%printRatesUnicellular()
-end subroutine printRatesGeneralistsSimple
+end subroutine printRatesProkaryote
 
-  function getProdBactGeneralistsSimple(this, u) result(ProdBact)
+  function getProdBactProkaryote(this, u) result(ProdBact)
     real(dp):: ProdBact
-    class(spectrumGeneralistsSimple), intent(in):: this
+    class(spectrumProkaryote), intent(in):: this
     real(dp), intent(in):: u(this%n)
     integer:: i
 
@@ -324,6 +319,6 @@ end subroutine printRatesGeneralistsSimple
       ProdBact = ProdBact + max(0.d0, this%JDOC(i) - ftemp2*this%Jresp(i))*u(i)/this%m(i)
     enddo
 
-  end function getProdBactGeneralistsSimple
+  end function getProdBactProkaryote
 
-end module generalists_simple
+end module prokaryote

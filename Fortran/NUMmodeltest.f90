@@ -15,8 +15,12 @@ program NUMmodeltest
 
   !call setupGeneralistsOnly(10)
   !call setupGeneralistsSimpleOnly(10)
-  k=2
+  k=3
   call setupGeneralistsSimple_two(10,k,errorio,errorstr)
+  
+
+  print*, 'mass gr2:', group(2)%spec%m
+  
   !call setupGeneralistssimpleOnly(10,errorio,errorstr)
 
   !call parametersFinalize(0.d0, .false.)
