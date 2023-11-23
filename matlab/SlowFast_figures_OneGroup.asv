@@ -35,7 +35,7 @@ InputListName={'input_generalists_simple';'input_generalists_simple'};
 inputFileName='../input/input_generalists_simpleX_1group.h';
 copyFileName='../input/input_generalists_simpleX.h';
 
-theOriginalfile='../input/input_generalists_simpleX_1group_Startup.h';
+theOriginalfile='../input_generalists_simpleX_1group_Startup.h';
 [SUCCESS,MESSAGE,MESSAGEID] = copyfile(theOriginalfile, inputFileName);
 if ~SUCCESS
     error('copying the original file')
@@ -52,28 +52,28 @@ end
 
 %% Simulate
 usesaved='no';
-yvector=param_vector.alphaF;
+vector=param_vector.alphaF;
 %epsilonL_vector=0.1:0.1:15;
-%epsilonL_vector=linspace(0.4,15,10);
+epsilonL_vector=linspace(0.4,15,10);
 switch usesaved
     case 'yes'
         load('bio_saved.mat')
     case 'no'
         % iterate over d=0.001 to 0.1
         
-        B=nan(length(yvector),n*(k+1));
+        B=nan(length(dvector),n*(k+1));
         jDOC=B;
         jLreal=B;
         jFreal=B;
-        for i=1:length(yvector)
-            alphaF=param_vector.alphaF(i);
-            % alphaF=epsilonL_vector(i);
-            palatability=param_vector.palatability(i);
+        for i=1:length(dvector)
+            %alphaF=param_vector.alphaF(i);
+            alphaF=epsilonL_vector(i);
+            palatability=1;%param_vector.palatability(i);
             %%
             ChangeTHeParam(paramToReplace,InputListName,inputFileName,alphaF,palatability)
             %%
             [SUCCESS,MESSAGE,MESSAGEID] = copyfile(inputFileName, copyFileName);
-            p = setitup(n,k,bParallel,tEnd,d,mortHTL, mHTL, bQuadraticHTL,bDecliningHTL);
+            p = setitup(n,k,bParallel,tEnd,d,mortHTL, mHTL, bQuadraticHTL,bDecliningHTL)
             p.d=d;
             sim = simulateChemostat(p, 100);
             % create average of last
@@ -105,32 +105,32 @@ B_L=B.*(jLreal./(jDOC+jLreal+jFreal));
 B_F=B.*(jFreal./(jDOC+jLreal+jFreal));
 themax=max([max(max(B_DOC)) max(max(B_L)) max(max(B_F))]);
 %%
-PlotNutrientVSSize(p,B,'jet','total biomass',max(max(B)),yvector)
+PlotNutrientVSSize(p,B,'jet','total biomass',max(max(B)),dvector)
 %%
-PlotNutrientVSSize(p,B_DOC,cmap_osmotrophy,'osmotrophic biomass',themax,yvector)
+PlotNutrientVSSize(p,B_DOC,cmap_osmotrophy,'osmotrophic biomass',themax,dvector)
 %%
-PlotNutrientVSSize(p,B_L,cmap_phototrophy,'phototrophic biomass',themax,yvector)
+PlotNutrientVSSize(p,B_L,cmap_phototrophy,'phototrophic biomass',themax,dvector)
 %%
-PlotNutrientVSSize(p,B_F,cmap_phagotrophy,'phagotrophic biomass',themax,yvector)
+PlotNutrientVSSize(p,B_F,cmap_phagotrophy,'phagotrophic biomass',themax,dvector)
 %% plot biomassVSnutrint divided into different groups
 figure('color','w');
 subplot(3,1,1);
 %plot(dvector,sum(B(:,1:20),2),'b-');
 hold on; 
-plot(yvector,sum(B(:,21:40),2),'g-');
+plot(dvector,sum(B(:,21:40),2),'g-');
 set(gca,'XScale','log');
 box on
 ylabel('biomass (\mug C l^{(-1)})','FontSize', 14)
 
 
 subplot(3,1,2);
-plot(yvector,sum(B(:,41:50),2),'r-');
+plot(dvector,sum(B(:,41:50),2),'r-');
 set(gca,'XScale','log');
 ylabel('biomass (\mug C l^{(-1)})','FontSize', 14)
 
 
 subplot(3,1,3);
-plot(yvector,sum(B(:,51:end),2),'k-')
+plot(dvector,sum(B(:,51:end),2),'k-')
 set(gca,'XScale','log')
 xlabel('mixing rate (day^{-1})','FontSize', 14)
 ylabel('biomass (\mug C l^{(-1)})','FontSize', 14)
@@ -198,7 +198,7 @@ for i=2:p.nGroups
     % ax=gca;ax.XAxis.TickLabels = compose('%g', ax.XAxis.TickValues);
     xlabel('Cell mass (\mug C)','FontSize', 14)
     colormap(cmap);    
-    if i==2;ylabel('strategy type','FontSize', 14);end
+    if i==1;ylabel('mixing rate (day^{-1})','FontSize', 14);end
     title([p.nameGroup{i},' ',num2str(length(find(p.typeGroups(1:i)==p.typeGroups(i))))],'FontSize', 16,'FontWeight','normal');
     clim([0 themax])
     box on

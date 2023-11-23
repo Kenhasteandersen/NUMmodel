@@ -94,7 +94,7 @@
 ! Phagotrophy:
 !-------------
   epsilonF = 0.8d0	          ! Food assimilation efficiency [-]
-  alphaF = 0.01d0                 ! Clearance rate [L/d/ug C]
+  alphaF = 0.006d0                 ! Clearance rate [L/d/ug C]
   cF = 30.0d0                  ! Max phagotrophy coefficient [um/day]
   beta = 500.d0                ! Preferred predator-prey mass ratio
   sigma = 1.3d0                ! Preferred predator-prey mass range
@@ -113,7 +113,7 @@
 
 ! Vulnerability to predation:
 !----------------------------
-  palatability = 3.1326d0        ! 3.1326d0 = full risk of predation
+  palatability = 2.2457d0        ! 2.2457d0 = full risk of predation
 
 
 

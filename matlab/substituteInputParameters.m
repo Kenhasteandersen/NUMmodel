@@ -1,4 +1,4 @@
-function substituteInputParameters(paramToReplace,InputListName,newvalue)
+function substituteInputParameters(paramToReplace,InputListName,newvalue,inputFileName)
 %this function creates a new input file with changed parameters based on
 %the original input file in the input folder. The original input file is
 %renamed from input.h to input_orig.h while the new input file is named
@@ -23,7 +23,7 @@ InputListName=cellstr(InputListName);
 newvalue=cellstr(newvalue);
 
 %% define paths and load lists
-inputFileName='../input/input.h';
+% inputFileName='../input/input.h';
 inputFileTmpName='../input/input_orig.h';
 inputHeaderName='../input/input_parameter_headers.mat';
 load(inputHeaderName,'thelists')

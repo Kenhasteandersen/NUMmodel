@@ -4,7 +4,7 @@ mAdult=[];
 % number of size groups:
 n = 20;
 % number of generlist groups:
-k = 2;
+k = 1;
 % run in parallel?:
 bParallel = false;
 % Years of simulation

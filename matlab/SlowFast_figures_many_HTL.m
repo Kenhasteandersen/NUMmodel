@@ -17,7 +17,7 @@ d=0.1;
 %the HTL mortality (or the constant if bQuadratic=true)
 mortHTL=0.1;
 mHTL=1/500^1.5;
-bQuadraticHTL=false;
+bQuadraticHTL=false;        
 bDecliningHTL=false;
 
 %calculate 
@@ -63,7 +63,8 @@ setHTL(mortHTL, mHTL, bQuadraticHTL,bDecliningHTL);
 
 %% Simulate
 usesaved='no';
-dvector=logspace(-3,-1,20);
+mortHTL_vector=linspace(0,0.3,20);
+dvector=mortHTL_vector;
 switch usesaved
     case 'yes'
         load('bio_saved.mat')
@@ -74,7 +75,7 @@ switch usesaved
         jDOC=B;
         jLreal=B;
         jFreal=B;
-        mortHTL_vector=linspace(0.05,0.5,10);
+        
         for i=1:length(mortHTL_vector)
             setHTL(mortHTL_vector(i), mHTL, bQuadraticHTL,bDecliningHTL);
             sim = simulateChemostat(p, 100);
@@ -142,7 +143,7 @@ thism=p.m(23:42);
 gnr=1:10;
 [x2,y2]=meshgrid(thism,gnr);
 figure('color','w');
-for dd=1:2:20
+for dd=1:size(B,1)
 for i=1:10
     grupnr=i+1;
     thisB(i,:)=B(dd,p.ixStart(grupnr)-2:p.ixEnd(grupnr)-2);
@@ -151,7 +152,7 @@ nexttile
 surf(x2,y2,thisB)
 set(gca,'XScale','log','YScale','log');xlabel('cell mass');ylabel('generalist group');zlabel('biomass')
 view(gca,[31.5832061068702 22.2]);
-subtitle(['mixing rate ',num2str(dvector(dd))]);
+subtitle(['mortHTL ',num2str(mortHTL_vector(dd))]);
 zlim([0 50])
 end
 
@@ -197,7 +198,8 @@ if p.nGroups==3
 end
 
 theX=logspace(-7,2,10);
-dvector=logspace(-3,-1,20);
+%dvector=logspace(-3,-1,20);
+dvector=linspace(0.05,0.5,10);
 for i=1:p.nGroups
     nexttile(i)
     %subplot(1,p.nGroups,i)
@@ -209,7 +211,7 @@ for i=1:p.nGroups
     thexlim=xlim; theylim=ylim;
     plot([thexlim(1) thexlim(1) thexlim(2) thexlim(2) thexlim(1)],[theylim(1) theylim(2) theylim(2) theylim(1) theylim(1)],'-k')
     if i~=1;set(gca,'YTick', []);end
-    set(gca,'XScale','log','YScale','log','FontSize',14)
+    set(gca,'XScale','log','FontSize',14)
     ax=gca;
     test=theX(theX(1,:) >= ax.XLim(1) & theX(1,:) <= ax.XLim(2));
     %ax.XTick=[0.0000001 0.00001 0.001 0.1];
@@ -219,7 +221,7 @@ for i=1:p.nGroups
     % ax=gca;ax.XAxis.TickLabels = compose('%g', ax.XAxis.TickValues);
     xlabel('Cell mass (\mug C)','FontSize', 14)
     colormap(cmap);    
-    if i==1;ylabel('mixing rate (day^{-1})','FontSize', 14);end
+    if i==1;ylabel('mortHTL','FontSize', 14);end
     title([p.nameGroup{i},' ',num2str(length(find(p.typeGroups(1:i)==p.typeGroups(i))))],'FontSize', 16,'FontWeight','normal');
     clim([0 themax])
     box on

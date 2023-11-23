@@ -113,7 +113,7 @@
 
 ! Vulnerability to predation:
 !----------------------------
-  palatability = 3.1326d0        ! 3.1326d0 = full risk of predation
+  palatability = 1d0        ! 1d0 = full risk of predation
 
 
 

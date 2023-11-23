@@ -30,42 +30,90 @@
 
 !
 !***********************************************************************
-! GENERALISTS SIMPLE INPUT PARAMETERS
+! PROKARYOTE INPUT PARAMETERS
 !***********************************************************************
 !
-  mMinGeneralist = 1.1623d-9    ! Smallest cell size [mug C]
-  mMaxGeneralist = 1.0d0	! Largest cell size [mug C]
+  mMinProkaryote = 7.0d-10 !1.1623d-9  ! Smallest cell size [mug C]
+  mMaxProkaryote = 1.0d-9 !1.0d0  ! Largest cell size [mug C]
 
 ! Light uptake:
 !--------------
-  epsilonL = 0.8d0              ! Light uptake efficiency []
-  alphaL = 0.3d0                ! Light affinity coef. [1/(uE/m2/s) 1/day um]
-  rLstar = 7.5d0                ! Light affinity cross-over size [um]
+  epsilonL = 0.8d0        ! Light uptake efficiency []
+  alphaL = 0.3d0              ! Light affinity coef. [1/(uE/m2/s) 1/day um]
+  rLstar = 7.5d0          ! Light affinity cross-over size [um]
 
 ! Dissolved nutrient and DOC uptake:
 !-----------------------------------
-  alphaN = 0.972d0                ! Diffusive affinity coefficient [L/d/mugC/um^2] 
-  rNstar = 0.4d0                  ! Diffusive affinity cross-over size [um]
+  alphaN = 0.972d0             ! Diffusive affinity coefficient [L/d/mugC/um^2] 
+  rNstar = 0.4d0           ! Diffusive affinity cross-over size [um]
 
 ! Phagotrophy:
 !-------------
-  epsilonF = 0.8d0                ! Food assimilation efficiency [-]
-  alphaF = 0.018d0                ! Clearance rate [L/d/ug C]
-  cF = 30.0d0                      ! Max phagotrophy coefficient [um/day]
-  beta = 500.d0                 ! Preferred predator-prey mass ratio
-  sigma = 1.3d0                 ! Preferred predator-prey mass range
+  epsilonF = 0.000001d0 !0.8d0	       ! Food assimilation efficiency [-]
+  alphaF = 0.0d0 !0.018d0             ! Clearance rate [L/d/ug C]
+  cF = 30.0d0                     ! Max phagotrophy coefficient [um/day]
+  beta = 500.d0                ! Preferred predator-prey mass ratio
+  sigma = 1.3d0                ! Preferred predator-prey mass range
 
 ! Metabolism:
 !------------
-  cLeakage = 0.03d0             ! Passive leakage of C and N
-  delta = 0.05d0                 ! Thickness of cell wall [um]
-  alphaJ = 1.5d0                 ! Constant for jMax [day-1]
-  cR = 0.1d0                     ! Basal metabolism relative to jMax [-]
+  cLeakage = 0.03d0           ! Passive leakage of C and N
+  delta = 0.05d0                ! Thickness of cell wall [um]
+  alphaJ = 1.5d0                ! Constant for jMax [day-1]
+  cR = 0.1d0                   ! Basal metabolism relative to jMax [-]
 
 ! Biogeo:
 !--------
-  remin2 = 0.5d0                ! Fraction of viral lysis remineralized to DOC
-  reminF = 0.1d0                ! Fraction of feeding losses remineralized
+  remin2 = 0.5d0               ! Fraction of viral lysis remineralized to DOC
+  reminF = 0.1d0               ! Fraction of feeding losses remineralized
+
+! Vulnerability to predation:
+!----------------------------
+  palatability = 0.1566      ! 1 = full risk of predation
+
+
+!
+!***********************************************************************
+! GENERALISTS SIMPLE INPUT PARAMETERS
+!***********************************************************************
+!
+  mMinGeneralist = 10*2.5d-8 !1.07d-7 !2.5d-8 ! 1.1623d-9  ! Smallest cell size [mug C]
+  mMaxGeneralist = 10*10.0d0	! Largest cell size [mug C]
+
+! Light uptake:
+!--------------
+  epsilonL = 10*0.8d0        ! Light uptake efficiency []
+  alphaL = 10*0.3d0              ! Light affinity coef. [1/(uE/m2/s) 1/day um]
+  rLstar = 10*7.5d0          ! Light affinity cross-over size [um]
+
+! Dissolved nutrient and DOC uptake:
+!-----------------------------------
+  alphaN = 10*0.972d0             ! Diffusive affinity coefficient [L/d/mugC/um^2] 
+  rNstar = 10*0.4d0           ! Diffusive affinity cross-over size [um]
+
+! Phagotrophy:
+!-------------
+  epsilonF = 10*0.8d0	           ! Food assimilation efficiency [-]
+  alphaF = 0.0001d0 0.0002d0 0.0003d0 0.0005d0 0.0008d0 0.0013d0 0.0022d0 0.0036d0 0.0060d0 0.01d0 ! 0.0001d0 0.01d0  ! Clearance rate [L/d/ug C]
+  cF = 10*30.0d0                     ! Max phagotrophy coefficient [um/day]
+  beta = 10*500.d0                ! Preferred predator-prey mass ratio
+  sigma = 10*1.3d0                ! Preferred predator-prey mass range
+
+! Metabolism:
+!------------
+  cLeakage = 10*0.03d0           ! Passive leakage of C and N
+  delta = 10*0.05d0                ! Thickness of cell wall [um]
+  alphaJ = 10*1.5d0                ! Constant for jMax [day-1]
+  cR = 10*0.1d0                   ! Basal metabolism relative to jMax [-]
+
+! Biogeo:
+!--------
+  remin2 = 10*0.5d0               ! Fraction of viral lysis remineralized to DOC
+  reminF = 10*0.1d0               ! Fraction of feeding losses remineralized
+
+! Vulnerability to predation:
+!----------------------------
+  palatability = 0.1566d0 0.2185d0 0.3048d0 0.4252d0 0.5931d0 0.8273d0 1.1541d0 1.6099d0 2.2457d0 3.1326d0 !0.1566 3.13       ! 1 = full risk of predation
 
 
 
@@ -145,7 +193,7 @@
 
 ! Biogeo:
 !--------
-  remin2 = 0.5d0                ! Fraction of virulysis remineralized to DOC
+  remin2 = 0.9d0                ! Fraction of virulysis remineralized to DOC
 
 ! Vulnerability to predation:
 !----------------------------
@@ -207,7 +255,7 @@
   alphaF = 0.011                ! Clearance rate coefficient
   q = 0.75                      ! Exponent of clearance rate
   h = 1.37                      ! Coefficient for maximum ingestion rate
-  hExponent = 0.75              ! Exponent for maximum ingestion rate
+  hExponent = 0.75              ! Exponent for maximum ingestions rate
 
 ! kBasal  is a factor for basal metabolism {0.006}. This value represents basal metabolism at 
 ! starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
@@ -223,11 +271,11 @@
    
   AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
   vulnerability = 1.            ! Active copepods have full risk of predation
-  DiatomsPreference = 1.0       ! Feeding preference on diatoms
+  DiatomsPreference = 1.0       ! Feeding preference on diatoms (Less feeding on diatoms)
 
 !***********************************************************************
 ! COPEPODS PASSIVE INPUT PARAMETERS
-! - Values taken from Serra-Pompei et al (2020) for passively feeding copepods
+! - Values taken from Serra-Pompei et al (2020) for actively feeding copepods
 !***********************************************************************
 
    epsilonF = 0.67               ! Assimilation efficiency
@@ -237,7 +285,7 @@
    alphaF = 0.0052               ! Clearance rate coefficient
    q = 0.75                      ! Exponent of clearance rate
    h = 0.4                       ! Coefficient for maximum ingestion rate
-   hExponent = 0.75              ! Exponent for maximum ingestion rate
+   hExponent = 0.75              ! Exponent for maximum ingestions rate
 
 ! kBasal  is a factor for basal metabolism {0.006}. This value represents basal metabolism at 
 ! starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
@@ -258,8 +306,7 @@
 !***********************************************************************
 ! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS
 !*********************************************************************** 
-  mMin = 1.d-9                  ! Smallest POM mass
+  mMin = 1d-9                   ! Smallest POM mass
   remin = 0.07d0                ! remineralisation rate (1/day) (Serra-Pompei (2022)) @10 degrees
-  palatability = 0.1d0          ! Preference of other groups for eating POM
 
   
