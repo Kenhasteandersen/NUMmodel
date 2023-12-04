@@ -10,7 +10,8 @@
 % Input:
 %  p: parameter structure from parametersGlobal
 %  sim: (optional) simulation to use for initial conditions
-%  bCalcAnnualAverages: increases the simulation time by a factor 2-3
+%  bCalcAnnualAverages: increases the simulation time of the last year by a
+%                       factor 10
 %
 % Output:
 %  sim: structure with simulation results
@@ -215,12 +216,12 @@ tSave = [];
 % Matrices for annual averages:
 %
 if bCalcAnnualAverages
-    sim.ProdGrossAnnual = zeros( nb,1 );
-    sim.ProdNetAnnual = zeros( nb,1 );
-    sim.ProdHTLAnnual = zeros( nb,1 );
-    sim.BpicoAnnualMean = zeros( nb,1 );
-    sim.BnanoAnnualMean = zeros( nb,1 );
-    sim.BmicroAnnualMean = zeros( nb,1 );
+    ProdGrossAnnual = zeros( nb,1 );
+    ProdNetAnnual = zeros( nb,1 );
+    ProdHTLAnnual = zeros( nb,1 );
+    BpicoAnnualMean = zeros( nb,1 );
+    BnanoAnnualMean = zeros( nb,1 );
+    BmicroAnnualMean = zeros( nb,1 );
 end
 
 % ---------------------------------------
@@ -346,17 +347,18 @@ for i=1:simtime
     % Update annual averages:
     %
     if bCalcAnnualAverages
-        for k = 1:nb
+        if i > simtime - 365/p.dtTransport
             [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
                 getFunctions(u(k,:), L(k), T(k));
-            sim.ProdGrossAnnual(k) = sim.ProdGrossAnnual(k) + ProdGross1/(p.tEnd*2);
-            sim.ProdNetAnnual(k) = sim.ProdNetAnnual(k) + ProdNet1/(p.tEnd*2);
-            sim.ProdHTLAnnual(k) = sim.ProdHTLAnnual(k) + ProdHTL1/(p.tEnd*2);
-            sim.BpicoAnnualMean(k) = sim.BpicoAnnualMean(k) + Bpico1/(p.tEnd*2*365);
-            sim.BnanoAnnualMean(k) = sim.BnanoAnnualMean(k) + Bnano1/(p.tEnd*2*365);
-            sim.BmicroAnnualMean(k) = sim.BmicroAnnualMean(k) + Bmicro1/(p.tEnd*2*365);
+            ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
+            ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
+            ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;
+            BpicoAnnualMean(k) = BpicoAnnualMean(k) + Bpico1;
+            BnanoAnnualMean(k) = BnanoAnnualMean(k) + Bnano1;
+            BmicroAnnualMean(k) = BmicroAnnualMean(k) + Bmicro1;
         end
     end
+
 end
 time = toc;
 fprintf('Solving time: %2u:%02u:%02u\n', ...
@@ -371,19 +373,23 @@ sim.B(sim.B<0) = 0.;
 sim.DOC(sim.DOC<0) = 0.;
 
 if bCalcAnnualAverages
-    tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
-    sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.ProdNetAnnual, [], p.pathBoxes, p.pathGrid));
-    sim.ProdNetAnnual = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.ProdHTLAnnual, [], p.pathBoxes, p.pathGrid));
-    sim.ProdHTLAnnual = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.BpicoAnnualMean, [], p.pathBoxes, p.pathGrid));
-    sim.BpicoAnnualMean = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.BnanoAnnualMean, [], p.pathBoxes, p.pathGrid));
-    sim.BnanoAnnualMean = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.BmicroAnnualMean, [], p.pathBoxes, p.pathGrid));
-    sim.BmicroAnnualMean = squeeze(tmp(:,:,1));
+    sim.ProdGrossAnnual = integrate_over_depth(ProdGrossAnnual);
+    sim.ProdNetAnnual = integrate_over_depth(ProdNetAnnual);
+    sim.ProdHTLAnnual = integrate_over_depth(ProdHTLAnnual);
+    sim.BpicoAnnualMean = integrate_over_depth(BpicoAnnualMean);
+    sim.BnanoAnnualMean = integrate_over_depth(BnanoAnnualMean);
+    sim.BmicroAnnualMean = integrate_over_depth(BmicroAnnualMean);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%
+    function area = integrate_over_depth(conc)
+        tmp = single(matrixToGrid(conc, [], p.pathBoxes, p.pathGrid)) / (365/p.dtTransport);
+        tmp( isnan(tmp) ) = 0;
+        area = zeros(length(sim.x), length(sim.y));
+        for iz = 1:length(sim.dznom)
+            area = area + squeeze(tmp(:,:,iz))*sim.dznom(iz);
+        end
+    end
+
+end
 
