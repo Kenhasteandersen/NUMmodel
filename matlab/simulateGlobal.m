@@ -26,6 +26,7 @@ end
 % Get the global parameters if they are not already set:
 %
 if ~isfield(p,'nameModel')
+    disp('Parameters not set. Using standard parameters for global run.');
     p = parametersGlobal(p);
 end
 
