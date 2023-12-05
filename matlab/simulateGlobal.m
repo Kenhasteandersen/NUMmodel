@@ -346,8 +346,8 @@ for i=1:simtime
     %
     % Update annual averages:
     %
-    if bCalcAnnualAverages
-        if i > simtime - 365/p.dtTransport
+    if bCalcAnnualAverages && i > simtime - 365/p.dtTransport
+        parfor k = 1:nb
             [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
                 getFunctions(u(k,:), L(k), T(k));
             ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
