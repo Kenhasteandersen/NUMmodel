@@ -1,3 +1,14 @@
+%
+% Plot a Sheldon size spectrum over time in a given water column
+%
+% In:
+%  sim - simulation structure
+%  iDepth - The index of the depth to use
+%  lat, lon - latitude and longitude (only needed for a global simulation)
+%
+% Out:
+%  s - structure with the Sheldon spectrum
+%
 function s = plotSizespectrumTime(sim,iDepth,lat,lon)
 
 arguments
