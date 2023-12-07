@@ -255,13 +255,6 @@ for i=1:simtime
 
         month = mod(month + 1, 12);
     end
-
-    %
-    % Enforce minimum B concentration
-    %
-    %for k = 1:n
-    %    u(u(:,k)<p.umin(k),k) = p.umin(k);
-    %end
     %
     % Run Euler time step for dtTransport days:
     %
@@ -271,12 +264,40 @@ for i=1:simtime
     %N = calc_tot_n(p,u);
 
     if ~isempty(gcp('nocreate'))
-        parfor k = 1:nb
+        if bCalcAnnualAverages && i > simtime - 365/p.dtTransport
             %
-            % Integrate ODEs:
+            % Integrate and calculate functions (only last year):
             %
-            u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
-                u(k,:), L(k), T(k), dtTransport, dt);
+            parfor k = 1:nb
+                ProdGross1 = 0;
+                ProdNet1 = 0;
+                ProdHTL1 = 0;
+                ProdBact1 = 0;
+                eHTL1 = 0;
+                Bpico1 = 0;
+                Bnano1 = 0;
+                Bmicro1 = 0;
+
+                [u(k,:), ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1] = ...
+                    calllib(sLibname, 'f_simulateeulerfunctions', ...
+                    u(k,:), L(k), T(k), dtTransport, dt, ...
+                    ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1);
+
+                ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
+                ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
+                ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;
+                BpicoAnnualMean(k) = BpicoAnnualMean(k) + Bpico1;
+                BnanoAnnualMean(k) = BnanoAnnualMean(k) + Bnano1;
+                BmicroAnnualMean(k) = BmicroAnnualMean(k) + Bmicro1;
+            end
+        else
+            %
+            % Just integrate ODEs:
+            %
+            parfor k = 1:nb
+                u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
+                    u(k,:), L(k), T(k), dtTransport, dt);
+            end
         end
     else
         for k = 1:nb
@@ -343,22 +364,6 @@ for i=1:simtime
         tSave = [tSave, i*p.dtTransport];
         fprintf('.\n');
     end
-    %
-    % Update annual averages:
-    %
-    if bCalcAnnualAverages && i > simtime - 365/p.dtTransport
-        parfor k = 1:nb
-            [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
-                getFunctions(u(k,:), L(k), T(k));
-            ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
-            ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
-            ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;
-            BpicoAnnualMean(k) = BpicoAnnualMean(k) + Bpico1;
-            BnanoAnnualMean(k) = BnanoAnnualMean(k) + Bnano1;
-            BmicroAnnualMean(k) = BmicroAnnualMean(k) + Bmicro1;
-        end
-    end
-
 end
 time = toc;
 fprintf('Solving time: %2u:%02u:%02u\n', ...
@@ -373,12 +378,12 @@ sim.B(sim.B<0) = 0.;
 sim.DOC(sim.DOC<0) = 0.;
 
 if bCalcAnnualAverages
-    sim.ProdGrossAnnual = integrate_over_depth(ProdGrossAnnual);
-    sim.ProdNetAnnual = integrate_over_depth(ProdNetAnnual);
-    sim.ProdHTLAnnual = integrate_over_depth(ProdHTLAnnual);
-    sim.BpicoAnnualMean = integrate_over_depth(BpicoAnnualMean);
-    sim.BnanoAnnualMean = integrate_over_depth(BnanoAnnualMean);
-    sim.BmicroAnnualMean = integrate_over_depth(BmicroAnnualMean);
+    sim.ProdGrossAnnual(1,:,:) = integrate_over_depth(ProdGrossAnnual);
+    sim.ProdNetAnnual(1,:,:) = integrate_over_depth(ProdNetAnnual);
+    sim.ProdHTLAnnual(1,:,:) = integrate_over_depth(ProdHTLAnnual);
+    sim.BpicoAnnualMean(1,:,:) = integrate_over_depth(BpicoAnnualMean);
+    sim.BnanoAnnualMean(1,:,:) = integrate_over_depth(BnanoAnnualMean);
+    sim.BmicroAnnualMean(1,:,:) = integrate_over_depth(BmicroAnnualMean);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%

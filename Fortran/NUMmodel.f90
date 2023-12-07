@@ -676,7 +676,7 @@ contains
        gammaN = max(0.d0, min(1.d0, -u(idxN)/(dudt(idxN)*dt)))
     end if
     if ((u(idxDOC) + dudt(idxDOC)*dt) .lt. 0) then
-       gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(dudt(idxDOC)*dt)))
+       gammaDOC = max(0.d0, min(1.d0, u(idxDOC)/(dudt(idxDOC)*dt)))
     end if
     if (nNutrients .gt. 2) then
       if ((u(idxSi) + dudt(idxSi)*dt) .lt. 0) then
@@ -895,6 +895,22 @@ contains
        u = u + dudt*dt
     end do
   end subroutine simulateEuler
+
+  ! -----------------------------------------------
+  ! Simulate with Euler integration and also return functions
+  ! -----------------------------------------------
+  subroutine simulateEulerFunctions(u, L, T, tEnd, dt, &
+            ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+    real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
+    real(dp), intent(in):: L      ! Light level
+    real(dp), intent(in):: T ! Temperature
+    real(dp), intent(in):: tEnd ! Time to simulate
+    real(dp), intent(in):: dt    ! time step
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+
+    call simulateEuler(u, L, T, tEnd, dt)
+    call getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+ end subroutine simulateEulerFunctions
 
   !=========================================
   ! Diagnostic functions

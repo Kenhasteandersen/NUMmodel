@@ -44,6 +44,21 @@ u = calllib(loadNUMmodelLibrary(), 'f_simulatechemostateuler', u, ...
     L, T, ...
     int32(p.idxB-1), ...
     p.u0(1:(p.idxB-1)), p.d, p.tEnd, 0.01, options.bUnicellularloss);
+
+ProdGross = 0;
+ProdNet = 0;
+ProdHTL = 0;
+ProdBact = 0;
+eHTL = 0;
+Bpico = 0;
+Bnano = 0;
+Bmicro = 0;
+[u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro] = ...
+    calllib(loadNUMmodelLibrary(), 'f_simulateeulerfunctions', u, ...
+    L, T, p.tEnd, 0.01,  ...
+    ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro);
+
+
 %
 % Assemble result:
 %
