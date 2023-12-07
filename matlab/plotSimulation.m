@@ -1,7 +1,17 @@
 %θ
 % Make a set of basic plots of a simulation
 %
-function plotSimulation(sim)
+function plotSimulation(sim, options)
+
+arguments
+    sim = struct;
+    % Options for global plots:
+    options.sProjection = 'fast';
+    options.lat = 60;
+    options.lon = -15;
+    options.tDayPlot = 150;
+end
+
 
 switch sim.p.nameModel
     
@@ -53,31 +63,28 @@ switch sim.p.nameModel
     case 'global'
         figure(1)
         clf
-        plotGlobal(sim,0);
-        
-        lat = 60;
-        lon = -15;
-        
+        plotGlobal(sim,0,sProjection=options.sProjection);
+                
         figure(2)
         clf
-        plotWatercolumnTime(sim,lat,lon, depthMax=200);
-        sgtitle( sprintf('Water column at %i, %i',[lat,lon]))
+        plotWatercolumnTime(sim,options.lat,options.lon, depthMax=200);
+        sgtitle( sprintf('Water column at %i, %i',[options.lat,options.lon]))
         
         figure(3)
-        tDay = max(sim.t)-215;
+        tDay = max(sim.t)-(365-options.tDayPlot);
         if (tDay<1)
             tDay = max(sim.t);
         end
-        plotWatercolumn(sim, tDay,lat,lon, bNewplot=true, depthMax=200);
-        sgtitle( sprintf('Watercolumn at (%i,%i) year %i, day %i',[lat,lon,floor(tDay/365)+1, mod(tDay,365)]));
+        plotWatercolumn(sim, tDay,options.lat,options.lon, bNewplot=true, depthMax=200);
+        sgtitle( sprintf('Watercolumn at (%i,%i) year %i, day %i',[options.lat,options.lon,floor(tDay/365)+1, mod(tDay,365)]));
 
         figure(4)
-        plotSizespectrumTime(sim,1,lat,lon);
-        sgtitle(sprintf('Size spectrum at (%3.0f,%3.0f).\n',[lat,lon]));
+        plotSizespectrumTime(sim,1,options.lat,options.lon);
+        sgtitle(sprintf('Size spectrum at (%3.0f,%3.0f).\n',[options.lat,options.lon]));
         
         figure(5)
-        plotSizespectrum(sim,150,1,lat,lon);
-        sgtitle( sprintf('Surface spectrum at (%i,%i) year %i, day %i',[lat,lon,floor(tDay/365)+1, mod(tDay,365)]));
+        plotSizespectrum(sim,tDay,1,options.lat,options.lon);
+        sgtitle( sprintf('Surface spectrum at (%i,%i) year %i, day %i',[options.lat,options.lon,floor(tDay/365)+1, mod(tDay,365)]));
 
         figure(6)
         plotGlobalTransect(sim,bAMTtrack=true);

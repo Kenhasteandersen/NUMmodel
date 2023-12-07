@@ -28,7 +28,7 @@ switch sim.p.nameModel
             % Extract from global run:
             idx = calcGlobalWatercolumn(lat,lon,sim);
             s.B = squeeze(sim.B(:, idx.x, idx.y, iDepth, :));
-            sTitle = sprintf("Sheldon spectrum at %3.0f m (log_{10} {\mu}g_N/l)", sim.z(iDepth));
+            sTitle = sprintf("Sheldon spectrum at %3.0f m (log_{10} ug_N/l)", sim.z(iDepth));
         end
 
     otherwise
@@ -66,7 +66,7 @@ set(gca, 'colorscale','log')
 
 c = colorbar;
 c.Label.String = "log_{10}({\mu}g_C/L)";
-title(sTitle)
+sgtitle(sTitle)
 xlabel('Mass (\mugC)')
 ylabel('Time (days)')
 
