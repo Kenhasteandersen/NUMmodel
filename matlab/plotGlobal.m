@@ -34,13 +34,13 @@ tiledlayout(2+bSilicate+sim.p.nGroups,1)
 %text(0, 1, labels(i),'Units','normalized')
 nexttile
 field = getfield(sim.DOC);
-panelGlobal(sim.x,sim.y,log10(field),[-2 0],sTitle='Surface DOC (log_{10} {\mu}g_C/l)',sProjection=sProjection);
+panelGlobal(sim.x,sim.y,log10(field),[0 2],sTitle='Surface DOC (log_{10} {\mu}g_C/l)',sProjection=sProjection);
 set(gca,'XTickLabel','')
 
 % Nitrogen
 nexttile
 field = getfield(sim.N);
-c = panelGlobal(sim.x,sim.y,log10(field),[-2 1],sTitle='Surface N (log_{10} {\mu}g_C/l)',sProjection=sProjection);
+c = panelGlobal(sim.x,sim.y,log10(field),[0 2],sTitle='Surface N (log_{10} {\mu}g_C/l)',sProjection=sProjection);
 c.Label.String  = ' [\mug N l^{-1}]';
 set(gca,'XTickLabel','')
 
@@ -48,7 +48,7 @@ set(gca,'XTickLabel','')
 if bSilicate
     nexttile
     field = getfield(sim.Si);
-    c = panelGlobal(sim.x,sim.y,log10(field),[-2 1],sTitle='Surface Si (log_{10} {\mu}g_{Si}/l)',sProjection=sProjection);
+    c = panelGlobal(sim.x,sim.y,log10(field),[0 2],sTitle='Surface Si (log_{10} {\mu}g_{Si}/l)',sProjection=sProjection);
     c.Label.String  = ' [\mug Si l^{-1}]';
 end
 set(gca,'XTickLabel','')
@@ -62,8 +62,8 @@ for i = 1:sim.p.nGroups
         field = squeeze(field(iTime,:,:));
     end
     cbar = panelGlobal(sim.x,sim.y,log10(field),...
-        [0 1], sTitle=strcat('Surface ',sim.p.nameGroup(i),' (log_{10} {\mu}g_C/l)'), sProjection=sProjection);
-    clim([0 1])
+        [-2 1], sTitle=strcat(sim.p.nameGroup(i)), sProjection=sProjection);
+    clim([-2 1])
     cbar.Label.String  = 'g_C/m^2';
     set(gca,'XTickLabel','')
 
