@@ -8,7 +8,8 @@ end
 %
 if ~isfield(sim,'Bpnm')
     sim.Bpnm = zeros(length(sim.x), length(sim.y), 3);
-    for iTime = find(sim.t > sim.t(end)-365) % Average over last year
+    ixTime = find(sim.t > sim.t(end)-365);
+    for iTime = ixTime % Average over last year
         for i = 1:length(sim.x)
             for j = 1:length(sim.y)
                 tmp = [0 0 0];
@@ -21,7 +22,7 @@ if ~isfield(sim,'Bpnm')
             end
         end
     end
-    sim.Bpnm = sim.Bpnm/iTime;
+    sim.Bpnm = sim.Bpnm/length(ixTime);
 end
 
 %%
