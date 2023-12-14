@@ -896,6 +896,25 @@ contains
     end do
   end subroutine simulateEuler
 
+
+   ! -----------------------------------------------
+  ! Simulate with Euler integration
+  ! -----------------------------------------------
+  subroutine simulateEulerParallel(u, L, T, tEnd, dt)
+    real(dp), intent(inout):: u(:,:) ! Initial conditions and result after integration
+    real(dp), intent(in):: L(nGrid)      ! Light level
+    real(dp), intent(in):: T(nGrid) ! Temperature
+    real(dp), intent(in):: tEnd ! Time to simulate
+    real(dp), intent(in):: dt    ! time step
+    integer:: i
+
+    !$OMP PARALLEL DO PRIVATE(upositive, F, group)
+    do i = 1, size(T)
+      call simulateEuler(u(i,:),L(i),T(i),tEnd,dt)
+    end do
+    !$OMP END PARALLEL DO
+  end subroutine simulateEulerParallel
+
   ! -----------------------------------------------
   ! Simulate with Euler integration and also return functions
   ! -----------------------------------------------
