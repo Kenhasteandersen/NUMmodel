@@ -5,9 +5,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 #   set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 #   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 #endif()
-set(CMAKE_FORTRAN_FLAGS="-O2")
+
+set(CMAKE_FORTRAN_FLAGS="-O2 ")
 set(RELEASE_FLAGS "-O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS")
 set(DEBUG_FLAGS "-g3")
+
 
 add_library(NUMmodel SHARED
 	${CMAKE_CURRENT_LIST_DIR}/read_input.f90
@@ -36,6 +38,14 @@ add_executable(NUMmodeltest
 	$<TARGET_OBJECTS:NUMmodel>
 	${CMAKE_CURRENT_LIST_DIR}/NUMmodeltest.f90
 )
+
+#find_package(OpenMP REQUIRED)
+#if(OpenMP_Fortran_FOUND)
+#    target_link_libraries(NUMmodel PUBLIC OpenMP::OpenMP_Fortran)
+#	target_link_libraries(NUMmodeltest PUBLIC OpenMP::OpenMP_Fortran)
+#	set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+#	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")  
+#endif()
 
 install(TARGETS NUMmodel_matlab NUMmodel_R  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../lib)
 install(TARGETS NUMmodeltest DESTINATION ${CMAKE_CURRENT_LIST_DIR})

@@ -3,7 +3,7 @@ program NUMmodeltest
   use globals
   implicit none
 
-  real(dp), allocatable:: u0(:), u00(:), dudt(:)
+  real(dp), allocatable:: u0(:), u00(:), dudt(:),uu(:,:),L(:),T(:)
   real(dp):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
   integer:: i
   real(dp):: Nbalance,Cbalance, Sibalance
@@ -50,18 +50,33 @@ program NUMmodeltest
     print*, 'Error loading parameter ', errorstr
   end if
 
+  allocate(uu(4,nGrid))
+  allocate(L(4))
+  allocate(T(4))
+  do i = 1,size(L)
+    L(i) = 100
+    T(i) = 100
+    uu(i,idxN) = 150.d0
+    uu(i,idxDOC) = 10.d0
+    uu(i,idxB:nGrid) = 10.d0
+  end do
+  call simulateEulerParallel(uu,L,T,100.d0,0.1d0)
+  do i = 1,size(L)
+  write(*,*) uu(i,:)
+  enddo
+ 
   !call setHTL(0.1d0, 0.1d0, .false., .false.)
 
-  allocate(u0(nGrid))
-  allocate(u00(nGrid))
-  allocate(dudt(nGrid))
-  u00(idxN) = 150.d0
-  u00(idxDOC) = 10.d0
-  !u00(idxSi) = 10.d0
-  do i = idxB, nGrid
-     u00(i) = 10 + 0.1*(i-2)
-  end do
-  dudt = 0.d0
+  ! allocate(u0(nGrid))
+  ! allocate(u00(nGrid))
+  ! allocate(dudt(nGrid))
+  ! u00(idxN) = 150.d0
+  ! u00(idxDOC) = 10.d0
+  ! !u00(idxSi) = 10.d0
+  ! do i = idxB, nGrid
+  !    u00(i) = 10 + 0.1*(i-2)
+  ! end do
+  ! dudt = 0.d0
 
   !call getSinking(u00)
   !write(*,*) u00
@@ -82,24 +97,24 @@ program NUMmodeltest
   !      write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
   !end select
   
-  call calcDerivatives(u00, 30.d0, 10.d0, 0.0d0, dudt)
-  call printRates()
-  !write(*,*) 'ngrid',nGrid
+  ! call calcDerivatives(u00, 30.d0, 10.d0, 0.0d0, dudt)
+  ! call printRates()
+  ! !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
   !write(*,*) 'nbutrients',nNutrients
 
-  ProdGross = 0
-  ProdNet = 0
-  ProdHTL=0
-  ProdBact = 0
-  eHTL=0
-  Bpico=0
-  Bnano=0
-  Bmicro=0
+  ! ProdGross = 0
+  ! ProdNet = 0
+  ! ProdHTL=0
+  ! ProdBact = 0
+  ! eHTL=0
+  ! Bpico=0
+  ! Bnano=0
+  ! Bmicro=0
 
  ! call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
   !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
-  write(*,*) dudt
+  !write(*,*) dudt
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()
   !!$  u0=u00
@@ -113,10 +128,10 @@ program NUMmodeltest
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
  !write(*,*) Bpico, Bnano, Bmicro
-  call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
-    write(*,*) 'Nbalance:', Nbalance
-    write(*,*) 'Cbalance:', Cbalance
-    write(*,*) 'Sibalance:', Sibalance
+  ! call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
+  !   write(*,*) 'Nbalance:', Nbalance
+  !   write(*,*) 'Cbalance:', Cbalance
+  !   write(*,*) 'Sibalance:', Sibalance
    
 
 !do i = 5,9
