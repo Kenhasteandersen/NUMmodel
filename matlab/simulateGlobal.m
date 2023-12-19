@@ -10,18 +10,20 @@
 % Input:
 %  p: parameter structure from parametersGlobal
 %  sim: (optional) simulation to use for initial conditions
-%  bCalcAnnualAverages: increases the simulation time of the last year by a
+%  options.bCalcAnnualAverages: increases the simulation time of the last year by a
 %                       factor 10
+%  options.bVerbose: Write out progress on the terminal
 %
 % Output:
 %  sim: structure with simulation results
 %
-function sim = simulateGlobal(p, sim, bCalcAnnualAverages)
+function sim = simulateGlobal(p, sim, options)
 
 arguments
     p struct;
     sim struct = [];
-    bCalcAnnualAverages = false; % Whether to calculate annual averages
+    options.bCalcAnnualAverages = false; % Whether to calculate annual averages
+    options.bVerbose = true; % Whether to write output on the terminal
 end
 %
 % Get the global parameters if they are not already set:
@@ -43,7 +45,9 @@ ixB = p.idxB:p.n;
 
 %Tbc = [];
 
-disp('Preparing simulation')
+if options.bVerbose
+    disp('Preparing simulation')
+end
 %
 % Check that files exist:
 %
@@ -68,7 +72,9 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 % Initial conditions:
 %
 if ~isempty(sim)
-    disp('Starting from previous simulation.');
+    if options.bVerbose
+        disp('Starting from previous simulation.');
+    end
     u(:,ixN) = gridToMatrix(squeeze(double(sim.N(end,:,:,:))),[],p.pathBoxes, p.pathGrid);
     u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(end,:,:,:))),[],p.pathBoxes, p.pathGrid);
     if bSilicate
@@ -137,7 +143,9 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 idxSinking = find(p.velocity ~= 0);
 
 if ~isempty(idxSinking)
-    disp('Allocating sinking matrices')
+    if options.bVerbose
+        disp('Allocating sinking matrices')
+    end
     % Allocate sinking matrices:
     Asink = {};
     for l = 1:length(idxSinking)
@@ -215,7 +223,7 @@ tSave = [];
 %
 % Matrices for annual averages:
 %
-if bCalcAnnualAverages
+if options.bCalcAnnualAverages
     ProdGrossAnnual = zeros( nb,1 );
     ProdNetAnnual = zeros( nb,1 );
     ProdHTLAnnual = zeros( nb,1 );
@@ -227,7 +235,9 @@ end
 % ---------------------------------------
 % Run transport matrix simulation
 % ---------------------------------------
-disp('Starting simulation')
+if options.bVerbose
+    disp('Starting simulation')
+end
 sLibname = loadNUMmodelLibrary();
 dtTransport = p.dtTransport;
 n = p.n;
@@ -264,7 +274,7 @@ for i=1:simtime
     %N = calc_tot_n(p,u);
 
     if ~isempty(gcp('nocreate'))
-        if bCalcAnnualAverages && i > simtime - 365/p.dtTransport
+        if options.bCalcAnnualAverages && i > simtime - 365/p.dtTransport
             %
             % Integrate and calculate functions (only last year):
             %
@@ -343,7 +353,9 @@ for i=1:simtime
     % Save timeseries in grid format
     %
     if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
-        fprintf('t = %u days',floor(i/2))
+        if options.bVerbose
+            fprintf('t = %u days',floor(i/2))
+        end
 
         if any(isnan(u))
             warning('NaNs after running current time step');
@@ -362,12 +374,17 @@ for i=1:simtime
         sim.L(iSave,:,:,:) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
         sim.T(iSave,:,:,:) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
         tSave = [tSave, i*p.dtTransport];
-        fprintf('.\n');
+        if options.bVerbose
+            fprintf('.\n');
+        end 
     end
 end
 time = toc;
-fprintf('Solving time: %2u:%02u:%02u\n', ...
-    [floor(time/3600), mod(floor(time/60),60), floor(mod(time,60))]);
+if options.bVerbose
+    fprintf('Solving time: %2u:%02u:%02u\n', ...
+        [floor(time/3600), mod(floor(time/60),60), floor(mod(time,60))]);
+end
+
 % ---------------------------------------
 % Put results into sim structure:
 % ---------------------------------------
@@ -377,7 +394,7 @@ sim.Ntot = calcGlobalN(sim);
 sim.B(sim.B<0) = 0.;
 sim.DOC(sim.DOC<0) = 0.;
 
-if bCalcAnnualAverages
+if options.bCalcAnnualAverages
     sim.ProdGrossAnnual(1,:,:) = integrate_over_depth(ProdGrossAnnual);
     sim.ProdNetAnnual(1,:,:) = integrate_over_depth(ProdNetAnnual);
     sim.ProdHTLAnnual(1,:,:) = integrate_over_depth(ProdHTLAnnual);
