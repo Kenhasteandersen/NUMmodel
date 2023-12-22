@@ -5,7 +5,6 @@
 !     This vector is already set to default as mPOM = m, which works for unicellular groups
 !  2) Define the fluxes to POM in jPOM (note this is a rate 1/day)
 !
-! NOTE: THE DYNAMICS OF POM IN GENERALISTS AND COPEPODS NEEDS TO BE REVISITED
 !
 module POM
     use globals
@@ -17,7 +16,7 @@ module POM
   
     type, extends(typeSpectrum) :: spectrumPOM
             
-      real(dp):: remin
+      real(dp):: remin ! Remineralizaation rate (1/day)
 
     contains
       procedure, pass :: initPOM

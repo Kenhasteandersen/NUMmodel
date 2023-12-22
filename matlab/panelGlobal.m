@@ -22,6 +22,7 @@ arguments
     vContourLevels = double([min(z(:)), max(z(:))]);
     options.sTitle string = '';
     options.sProjection string = 'fast';
+    options.sUnits = '\mug C l^{-1}';
 end
 %
 % Check that mapping toolbox is installed
@@ -73,7 +74,7 @@ else
 end
 
 cbar = colorbar('eastoutside', 'FontSize',14);
-cbar.Label.String  = '\mug C l^{-1}';
+cbar.Label.String  = options.sUnits;
 cbar.FontSize = 10;
 box off
 title(options.sTitle,'fontweight','normal')
