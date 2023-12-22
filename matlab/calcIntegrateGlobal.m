@@ -5,7 +5,7 @@
 % In:
 %  sim: simulation structure
 %  field: field to integrate, e.g., field = sim.B or field = sim.N
-%  bAverageTime: whether to average over time (default false)
+%  bAverageTime: whether to average over last year (default false)
 %
 % Out:
 %  Three dimensional field in units of g/m2
@@ -28,5 +28,5 @@ dz = sim.dznom;
 field = squeeze( sum(field.*reshape(dz ,1,1,1,numel(dz)),4) / 1000); % g/m2
 
 if bAverageTime
-    field = mean(field,1);
+    field = mean(field(sim.t>sim.t(end)-365,:,:,1));
 end

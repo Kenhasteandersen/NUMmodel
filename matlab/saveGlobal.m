@@ -19,6 +19,6 @@ savesim.t = 0;
 savesim.p = sim.p;
 sim = savesim;
 
-save(sim.p.pathInit,'sim','-v7.3');
+save(path,'sim','-v7.3');
 
     
