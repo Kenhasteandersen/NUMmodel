@@ -195,6 +195,19 @@ if bSilicate
     p.u0(ixSi) = u(nGrid,ixSi);
 end
 %
+% Set BCvalue:
+%
+BCvalue = p.BCvalue;
+%if size(BCvalue,1)==1
+%    BCvalue = ones(length(ixBottom),1)*BCvalue;
+%end
+% If BCvalue == -1 then use the bottom value from the initial conditions:
+for i = 1:length(BCvalue)
+    if BCvalue(i)==-1
+        BCvalue(i) = u(end,i)';
+    end
+end
+%
 % Matrices for saving the solution:
 %
 iSave = 0;
@@ -285,7 +298,7 @@ for i = 1:simtime
     % Bottom BC for nutrients:
     u(end, 1:p.nNutrients) = u(end, 1:p.nNutrients) +  ...
         p.BCdiffusion(1:p.nNutrients)*p.dtTransport/sim.dznom(nGrid) .* ...
-        ( p.BCvalue(1:p.nNutrients) - u(end,1:p.nNutrients) );
+        ( BCvalue(1:p.nNutrients) - u(end,1:p.nNutrients) );
 
     %u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
     %    p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
