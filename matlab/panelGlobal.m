@@ -10,6 +10,7 @@
 %  sProjection: projection to use. Defaults to 'fast'. Other projections 
 %               requires that the mapping toolbox is installed. 
 %               Good projection is 'eckert4'.
+%  sUnits : The unit to show on the colorbar
 %
 % Out:
 %  cbar: the color bar object
