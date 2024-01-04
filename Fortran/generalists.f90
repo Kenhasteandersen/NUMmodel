@@ -9,20 +9,21 @@ module generalists
 
   private 
   
-  real(dp) :: alphaL,epsilonL,bL,bN,bDOC,bF,bg,remin2,reminF
+  real(dp) :: epsilonL,bL,bN,bDOC,bF,bg,remin2,reminF
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
     !
     ! Regulation factors:
     !
-    real(dp), allocatable :: dL(:), dN(:), dDOC(:)
+    real(dp), allocatable :: dL(:), dN(:), dDOC(:), jNet(:)
     
   contains
     procedure, pass :: initGeneralists
     procedure :: calcRates => calcRatesGeneralists
     procedure :: calcDerivativesGeneralists
     procedure :: printRates => printRatesGeneralists
+    !procedure :: getProdNet => getProdNetGeneralists
     procedure :: getProdBact => getProdBactGeneralists 
   end type spectrumGeneralists
  
@@ -71,11 +72,9 @@ contains
     call read_input(inputfile,'generalists','remin2',remin2,errorio,errorstr)
     call read_input(inputfile,'generalists','reminF',reminF,errorio,errorstr)
     call read_input(inputfile,'generalists','rho',rho,errorio,errorstr)
-
     call read_input(inputfile,'generalists','epsilonF',this%epsilonF,errorio,errorstr)
     call read_input(inputfile,'generalists','beta',this%beta,errorio,errorstr)
     call read_input(inputfile,'generalists','sigma',this%sigma,errorio,errorstr)
-    
 
     allocate(this%JFreal(n))
 
@@ -99,6 +98,7 @@ contains
     allocate(this%dL(n))
     allocate(this%dN(n))
     allocate(this%dDOC(n))
+    allocate(this%Jnet(n))
 
   end subroutine initGeneralists
 
@@ -107,7 +107,7 @@ contains
     real(dp), intent(in):: gammaN, gammaDOC
     real(dp), intent(in):: L, N, DOC
     real(dp):: f, JmaxT
-    real(dp):: Jnetp(this%n), Jnet(this%n)
+    real(dp):: Jnetp(this%n)
     integer:: i
 
     do i = 1, this%n
@@ -155,17 +155,17 @@ contains
        !write(*,*) dN(i)
        if (this%dN(i).lt.0) then ! check if N leaks out of the cell
         this%dN(i)=0.
-        Jnet =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
+        this%Jnet(i) =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
         + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*this%dN(i)*this%JN(i)) ! was with max(O.,..) 
-        f = (Jnet(i) )/(Jnet(i) + JmaxT)
+        f = (this%Jnet(i) )/(this%Jnet(i) + JmaxT)
         !if (f .gt. 0) then
 
         this%JNlossLiebig(i) = (1-f)*this%JF(i)-f*JmaxT!-1/(1+bg)*(bN*dN(i)*this%JN(i))!this%JF(i)-!this%JF(i)-Jnet(i)!f*JmaxT
         !endif
        else 
-        Jnet =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
+        this%Jnet(i) =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
         + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*this%dN(i)*this%JN(i)) ! was with max(O.,..) 
-        f = (Jnet(i) )/(Jnet(i) + JmaxT)
+        f = (this%Jnet(i) )/(this%Jnet(i) + JmaxT)
         this%JNlossLiebig(i) = 0
         end if
        !Jnet =  1./(1+bg)*(dDOC(i)*this%JDOC(i)*(1.-bDOC)+dL(i)*this%JL(i)*(1-bL) &
@@ -174,7 +174,7 @@ contains
        ! Saturation of net growth
        !
        !f = (Jnet(i) )/(Jnet(i) + JmaxT)
-       if ((Jnet(i) + JmaxT).eq.0) then
+       if ((this%Jnet(i) + JmaxT).eq.0) then
         f=0.
        end if
         this%JCtot(i) = & 
@@ -182,7 +182,7 @@ contains
         - (1-f)*fTemp2*this%Jresp(i) &
         - ( (1-f)&
         *(bDOC*this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i)*bL+ this%JF(i)*bF+bN*this%dN(i)*this%JN(i))&
-        +(1-f)*bg*Jnet(i) )
+        +(1-f)*bg*this%Jnet(i) )
       !
        ! Apply saturation to uptake rates
        !
@@ -209,7 +209,7 @@ contains
                    bL*this%dL(i)*this%JL(i) + &
                    bN*this%dN(i)*this%JN(i) + &
                    bF*this%JF(i) + &
-                   bg*Jnet(i))
+                   bg*this%Jnet(i))
 
       !write(*,*) this%Jresptot(i)                 
       ! 
@@ -295,6 +295,33 @@ subroutine printRatesGeneralists(this)
   write(*,99) "deltaN:", this%dN
   write(*,99) "deltaDOC:", this%dDOC
 end subroutine printRatesGeneralists
+
+!
+  ! Returns the net primary production calculated as the total amount of carbon fixed
+  ! by photsynthesis minus the respiration due to basal respiration,
+  ! photosynthesis, nutrint uptake, and growth. Units: mugC/day/m3
+  ! (See Andersen and Visser (2023) table 5)
+  !
+function getProdNetGeneralists(this, u) result(ProdNet)
+  real(dp):: ProdNet
+  class(spectrumGeneralists), intent(in):: this
+  real(dp), intent(in):: u(this%n)
+  integer:: i
+  real(dp):: resp
+
+  ProdNet = 0.d0
+  do i = 1, this%n
+    resp = (1-this%f(i))*fTemp2*this%Jresp(i) + &
+      (1-this%f(i))*( &
+      bL*this%dL(i)*this%JL(i) + &
+       bN*this%dN(i)*this%JN(i) + &   
+      bg*this%Jnet(i))
+      !print*, resp, this%f(i), bg*this%Jnet(i)
+      ProdNet = ProdNet + max( 0.d0, &
+                 (this%JLreal(i) - resp)*u(i)/this%m(i) )
+                ! (this%JLreal(i) - this%Jresptot(i))*u(i)/this%m(i) )
+  end do
+end function getProdNetGeneralists
 
   function getProdBactGeneralists(this, u) result(ProdBact)
     real(dp):: ProdBact
