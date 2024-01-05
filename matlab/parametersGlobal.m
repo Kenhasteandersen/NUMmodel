@@ -39,8 +39,10 @@ if (nargin==1 || nargin==0 || nTMmodel == 1)
     p.pathGrid      = strcat(path,'/../TMs/MITgcm_2.8deg/grid.mat');
     p.pathConfigData = strcat(path,'/../TMs/MITgcm_2.8deg/config_data.mat');
     p.pathTemp      = strcat(path,'/../TMs/MITgcm_2.8deg/BiogeochemData/Theta_bc.mat'); 
-    p.pathN0        = strcat(path,'/../TMs/MITgcm_N0');
-    p.pathInit      = strcat(sprintf('Transport matrix/globalInitMITgcm_%02i',length(p.u0)));
+    p.pathN0        = strcat(path,'/../TMs/MITgcm_2.8deg/N0');
+    p.pathSi0       = strcat(path,'/../TMs/MITgcm_2.8deg/Si0');
+    p.pathInit      = strcat(sprintf('TMs/globalInitMITgcm_%02i',length(p.u0)));
+    p.pathPARday    = strcat(path,'/../TMs/MITgcm_2.8deg/parday.mat');
     
     p.dt = 0.1; % For Euler time stepping
     p.dtTransport = 0.5; % The TM time step (in units of days)
@@ -51,14 +53,15 @@ elseif nTMmodel == 2
     p.pathGrid = strcat(path,'/../TMs/MITgcm_ECCO/grid.mat');
     p.pathConfigData = strcat(path,'/../TMs/MITgcm_ECCO/config_data.mat');
     p.pathTemp = strcat(path,'/../TMs/MITgcm_ECCO/BiogeochemData/Theta_bc.mat'); 
-    p.pathN0    = strcat(path,'/../TMs/MITgcm_ECCO_N0');
+    p.pathN0    = strcat(path,'/../TMs/MITgcm_ECCO/N0');
+    p.pathSi0    = strcat(path,'/../TMs/MITgcm_ECCO/Si0');
     p.pathInit = strcat(sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0)));
     
     p.dt = 0.1; % For Euler time stepping
     p.dtTransport = 0.5; % The TM time step (in units of days)
 elseif nTMmodel == 3
     % Experimental
-     p.TMname = 'UVicOSUpicdefault';
+    p.TMname = 'UVicOSUpicdefault';
     p.pathMatrix = strcat(path,'/../TMs/UVicOSUpicdefault/Matrix1/TMs/matrix_nocorrection_');
     p.pathBoxes = strcat(path,'/../TMs/UVicOSUpicdefault/Matrix1/Data/boxes.mat');
     p.pathGrid = strcat(path,'/../TMs/UVicOSUpicdefault/grid.mat');
@@ -91,31 +94,17 @@ p.bTransport = true; % Whether to do the transport with the transport matrix
 % Bottom BC for nutrients:
 %
 p.BCdiffusion = [0, 0, 10]; % Diffusivity of nutrients out of the bottom m^2/day
-p.BCvalue = p.u0; % Use the initial value concentration of the bottom concentration
+p.BCvalue = 0*p.u0 - 1; % Use the initial value concentration of the bottom concentration
 p.BC_POMclosed = true; % Whether the bottom BC for POM is open or closed
-%
-% Set minimum concentrations:
-%
-% p.umin = 0*p.u0;
-% for iGroup = 1:p.nGroups
-%     ix = p.ixStart(iGroup):p.ixEnd(iGroup);
-%     if p.typeGroups(iGroup) < 10
-%         p.umin(ix) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Minimum B concentration for unicellular groups
-%     end
-%     if p.typeGroups(iGroup)>=10 && p.typeGroups(iGroup)<100
-%         p.umin(ix(1)) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Send in some nauplii in copepod groups
-%     end
-% end
 %
 % Light environment:
 %
 p.bUse_parday_light = false; % Using the parday file includes changes in cloud cover
                              % but only works with MITgcm_2.8
+p.kw = 0.05; % Damping of light by water; m^-1
 % Parameters used to calculate light if not using parday:
 p.EinConv = 4.57; % conversion factor from W m^-2 to \mu mol s^-1 m^-2 (Thimijan & Heins 1983)
 p.PARfrac = 0.4; % Fraction of light available as PAR. Source unknown
-p.kw = 0.05; % Damping of light by water; m^-1
-
 
 
 end
