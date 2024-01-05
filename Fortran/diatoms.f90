@@ -21,6 +21,7 @@ module diatoms
        procedure :: calcRates => calcRatesDiatoms
        procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
+       procedure :: getProdNet => getProdNetDiatoms
      end type spectrumDiatoms
 
      public  initDiatoms, spectrumDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
@@ -220,12 +221,11 @@ module diatoms
            f=0.
           end if
 
-          this%JNreal(i) = (1-f)*dN(i) * this%JN(i) 
+          this%JNreal(i) =   (1-f)*dN(i)   * this%JN(i) 
           this%JDOCreal(i) = (1-f)*dDOC(i) * this%JDOC(i)
-          this%JLreal(i) = (1-f)*dL(i) * this%JL(i)
-          this%JSireal(i) = (1-f)*dSi(i) * this%JSi(i)
-          this%Jtot(i)= f * JmaxT - (1-f)*( this%JlossPassive(i) )!+ fTemp2*this%Jresp(i))
-
+          this%JLreal(i) =   (1-f)*dL(i)   * this%JL(i)
+          this%JSireal(i) =  (1-f)*dSi(i)  * this%JSi(i)
+          this%Jtot(i)= f*JmaxT - (1-f)*this%JlossPassive(i)!+ fTemp2*this%Jresp(i))
 
          this%JCtot(i) = & 
         !
@@ -238,12 +238,13 @@ module diatoms
          -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
              
           this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-          this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + & !
-               (1-f)*(bDOC*dDOC(i)*this%JDOC(i) + &
-                      bL*dL(i)*this%JL(i) + &
-                      bN*dN(i)*this%JN(i) + &
-                      bSi*dSi(i)*this%JSi(i) + &
-                      bg*Jnet(i))
+          this%Jresptot(i) = &
+              fTemp2*this%Jresp(i) + & !
+              bDOC*this%JDOCreal(i) + &
+              bL*this%JLreal(i) + &
+              bN*this%JNreal(i) + &
+              bSi*this%JSireal(i) + &
+              bg*Jnet(i)
           !
           !write(*,*) jlim(i),dN(i),dSi(i)
 
@@ -337,6 +338,30 @@ module diatoms
       write(*,99) "jResptot:", this%Jresptot / this%m
     end subroutine printRatesDiatoms
     
+!
+  ! Returns the net primary production calculated as the total amount of carbon fixed
+  ! by photsynthesis minus the respiration due to basal respiration,
+  ! photosynthesis, nutrint uptake, and growth. Units: mugC/day/m3
+  ! (See Andersen and Visser (2023) table 5)
+  !
+    function getProdNetDiatoms(this, u) result(ProdNet)
+      real(dp):: ProdNet
+      class(spectrumDiatoms), intent(in):: this
+      real(dp), intent(in):: u(this%n)
+      integer:: i
+      real(dp):: resp
+    
+      ProdNet = 0.d0
+      do i = 1, this%n
+        resp = &
+          fTemp2*this%Jresp(i) + & ! Basal metabolism
+          bL*this%JLreal(i) + &    ! Light uptake metabolism
+          bN*this%JNreal(i) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i)) + &  ! The fraction of N uptake that is not associated to DOC uptake  
+          bg*this%f(i)*this%Jmax(i)/(1-this%f(i)) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i)) ! The fraction of growth not associated with DOC
+          ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
+      end do
+    end function getProdNetDiatoms
+
     function getProdBactDiatoms(this, u) result(ProdBact)
       real(dp):: ProdBact
       class(spectrumDiatoms), intent(in):: this
