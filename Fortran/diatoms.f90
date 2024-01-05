@@ -358,7 +358,7 @@ module diatoms
           bL*this%JLreal(i) + &    ! Light uptake metabolism
           bN*this%JNreal(i) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i)) + &  ! The fraction of N uptake that is not associated to DOC uptake  
           bg*this%f(i)*this%Jmax(i)/(1-this%f(i)) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i)) ! The fraction of growth not associated with DOC
-          ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
+        ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
       end do
     end function getProdNetDiatoms
 
