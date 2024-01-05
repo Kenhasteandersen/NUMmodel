@@ -40,17 +40,17 @@ depth_layers=[23;21;21;19]; %maunally identified
 %%
 time_dim= size(simFken10.ProdNet,1);
 time=time_dim-12+1:time_dim;
-
 figure(4)
 clf(4)
+% set(gcf, 'Position', get(0, 'Screensize'))
 set(gcf,'color','w');
 
 t=tiledlayout(2,2);
 for ilat = 1:length(lat)
-    file_nameNPPcafe=['NPP_extracted_CAFElat',num2str(lat(ilat))];
+file_nameNPPcafe=['NPP_extracted_CAFElat',num2str(lat(ilat))];
     load([directory_h,file_nameNPPcafe]);
-    idx(ilat) = calcGlobalWatercolumn(lat(ilat),lon(ilat),simFken5);
-    nexttile                              % without this
+idx(ilat) = calcGlobalWatercolumn(lat(ilat),lon(ilat),simFken5);
+nexttile                              % without this
         plot(simFken5.ProdNet(time,idx(ilat).x, idx(ilat).y), 'o-r', 'LineWidth', 2)% mgC/m2/day
         hold on
         plot(simFken10.ProdNet(time,idx(ilat).x, idx(ilat).y), 'o-m', 'LineWidth', 2)% mgC/m2/day
@@ -59,14 +59,14 @@ for ilat = 1:length(lat)
 
         plot(NPP_extracted(1,:), 'ok--','LineWidth', 2)
 
-    ylim([0 3000])
-    xlabel('Time (month)')
-    ylabel('NPP (mgC / m^2 /day)')
-    mTitle = append('Lat: ', string(lat(ilat)), ', Lon: ', string(lon(ilat)));
-    title(mTitle)
-    axis tight
+ylim([0,3000])
+xlabel('Time (month)')
+ylabel('NPP (mgC / m^2 /day)')
+mTitle = append('Lat: ', string(lat(ilat)), ', Lon: ', string(lon(ilat)));
+title(mTitle)
+axis tight
 end
-lg  = legend('v_{sink}=5m/d','v_{sink}=10m/d','v_{sink}=30m/d','v_{sink}=50m/d','CAFE','NumColumns',3); 
+lg  = legend('v_{sink}=5m/s','v_{sink}=10m/s','v_{sink}=30m/s','v_{sink}=50m/s','CAFE','NumColumns',3); 
 lg.Layout.Tile = 'South'; % <-- Legend placement with tiled layout
 sgtitle('NPP for varying sinkingPOM','FontSize', 20)
-lg.FontSize=14;
+lg.
