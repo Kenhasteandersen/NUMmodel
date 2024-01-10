@@ -1,6 +1,7 @@
 %
-% Integrate a global field over depth. If the field is 5-dimensional, it is
-% assumed to be a biomass spectrum, that is then summed.
+% Integrate a global field over depth. The field should have either 4 or 5 dimensions
+% A 4-D field would be (time, x, y, z). If the field is 5-dimensional, it is
+% assumed that the last dimension is a biomass spectrum, that is then summed.
 %
 % In:
 %  sim: simulation structure

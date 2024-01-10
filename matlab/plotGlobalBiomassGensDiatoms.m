@@ -27,12 +27,12 @@ if ~isfield(sim,'Bpnm')
           %here we need to distinguish gens, diatoms and copepods
                     for k = 1:length(sim.z)
                       sim.Bgen=sim.B(sim.p.ixStart(1):sim.p.ixEnd(1));
-                      tmp2 = calcPicoNanoMicro(squeeze(sim.Bgen(i,j,k,:,iTime)), sim.p.m(sim.p.ixStart(1):sim.p.ixEnd(1)));
+                      tmp2 = calcPicoNanoMicro(squeeze(sim.Bgen(iTime,i,j,k,:)), sim.p.m(sim.p.ixStart(1):sim.p.ixEnd(1)));
                       tmp2(isnan(tmp2))=0;
                       tmp = tmp + tmp2 * sim.dznom(k)*0.001; % gC/m2
                       if any(sim.p.typeGroups(:)==3)
                           sim.Bdiat=sim.B(sim.p.ixStart(2):sim.p.ixEnd(2));
-                          tmp2 = calcPicoNanoMicro(squeeze(sim.Bdiat(i,j,k,:,iTime)), sim.p.m(sim.p.ixStart(2):sim.p.ixEnd(2)));
+                          tmp2 = calcPicoNanoMicro(squeeze(sim.Bdiat(iTime,i,j,k,:)), sim.p.m(sim.p.ixStart(2):sim.p.ixEnd(2)));
                           tmp2(isnan(tmp2))=0;
                           tmp = tmp + tmp2 * sim.dznom(k)*0.001; % gC/m2                      end
                       end

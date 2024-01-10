@@ -125,7 +125,7 @@ if p.bUse_parday_light
     end
 end
 L0 = zeros(nb,365/p.dtTransport );
-for i = 1:730
+for i = 1:365/p.dtTransport
     if p.bUse_parday_light
         L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox);
     else

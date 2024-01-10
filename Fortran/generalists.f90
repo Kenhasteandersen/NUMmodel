@@ -312,10 +312,7 @@ function getProdNetGeneralists(this, u) result(ProdNet)
       bL*this%JLreal(i) + &    ! Light uptake metabolism
       bN*this%JNreal(i) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i)) + &  ! The fraction of N uptake that is not associated to DOC uptake  
       bg*this%Jnet(i) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i) + this%JFreal(i)) ! The fraction of growth not associated with DOC or feeding
-      !print*, resp, this%f(i), bg*this%Jnet(i)
-      ProdNet = ProdNet + max( 0.d0, &
-                 (this%JLreal(i) - resp) * u(i)/this%m(i) )
-                ! (this%JLreal(i) - this%Jresptot(i))*u(i)/this%m(i) )
+      ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
   end do
 end function getProdNetGeneralists
 

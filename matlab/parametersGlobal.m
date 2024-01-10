@@ -56,7 +56,7 @@ elseif nTMmodel == 2
     p.pathN0    = strcat(path,'/../TMs/MITgcm_ECCO/N0');
     p.pathSi0    = strcat(path,'/../TMs/MITgcm_ECCO/Si0');
     p.pathInit = strcat(sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0)));
-    
+    p.pathPARday= strcat(path,'nonexistant'); % No parday file for high-res runs
     p.dt = 0.1; % For Euler time stepping
     p.dtTransport = 0.5; % The TM time step (in units of days)
 elseif nTMmodel == 3
