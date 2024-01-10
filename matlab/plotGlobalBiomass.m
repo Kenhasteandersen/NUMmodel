@@ -14,7 +14,7 @@ if ~isfield(sim,'Bpnm')
             for j = 1:length(sim.y)
                 tmp = [0 0 0];
                 for k = 1:length(sim.z)
-                    tmp2 = calcPicoNanoMicro(squeeze(sim.B(iTime,i,j,k,:)), sim.p.m(sim.p.idxB:end));
+                    tmp2 = calcPicoNanoMicro(sim.p,squeeze(sim.B(iTime,i,j,k,:)));
                     tmp2(isnan(tmp2))=0;
                     tmp = tmp + tmp2 * sim.dznom(k)*0.001; % gC/m2
                 end
