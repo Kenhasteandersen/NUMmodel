@@ -20,6 +20,7 @@ Fortran/server.csr
 Fortran/server.key
 matlab/**.mat
 matlab/.DS_Store
+matlab/amaliaGlobalRun.m
 matlab/biomass mats
 matlab/calcPicoNanoMicroRate.asv
 matlab/compareEulerAndMatlab.m
