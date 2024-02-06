@@ -297,7 +297,7 @@ contains
         IF ( errorio ) RETURN 
    end do
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.001d0, .true., .true.)
+   call parametersFinalize(0.007d0, .true., .false.)
 
   end subroutine setupGenDiatCope
 
