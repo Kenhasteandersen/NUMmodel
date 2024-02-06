@@ -9,4 +9,8 @@ p = parametersGlobal(p,nTMmodel);
 
 p.nameModel = 'watercolumn';
 
+if nTMmodel==2
+    p.bUse_parday_light=false;
+end
+
 p.tSave = 1;
