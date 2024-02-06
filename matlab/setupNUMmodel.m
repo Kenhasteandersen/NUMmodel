@@ -74,7 +74,7 @@ end
 
 % POM:
 p = parametersAddgroup(100, p, nPOM);
-setSinkingPOM(p, 14.5); 
+setSinkingPOM(p, 20); 
 
 % Initial conditions:
 p = getMass(p);
@@ -86,4 +86,4 @@ p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix));
 
 p.u0( p.ixStart(end):p.ixEnd(end) ) = 0; % No POM in initial conditions
 
-setHTL(0.007,0.1,true,false);
+setHTL(0.015,0.1,true,false);
