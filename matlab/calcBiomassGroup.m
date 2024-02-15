@@ -26,7 +26,7 @@ if isempty(ixGroup)
 end
 ix = [];
 for i = 1:length(ixGroup)
-    ix = [ix sim.p.ixStart(ixGroup(i)):sim.p.ixEnd(ixGroup(i))];
+    ix = [ix (sim.p.ixStart(ixGroup(i)):sim.p.ixEnd(ixGroup(i)))-sim.p.idxB+1];
 end
 %
 % Prepare time averaging:
