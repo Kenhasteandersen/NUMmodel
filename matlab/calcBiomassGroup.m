@@ -24,6 +24,10 @@ ixGroup = find( sim.p.typeGroups==typeGroup );
 if isempty(ixGroup)
     error('There is no %i group in the simulation. Check sim.p.typeGroups\n',typeGroup);
 end
+ix = [];
+for i = 1:length(ixGroup)
+    ix = [ix sim.p.ixStart(ixGroup(i)):sim.p.ixEnd(ixGroup(i))];
+end
 %
 % Prepare time averaging:
 %
@@ -38,16 +42,16 @@ end
 switch sim.p.nameModel
     
     case 'chemostat'
-        B = sum( sim.B(:, ixGroup),2 ) * sim.p.widthProductiveLayer;
+        B = sum( sim.B(:, ix),2 ) * sim.p.widthProductiveLayer;
         B = mean( B(ixTime,:),1 );
 
     case 'watercolumn'
         B = squeeze( sum( sim.B .* reshape(sim.dznom,1,numel(sim.dznom),1),2) );
-        B = sum( B(:, ixGroup),2 );
+        B = sum( B(:, ix),2 );
         B = mean( B(ixTime,:),1 );
 
     case 'global'
-        B = sum( sim.B(:,:,:,:,ixGroup),5 ); % Sum the group
+        B = sum( sim.B(:,:,:,:,ix),5 ); % Sum the group
         B = squeeze( calcIntegrateGlobal(sim,B,bAverageTime) );
 end
 
