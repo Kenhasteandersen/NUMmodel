@@ -330,13 +330,13 @@ for i=1:simtime
     %N = calc_tot_n(p,u);
     %
     % Bottom BC for nutrient fields. The boundary allows diffusion from the
-    % bottom into the cell. The diffusivity is controlled by p.BCdiffusion
+    % bottom into the cell. The diffusivity is controlled by p.BCmixing
     % and the bottom value by p.BCvalue. These parameters are set in
     % parametersGlobal:
     %
     for k = 1:p.nNutrients
         u(ixBottom, k) = u(ixBottom, k) +  p.dtTransport* ...
-            p.BCdiffusion(k)./dzBottom'.*(BCvalue(:,k)-u(ixBottom,k));
+            p.BCmixing(k).*(BCvalue(:,k)-u(ixBottom,k));
     end
     %calc_tot_n(p,u)/N - 1
     %N = calc_tot_n(p,u);

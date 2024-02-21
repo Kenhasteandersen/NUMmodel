@@ -278,7 +278,7 @@ for i = 1:simtime
     end
     % Bottom BC for nutrients:
     u(end, 1:p.nNutrients) = u(end, 1:p.nNutrients) +  ...
-        p.BCdiffusion(1:p.nNutrients)*p.dtTransport/sim.dznom(nGrid) .* ...
+        p.BCmixing(1:p.nNutrients)*p.dtTransport .* ...
         ( BCvalue(1:p.nNutrients) - u(end,1:p.nNutrients) );
 
     %u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
@@ -361,7 +361,7 @@ sim.lon = lon;
 
 sim.Ntot = (sum(sim.N'.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
     sum(squeeze(sum(sim.B,3))'.*(sim.dznom*ones(1,length(sim.t))))/rhoCN)/1000; % gN/m2 in biomass
-sim.Nprod = p.BCdiffusion(p.idxN)*(p.BCvalue(p.idxN)-sim.N(:,end))/1000; % Diffusion in from the bottom; gN/m2/day
+sim.Nprod = p.BCmixing(p.idxN)*(p.BCvalue(p.idxN)-sim.N(:,end))*sim.dznom(end)/1000; % Diffusion in from the bottom; gN/m2/day
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
 %     sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
