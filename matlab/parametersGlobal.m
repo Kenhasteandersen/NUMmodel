@@ -93,7 +93,7 @@ p.bTransport = true; % Whether to do the transport with the transport matrix
 %
 % Bottom BC for nutrients:
 %
-p.BCdiffusion = [1, 0, 10]; % Diffusivity of nutrients out of the bottom m^2/day
+p.BCdiffusion = [1, 0, 1]; % Diffusivity of nutrients out of the bottom m^2/day
 p.BCvalue = 0*p.u0 - 1; % Use the initial value concentration of the bottom concentration
 p.BC_POMclosed = false; % Whether the bottom BC for POM is open or closed
 %
