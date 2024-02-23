@@ -13,6 +13,7 @@
 %  options.bCalcAnnualAverages: increases the simulation time of the last year by a
 %                       factor 10
 %  options.bVerbose: Write out progress on the terminal
+%  options.bNinit: Use only nutrient fields for initialization
 %
 % Output:
 %  sim: structure with simulation results
@@ -24,6 +25,7 @@ arguments
     sim struct = [];
     options.bCalcAnnualAverages = false; % Whether to calculate annual averages
     options.bVerbose = true; % Whether to write output on the terminal
+    options.bNinit = false;
 end
 %
 % Get the global parameters if they are not already set:
@@ -71,6 +73,23 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 % Initial conditions:
 %
+if exist(strcat(p.pathN0,'.mat'),'file')
+    load(p.pathN0, 'N');
+    u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
+else
+    u(:, ixN) = p.u0(p.idxN)*ones(nb,1);
+end
+u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
+if bSilicate
+    if exist(strcat(p.pathSi0,'.mat'),'file')
+        load(p.pathSi0, 'Si');
+        u(:, ixSi) = gridToMatrix(Si, [], p.pathBoxes, p.pathGrid);
+    else
+        u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+    end
+end
+u(:, ixB) = ones(nb,1)*p.u0(ixB);
+
 if ~isempty(sim)
     if options.bVerbose
         disp('Starting from previous simulation.');
@@ -80,27 +99,13 @@ if ~isempty(sim)
     if bSilicate
         u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(end,:,:,:))),[],p.pathBoxes, p.pathGrid);
     end
-    for i = 1:p.n -p.idxB+1
-        u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(end,:,:,:,i)))),[],p.pathBoxes, p.pathGrid);
-    end
-else
-    if exist(strcat(p.pathN0,'.mat'),'file')
-        load(p.pathN0, 'N');
-        u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
-    else
-        u(:, ixN) = p.u0(p.idxN)*ones(nb,1);
-    end
-    u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
-    if bSilicate
-        if exist(strcat(p.pathSi0,'.mat'),'file')
-            load(p.pathSi0, 'Si');
-            u(:, ixSi) = gridToMatrix(Si, [], p.pathBoxes, p.pathGrid);
-        else
-            u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+    if ~options.bNinit
+        for i = 1:p.n -p.idxB+1
+            u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(end,:,:,:,i)))),[],p.pathBoxes, p.pathGrid);
         end
     end
-    u(:, ixB) = ones(nb,1)*p.u0(ixB);
 end
+
 sim = load(p.pathGrid,'x','y','z','dznom','bathy'); % Get grid
 %
 % Load temperature:
@@ -330,13 +335,13 @@ for i=1:simtime
     %N = calc_tot_n(p,u);
     %
     % Bottom BC for nutrient fields. The boundary allows diffusion from the
-    % bottom into the cell. The diffusivity is controlled by p.BCmixing
+    % bottom into the cell. The diffusivity is controlled by p.BCdiffusion
     % and the bottom value by p.BCvalue. These parameters are set in
     % parametersGlobal:
     %
     for k = 1:p.nNutrients
         u(ixBottom, k) = u(ixBottom, k) +  p.dtTransport* ...
-            p.BCmixing(k).*(BCvalue(:,k)-u(ixBottom,k));
+            p.BCdiffusion(k)./dzBottom'.*(BCvalue(:,k)-u(ixBottom,k));
     end
     %calc_tot_n(p,u)/N - 1
     %N = calc_tot_n(p,u);
@@ -376,7 +381,7 @@ for i=1:simtime
         tSave = [tSave, i*p.dtTransport];
         if options.bVerbose
             fprintf('.\n');
-        end 
+        end
     end
 end
 time = toc;
