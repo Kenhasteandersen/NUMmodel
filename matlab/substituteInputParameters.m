@@ -52,7 +52,8 @@ for i=1:length(paramToReplace)
     idx_comment = find(thisline == '!');
     idx_comment = min([idx_comment-1,length(thisline)]);
     value=strtrim(thisline(idx+1:idx_comment));
-    S{theline} = regexprep(S{theline}, value, newvalue{i});
+    % S{theline} = regexprep(S{theline}, value, newvalue{i});
+    S{theline} = replace(S{theline}, value, newvalue{i});
 end
 
 [fid, msg] = fopen(inputFileName, 'w');

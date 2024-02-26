@@ -77,43 +77,43 @@
 ! GENERALISTS SIMPLE INPUT PARAMETERS
 !***********************************************************************
 !
-  mMinGeneralist = 9*2.5d-8 !1.07d-7 !2.5d-8 ! 1.1623d-9  ! Smallest cell size [mug C]
-  mMaxGeneralist = 9*10.0d0	! Largest cell size [mug C]
+  mMinGeneralist = 5*2.5d-8 !1.07d-7 !2.5d-8 ! 1.1623d-9  ! Smallest cell size [mug C]
+  mMaxGeneralist = 5*10.0d0	! Largest cell size [mug C]
 
 ! Light uptake:
 !--------------
-  epsilonL = 9*0.8d0        ! Light uptake efficiency []
-  alphaL = 9*0.3d0              ! Light affinity coef. [1/(uE/m2/s) 1/day um]
-  rLstar = 9*7.5d0          ! Light affinity cross-over size [um]
+  epsilonL = 5*0.8d0        ! Light uptake efficiency []
+  alphaL = 5*0.3d0              ! Light affinity coef. [1/(uE/m2/s) 1/day um]
+  rLstar = 5*7.5d0          ! Light affinity cross-over size [um]
 
 ! Dissolved nutrient and DOC uptake:
 !-----------------------------------
-  alphaN = 9*0.972d0             ! Diffusive affinity coefficient [L/d/mugC/um^2] 
-  rNstar = 9*0.4d0           ! Diffusive affinity cross-over size [um]
+  alphaN = 5*0.972d0             ! Diffusive affinity coefficient [L/d/mugC/um^2] 
+  rNstar = 5*0.4d0           ! Diffusive affinity cross-over size [um]
 
 ! Phagotrophy:
 !-------------
-  epsilonF = 9*0.8d0	           ! Food assimilation efficiency [-]
-  alphaF = 0.0001d0 0.00031623d0 0.001d0 0.0031623d0 0.01d0 0.031623d0 0.1d0 0.31623d0 1d0  ! Clearance rate [L/d/ug C]
-  cF = 9*30.0d0                     ! Max phagotrophy coefficient [um/day]
-  beta = 9*500.d0                ! Preferred predator-prey mass ratio
-  sigma = 9*1.3d0                ! Preferred predator-prey mass range
+  epsilonF = 5*0.8d0	           ! Food assimilation efficiency [-]
+  alphaF = 0.0d0 ! Clearance rate [L/d/ug C]
+  cF = 5*30.0d0                     ! Max phagotrophy coefficient [um/day]
+  beta = 5*500.d0                ! Preferred predator-prey mass ratio
+  sigma = 5*1.3d0                ! Preferred predator-prey mass range
 
 ! Metabolism:
 !------------
-  cLeakage = 9*0.03d0           ! Passive leakage of C and N
-  delta = 9*0.05d0                ! Thickness of cell wall [um]
-  alphaJ = 9*1.5d0                ! Constant for jMax [day-1]
-  cR = 9*0.1d0                   ! Basal metabolism relative to jMax [-]
+  cLeakage = 5*0.03d0           ! Passive leakage of C and N
+  delta = 5*0.05d0                ! Thickness of cell wall [um]
+  alphaJ = 5*1.5d0                ! Constant for jMax [day-1]
+  cR = 5*0.1d0                   ! Basal metabolism relative to jMax [-]
 
 ! Biogeo:
 !--------
-  remin2 = 9*0.5d0               ! Fraction of viral lysis remineralized to DOC
+  remin2 = 5*0.5d0               ! Fraction of viral lysis remineralized to DOC
   reminF = 5*0.1d0               ! Fraction of feeding losses remineralized
 
 ! Vulnerability to predation:
 !----------------------------
-  palatability = 0.011876d0 0.025114d0 0.053109d0 0.11231d0 0.2375d0 0.50225d0 1.0621d0 2.246d0 4.7497d0  ! 1 = full risk of predation
+  palatability = 0.0d0 ! 1 = full risk of predation
 
 
 

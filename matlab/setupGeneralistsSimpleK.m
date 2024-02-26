@@ -14,7 +14,7 @@ arguments
 end
 
 loadNUMmodelLibrary(bParallel);
-errortext ='';
+errortext ='                    ';
 errorio=false;
 
 
@@ -27,7 +27,7 @@ if bParallel
     errortext = repmat({''}, [1 poolsize]);
 
     parfor i=1:poolsize
-        this_errortext ='';
+        this_errortext ='                    ';
         [errorio(i),this_errortext]=calllib(loadNUMmodelLibrary(), 'f_setupgeneralistssimple_two', int32(n), int32(k),errorio(i), this_errortext);
         errortext(i)={this_errortext}
     end

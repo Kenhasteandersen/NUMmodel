@@ -11,7 +11,7 @@ bParallel = false;
 tEnd=5;
 % Years to save;
 tSave=2;
-% timestep:
+% Default mixing rate:
 d=0.1;
 % set HTL parameters:
 %the HTL mortality (or the constant if bQuadratic=true)
@@ -20,7 +20,14 @@ mHTL=1/500^1.5;
 bQuadraticHTL=false;
 bDecliningHTL=false;
 
-%calculate 
+
+% v0_coefficient og gamma fås fra nielsen_kiørboe_2021.m;
+gamma=0.6505;
+v0_coefficient=1.7198;
+%x-aksen på thomas plot
+alpha=logspace(-4,0,1000);
+
+%calculate
 % alphaF=logspace(-4,-2,10);
 % meanval=0.8373;
 % vulnera=(10.^(P(2)+P(1).*log10(alphaF)))./meanval;
@@ -28,22 +35,28 @@ bDecliningHTL=false;
 % Load the parameters
 param_vector=load('alphaF_palatability.mat');
 
-%paramToReplace={'alphaF';'palatability'};
 paramToReplace={'alphaF';'palatability'};
 % which input list do they belong to?
 InputListName={'input_generalists_simple';'input_generalists_simple'};
 inputFileName='../input/input_generalists_simpleX_1group.h';
 copyFileName='../input/input_generalists_simpleX.h';
+theOriginalfile='../input/input_generalists_simpleX_1group_Startup.h';
 
-theOriginalfile='../input_generalists_simpleX_1group_Startup.h';
+
+
+
+
+%% Modify input file
 [SUCCESS,MESSAGE,MESSAGEID] = copyfile(theOriginalfile, inputFileName);
 if ~SUCCESS
-    error('copying the original file')
+    error('error: copying the original file')
 end
 
 
-% what are the new values?
 
+
+%Calculate the vulnerability:
+v=10^(v0_coefficient).*alpha.^(gamma);
 
 
 %% setup simulation
@@ -52,29 +65,38 @@ end
 
 %% Simulate
 usesaved='no';
-vector=param_vector.alphaF;
+yvector=param_vector.alphaF;
 %epsilonL_vector=0.1:0.1:15;
-epsilonL_vector=linspace(0.4,15,10);
+%epsilonL_vector=linspace(0.4,15,10);
+imort=0; inn=0;
+for nn=logspace(-2,0,5)
+    inn=inn+1;
+
+   
+for mortHTL=0.1:0.4:1
+    imort=imort+1;
+    
 switch usesaved
     case 'yes'
         load('bio_saved.mat')
     case 'no'
         % iterate over d=0.001 to 0.1
-        
-        B=nan(length(dvector),n*(k+1));
+
+        B=nan(length(yvector),n*(k+1));
         jDOC=B;
         jLreal=B;
         jFreal=B;
-        for i=1:length(dvector)
-            %alphaF=param_vector.alphaF(i);
-            alphaF=epsilonL_vector(i);
-            palatability=1;%param_vector.palatability(i);
+        jmortHTL=B;
+        for i=1:length(yvector)
+            alphaF=param_vector.alphaF(i);
+            % alphaF=epsilonL_vector(i);
+            palatability=param_vector.palatability(i);
             %%
             ChangeTHeParam(paramToReplace,InputListName,inputFileName,alphaF,palatability)
             %%
             [SUCCESS,MESSAGE,MESSAGEID] = copyfile(inputFileName, copyFileName);
-            p = setitup(n,k,bParallel,tEnd,d,mortHTL, mHTL, bQuadraticHTL,bDecliningHTL)
-            p.d=d;
+            p = setitup(n,k,bParallel,tEnd,nn,mortHTL, mHTL, bQuadraticHTL,bDecliningHTL);
+            p.d=nn;
             sim = simulateChemostat(p, 100);
             % create average of last
             tsave_start=365*(tEnd-tSave)+1;
@@ -84,14 +106,17 @@ switch usesaved
             jDOC_tmp=nan(sim.p.n-2,length(idx));
             jLreal_tmp=jDOC_tmp;
             jFreal_tmp=jDOC_tmp;
+            jmortHTL_tmp=jDOC_tmp;
             for j=1:length(idx)
                 jDOC_tmp(:,j)=sim.rates(idx(j)).jDOC;
                 jLreal_tmp(:,j)=sim.rates(idx(j)).jLreal;
                 jFreal_tmp(:,j)=sim.rates(idx(j)).jFreal;
+                jmortHTL_tmp(:,j)=sim.rates(idx(j)).mortHTL;
             end
             jDOC(i,:)=mean(jDOC_tmp,2,'omitnan')';
             jLreal(i,:)=mean(jLreal_tmp,2,'omitnan')';
             jFreal(i,:)=mean(jFreal_tmp,2,'omitnan')';
+            jmortHTL(i,:)=mean(jmortHTL_tmp,2,'omitnan')';
         end
 end
 
@@ -103,34 +128,98 @@ load('cmaps.mat')
 B_DOC=B.*(jDOC./(jDOC+jLreal+jFreal));
 B_L=B.*(jLreal./(jDOC+jLreal+jFreal));
 B_F=B.*(jFreal./(jDOC+jLreal+jFreal));
+
+sumBF=sum(B_F,2);
+[~,bbb]=max(sumBF);
+optimal_vuln(imort,inn)=param_vector.palatability(bbb);
+end
+end
+
+
+
 themax=max([max(max(B_DOC)) max(max(B_L)) max(max(B_F))]);
 %%
-PlotNutrientVSSize(p,B,'jet','total biomass',max(max(B)),dvector)
+PlotNutrientVSSize(p,B,'jet','total biomass',max(max(B)),yvector)
 %%
-PlotNutrientVSSize(p,B_DOC,cmap_osmotrophy,'osmotrophic biomass',themax,dvector)
+PlotNutrientVSSize(p,B_DOC,cmap_osmotrophy,'osmotrophic biomass',themax,yvector)
 %%
-PlotNutrientVSSize(p,B_L,cmap_phototrophy,'phototrophic biomass',themax,dvector)
+PlotNutrientVSSize(p,B_L,cmap_phototrophy,'phototrophic biomass',themax,yvector)
 %%
-PlotNutrientVSSize(p,B_F,cmap_phagotrophy,'phagotrophic biomass',themax,dvector)
+PlotNutrientVSSize(p,B_F,cmap_phagotrophy,'phagotrophic biomass',themax,yvector)
+
+%%
+jmortHTL(jmortHTL<0)=0;
+figure('color','w');
+i=2; % gruppenr. Ikke bakterierne her
+alpha_idx=[4 8];
+for kk=1:2
+    subplot(2,2,kk)
+    m=p.m(p.ixStart(i):p.ixEnd(i));
+    aa=area(m,B_DOC(alpha_idx(kk),p.ixStart(i)-2:p.ixEnd(i)-2));
+    aa.LineStyle=":";
+    aa.LineWidth=2;
+    aa.FaceAlpha=0.5;
+    aa.FaceColor=[0.427450980392157 0.525490196078431 0.909803921568627];
+    box off
+
+    hold on
+    bb=area(m,B_L(alpha_idx(kk),p.ixStart(i)-2:p.ixEnd(i)-2));
+    bb.LineStyle="-";
+    bb.FaceAlpha=0.5;
+    bb.FaceColor=[0.929411764705882 0.784313725490196 0.203921568627451];
+    box off
+
+    cc=area(m,B_F(alpha_idx(kk),p.ixStart(i)-2:p.ixEnd(i)-2));
+    cc.LineStyle="--";
+    cc.FaceAlpha=0.5;
+    cc.FaceColor=[0.890196078431372 0.125490196078431 0.266666666666667];
+    set(gca,'XScale','log')
+    box off
+    thelims=get(gca,'Ylim');
+    set(gca,'YLim',[0 max(thelims)])
+
+    % thelims=get(gca,'Ylim');
+    % set(gca,'YLim',[-max(abs(thelims)) max(abs(thelims))])
+
+    subplot(2,2,kk+2)
+    plot(m,m.*0,'k','LineWidth',1)
+    hold on
+
+    plot(m,jLreal(alpha_idx(kk),p.ixStart(i)-2:p.ixEnd(i)-2),'y','LineWidth',1)
+    hold on
+    plot(m,jDOC(alpha_idx(kk),p.ixStart(i)-2:p.ixEnd(i)-2),'b','LineWidth',1)
+    plot(m,jFreal(alpha_idx(kk),p.ixStart(i)-2:p.ixEnd(i)-2),'r','LineWidth',1)
+    plot(m,-1.*jmortHTL(alpha_idx(kk),p.ixStart(i)-2:p.ixEnd(i)-2),'m','LineWidth',2)
+    % thelims=get(gca,'Ylim');
+    % set(gca,'YLim',[-max(abs(thelims)) max(abs(thelims))])
+    set(gca,'XScale','log')
+    box off
+    
+    % set(gca,'XAxisLocation','origin')
+
+end
+
+
+
 %% plot biomassVSnutrint divided into different groups
 figure('color','w');
 subplot(3,1,1);
 %plot(dvector,sum(B(:,1:20),2),'b-');
-hold on; 
-plot(dvector,sum(B(:,21:40),2),'g-');
+hold on;
+plot(yvector,sum(B(:,21:40),2),'g-');
 set(gca,'XScale','log');
 box on
 ylabel('biomass (\mug C l^{(-1)})','FontSize', 14)
 
 
 subplot(3,1,2);
-plot(dvector,sum(B(:,41:50),2),'r-');
+plot(yvector,sum(B(:,41:50),2),'r-');
 set(gca,'XScale','log');
 ylabel('biomass (\mug C l^{(-1)})','FontSize', 14)
 
 
 subplot(3,1,3);
-plot(dvector,sum(B(:,51:end),2),'k-')
+plot(yvector,sum(B(:,51:end),2),'k-')
 set(gca,'XScale','log')
 xlabel('mixing rate (day^{-1})','FontSize', 14)
 ylabel('biomass (\mug C l^{(-1)})','FontSize', 14)
@@ -197,15 +286,15 @@ for i=2:p.nGroups
     % ax=gca;ax.XTick=theXspace;
     % ax=gca;ax.XAxis.TickLabels = compose('%g', ax.XAxis.TickValues);
     xlabel('Cell mass (\mug C)','FontSize', 14)
-    colormap(cmap);    
-    if i==1;ylabel('mixing rate (day^{-1})','FontSize', 14);end
+    colormap(cmap);
+    if i==2;ylabel('strategy type','FontSize', 14);end
     title([p.nameGroup{i},' ',num2str(length(find(p.typeGroups(1:i)==p.typeGroups(i))))],'FontSize', 16,'FontWeight','normal');
     clim([0 themax])
     box on
     %if i==3;colorbar;end
-     
+
 end
-nexttile(p.nGroups+1)
+% nexttile(p.nGroups+1)
 colormap(cmap)
 cbar=colorbar('Location','westoutside');
 ylabel(cbar, '\mug C l^{(-1)}','FontSize', 14)
@@ -242,7 +331,7 @@ blue(1,:)=[58/255,67/255,186/255];
 blue(2,:)=[4/255,146/255,194/255];
 blue(3,:)=[130/255,237/255,253/255];
 for i=4:k+1
- blue(i,:)=[130/255,237/255,253/255];
+    blue(i,:)=[130/255,237/255,253/255];
 end
 
 for i=2:k+1

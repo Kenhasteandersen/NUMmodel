@@ -1,0 +1,1 @@
+ parameter alphaF not defined for generalists_simple in ../input/input_generalists_simpleX.h                                                                .

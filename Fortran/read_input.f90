@@ -10,7 +10,7 @@ module read_input_module
     logical(1), intent(inout):: errorio 
     character(c_char), dimension(*), intent(out) :: errorstr
     character(len=20) :: f_errorstr
-    character(len=100) :: line, val, thislist, key
+    character(len=200) :: line, val, thislist, key
     character(len=100) :: str_General
     character(len=100) :: str_Generalists_simple
     character(len=100) :: str_Generalists
