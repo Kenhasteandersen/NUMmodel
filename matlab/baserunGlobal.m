@@ -16,11 +16,9 @@ function sim = baserunGlobal(p)
 %
 if (nargin==0)
     mAdult = logspace(log10(0.2), log10(10000), 5);
-    
     n = 10;
     nCopepods = 10;
     nPOM = 10;
-%     p = setupGeneralistsSimpleOnly(10, true); % Use 10 size groups and parallel execution
     p=setupNUMmodel(true);
     p = parametersGlobal(p); % Use standard low-res model
     %p = parametersGlobal(10,2); % Use MITgcm_ECCO

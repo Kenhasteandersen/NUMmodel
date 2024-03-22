@@ -1,6 +1,6 @@
 function [y,fval,exitflag,output] = tuning(parinit, siminit)
 arguments
-    parinit = [0.081, 13.5, 0.029]; % kw, u, and mortHTL
+    parinit = [0.067, 14.5, 0.007]; % kw, u, and mortHTL
     siminit = [];
 end
 
@@ -34,7 +34,8 @@ end
 %p.tEnd = 12;
 
 % The objective we are optimizing towards:
-objExpected = [1 1 1 200 800 1000]; % Pico, POC, copepods; NPP oligotrophic, eutrophic and seasonal
+
+objExpected = [1 1 1 800 200 1000]; % Pico, POC, copepods; NPP , eutrophic oligotrophic and seasonal
 
 options = optimoptions('fmincon');
 options.Display = 'iter';
@@ -64,7 +65,8 @@ parmax = [0.12, 20, 0.1];
 
         % Evaluate objective criterion:
         obj = obj ./ objExpected;
-        err = double(mean(abs(log(obj))));
+        obj(4:6) = log(obj(4:6));
+        err = double(mean(abs(obj)));
         fprintf("Pars: %f, %f, %f; err: %f\n",[par,err]);
         fprintf("Objective vector: %f, %f, %f, %f, %f, %f\n", obj)
         fprintf("====================\n");

@@ -4,12 +4,12 @@
 function p = setupNUMmodel(mAdultPassive, mAdultActive, n,nCopepods,nPOM, options)
 
 arguments
-    mAdultPassive (1,:) = [0.2 5];
-    mAdultActive (1,:) = [1 10 100 1000];
-    n = 10;
-    nCopepods = 10;
-    nPOM = 1;
-    options.bParallel = true;
+    mAdultPassive (1,:) = [0.2 5]; % Adult masses of passive copepods
+    mAdultActive (1,:) = [1 10 100 1000];  % Adult masses of active copepods
+    n = 10;  % Number of size groups in generalist and diatom spectra
+    nCopepods = 10;  % Number of stages in copepod groups
+    nPOM = 1;  % Number of POM size groups
+    options.bParallel = true;  % Whether to prepare for parallel runs (for global runs)
 end
 
 loadNUMmodelLibrary(options.bParallel);

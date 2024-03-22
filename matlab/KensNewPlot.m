@@ -1,0 +1,153 @@
+lat = 60;
+lon = -15;
+newPalette={[21, 16, 240]/256,[0, 163, 136]/256,[240, 154, 15]/256,...
+    [219, 6, 6]/256,[219, 6, 6]/256,[219, 6, 6]/256,[219, 6, 6]/256,[116, 71, 145]/256};
+%%
+% Global simulation
+%
+p=setupNUMmodel(true);
+
+% p = setupNUMmodel([0.5 2], [10 333 1000], 20,7,1, bParallel=true);
+
+% load ../Tuning/NUMmodelsmall.mat
+p = parametersGlobal(p);
+p.tEnd = 3*365;
+% sim = simulateGlobal(p,sim, bNinit = true); % Use the simulation only to initialize nutrient fields
+% sim = simulateGlobal(p,sim); % Use the simulation only to initialize nutrient fields
+
+p.tSave = 2;
+p.tEnd = 365;
+sim = simulateGlobal(p);
+
+save('figure_comparison.mat','sim','-v7.3')
+load('figure_comparison')
+%%
+% Watercolumn
+% %
+p = setupNUMmodel([0.5 2], [10 333 1000], 20,7,1);
+
+p = parametersWatercolumn(p,2);
+p.tEnd = 3*365;
+simWC = simulateWatercolumn(p, lat,lon);
+
+%%
+% Chemostat
+%
+p = parametersChemostat(p,lat_lon=[lat,lon]);
+
+p.tEnd = 3*365;
+simC = simulateChemostat(p, bUnicellularloss=false);
+
+
+%%
+
+% Figure:
+%
+sim.p.colGroup=newPalette;
+simWC.p.colGroup=newPalette;
+simC.p.colGroup=newPalette;
+
+ylimSpectrum = [0.01 50];
+sProjection='eckert4';
+
+x0=0; %positions (no need to change)
+y0=0;
+width=16; %figure width in cm
+height=16; %figure height in cm
+
+fig=figure('Renderer','Painters','Units','centimeters',...
+'Position',[x0 y0 width height],...
+'PaperPositionMode','auto');
+
+clf
+set(gcf,'color','w');
+tiledlayout(3,3)
+%
+% Global:
+%
+
+% Generalists and diatoms:
+for iGroup = 1:2
+    nexttile(1+3*(iGroup-1))
+    ix = (sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup)) -sim.p.idxB+1;
+    B = calcIntegrateGlobal(sim, sim.B(:,:,:,:,ix), true);
+    % Plot the group:
+    cbar = panelGlobal(sim.x,sim.y, log10(B),[-1 2], ...
+        sTitle=sim.p.nameGroup{iGroup},...
+        sProjection=sProjection);
+    cbar.Label.String  = 'log_{10} (g/m^2)';
+    colorbar
+    cmocean('haline',500)
+    set(gca,'YTickLabel',[]);
+    set(gca,'XTickLabel',[]);
+end
+% Copepods:
+nexttile(7)
+B = 0*B;
+for iGroup = 3:6
+    ix = (sim.p.ixStart(iGroup):sim.p.ixEnd(iGroup)) -sim.p.idxB+1;
+    B = B + calcIntegrateGlobal(sim, sim.B(:,:,:,:,ix), true);
+end
+    cbar = panelGlobal(sim.x,sim.y, log10(B),[-1 2], ...
+    sTitle = 'Copepods',...
+    sProjection=sProjection);
+    cbar.Label.String  = 'log_{10} (g/m^2)';
+    colorbar
+    cmocean('haline',500)
+    set(gca,'YTickLabel',[]);
+    set(gca,'XTickLabel',[]);
+% Watercolumn:
+nexttile(2)
+
+idx = calcGlobalWatercolumn(lat,lon,sim);
+plotWC(squeeze(sim.B(:,idx.x, idx.y, idx.z,:)),sim,sim.z(idx.z))
+title('Total biomass (log_{10} {\mu}g_C/l)','fontweight','normal');
+
+xlabel('')
+colorbar
+    cmocean('haline',500)
+
+% spectrum
+nexttile(3)
+
+ iDepth=1; time=150;
+ [~, iTime] = min(abs(sim.t-time));
+ set(gca,'XTickLabel','');
+ xlabel('')
+ plotPanelSpectrum(sim,iTime,1,lat,lon);
+
+ylim(ylimSpectrum)
+xlabel('')
+legend('')
+%%
+% Watercolumn plots:
+%
+nexttile(5)
+plotWC(simWC.B, simWC, simWC.z);
+colorbar
+    cmocean('haline',500)
+
+nexttile(6)
+s = simWC;
+s.t = 1;
+s.B = mean(squeeze(s.B(:,iDepth,:)),1);
+
+% s.rates = sim.rates;
+set(gca,'XTickLabel','');
+xlabel('')
+plotPanelSpectrum(simWC,iTime,1,lat,lon);
+% plotPanelSpectrum(s, 1)
+ylim(ylimSpectrum)
+xlabel('')
+legend('')
+%
+% Chemostat plots:
+%
+nexttile(9)
+s = simC;
+s.t = 1;
+s.B = mean(s.B,1);
+plotPanelSpectrum(simC,iTime,1,lat,lon)
+ylim(ylimSpectrum)
+xlabel('mass (\mugC)')
+

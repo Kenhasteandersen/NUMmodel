@@ -33,7 +33,7 @@ if ~strcmp(options.sProjection,'fast')
     end
 end
 
-colorLand = [0.3 0.4 0.3];
+colorLand = "#f5eef8";%[0.3 0.4 0.3];
 
 % Adjust to global plot (close gap at lat 0)
 z = [z;z(1,:)];
