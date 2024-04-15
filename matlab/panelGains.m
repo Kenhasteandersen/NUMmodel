@@ -19,7 +19,7 @@ for iGroup = 1:p.nGroups
     % Generalists and copepods:
     %
     if ((p.typeGroups(iGroup)~=3) && (p.typeGroups(iGroup)~=4))
-        semilogx(m, rates.jF(ix), 'r-', 'linewidth',2)
+        semilogx(m, rates.jFreal(ix), 'r-', 'linewidth',2)
         hold on
         semilogx(m, rates.jN(ix), 'b-','linewidth',2)
         semilogx(m, rates.jLreal(ix), 'g-','linewidth',2)
