@@ -18,7 +18,8 @@ ix = ~isnan(sim.N(1,:,:,1)); % Find all relevant grid cells
 Bphyto = zeros(length(sim.t), length(sim.x), length(sim.y));
 Bbacteria = Bphyto;
 Bzoo = Bphyto;
-Diatomratio = Bphyto;
+BphytoDiatoms = Bphyto;
+BphytoOthers = Bphyto;
 
 nX = length(sim.x);
 nY = length(sim.y);
@@ -46,8 +47,6 @@ ixDiatoms = p.typeGroups==3 | p.typeGroups==4;
 for iTime = ixTime
     for i = 1:nX
         for j = 1:nY
-            BphytoDiatoms = 0;
-            BphytoOthers = 0;
             for k = 1:nZ
                 if ~isnan(N(iTime,i,j,k))
                     if isfield(p,'idxSi')
@@ -68,18 +67,18 @@ for iTime = ixTime
                     Bbacteria(iTime,i,j) = Bbacteria(iTime,i,j) + sum(Bbacteriatmp)*conv; % mgC/m2
                     Bzoo(iTime,i,j) = Bzoo(iTime,i,j) + sum(Bzootmp)*conv; % mgC/m2
 
-                    BphytoDiatoms = BphytoDiatoms + sum(Bphytotmp(ixDiatoms))*conv;
-                    BphytoOthers = BphytoOthers + sum(Bphytotmp(ixGeneralists))*conv;
+                    BphytoDiatoms(iTime,i,j) = BphytoDiatoms(iTime,i,j)+ sum(Bphytotmp(ixDiatoms))*conv;
+                    BphytoOthers(iTime,i,j) = BphytoOthers(iTime,i,j) + sum(Bphytotmp(ixGeneralists))*conv;
                 end
             end
-            Diatomratio(iTime,i,j) = BphytoDiatoms / (BphytoDiatoms+BphytoOthers);
         end
     end
 end
 sim.Bphyto = Bphyto;
 sim.Bbacteria = Bbacteria;
 sim.Bzoo = Bzoo;
-sim.Diatomratio = Diatomratio;
+sim.Diatomratio = BphytoDiatoms ./ (BphytoDiatoms+BphytoOthers);
+sim.Bdiatoms = BphytoDiatoms;
 %%
 % Make plot:
 %
