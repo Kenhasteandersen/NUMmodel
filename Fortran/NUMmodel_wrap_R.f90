@@ -1,4 +1,5 @@
 
+
 subroutine f_setupGeneralistsSimpleOnly(n, errorio, errorstr)
   use NUMmodel, only:  setupGeneralistsSimpleOnly
   use globals
@@ -49,9 +50,11 @@ end subroutine
 
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
     use globals
+    use iso_c_binding, only: c_double, c_int, c_bool, c_char, c_null_char
+
     use NUMmodel, only: setHTL
     real(dp), intent(in):: mHTL, mortHTL
-    logical, intent(in):: bQuadraticHTL, bDecliningHTL
+    logical(c_bool), intent(in):: bQuadraticHTL, bDecliningHTL
 
     call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
   end subroutine f_setHTL
