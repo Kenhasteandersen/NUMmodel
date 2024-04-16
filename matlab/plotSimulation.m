@@ -9,7 +9,10 @@ arguments
     options.sProjection = 'fast';
     options.lat = 60;
     options.lon = -15;
-    options.tDayPlot = 150;
+    options.tDayPlot = -170; % Days before last time to make size spectrum plot etc.
+end
+if (options.tDayPlot < 0)
+    options.tDayPlot = sim.t(end) + options.tDayPlot;
 end
 
 
@@ -22,7 +25,7 @@ switch sim.p.nameModel
 
         figure
         clf
-        plotSizespectrum(sim);
+        plotSizespectrum(sim, options.tDayPlot);
 
         if ~any(isnan(sim.p.seasonalOptions.lat_lon)) || sim.p.seasonalOptions.seasonalAmplitude ~= 0
             figure(3)
@@ -30,7 +33,6 @@ switch sim.p.nameModel
         end
         
     case 'watercolumn'
-        day = sim.p.tEnd - 170;
                 
         figure(1)
         clf
@@ -38,14 +40,14 @@ switch sim.p.nameModel
         
         figure(2)
         clf
-        plotWatercolumn(sim,day,'depthMax',200);
+        plotWatercolumn(sim,options.tDayPlot,'depthMax',200);
         
         figure(3)
         % Find the depth of maximum biomass:
-        Bdepth = sum( sim.B(day,:,:),3 );
+        Bdepth = sum( sim.B(options.tDayPlot,:,:),3 );
         iDepth = find(Bdepth==max(Bdepth));
          
-        plotSizespectrum(sim,day,iDepth);
+        plotSizespectrum(sim,options.tDayPlot,iDepth);
         % plotSizespectrum(sim,iDepth);
 
         figure(4)
@@ -71,7 +73,7 @@ switch sim.p.nameModel
         sgtitle( sprintf('Water column at %i, %i',[options.lat,options.lon]))
         
         figure(3)
-        tDay = max(sim.t)-(365-options.tDayPlot);
+        tDay = options.tDayPlot;
         if (tDay<1)
             tDay = max(sim.t);
         end

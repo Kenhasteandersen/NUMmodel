@@ -2,6 +2,12 @@
 % Plot Sheldon biomass spectrum. The biomasses are normalised by the log of
 % the ratio between upper and lower masses in each bin
 %
+% In:
+%  sim - simulation structure
+%  ixTime - the time step to plot (defaults to the last)
+% Options:
+%  bPlotStrategies - whether to plot the strategies in the background
+%
 function panelSpectrum(sim, ixTime, options)
 arguments
     sim struct;

@@ -52,6 +52,7 @@ for iTime = 1:length(sim.t)
     [mc, s.Bc(:,iTime)] = calcCommunitySpectrum(s.B, sim, iTime);
 end
 
+s.mc = mc;
 s.Bc(imag(s.Bc) ~=0) = 0.01;
 s.Bc(s.Bc < 0.01) = 0.01;
 
