@@ -116,7 +116,7 @@ contains
 
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
-    logical, intent(in), value:: bQuadraticHTL, bDecliningHTL
+    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL
 
     call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
   end subroutine f_setHTL 

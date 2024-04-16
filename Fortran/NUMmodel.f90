@@ -78,7 +78,7 @@ contains
     call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
       IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimpleOnly
   
   ! -----------------------------------------------
@@ -91,7 +91,7 @@ contains
     call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
       IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr) ! generalists with n size classes
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
@@ -106,7 +106,7 @@ contains
     call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
       IF ( errorio ) RETURN 
     call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimplePOM
   
   
@@ -122,7 +122,7 @@ contains
     call parametersAddGroup(typeGeneralist, n, 0.d0,errorio,errorstr) ! generalists with n size classes
       IF ( errorio ) RETURN 
     call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
   end subroutine setupGeneralistsPOM
 
   ! -----------------------------------------------
@@ -135,7 +135,7 @@ contains
     call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
       IF ( errorio ) RETURN 
     call parametersAddGroup(typeDiatom, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
-    call parametersFinalize(0.1d0, .false., .false.)
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
   end subroutine setupDiatomsOnly
 
   ! -----------------------------------------------
@@ -148,7 +148,7 @@ contains
    call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
      IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom_simple, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
-   call parametersFinalize(0.1d0, .false., .false.)
+   call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
   end subroutine setupDiatoms_simpleOnly
  
   ! -----------------------------------------------
@@ -163,7 +163,7 @@ contains
       call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr) ! generalists with n size classes
         IF ( errorio ) RETURN 
       call parametersAddGroup(typeDiatom, n, 0.d0,errorio,errorstr) ! diatoms with n size classes
-      call parametersFinalize(.1d0, .false., .false.)
+      call parametersFinalize(.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
    end subroutine setupGeneralistsDiatoms
  
    subroutine setupGeneralistsDiatoms_simple(n,errorio,errorstr)
@@ -175,7 +175,7 @@ contains
       call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
         IF ( errorio ) RETURN 
       call parametersAddGroup(typeDiatom_simple, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
-      call parametersFinalize(0.1d0, .false., .false.)
+      call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
    end subroutine setupGeneralistsDiatoms_simple
  
   ! -----------------------------------------------
@@ -189,7 +189,7 @@ contains
     call parametersAddGroup(typeGeneralistSimple, 10, 0.0d0,errorio,errorstr)
       IF ( errorio ) RETURN 
     call parametersAddGroup(typeCopepodActive, 10, .1d0,errorio,errorstr) ! add copepod with adult mass .1 mugC
-    call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
+    call parametersFinalize(0.003d0, logical(.true.,1), logical(.true.,1)) ! Use quadratic mortality
   end subroutine setupGeneralistsSimpleCopepod
 
   ! -----------------------------------------------
@@ -207,13 +207,13 @@ contains
     call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
       IF ( errorio ) RETURN 
     if ( size(mAdult) .eq. 0) then
-       call parametersFinalize(0.1d0, .true., .true.)
+       call parametersFinalize(0.1d0, logical(.true.,1), logical(.true.,1))
     else
        do iCopepod = 1, size(mAdult)
           call parametersAddGroup(typeCopepodActive, n, mAdult(iCopepod),errorio,errorstr) ! add copepod
             IF ( errorio ) RETURN 
        end do
-       call parametersFinalize(0.001d0, .true., .true.)
+       call parametersFinalize(0.001d0, logical(.true.,1), logical(.true.,1))
     end if
   end subroutine setupGeneric
   ! -----------------------------------------------
@@ -245,7 +245,7 @@ contains
    end do
    
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.07d0, .true., .false.)
+   call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
 
   end subroutine setupNUMmodel
 
@@ -271,7 +271,7 @@ contains
         IF ( errorio ) RETURN 
    end do
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.001d0, .true., .true.)
+   call parametersFinalize(0.001d0, logical(.true.,1), logical(.true.,1))
 
   end subroutine setupNUMmodelSimple
   
@@ -297,7 +297,7 @@ contains
         IF ( errorio ) RETURN 
    end do
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.007d0, .true., .false.)
+   call parametersFinalize(0.007d0,logical(.true.,1), logical(.false.,1))
 
   end subroutine setupGenDiatCope
 
@@ -425,7 +425,7 @@ contains
   ! -----------------------------------------------
   subroutine parametersFinalize(mortHTL, boolQuadraticHTL, boolDecliningHTL)
     real(dp), intent(in):: mortHTL
-    logical, intent(in):: boolQuadraticHTL, boolDecliningHTL
+    logical(1), intent(in):: boolQuadraticHTL, boolDecliningHTL
     integer:: i,j, iGroup, jGroup
     real(dp),parameter :: betaHTL = 500.d0
     real(dp):: mHTL
@@ -546,8 +546,8 @@ contains
     real(dp), intent(in):: mHTL ! The size where HTL is 50% of max
     real(dp), intent(in):: mortalityHTL ! The level of HTL mortality (at a reference size of 1 ugC
                                         ! B/z = 1/l )
-    logical, intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
-    logical, intent(in):: boolDecliningHTL ! Whether the mortality declines with size
+    logical(1), intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
+    logical(1), intent(in):: boolDecliningHTL ! Whether the mortality declines with size
     real(dp), parameter:: mRef = .1d0 ! Reference mass (in ugC)
     !real(dp), parameter:: betaHTL = 500.
     integer:: iGroup
