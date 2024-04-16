@@ -341,7 +341,7 @@ for i=1:simtime
     %
     for k = 1:p.nNutrients
         u(ixBottom, k) = u(ixBottom, k) +  p.dtTransport* ...
-            p.BCdiffusion(k)./dzBottom'.*(BCvalue(:,k)-u(ixBottom,k));
+            p.BCmixing(k)./dzBottom'.*(BCvalue(:,k)-u(ixBottom,k));
     end
     %calc_tot_n(p,u)/N - 1
     %N = calc_tot_n(p,u);
