@@ -256,6 +256,68 @@
   DiatomsPreference = 0.2       ! Feeding preference on diatoms (lowered feeding on diatoms)
 
 !***********************************************************************
+! COPEPOD SPECIES PARAMETERS
+01
+! Species name: XXX
+!***********************************************************************
+   AdultMass = 1. ! Adult mass in microGram carbon
+   epsilonF = 0.67               ! Assimilation efficiency
+   epsilonR = 0.25               ! Reproductive efficiency
+   beta = 100.                   ! Preferred predator-prey mass ratio
+   sigma = 1.                    ! Preferred predator-prey mass range
+   alphaF = 0.0052               ! Clearance rate coefficient
+   q = 0.75                      ! Exponent of clearance rate
+   h = 0.4                       ! Coefficient for maximum ingestion rate
+   hExponent = 0.75              ! Exponent for maximum ingestion rate
+
+! kBasal  is a factor for basal metabolism {0.006}. This value represents basal metabolism at 
+! starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
+! 0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid 
+! too long transients. 
+!---------------------
+  kBasal = 0.01  
+       
+! kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
+! data in Kiørboe and Hirst (2014) are for fully fed copepods.   
+!------------------------------------------------------------       
+  kSDA = 0.16                   
+   
+  AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
+  vulnerability = 1.0           ! Passive copepods have reduced risk of predation
+  DiatomsPreference = 0.2       ! Feeding preference on diatoms (lowered feeding on diatoms)
+
+!***********************************************************************
+! COPEPOD SPECIES PARAMETERS
+02
+! Species name: XXX
+!***********************************************************************
+   AdultMass = 10. ! Adult mass in microGram carbon
+   epsilonF = 0.67               ! Assimilation efficiency
+   epsilonR = 0.25               ! Reproductive efficiency
+   beta = 100.                   ! Preferred predator-prey mass ratio
+   sigma = 1.                    ! Preferred predator-prey mass range
+   alphaF = 0.0052               ! Clearance rate coefficient
+   q = 0.75                      ! Exponent of clearance rate
+   h = 0.4                       ! Coefficient for maximum ingestion rate
+   hExponent = 0.75              ! Exponent for maximum ingestion rate
+
+! kBasal  is a factor for basal metabolism {0.006}. This value represents basal metabolism at 
+! starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
+! 0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid 
+! too long transients. 
+!---------------------
+  kBasal = 0.01  
+       
+! kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the 
+! data in Kiørboe and Hirst (2014) are for fully fed copepods.   
+!------------------------------------------------------------       
+  kSDA = 0.16                   
+   
+  AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
+  vulnerability = 1.0           ! Passive copepods have reduced risk of predation
+  DiatomsPreference = 0.2       ! Feeding preference on diatoms (lowered feeding on diatoms)
+
+!***********************************************************************
 ! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS
 !*********************************************************************** 
   mMin = 1.d-9                  ! Smallest POM mass

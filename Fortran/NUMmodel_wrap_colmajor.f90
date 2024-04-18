@@ -7,7 +7,7 @@ module NUMmodel_wrap
        setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
        setupGeneralistsSimpleCopepod, &
-       setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
+       setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupNUMmodelSpecies,setupGenDiatCope, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, simulateEulerFunctions, getFunctions, &
        setHTL, setmortHTL, setSinking, getRates, getBalance, getLost, theta
@@ -105,6 +105,18 @@ contains
     character(c_char), dimension(*) :: errorstr
     call setupNUMmodelSimple(n,nCopepod,nPOM,mAdult,errorio, errorstr)
   end subroutine f_setupNUMmodelSimple
+
+  subroutine f_testsetup(n,n1) bind(c)
+    integer(c_int), intent(in), value:: n,n1
+    end subroutine f_testsetup
+
+  subroutine f_setupNUMmodelSpecies(n,nCopepod,nPOM, nCopepods, idCopepods, errorio, errorstr) bind(c)
+   integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
+   integer(c_int), intent(in):: idCopepods(nCopepods)
+   logical(c_bool), intent(out) :: errorio
+   character(c_char), dimension(*) :: errorstr
+   call setupNUMmodelSpecies(n,nCopepod,nPOM, idCopepods, errorio, errorstr)
+ end subroutine f_setupNUMmodelSpecies
 
   subroutine f_setupGenDiatCope(n,nCopepod,nPOM, nCopepods, mAdult, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods

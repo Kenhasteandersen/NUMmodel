@@ -18,6 +18,7 @@ module read_input_module
     character(len=100) :: str_Diatoms
     character(len=100) :: str_Copepods_passive
     character(len=100) :: str_Copepods_active
+    character(len=100) :: str_Copepod_species
     character(len=100) :: str_POM
     integer:: ios, n, i
     integer, parameter :: DRK = selected_real_kind (20)
@@ -43,6 +44,7 @@ module read_input_module
     str_Diatoms='! DIATOMS INPUT PARAMETERS'
     str_Copepods_passive='! COPEPODS PASSIVE INPUT PARAMETERS'
     str_Copepods_active='! COPEPODS ACTIVE INPUT PARAMETERS'
+    str_Copepod_species="! COPEPOD SPECIES PARAMETERS"
     str_POM='! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS'
     thislist='no list defined yet'
     
@@ -69,6 +71,10 @@ module read_input_module
             thislist='copepods_passive'
           else if (line(1:len(str_Copepods_active)).eq.str_Copepods_active) then
             thislist='copepods_active'
+          else if (line(1:len(str_Copepod_species)).eq.str_Copepod_species) then
+            ! Find species number by reading another line:
+            read(1, '(A)', iostat=ios) line
+            thislist='copepod_species'//line
           else if (line(1:len(str_POM)).eq.str_POM) then
             thislist='POM'
           end if   

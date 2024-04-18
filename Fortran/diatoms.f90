@@ -119,8 +119,15 @@ module diatoms
           jlim(i)=0.0
           !
           ! Potential net uptake
-          Jnetp(i)=this%JL(i)*(1-bL)+this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
-          !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
+          Jnetp(i) = this%JL(i)*(1-bL)+this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
+          if (Jnetp(i) .lt. 0) then ! There is not enough carbon to satisfy standard metabolism then only take up carbon and no resources
+             dN(i) = 0.
+             dSi(i) = 0.
+             dDOC(i) = 1.
+             dL(i) = 1.
+             Jnet(i) = 0.
+          else
+           !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
           !
           ! Calculation of down-regulation factors for
           ! N-uptake
@@ -138,7 +145,7 @@ module diatoms
           dDOC(i)=1.
           !------------ up to this point all good -----------------
           !
-          !write(*,*) dN(i),dSi(i)
+          !write(*,*) dN(i),dSi(i), Jnetp(i), jlim(i)
 
            if (dN(i)==1 .and. dSi(i)==1) then
              if ( this%JN(i)<this%JSi(i) ) then
@@ -213,6 +220,7 @@ module diatoms
           !
           !Jnetp  = this%JL(i)*(1-bL)+dDOC(i)*this%jDOC(i)*(1-bDOC)-this%Jresp(i)   
           !Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*dN(i)*this%JN(i)+bSi*dSi(i)*this%JSi(i)))) 
+            end if   
           !
           ! Saturation of net growth
           !
@@ -220,6 +228,9 @@ module diatoms
           if ((Jnet(i) + JmaxT).eq.0) then
            f=0.
           end if
+      
+
+          !write(*,*) i, dN(i),dDOC(i),dL(i),dSi(i)
 
           this%JNreal(i) =   (1-f)*dN(i)   * this%JN(i) 
           this%JDOCreal(i) = (1-f)*dDOC(i) * this%JDOC(i)

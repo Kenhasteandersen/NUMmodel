@@ -29,7 +29,8 @@ program NUMmodeltest
    !              gen-diat-cop      POM      mAdult    
   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
-  call setupGeneralistssimpleOnly(5,errorio,errorstr)
+  !call setupGeneralistssimpleOnly(5,errorio,errorstr)
+  call setupNUMmodelSpecies(4, 4, 1, (/01, 02/), errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
   !call setupDiatomsOnly(10,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
@@ -50,6 +51,7 @@ program NUMmodeltest
     print*, 'Error loading parameter ', errorstr
   end if
 
+
   !call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))
@@ -63,6 +65,10 @@ program NUMmodeltest
   end do
   dudt = 0.d0
 
+
+  call getMass(u0, u00)
+  write(*,*) u0
+  
   !call getSinking(u00)
   !write(*,*) u00
   !u00(8:12) = 5.d0
@@ -99,7 +105,7 @@ program NUMmodeltest
 
  ! call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
   !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
-  write(*,*) dudt
+  !write(*,*) dudt
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()
   !!$  u0=u00
@@ -117,7 +123,6 @@ program NUMmodeltest
     write(*,*) 'Nbalance:', Nbalance
     write(*,*) 'Cbalance:', Cbalance
     write(*,*) 'Sibalance:', Sibalance
-   
 
 !do i = 5,9
 !   write(*,*) i, theta(i+3,6:9)

@@ -15,6 +15,7 @@ module NUMmodel
   use generalists_simple
   use diatoms_simple
   use copepods
+  use copepodSpecies
   use diatoms
   use POM
   use read_input_module
@@ -32,6 +33,7 @@ module NUMmodel
   integer, parameter :: typeDiatom_simple = 4
   integer, parameter :: typeCopepodActive = 10
   integer, parameter :: typeCopepodPassive = 11
+  integer, parameter :: typeCopepodSpecies = 50
   integer, parameter :: typePOM = 100
   !
   ! Variables that contain the size spectrum groups
@@ -216,6 +218,7 @@ contains
        call parametersFinalize(0.001d0, .true., .true.)
     end if
   end subroutine setupGeneric
+
   ! -----------------------------------------------
   ! Full NUM model setup with generalists, copepods, and POM
   ! -----------------------------------------------
@@ -275,6 +278,38 @@ contains
 
   end subroutine setupNUMmodelSimple
   
+ ! -----------------------------------------------
+  ! Full NUM model setup with generalists, copepods species, and POM
+  ! -----------------------------------------------
+  subroutine setupNUMmodelSpecies(n, nCopepod, nPOM, idSpecies, errorio,errorstr)
+   integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
+   integer, intent(in):: idSpecies(:) ! And array with the id's (numbers) of species
+   logical(1), intent(out):: errorio 
+   character(c_char), dimension(*) :: errorstr
+   integer:: iCopepod, nSpecies
+
+   nSpecies = size(idSpecies)
+   call parametersInit(nSpecies+3, &
+      2*n + nPOM + nCopepod*nSpecies, &
+      3,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
+   IF ( errorio ) RETURN 
+
+   do iCopepod = 1, nSpecies
+      !call parametersAddGroup(typeCopepodSpecies+idSpecies(iCopepod)-1, nCopepod, 0.d0, errorio, errorstr) ! add copepod
+      call parametersAddGroup(typeCopepodSpecies+idSpecies(iCopepod)-1, nCopepod, 0.d0, errorio, errorstr) ! add copepod
+        IF ( errorio ) RETURN 
+   end do
+   
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
+   call parametersFinalize(0.07d0, .true., .false.)
+
+  end subroutine setupNUMmodelSpecies
+
+
   ! -------------------------------------------------------
   ! A generic setup with generalists, diatoms and copepods
   ! -------------------------------------------------------
@@ -372,12 +407,14 @@ contains
     real(dp), intent(in):: mMax
     logical(1), intent(out) :: errorio
     character(c_char), dimension(*) :: errorstr
+    character(20):: nameCopepod
 
     type(spectrumGeneralists) :: specGeneralists
     type(spectrumGeneralistsSimple) :: specGeneralistsSimple
     type(spectrumDiatoms_simple):: specDiatoms_simple
     type(spectrumDiatoms):: specDiatoms
     type(spectrumCopepod):: specCopepod
+    type(spectrumCopepodSpecies):: specCopepodSpecies
     type(spectrumPOM):: specPOM
     !
     ! Find the group number and grid location:
@@ -412,6 +449,10 @@ contains
    case(typeCopepodActive)
       call initCopepod(specCopepod, active, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
+   case(typeCopepodSpecies : typeCopepodSpecies+10)
+      write(nameCopepod,'(i2.2)') typeGroup-typeCopepodSpecies+1
+      call initCopepodSpecies(specCopepodSpecies, 'copepod_species'//nameCopepod, n, errorio, errorstr)
+      allocate (group( iCurrentGroup )%spec, source=specCopepodSpecies)
    case(typePOM)
       call initPOM(specPOM, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
@@ -696,6 +737,12 @@ contains
             upositive(ixStart(iGroup):ixEnd(iGroup)), &
             dudt(idxN), &
             dudt(ixStart(iGroup):ixEnd(iGroup)))
+         type is (spectrumCopepodSpecies)
+            call calcDerivativesCopepodSpecies(spec, &
+               upositive(ixStart(iGroup):ixEnd(iGroup)), &
+               T, &
+               dudt(idxN), &
+               dudt(ixStart(iGroup):ixEnd(iGroup)))
       end select
     end do
     !

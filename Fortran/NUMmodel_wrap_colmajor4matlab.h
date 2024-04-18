@@ -26,6 +26,12 @@ void f_setupnummodel(const int n, const int nCopepod, const int nPOM,
 void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, const int nCopepods, 
                                         const double mAdult[], bool *Clost, char *errorstr);
 
+void f_testsetup(const double n);
+
+void f_setupnummodelspecies(const int n, const int nCopepod, const int nPOM, 
+					const int nCopepods, const int idCopepods[], 
+					bool *Clost, char *errorstr);
+
 void f_setupgendiatcope(const int n,const int nCopepod, const int nPOM, const int nCopepods, 
                                         const double mAdult[], bool *Clost, char *errorstr);
 
