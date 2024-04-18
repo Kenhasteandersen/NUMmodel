@@ -691,7 +691,8 @@ contains
 
     ! Calculate feeding for each group:
     do iGroup = 1, nGroups
-      call calcFeeding(group(iGroup)%spec, F( ixStart(iGroup):ixEnd(iGroup) ))
+
+      call group(iGroup)%spec%calcFeeding( F( ixStart(iGroup):ixEnd(iGroup) ))
     end do 
     !
     ! Calc HTL mortality:

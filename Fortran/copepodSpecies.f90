@@ -2,6 +2,9 @@
 ! Module to handle copepods from a specific species. These can have different species-
 ! specific parameters, and species-dependent temperature functions.
 !
+! The species are defined in input.h. Each species has a number, which is given on a 
+! single line just below the header: "! COPEPOD SPECIES PARAMETERS"
+!
 module copepodSpecies
   use globals
   use spectrum
@@ -18,6 +21,7 @@ module copepodSpecies
   contains
     procedure, pass :: initCopepodSpecies
     procedure :: calcDerivativesCopepodSpecies
+    procedure :: calcFeeding => calcFeedingCopepodSpecies
   end type spectrumCopepodSpecies
   
   public spectrumCopepodSpecies, initCopepodSpecies, calcDerivativesCopepodSpecies
@@ -74,7 +78,7 @@ contains
   subroutine calcDerivativesCopepodSpecies(this, u, T, dNdt, dudt)
     class(spectrumCopepodSpecies), intent(inout):: this
     real(dp), intent(in):: u(this%n)
-    real(dp), intent(in):: T
+    real(dp), intent(in):: T  ! Temperature
     real(dp), intent(inout):: dNdt, dudt(this%n)
     integer:: i
     real(dp):: nu, b
@@ -144,5 +148,16 @@ contains
     !      - sum(this%mort*u)/rhoCN  ! Mortality losses
 
   end subroutine calcDerivativesCopepodSpecies
+
+  subroutine calcFeedingCopepodSpecies(this, F)
+    class (spectrumCopepodSpecies), intent(inout):: this
+    real(dp), intent(in):: F(this%n)
+    !
+    ! Should use "currentT" for calculating the temperature response
+    !
+    this%flvl = this%epsilonF * this%AF*F / & ! Note: adding a small number in the
+      ((this%AF*F+eps) + fTemp2*this%JFmax)   ! demonominator to avoid negative values if F = JFmax = 0.
+    this%JF = this%flvl * fTemp2*this%JFmax
+  end subroutine calcFeedingCopepodSpecies
 
 end module copepodSpecies

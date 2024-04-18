@@ -37,7 +37,7 @@ module spectrum
 
      procedure, pass :: initSpectrum
      procedure :: calcGrid
-     procedure :: calcFeeding
+     procedure :: calcFeeding => calcFeedingSpectrum
      procedure :: printRates => printRatesSpectrum
      procedure :: printRatesSpectrum
      procedure :: getClost => getClostSpectrum
@@ -187,14 +187,14 @@ end subroutine calcGrid
   !
   ! Returns the amount of encounter and potentially assimilated food available for a group, JF
   !
-  subroutine calcFeeding(this, F)
+  subroutine calcFeedingSpectrum(this, F)
     class (typeSpectrum), intent(inout):: this
     real(dp), intent(in):: F(this%n)
 
     this%flvl = this%epsilonF * this%AF*F / & ! Note: adding a small number in the
       ((this%AF*F+eps) + fTemp2*this%JFmax)   ! demonominator to avoid negative values if F = JFmax = 0.
     this%JF = this%flvl * fTemp2*this%JFmax
-  end subroutine calcFeeding
+  end subroutine calcFeedingSpectrum
 
   !
   ! Returns the carbon that is lost from the system (by default only respiration, but 

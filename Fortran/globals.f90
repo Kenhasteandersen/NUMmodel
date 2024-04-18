@@ -14,6 +14,7 @@ module globals
   ! Temperature scalings parameters:
   real(dp) :: fTemp2, fTemp15 ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
   real(dp), parameter:: Tref = 10. ! Reference temperature
+  real(dp) :: currentT = -1000.! Temperature from last call to fTemp
   
   !
   ! Specification of what to do with HTL losses:
@@ -43,15 +44,16 @@ module globals
   ! -----------------------------------------------
   ! Update the temperature corrections only if T has changed
   ! -----------------------------------------------
-  subroutine updateTemperature(T)
-    real(dp), intent(in) :: T
-    real(dp), save :: Told = -1000.
+  subroutine updateTemperature(Temp)
+    real(dp), intent(in) :: Temp
+    !real(dp), save :: Told = -1000.
 
-    if (T .ne. Told) then
-      Told = T
-      fTemp2 = fTemp(2.d0, T)
-      fTemp15 = fTemp(1.5d0, T)
+    if (Temp .ne. currentT) then
+      currentT = Temp
+      fTemp2 = fTemp(2.d0, Temp)
+      fTemp15 = fTemp(1.5d0, Temp)
     end if
+  
   end subroutine updateTemperature
 
 end module globals
