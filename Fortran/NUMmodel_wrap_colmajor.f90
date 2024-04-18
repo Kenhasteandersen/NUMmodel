@@ -106,10 +106,6 @@ contains
     call setupNUMmodelSimple(n,nCopepod,nPOM,mAdult,errorio, errorstr)
   end subroutine f_setupNUMmodelSimple
 
-  subroutine f_testsetup(n,n1) bind(c)
-    integer(c_int), intent(in), value:: n,n1
-    end subroutine f_testsetup
-
   subroutine f_setupNUMmodelSpecies(n,nCopepod,nPOM, nCopepods, idCopepods, errorio, errorstr) bind(c)
    integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
    integer(c_int), intent(in):: idCopepods(nCopepods)
@@ -128,9 +124,12 @@ contains
 
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
-    logical, intent(in), value:: bQuadraticHTL, bDecliningHTL
+    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL
+    logical:: tmp1, tmp2
 
-    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
+    tmp1 = bQuadraticHTL
+    tmp2 = bDecliningHTL
+    call setHTL(mHTL, mortHTL, tmp1, tmp2)
   end subroutine f_setHTL 
 
   subroutine f_setMortHTL(mortHTL) bind(c)

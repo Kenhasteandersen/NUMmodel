@@ -23,7 +23,7 @@ end
 % Find the correct library for the OS:
 %
 switch computer('arch')
-    case {'maci','maci64'}
+    case {'maci','maci64','maca64'}
         sLibname = 'libNUMmodel_matlab';
         sExtension = '.dylib';
     case {'glnx86','glnxa64'}
