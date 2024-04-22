@@ -261,6 +261,7 @@
 ! Species name: XXX
 !***********************************************************************
    AdultMass = 1. ! Adult mass in microGram carbon
+   Q10 = 2. ! Q10 for maximum consumption and respiration
    epsilonF = 0.67               ! Assimilation efficiency
    epsilonR = 0.25               ! Reproductive efficiency
    beta = 100.                   ! Preferred predator-prey mass ratio
@@ -292,6 +293,7 @@
 ! Species name: XXX
 !***********************************************************************
    AdultMass = 10. ! Adult mass in microGram carbon
+   Q10 = 2. ! Q10 for maximum consumption and respiration
    epsilonF = 0.67               ! Assimilation efficiency
    epsilonR = 0.25               ! Reproductive efficiency
    beta = 100.                   ! Preferred predator-prey mass ratio

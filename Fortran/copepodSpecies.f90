@@ -16,7 +16,7 @@ module copepodSpecies
 
   type, extends(spectrumCopepod) :: spectrumCopepodSpecies
     real(dp) :: alphaF, q, h, hExponent, AdultOffspring, mAdult
-    real(dp) :: epsilonR, kBasal, kSDA
+    real(dp) :: epsilonR, kBasal, kSDA, Q10
 
   contains
     procedure, pass :: initCopepodSpecies
@@ -44,6 +44,8 @@ contains
     call read_input(inputfile,nameSpecies,'AdultMass',this%mAdult,errorio,errorstr)
     call read_input(inputfile,nameSpecies,'AdultOffspring',this%AdultOffspring,errorio,errorstr)
     call this%initMulticellular(n, this%mAdult/this%AdultOffspring, this%mAdult)
+
+    call read_input(inputfile,nameSpecies,'Q10',this%Q10,errorio,errorstr)
 
     call read_input(inputfile,nameSpecies,'alphaF',alphaF,errorio,errorstr)
     call read_input(inputfile,nameSpecies,'q',q,errorio,errorstr)
@@ -81,7 +83,7 @@ contains
     real(dp), intent(in):: T  ! Temperature
     real(dp), intent(inout):: dNdt, dudt(this%n)
     integer:: i
-    real(dp):: nu, b
+    real(dp):: nu, b, Q10factor
 
     do i = 1, this%n
        !
@@ -89,7 +91,8 @@ contains
        !
 
        ! Basal and SDA respiration:
-       this%Jresptot(i) = this%JrespFactor(i) * this%kBasal * fTemp2 + this%kSDA * this%JF(i)
+       Q10factor = this%Q10**((T-Tref)/10.)
+       this%Jresptot(i) = this%JrespFactor(i) * this%kBasal * Q10factor + this%kSDA * this%JF(i)
        ! Available energy:
        nu = this%JF(i) - this%Jresptot(i)
        !this%Jresptot(i) = this%Jresptot(i) - min(0.d0, nu) ! Limit respiration to the energy available
@@ -152,12 +155,15 @@ contains
   subroutine calcFeedingCopepodSpecies(this, F)
     class (spectrumCopepodSpecies), intent(inout):: this
     real(dp), intent(in):: F(this%n)
+    real(dp):: Q10factor
+
+    Q10factor = this%Q10**((currentT-Tref)/10.)
     !
     ! Should use "currentT" for calculating the temperature response
     !
     this%flvl = this%epsilonF * this%AF*F / & ! Note: adding a small number in the
-      ((this%AF*F+eps) + fTemp2*this%JFmax)   ! demonominator to avoid negative values if F = JFmax = 0.
-    this%JF = this%flvl * fTemp2*this%JFmax
+      ((this%AF*F+eps) + Q10factor*this%JFmax)   ! demonominator to avoid negative values if F = JFmax = 0.
+    this%JF = this%flvl * Q10factor*this%JFmax
   end subroutine calcFeedingCopepodSpecies
 
 end module copepodSpecies
