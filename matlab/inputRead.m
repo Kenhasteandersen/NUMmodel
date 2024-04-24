@@ -34,23 +34,34 @@ thislist='no list defined yet';
 % Open and read the text file, line by line
 %--------------------------------------------------------------------------
 fid = fopen(filename,'r');
+rep_cop = 0; % an extra index to account for duplicate copepod headers
 while ~feof(fid)
     line = fgetl(fid);
     %----------------------------------------------------------------------
     % Check if this line is a parameter header. If, then update "thislist"
     %----------------------------------------------------------------------
     io=find(strcmp(line,thestrings)==1);
+
+    if length(io)>1  % select appropriate copepod species
+        io = io(1+rep_cop);
+    end
+       
     if ~isempty(io)
         thislist=string(thelists(io,1));
+
+        if io>=6 % make index for the next copepod species
+            rep_cop = rep_cop+1;
+        end
+        
     end
     %----------------------------------------------------------------------
     % Remove leading and trailing white spaces
     %----------------------------------------------------------------------
     line=strtrim(line);
     %----------------------------------------------------------------------
-    % If the line is not blank or a comment: extract the keyword and value
+    % If the line is not blank, a comment or only include numbers: extract the keyword and value
     %----------------------------------------------------------------------
-    if ~isempty(line) && ~strcmp(line(1),'!')
+    if ~isempty(line) && ~strcmp(line(1),'!') && ~all(isstrprop(line,'digit'))
         %------------------------------------------------------------------
         % Find the "=" and "!" marking comments in the end of the line
         %------------------------------------------------------------------
