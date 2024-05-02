@@ -164,10 +164,17 @@ else
     else
         u(:, ixN) = p.u0(p.idxN)*ones(nb,1);
     end
-    u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
+
     if bSilicate
-        u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+        if exist(strcat(p.pathSi0,'.mat'),'file')
+            load(p.pathSi0, 'Si');
+            u(:, ixSi) = gridToMatrix(Si, [], p.pathBoxes, p.pathGrid);
+        else
+            u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+        end
     end
+
+    u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
     u = u(idxGrid,:); % Use only the specific water column
 end
@@ -424,21 +431,21 @@ sim.Nprod = p.BCmixing(p.idxN)*(p.BCvalue(p.idxN)-sim.N(:,end))*sim.dznom(end)/1
         end
 
         for i = 1:365/p.dtTransport
-           % zup = sim.z - 0.5*sim.dznom; % Top of a box
-           % zup = zup(1:length(idxGrid));
-           % dz = sim.dznom(1:length(idxGrid));
-           % if p.bUse_parday_light
-           %     Lup = 1e6*parday(idx.x,idx.y,1,i)/(24*60*60).*exp(-p.kw*zup);
-           % else
-           %     Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*zup);
-           % end
-           % L0(:,i) = Lup.*(1-exp(-p.kw*dz))./(p.kw*dz);
-           if p.bUse_parday_light
+            % zup = sim.z - 0.5*sim.dznom; % Top of a box
+            % zup = zup(1:length(idxGrid));
+            % dz = sim.dznom(1:length(idxGrid));
+            % if p.bUse_parday_light
+            %     Lup = 1e6*parday(idx.x,idx.y,1,i)/(24*60*60).*exp(-p.kw*zup);
+            % else
+            %     Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*zup);
+            % end
+            % L0(:,i) = Lup.*(1-exp(-p.kw*dz))./(p.kw*dz);
+            if p.bUse_parday_light
                 Lup = 1e6*parday(idx.x,idx.y,1,i)/(24*60*60);
             else
                 Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid(1)),i*p.dtTransport,1);
-           end
-           L0(:,i) = Lup*exp(-p.kw*sim.z(1:nGrid));
+            end
+            L0(:,i) = Lup*exp(-p.kw*sim.z(1:nGrid));
         end
 
     end
