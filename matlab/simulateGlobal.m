@@ -297,7 +297,7 @@ for i=1:simtime
                     calllib(sLibname, 'f_simulateeulerfunctions', ...
                     u(k,:), L(k), T(k), dtTransport, dt, ...
                     ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1);
-
+               
                 ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
                 ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
                 ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;

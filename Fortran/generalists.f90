@@ -303,16 +303,29 @@ function getProdNetGeneralists(this, u) result(ProdNet)
   class(spectrumGeneralists), intent(in):: this
   real(dp), intent(in):: u(this%n)
   integer:: i
-  real(dp):: resp
+  real(dp):: resp, tmp, tmp2
 
   ProdNet = 0.d0
   do i = 1, this%n
+    if ( (this%JLreal(i) + this%JDOCreal(i)) .ne. 0.d0 ) then
+      tmp = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i))
+    else
+      tmp = 0.d0
+    endif
+
+    if ( (this%JLreal(i) + this%JDOCreal(i)+ this%JFreal(i)) .ne. 0.d0 ) then
+      tmp2 = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i) + this%JFreal(i))
+    else
+      tmp2 = 0.d0
+    endif
+
     resp = &
       fTemp2*this%Jresp(i) + & ! Basal metabolism
       bL*this%JLreal(i) + &    ! Light uptake metabolism
-      bN*this%JNreal(i) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i)) + &  ! The fraction of N uptake that is not associated to DOC uptake  
-      bg*this%Jnet(i) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i) + this%JFreal(i)) ! The fraction of growth not associated with DOC or feeding
-      ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
+      bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is not associated to DOC uptake  
+      bg*this%Jnet(i) * tmp2 ! The fraction of growth not associated with DOC or feeding
+    ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
+
   end do
 end function getProdNetGeneralists
 
