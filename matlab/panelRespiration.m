@@ -42,7 +42,7 @@ switch p.nameGroup{iGroup}
         fillbetweenlines(m, jR+jR_DOC, jR+jR_DOC+jR_L, [0 0.8 0]);
         fillbetweenlines(m, jR+jR_DOC+jR_L, jR+jR_DOC+jR_L+jR_N, [0 0.6 0]);
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N, jR+jR_DOC+jR_L+jR_N+jR_F, [0 0.4 0]);
-        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g, [0.6 0 0]);
+        fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g, [0.6 0.0 0]);
         fillbetweenlines(m, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g, jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot, [0.8 0 0] );
 
         ymax = max(jR+jR_DOC+jR_L+jR_N+jR_F+jR_g+jTot);

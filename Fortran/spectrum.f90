@@ -287,6 +287,7 @@ end subroutine calcGrid
     write(*,99) "jDOC:", this%JDOCreal / this%m
     write(*,99) "jDOCreal:", this%JDOCreal / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m
+    write(*,99) "jNloss:", this%JNloss / this%m
   end subroutine printRatesUnicellular
 
   !function getCbalanceUnicellular(this, u, dudt) result(Cbalance)

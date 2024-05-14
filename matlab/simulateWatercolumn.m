@@ -179,9 +179,9 @@ else
     u = u(idxGrid,:); % Use only the specific water column
 end
 %p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
-if bSilicate
-    p.u0(ixSi) = u(nGrid,ixSi);
-end
+%if bSilicate
+%    p.u0(ixSi) = u(nGrid,ixSi);
+%end
 %
 % Set BCvalue:
 %
@@ -192,7 +192,7 @@ BCvalue = p.BCvalue;
 % If BCvalue == -1 then use the bottom value from the initial conditions:
 for i = 1:length(BCvalue)
     if BCvalue(i)==-1
-        BCvalue(i) = u(end,i)';
+        BCvalue(i) = p.u0(i)';
     end
 end
 %

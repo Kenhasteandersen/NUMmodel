@@ -29,9 +29,9 @@ program NUMmodeltest
    !              gen-diat-cop      POM      mAdult    
   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
-  call setupGeneralistsDiatoms(5,errorio,errorstr)
+  !call setupGeneralistsOnly(10,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
-  !call setupDiatomsOnly(10,errorio,errorstr)
+  call setupDiatomsOnly(10,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
   
   !call setupGeneralistsOnly(5,errorio,errorstr)
@@ -55,11 +55,11 @@ program NUMmodeltest
   allocate(u0(nGrid))
   allocate(u00(nGrid))
   allocate(dudt(nGrid))
-  u00(idxN) = 150.d0
-  u00(idxDOC) = .1d0
-  u00(idxSi) = 10.d0
+  u00(idxN) = 1.d0
+  u00(idxDOC) = 0.01d0
+  u00(idxSi) = 0.d0
   do i = idxB, nGrid
-     u00(i) = 10 + 0.1*(i-2)
+     u00(i) = 0.0686d0 !+ 0.1*(i-2)
   end do
   dudt = 0.d0
 
@@ -82,7 +82,7 @@ program NUMmodeltest
   !      write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
   !end select
   
-  call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
+  call calcDerivatives(u00, 2.42d0, 10.d0, 0.0d0, dudt)
   call printRates()
   !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
@@ -113,10 +113,11 @@ program NUMmodeltest
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
  !write(*,*) Bpico, Bnano, Bmicro
-  call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
-    write(*,*) 'Nbalance:', Nbalance
-    write(*,*) 'Cbalance:', Cbalance
-    write(*,*) 'Sibalance:', Sibalance
+  write(*,*) dudt
+  call getBalance(u00, dudt, Cbalance,Nbalance,Sibalance)
+  write(*,*) 'Cbalance:', Cbalance
+  write(*,*) 'Nbalance:', Nbalance
+  write(*,*) 'Sibalance:', Sibalance
    
 
 !do i = 5,9
