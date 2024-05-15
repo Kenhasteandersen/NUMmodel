@@ -192,7 +192,7 @@ BCvalue = p.BCvalue;
 % If BCvalue == -1 then use the bottom value from the initial conditions:
 for i = 1:length(BCvalue)
     if BCvalue(i)==-1
-        BCvalue(i) = p.u0(i)';
+        BCvalue(i) = u(end,i)';
     end
 end
 %
