@@ -1005,6 +1005,7 @@ contains
                spec%getProdBact(u( ixStart(i):ixEnd(i) ))
        end select
     end do
+   
     !
     ! Make a rough estimate of pico-nano-micro plankton biomasses:
     !
@@ -1012,7 +1013,7 @@ contains
     ESD = 10000. * 1.5 * (m*1d-6)**onethird
     !conversion = 1d-6*1000 ! Convert to gC/m3
     conversion = 1d-3*1000 ! Convert to mgC/m3
-
+    
     do i = idxB, nGrid
        if (ESD(i) .le. 2.) then
           Bpico = Bpico + conversion*u(i)

@@ -29,7 +29,7 @@ program NUMmodeltest
    !              gen-diat-cop      POM      mAdult    
   !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
 
-  call setupGeneralistsDiatoms(5,errorio,errorstr)
+  call setupGeneralistsDiatoms(6,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
   !call setupDiatomsOnly(10,errorio,errorstr)
   !call setupDiatoms_simpleOnly(10)
@@ -57,9 +57,9 @@ program NUMmodeltest
   allocate(dudt(nGrid))
   u00(idxN) = 150.d0
   u00(idxDOC) = .1d0
-  u00(idxSi) = 10.d0
+  u00(idxSi) = 200.d0
   do i = idxB, nGrid
-     u00(i) = 10 + 0.1*(i-2)
+     u00(i) = 1! + 0.1*(i-2)
   end do
   dudt = 0.d0
 
@@ -84,6 +84,7 @@ program NUMmodeltest
   
   call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   call printRates()
+  write(*,*) dudt
   !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
   !write(*,*) 'nbutrients',nNutrients
@@ -97,8 +98,8 @@ program NUMmodeltest
   Bnano=0
   Bmicro=0
 
- ! call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
-  !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
+ call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
+write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
   !write(*,*) dudt
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()
@@ -113,10 +114,10 @@ program NUMmodeltest
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
  !write(*,*) Bpico, Bnano, Bmicro
-  call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
-    write(*,*) 'Nbalance:', Nbalance
-    write(*,*) 'Cbalance:', Cbalance
-    write(*,*) 'Sibalance:', Sibalance
+!  call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
+!    write(*,*) 'Nbalance:', Nbalance
+!    write(*,*) 'Cbalance:', Cbalance
+!    write(*,*) 'Sibalance:', Sibalance
    
 
 !do i = 5,9
