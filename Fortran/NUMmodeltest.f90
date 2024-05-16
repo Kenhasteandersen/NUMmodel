@@ -84,6 +84,7 @@ program NUMmodeltest
   
   call calcDerivatives(u00, 2.42d0, 10.d0, 0.0d0, dudt)
   call printRates()
+  write(*,*) dudt
   !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
   !write(*,*) 'nbutrients',nNutrients
@@ -97,8 +98,8 @@ program NUMmodeltest
   Bnano=0
   Bmicro=0
 
- ! call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
-  !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
+ call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
+write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
   !write(*,*) dudt
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()

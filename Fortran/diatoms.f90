@@ -14,7 +14,7 @@ module diatoms
      real(dp) :: rhoCSi, remin2
      
      type, extends(spectrumUnicellular) :: spectrumDiatoms
-     real(dp), dimension(:), allocatable:: JSi,JSireal
+     real(dp), dimension(:), allocatable:: JSi,JSireal, jNet
 
      contains
        procedure, pass :: initDiatoms
@@ -71,6 +71,7 @@ module diatoms
        
        allocate(this%JSi(this%n))
        allocate(this%JSireal(this%n))
+       allocate(this%jNet(this%n))
        !
        ! Radius:
        !
@@ -262,16 +263,24 @@ module diatoms
       class(spectrumDiatoms), intent(in):: this
       real(dp), intent(in):: u(this%n)
       integer:: i
-      real(dp):: resp
+      real(dp):: resp, tmp
     
       ProdNet = 0.d0
+
       do i = 1, this%n
+        if ( (this%JLreal(i) + this%JDOCreal(i)) .ne. 0.d0 ) then
+          tmp = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i))
+        else
+          tmp = 0.d0
+        endif
+
         resp = &
           fTemp2*this%Jresp(i) + & ! Basal metabolism
           bL*this%JLreal(i) + &    ! Light uptake metabolism
-          bN*this%JNreal(i) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i)) + &  ! The fraction of N uptake that is not associated to DOC uptake  
-          bg*this%f(i)*this%Jmax(i)/(1-this%f(i)) * this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i)) ! The fraction of growth not associated with DOC
+          bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is not associated to DOC uptake  
+          bg*this%Jnet(i) * tmp ! The fraction of growth not associated with DOC
         ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
+
       end do
     end function getProdNetDiatoms
 

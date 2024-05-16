@@ -26,7 +26,8 @@ p = parametersGlobal(p,TMmodel);
 sim = load(p.pathGrid,'x','y','z','dznom','bathy');
 
 [X,Y,Z] = meshgrid(sim.x,sim.y,sim.z);
-N = interp3(lat,lon+180,depth,N, Y,X,Z);
+X(X>180) = X(X>180)-360;
+N = interp3(lat,lon,depth,N, Y,X,Z);
 % Reorder dimensions:
 N = rearrange(N,length(sim.x),length(sim.y),length(sim.z));
 % Get rid of NANs:
@@ -39,7 +40,7 @@ save(p.pathN0,'N')
 sFile = 'woa18_all_i00_01.nc';
 molar_mass = 28.085;
 Si = ncread(sFile,'i_an') * molar_mass; % Objectively analyzed mean fields for moles_concentration_of_nitrate_in_sea_water at standard depth levels
-Si = interp3(lat,lon+180,depth,Si, Y,X,Z);
+Si = interp3(lat,lon,depth,Si, Y,X,Z);
 Si = rearrange(Si,length(sim.x),length(sim.y),length(sim.z));
 Si = replaceNAN(Si);
 
