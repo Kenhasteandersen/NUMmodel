@@ -107,7 +107,7 @@ module diatoms
    
        do i = 1, this%n
           !
-          ! Uptakes
+          ! Encounters:
           !
           this%JN(i) =  ftemp15* gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
           this%JDOC(i) = ftemp15*gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
