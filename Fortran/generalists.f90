@@ -145,7 +145,7 @@ contains
        endif
        this%Jtot(i) = this%Jnet(i) - this%JlossPassive(i)
 
-       ! Take up N only to the degree that is is not supplied by feeding:
+       ! Take up N only to the degree that is is not supplied by feeding (ie priotize feeding):
        this%JNreal(i) = max( 0.d0, this%Jnet(i) - this%jF(i) )
        
        !
