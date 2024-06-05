@@ -146,7 +146,8 @@ contains
        this%Jtot(i) = this%Jnet(i) - this%JlossPassive(i)
 
        ! Take up N only to the degree that is is not supplied by feeding:
-       this%JNreal(i) = this%dN(i) * this%JN(i)
+       this%JNreal(i) = max( 0.d0, this%Jnet(i) - this%jF(i) )
+       
        !
        ! Regulate carbon uptakes for growth + respiration towards lowered jNet.
        !
