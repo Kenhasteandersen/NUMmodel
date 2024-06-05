@@ -134,7 +134,7 @@ contains
          else
            this%dN(i) = max( 0.d0, min( 1.d0, (Jnetp(i) - this%JF(i)*(bg+1))/(this%JN(i)*(1+bg+bN)) ) )
          endif
-         this%Jnet(i) = min( (Jnetp(i)-bg*(this%dN(i)*this%JN(i)))/(1+bg) , & ! Carbon limitation
+         this%Jnet(i) = min( (Jnetp(i)-bN*(this%dN(i)*this%JN(i)))/(1+bg) , & ! Carbon limitation
                             this%JF(i) + this%dN(i)*this%JN(i))              ! N limitation
        endif 
        !
