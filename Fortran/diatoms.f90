@@ -162,11 +162,21 @@ module diatoms
           ! Regulate carbon uptakes for growth + respiration towards lowered jNet.
           !
 
+          tmp = ( (1 - bDOC)*this%jDOC(i) + (1 - bL)*this%jL(i)  )
+          if (tmp .eq. 0.0d0) then
+            this%jDOCreal(i) = 0.0d0
+            this%jLreal(i) = 0.0d0
+          else
+            tmp = ( Jnet(i) + bg*max(0.d0, JNet(i)) + bN*this%JNreal(i) + bSi*this%JSireal(i) + ftemp2*this%Jresp(i)) &
+                  / ( (1 - bDOC)*this%jDOC(i) + (1 - bL)*this%jL(i)  )
+            this%jDOCreal(i) = tmp * this%jDOC(i)
+            this%jLreal(i) = tmp * this%jL(i)
+          endif
           ! Prioritize DOC:
-          tmp = Jnet(i) + bg*max(0.d0, Jnet(i)) + bN*this%JNreal(i) + bSi*this%JSireal(i) + ftemp2*this%Jresp(i)
-          this%jDOCreal(i) = min( this%JDOC(i), tmp/(1-bDOC) )
+          !tmp = Jnet(i) + bg*max(0.d0, Jnet(i)) + bN*this%JNreal(i) + bSi*this%JSireal(i) + ftemp2*this%Jresp(i)
+          !this%jDOCreal(i) = min( this%JDOC(i), tmp/(1-bDOC) )
           ! And then light:
-          this%JLreal(i) = min( this%JL(i), (tmp - this%jDOCreal(i)*(1-bDOC))/(1-bL) )
+          !this%JLreal(i) = min( this%JL(i), (tmp - this%jDOCreal(i)*(1-bDOC))/(1-bL) )
           !
           ! Losses:
           !

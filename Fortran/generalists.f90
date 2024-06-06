@@ -155,11 +155,26 @@ contains
        ! First carbon from F assuming no uptakes from DOC and L:
        this%JFreal(i) = min( this%JF(i), &
            (this%Jnet(i) + bg*max(0.d0, this%Jnet(i)) + ftemp2*this%Jresp(i) + bN*this%Jnreal(i) )/(1-bF)) 
-       ! Then prioritize DOC:
-       tmp = this%Jnet(i) + bg*max(0.d0, this%Jnet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - this%JFreal(i)*(1-bF)
-       this%jDOCreal(i) = min( this%JDOC(i), tmp/(1-bDOC) )
-       ! And finally light:
-       this%JLreal(i) = min( this%JL(i), (tmp - this%jDOCreal(i)*(1-bDOC))/(1-bL) )
+       ! Then divide evenly btw DOC and L:
+       tmp = ( (1 - bDOC)*this%jDOC(i) + (1 - bL)*this%jL(i)  )
+       if (tmp .eq. 0.0d0) then
+          this%jDOCreal(i) = 0.0d0
+          this%jLreal(i) = 0.0d0
+       else
+         tmp = ( this%Jnet(i) + bg*max(0.d0, this%JNet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - &
+                this%JFreal(i)*(1 - bF) ) / tmp
+         !if (tmp .lt. 0.d0) then
+         ! tmp = this%Jnet(i) + bg*max(0.d0, this%Jnet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - this%JFreal(i)*(1-bF)
+         ! this%jDOCreal(i) = min( this%JDOC(i), tmp/(1-bDOC) )
+          !And finally light:
+         ! this%JLreal(i) = min( this%JL(i), (tmp - this%jDOCreal(i)*(1-bDOC))/(1-bL) )
+        !else
+          this%jDOCreal(i) = tmp * this%jDOC(i)
+          this%jLreal(i) = tmp * this%jL(i)
+        !endif
+      endif
+       
+       
       
        ! Exude surplus N:
        this%JNlossLiebig(i) = max( 0.d0, this%Jnreal(i) + this%Jfreal(i) - this%JlossPassive(i) - this%Jtot(i) )
