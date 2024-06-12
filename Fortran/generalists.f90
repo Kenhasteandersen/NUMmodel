@@ -9,20 +9,21 @@ module generalists
 
   private 
   
-  real(dp) :: alphaL,epsilonL,bL,bN,bDOC,bF,bg,remin2,reminF
+  real(dp) :: epsilonL,bL,bN,bDOC,bF,bg,remin2,reminF
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
     !
     ! Regulation factors:
     !
-    real(dp), allocatable :: dL(:), dN(:), dDOC(:)
+    real(dp), allocatable :: dL(:), dN(:), dDOC(:), jNet(:)
     
   contains
     procedure, pass :: initGeneralists
     procedure :: calcRates => calcRatesGeneralists
     procedure :: calcDerivativesGeneralists
     procedure :: printRates => printRatesGeneralists
+    procedure :: getProdNet => getProdNetGeneralists
     procedure :: getProdBact => getProdBactGeneralists 
   end type spectrumGeneralists
  
@@ -71,11 +72,9 @@ contains
     call read_input(inputfile,'generalists','remin2',remin2,errorio,errorstr)
     call read_input(inputfile,'generalists','reminF',reminF,errorio,errorstr)
     call read_input(inputfile,'generalists','rho',rho,errorio,errorstr)
-
     call read_input(inputfile,'generalists','epsilonF',this%epsilonF,errorio,errorstr)
     call read_input(inputfile,'generalists','beta',this%beta,errorio,errorstr)
     call read_input(inputfile,'generalists','sigma',this%sigma,errorio,errorstr)
-    
 
     allocate(this%JFreal(n))
 
@@ -99,6 +98,7 @@ contains
     allocate(this%dL(n))
     allocate(this%dN(n))
     allocate(this%dDOC(n))
+    allocate(this%Jnet(n))
 
   end subroutine initGeneralists
 
@@ -107,19 +107,17 @@ contains
     real(dp), intent(in):: gammaN, gammaDOC
     real(dp), intent(in):: L, N, DOC
     real(dp):: f, JmaxT
-    real(dp):: Jnetp(this%n), Jnet(this%n)
+    real(dp):: Jnetp(this%n)
     integer:: i
 
     do i = 1, this%n
        !
        ! Uptakes
        !
-       this%JN(i) = gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-       this%JDOC(i) =gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
-       this%JL(i) =  epsilonL * this%AL(i)*L  ! Photoharvesting
+       this%JN(i)   = gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
+       this%JDOC(i) = gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
+       this%JL(i)   = epsilonL * this%AL(i)*L  ! Photoharvesting
        JmaxT = fTemp2*this%Jmax(i)
-       !write(*,*) this%JL(i)/this%m(i), L, this%AL(i)
-       !this%JF(i)= 0.
        !
        ! Potential net uptake
        !
@@ -155,17 +153,17 @@ contains
        !write(*,*) dN(i)
        if (this%dN(i).lt.0) then ! check if N leaks out of the cell
         this%dN(i)=0.
-        Jnet =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
+        this%Jnet(i) =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
         + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*this%dN(i)*this%JN(i)) ! was with max(O.,..) 
-        f = (Jnet(i) )/(Jnet(i) + JmaxT)
+        f = (this%Jnet(i) )/(this%Jnet(i) + JmaxT)
         !if (f .gt. 0) then
 
         this%JNlossLiebig(i) = (1-f)*this%JF(i)-f*JmaxT!-1/(1+bg)*(bN*dN(i)*this%JN(i))!this%JF(i)-!this%JF(i)-Jnet(i)!f*JmaxT
         !endif
        else 
-        Jnet =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
+        this%Jnet(i) =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
         + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*this%dN(i)*this%JN(i)) ! was with max(O.,..) 
-        f = (Jnet(i) )/(Jnet(i) + JmaxT)
+        f = (this%Jnet(i) )/(this%Jnet(i) + JmaxT)
         this%JNlossLiebig(i) = 0
         end if
        !Jnet =  1./(1+bg)*(dDOC(i)*this%JDOC(i)*(1.-bDOC)+dL(i)*this%JL(i)*(1-bL) &
@@ -174,42 +172,40 @@ contains
        ! Saturation of net growth
        !
        !f = (Jnet(i) )/(Jnet(i) + JmaxT)
-       if ((Jnet(i) + JmaxT).eq.0) then
+       if ((this%Jnet(i) + JmaxT).eq.0) then
         f=0.
        end if
-        this%JCtot(i) = & 
-        (1-f)*(this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i) + this%JF(i) )&
-        - (1-f)*fTemp2*this%Jresp(i) &
-        - ( (1-f)&
-        *(bDOC*this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i)*bL+ this%JF(i)*bF+bN*this%dN(i)*this%JN(i))&
-        +(1-f)*bg*Jnet(i) )
+      !  this%JCtot(i) = & 
+      !      (1-f)*(this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i) + this%JF(i) )&
+      !    - (1-f)*fTemp2*this%Jresp(i) &
+      !    - ( (1-f)*(bDOC*this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i)*bL+ this%JF(i)*bF+bN*this%dN(i)*this%JN(i))&
+      !       +(1-f)*bg*this%Jnet(i) )
       !
        ! Apply saturation to uptake rates
        !
-       this%JNreal(i)=this%dN(i)*(1-f)*this%JN(i)
-       this%JDOCreal(i)=this%dDOC(i)*(1-f)*this%JDOC(i)
-       this%JLreal(i)=this%dL(i)*(1-f)*this%JL(i)
-       this%JFreal(i)=(1-f)*this%JF(i)
-       this%Jtot(i)= f * JmaxT-(1-f)*( this%JlossPassive(i))
+       this%JNreal(i)  = this%dN(i)*(1-f)*this%JN(i)
+       this%JDOCreal(i)= this%dDOC(i)*(1-f)*this%JDOC(i)
+       this%JLreal(i)  = this%dL(i)*(1-f)*this%JL(i)
+       this%JFreal(i)  = (1-f)*this%JF(i)
+       this%Jtot(i)    = f*JmaxT - (1-f)*this%JlossPassive(i)
       !        
       ! Actual uptakes:
       !
-      this%JNtot(i) = &
-            this%JNreal(i) + &
-            this%JFreal(i)
+      this%JNtot(i) = this%JNreal(i) + this%JFreal(i)
       !write(*,*) f,1-f,Jnet(i)   
       !write(*,*) dN(i),dL(i),this%JNlossLiebig(i)
       !
       ! Losses:
       !
-      this%JCloss_feeding(i) = (1.-this%epsilonF)/this%epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
+      this%JCloss_feeding(i)     = (1.-this%epsilonF)/this%epsilonF * this%JFreal(i) ! Incomplete feeding (units of carbon per time)
       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-      this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + &
-            (1-f)*(bDOC*this%dDOC(i)*this%JDOC(i) + &
-                   bL*this%dL(i)*this%JL(i) + &
-                   bN*this%dN(i)*this%JN(i) + &
-                   bF*this%JF(i) + &
-                   bg*Jnet(i))
+      this%Jresptot(i)= &
+            fTemp2*this%Jresp(i) + &
+            bDOC*this%JDOCreal(i) + &
+            bL*this%JLreal(i) + &
+            bN*this%JNreal(i) + &
+            bF*this%JFreal(i) + &
+            bg*this%Jnet(i)
 
       !write(*,*) this%Jresptot(i)                 
       ! 
@@ -223,7 +219,7 @@ contains
       !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
       !this%JF(i) = this%JFreal(i)
 
-      this%f(i)=f
+      this%f(i) = f
       !this%JF(i) = this%JFreal(i)
     end do
     this%jN = this%jNreal  ! Needed to get the the actual uptakes out with "getRates"
@@ -295,6 +291,43 @@ subroutine printRatesGeneralists(this)
   write(*,99) "deltaN:", this%dN
   write(*,99) "deltaDOC:", this%dDOC
 end subroutine printRatesGeneralists
+
+!
+  ! Returns the net primary production calculated as the total amount of carbon fixed
+  ! by photsynthesis minus the respiration due to basal respiration,
+  ! photosynthesis, nutrint uptake, and growth. Units: mugC/day/m3
+  ! (See Andersen and Visser (2023) table 5)
+  !
+function getProdNetGeneralists(this, u) result(ProdNet)
+  real(dp):: ProdNet
+  class(spectrumGeneralists), intent(in):: this
+  real(dp), intent(in):: u(this%n)
+  integer:: i
+  real(dp):: resp, tmp, tmp2
+
+  ProdNet = 0.d0
+  do i = 1, this%n
+    if ( (this%JLreal(i) + this%JDOCreal(i)) .ne. 0.d0 ) then
+      tmp = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i))
+    else
+      tmp = 0.d0
+    endif
+
+    if ( (this%JLreal(i) + this%JDOCreal(i)+ this%JFreal(i)) .ne. 0.d0 ) then
+      tmp2 = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i) + this%JFreal(i))
+    else
+      tmp2 = 0.d0
+    endif
+
+    resp = &
+      fTemp2*this%Jresp(i) + & ! Basal metabolism
+      bL*this%JLreal(i) + &    ! Light uptake metabolism
+      bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is not associated to DOC uptake  
+      bg*this%Jnet(i) * tmp2 ! The fraction of growth not associated with DOC or feeding
+    ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
+
+  end do
+end function getProdNetGeneralists
 
   function getProdBactGeneralists(this, u) result(ProdBact)
     real(dp):: ProdBact

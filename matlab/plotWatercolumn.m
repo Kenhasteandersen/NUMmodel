@@ -4,7 +4,12 @@
 % Warning: the "setup" function needs to be called before this plot is
 % made. If not matlab may crash or the results be incorrect.
 %
+% All biomasses are normalized to "Sheldon" spectra by dividing biomass
+% with ln(Delta) (the ratio between the upper and lower mass in each mass
+% bin); see Andersen and Visser (2023) Box V.
+%
 % In:
+%  sim
 %  time - time (in days)
 %  lat, lon - latitude and longitude (only for global simulation)
 %  Optional:
@@ -134,7 +139,7 @@ for iGroup = 1:sim.p.nGroups
     Delta = sim.p.mUpper(ix)./sim.p.mLower(ix);
     ixB = ix-sim.p.idxB+1;
 
-    BB = B(:, ixB)./log(Delta);
+    BB = B(:, ixB)./log(Delta); % Normalize to Sheldon spectra
     BB = [BB(1,:); BB]; % Add dummy layer on top
     BB( BB<0.01 ) = 0.01;
 

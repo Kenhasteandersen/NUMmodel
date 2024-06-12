@@ -77,6 +77,21 @@ void f_simulateeuler(
 			      const double tEnd,
 			      const double dt);
 
+void f_simulateeulerfunctions(
+			      double u[],
+			      const double L,
+				  const double T, 
+			      const double tEnd,
+			      const double dt,
+				  double *ProdGross,
+				  double *ProdNet,
+				  double *ProdHTL,
+				  double *ProdBact,
+				  double *eHTL,
+				  double *Bpico,
+				  double *Bnano,
+				  double *Bmicro);
+
 void f_getmass(
 				double *m,
 				double *mDelta);

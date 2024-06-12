@@ -1,3 +1,13 @@
+%
+% Calculate the radius of a particle from its mass. The calculation assumes
+% a spherical particle with constant density.
+%
+% In:
+%  m: mass in microgram carbon
+%
+% Out:
+%  r: radius in micrometer
+%
 function r = calcRadius(m)
 
 arguments

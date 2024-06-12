@@ -245,7 +245,8 @@
   
 !***********************************************************************
 ! COPEPODS ACTIVE INPUT PARAMETERS
-! - Values taken from Serra-Pompei et al (2020) for actively feeding copepods
+! - Values taken from Serra-Pompei et al (2020) for actively feeding copepods,
+! but adjusted to a reference temperature of 10 degrees
 !***********************************************************************
 
   epsilonF = 0.67               ! Assimilation efficiency
@@ -254,8 +255,8 @@
   sigma = 1.5                   ! Preferred predator-prey mass range
   alphaF = 0.011                ! Clearance rate coefficient
   q = 0.75                      ! Exponent of clearance rate
-  h = 1.37                      ! Coefficient for maximum ingestion rate
-  hExponent = 0.75              ! Exponent for maximum ingestions rate
+  h = 0.97                      ! Coefficient for maximum ingestion rate
+  hExponent = 0.75              ! Exponent for maximum ingestion rate
 
 ! kBasal  is a factor for basal metabolism {0.006}. This value represents basal metabolism at 
 ! starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
@@ -275,7 +276,8 @@
 
 !***********************************************************************
 ! COPEPODS PASSIVE INPUT PARAMETERS
-! - Values taken from Serra-Pompei et al (2020) for actively feeding copepods
+! - Values taken from Serra-Pompei et al (2020) for passively feeding copepods
+! but adjusted to reference temperature of 10 degrees
 !***********************************************************************
 
    epsilonF = 0.67               ! Assimilation efficiency
@@ -284,8 +286,8 @@
    sigma = 1.                    ! Preferred predator-prey mass range
    alphaF = 0.0052               ! Clearance rate coefficient
    q = 0.75                      ! Exponent of clearance rate
-   h = 0.4                       ! Coefficient for maximum ingestion rate
-   hExponent = 0.75              ! Exponent for maximum ingestions rate
+   h = 0.29                      ! Coefficient for maximum ingestion rate
+   hExponent = 0.75              ! Exponent for maximum ingestion rate
 
 ! kBasal  is a factor for basal metabolism {0.006}. This value represents basal metabolism at 
 ! starvation. Following Kiørboe (1985) the starvation metabolism is approximatly

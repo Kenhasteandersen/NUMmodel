@@ -10,7 +10,7 @@ module NUMmodel_wrap
        setupGeneralistsSimpleCopepod, &
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
-       simulateChemostatEuler, simulateEuler, getFunctions, &
+       simulateChemostatEuler, simulateEuler, simulateEulerFunctions, getFunctions, &
        setHTL, setmortHTL, setSinking, getRates, getBalance, getLost, theta
 
   use globals
@@ -124,7 +124,7 @@ contains
 
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
-    logical, intent(in), value:: bQuadraticHTL, bDecliningHTL
+    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL
 
     call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
   end subroutine f_setHTL 
@@ -167,6 +167,16 @@ contains
 
     call simulateEuler(u, L, T, tEnd, dt)
   end subroutine f_simulateEuler
+
+  subroutine f_simulateEulerFunctions(u, L, T, tEnd, dt, &
+    ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
+    real(c_double), intent(inout):: u(nGrid) ! Initial conditions and result after integration
+    real(c_double), intent(in), value:: L,T,tEnd,dt
+    real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+
+    call simulateEulerFunctions(u, L, T, tEnd, dt, &
+      ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+  end subroutine f_simulateEulerFunctions
 
    subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
     real(c_double), intent(in):: u(nGrid)

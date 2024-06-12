@@ -106,6 +106,8 @@ switch sim.p.nameModel
                     [ProdGross1, ProdNet1,ProdHTL1,ProdBact1,~,Bpico1,Bnano1,Bmicro1] = ...
                         getFunctions(u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
                     % Multiply by the thickness of each layer:
+                    %rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
+                    
                     conv = sim.dznom(k);
                     ProdGross = ProdGross + ProdGross1*conv;
                     ProdNet = ProdNet + ProdNet1*conv;
@@ -123,6 +125,7 @@ switch sim.p.nameModel
                     ChlVolume(k) = tmp;
                 end
             end
+
             iTimenow = iTime - ixTime(1)+1;
             sim.ProdGross(iTimenow) = ProdGross;
             sim.ProdNet(iTimenow) = ProdNet;

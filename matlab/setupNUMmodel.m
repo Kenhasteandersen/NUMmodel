@@ -1,17 +1,19 @@
 %
-% Setup with generalists and a number of copepods
+% Setup with generalists, diatoms, passive and active copepods, and POM
 %
 function p = setupNUMmodel(mAdultPassive, mAdultActive, n,nCopepods,nPOM, options)
 
 arguments
-    mAdultPassive (1,:) = [0.2 5];
-    mAdultActive (1,:) = [1 10 100 1000];
-    n = 10;
-    nCopepods = 10;
-    nPOM = 1;
-    options.bParallel = true;
+    mAdultPassive (1,:) = [0.2 5];  % Adult masses of passive copepods
+    mAdultActive (1,:) = [1 10 100 1000];  % Adult masses of active copepods
+    n = 10;  % Number of size groups in generalist and diatom spectra
+    nCopepods = 10;  % Number of stages in copepod groups
+    nPOM = 1;  % Number of POM size groups
+    options.bParallel = false;  % Whether to prepare for parallel runs (for global runs)
 end
-
+%
+% Load the NUM library and call the setupNUMmodel:
+% 
 loadNUMmodelLibrary(options.bParallel);
 
 errortext ='                    ';
@@ -40,20 +42,20 @@ if options.bParallel
         i=find(errorio==true,1);
         disp(['Error loading ',errortext{i},'. Execution terminated'])
         return
-    else
-        disp('done loading input parameters')
+    %else
+    %    disp('done loading input parameters')
     end
 else
     if errorio
         disp(['Error loading ',errortext,'. Execution terminated'])
         return
-    else
-        disp('done loading input parameters')
+    %else
+    %    disp('done loading input parameters')
     end
 end
-
-
-
+%
+% Setup in matlab:
+%
 p = setupNutrients_N_DOC_Si;
 
 % Generalists:
@@ -72,13 +74,16 @@ end
 
 % POM:
 p = parametersAddgroup(100, p, nPOM);
-setSinkingPOM(p, 20); % Since there is only one group, set a slow sinking
+setSinkingPOM(p, 20); 
 
+% Initial conditions:
 p = getMass(p);
 
-p.u0(1:3) = [150, 0, 200]; % Initial conditions (and deep layer concentrations)
+p.u0(1:3) = [150, 0, 200]; % Initial conditions (and deep layer concentrations) of nutrients
 % Initial condition at a Sheldon spectrum of "0.1":
 ix = p.idxB:p.n;
 p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix)); 
 
 p.u0( p.ixStart(end):p.ixEnd(end) ) = 0; % No POM in initial conditions
+
+setHTL(0.015,0.1,true,false);

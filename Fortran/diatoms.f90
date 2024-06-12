@@ -14,13 +14,14 @@ module diatoms
      real(dp) :: rhoCSi, remin2
      
      type, extends(spectrumUnicellular) :: spectrumDiatoms
-     real(dp), dimension(:), allocatable:: JSi,JSireal
+     real(dp), dimension(:), allocatable:: JSi,JSireal, jNet
 
      contains
        procedure, pass :: initDiatoms
        procedure :: calcRates => calcRatesDiatoms
        procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
+       procedure :: getProdNet => getProdNetDiatoms
      end type spectrumDiatoms
 
      public  initDiatoms, spectrumDiatoms, calcRatesDiatoms, calcDerivativesDiatoms
@@ -70,6 +71,7 @@ module diatoms
        
        allocate(this%JSi(this%n))
        allocate(this%JSireal(this%n))
+       allocate(this%jNet(this%n))
        !
        ! Radius:
        !
@@ -118,26 +120,33 @@ module diatoms
           jlim(i)=0.0
           !
           ! Potential net uptake
-          Jnetp(i)=this%JL(i)*(1-bL)+this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
-          !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
+          Jnetp(i) = this%JL(i)*(1-bL)+this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
+          if (Jnetp(i) .lt. 0.d0) then ! There is not enough carbon to satisfy standard metabolism. Then only take up carbon and no resources
+             dN(i) = 0.
+             dSi(i) = 0.
+             dDOC(i) = 1.
+             dL(i) = 1.
+             Jnet(i) = 0.
+          else
+           !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
           !
           ! Calculation of down-regulation factors for
           ! N-uptake
           if (this%JN(i).gt.0) then
-            dN(i) = min(1., 1./this%JN(i)*Jnetp(i)/(1+bg +bN+bSi))
+            dN(i) = min(1.d0, 1.d0/this%JN(i)*Jnetp(i)/(1.d0+bg +bN+bSi))
           else 
             dN(i)=1.
           end if  
           ! Si-uptake
           if (this%JSi(i).gt.0.) then
-            dSi(i) = min(1., 1./this%JSi(i)*Jnetp(i)/(1+bg +bN+bSi))
+            dSi(i) = min(1.d0, 1.d0/this%JSi(i)*Jnetp(i)/(1.d0+bg +bN+bSi))
           else 
             dSi(i)=1.
           end if 
           dDOC(i)=1.
           !------------ up to this point all good -----------------
           !
-          !write(*,*) dN(i),dSi(i)
+          !write(*,*) dN(i),dSi(i), Jnetp(i), jlim(i)
 
            if (dN(i)==1 .and. dSi(i)==1) then
              if ( this%JN(i)<this%JSi(i) ) then
@@ -171,11 +180,11 @@ module diatoms
            if  ( dSi(i)<1 .and. dN(i)<1 ) then  ! this check might be redundant, but just to make sure
               dL(i)=1
              Jnetp(i) = dL(i)*this%jL(i)*(1-bL)+dDOC(i)*this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
-             Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
+             Jnet(i)  = max(0.d0,1.d0/(1.d0+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
             jlim(i)=Jnet(i)
            end if
            if (this%JL(i)>0.) then
-             dL(i) = min(1., 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN) &
+             dL(i) = min(1.d0, 1.d0/(this%jL(i)*(1.d0-bL))*(jlim(i)*(1+bg+bSi+bN) &
              -(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
 
 
@@ -188,7 +197,7 @@ module diatoms
            !
            if (dL(i)<0.) then ! It means that there's is too much C taken up 
              dL(i) = 0       ! We set light uptake to 0 and downregulate DOC uptake
-             dDOC(i) = min(1., 1./(this%JDOC(i)*(1-bDOC))*(Jlim(i)*(1+bg+bSi+bN) + ftemp2*this%Jresp(i)))  
+             dDOC(i) = min(1.d0, 1.d0/(this%JDOC(i)*(1-bDOC))*(Jlim(i)*(1.d0+bg+bSi+bN) + ftemp2*this%Jresp(i)))  
            end if
              Jnetp(i) = dL(i)*this%jL(i)*(1-bL)+dDOC(i)*this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
              !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
@@ -212,6 +221,7 @@ module diatoms
           !
           !Jnetp  = this%JL(i)*(1-bL)+dDOC(i)*this%jDOC(i)*(1-bDOC)-this%Jresp(i)   
           !Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*dN(i)*this%JN(i)+bSi*dSi(i)*this%JSi(i)))) 
+            end if   
           !
           ! Saturation of net growth
           !
@@ -219,31 +229,34 @@ module diatoms
           if ((Jnet(i) + JmaxT).eq.0) then
            f=0.
           end if
+      
 
-          this%JNreal(i) = (1-f)*dN(i) * this%JN(i) 
+          !write(*,*) i, dN(i),dDOC(i),dL(i),dSi(i)
+
+          this%JNreal(i) =   (1-f)*dN(i)   * this%JN(i) 
           this%JDOCreal(i) = (1-f)*dDOC(i) * this%JDOC(i)
-          this%JLreal(i) = (1-f)*dL(i) * this%JL(i)
-          this%JSireal(i) = (1-f)*dSi(i) * this%JSi(i)
-          this%Jtot(i)= f * JmaxT - (1-f)*( this%JlossPassive(i) )!+ fTemp2*this%Jresp(i))
-
-
-         this%JCtot(i) = & 
+          this%JLreal(i) =   (1-f)*dL(i)   * this%JL(i)
+          this%JSireal(i) =  (1-f)*dSi(i)  * this%JSi(i)
+          this%Jtot(i)= f*JmaxT - (1-f)*this%JlossPassive(i)!+ fTemp2*this%Jresp(i))
+          this%jNet(i) = Jnet(i)
+        ! this%JCtot(i) = & 
         !
         ! (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i) )&
         ! - (1-f)*fTemp2*this%Jresp(i) &
         ! - ( (1-f)*(bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+bN*dN(i)*this%JN(i)+bN*dSi(i)*this%JSi(i))&
         ! + (1-f)*bg*Jnet(i) )
-          (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)- fTemp2*this%Jresp(i) &
-         - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) &
-         -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
+        !  (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)- fTemp2*this%Jresp(i) &
+        ! - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) &
+        ! -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
              
           this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-          this%Jresptot(i)= (1-f)*fTemp2*this%Jresp(i) + & !
-               (1-f)*(bDOC*dDOC(i)*this%JDOC(i) + &
-                      bL*dL(i)*this%JL(i) + &
-                      bN*dN(i)*this%JN(i) + &
-                      bSi*dSi(i)*this%JSi(i) + &
-                      bg*Jnet(i))
+          this%Jresptot(i) = &
+              fTemp2*this%Jresp(i) + & !
+              bDOC*this%JDOCreal(i) + &
+              bL*this%JLreal(i) + &
+              bN*this%JNreal(i) + &
+              bSi*this%JSireal(i) + &
+              bg*Jnet(i)
           !
           !write(*,*) jlim(i),dN(i),dSi(i)
 
@@ -341,6 +354,38 @@ module diatoms
       write(*,99) "jResptot:", this%Jresptot / this%m
     end subroutine printRatesDiatoms
     
+!
+  ! Returns the net primary production calculated as the total amount of carbon fixed
+  ! by photsynthesis minus the respiration due to basal respiration,
+  ! photosynthesis, nutrint uptake, and growth. Units: mugC/day/m3
+  ! (See Andersen and Visser (2023) table 5)
+  !
+    function getProdNetDiatoms(this, u) result(ProdNet)
+      real(dp):: ProdNet
+      class(spectrumDiatoms), intent(in):: this
+      real(dp), intent(in):: u(this%n)
+      integer:: i
+      real(dp):: resp, tmp
+    
+      ProdNet = 0.d0
+
+      do i = 1, this%n
+        if ( (this%JLreal(i) + this%JDOCreal(i)) .ne. 0.d0 ) then
+          tmp = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i))
+        else
+          tmp = 0.d0
+        endif
+
+        resp = &
+          fTemp2*this%Jresp(i) + & ! Basal metabolism
+          bL*this%JLreal(i) + &    ! Light uptake metabolism
+          bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is not associated to DOC uptake  
+          bg*this%Jnet(i) * tmp ! The fraction of growth not associated with DOC
+        ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
+
+      end do
+    end function getProdNetDiatoms
+
     function getProdBactDiatoms(this, u) result(ProdBact)
       real(dp):: ProdBact
       class(spectrumDiatoms), intent(in):: this

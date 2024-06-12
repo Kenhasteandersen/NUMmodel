@@ -81,7 +81,7 @@ contains
     call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
       IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimpleOnly
   subroutine setupNUMmodel2(n,errorio,errorstr)
     integer, intent(in):: n ! number of size classes
@@ -105,7 +105,7 @@ contains
     call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
       IF ( errorio ) RETURN 
     call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr) ! generalists with n size classes
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
   ! -----------------------------------------------
   ! A basic setup with 2 simple generalists
@@ -147,7 +147,7 @@ contains
     call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
       IF ( errorio ) RETURN 
     call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
   end subroutine setupGeneralistsSimplePOM
   
   
@@ -163,7 +163,7 @@ contains
     call parametersAddGroup(typeGeneralist, n, 0.d0,errorio,errorstr) ! generalists with n size classes
       IF ( errorio ) RETURN 
     call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
   end subroutine setupGeneralistsPOM
 
   ! -----------------------------------------------
@@ -176,7 +176,7 @@ contains
     call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
       IF ( errorio ) RETURN 
     call parametersAddGroup(typeDiatom, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
-    call parametersFinalize(0.1d0, .false., .false.)
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
   end subroutine setupDiatomsOnly
 
   ! -----------------------------------------------
@@ -189,7 +189,7 @@ contains
    call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
      IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom_simple, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
-   call parametersFinalize(0.1d0, .false., .false.)
+   call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
   end subroutine setupDiatoms_simpleOnly
   
 
@@ -205,7 +205,7 @@ contains
       call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr) ! generalists with n size classes
         IF ( errorio ) RETURN 
       call parametersAddGroup(typeDiatom, n, 0.d0,errorio,errorstr) ! diatoms with n size classes
-      call parametersFinalize(.1d0, .false., .false.)
+      call parametersFinalize(.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
    end subroutine setupGeneralistsDiatoms
  
    subroutine setupGeneralistsDiatoms_simple(n,errorio,errorstr)
@@ -217,7 +217,7 @@ contains
       call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
         IF ( errorio ) RETURN 
       call parametersAddGroup(typeDiatom_simple, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
-      call parametersFinalize(0.1d0, .false., .false.)
+      call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
    end subroutine setupGeneralistsDiatoms_simple
  
   ! -----------------------------------------------
@@ -231,7 +231,7 @@ contains
     call parametersAddGroup(typeGeneralistSimple, 10, 0.0d0,errorio,errorstr)
       IF ( errorio ) RETURN 
     call parametersAddGroup(typeCopepodActive, 10, .1d0,errorio,errorstr) ! add copepod with adult mass .1 mugC
-    call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
+    call parametersFinalize(0.003d0, logical(.true.,1), logical(.true.,1)) ! Use quadratic mortality
   end subroutine setupGeneralistsSimpleCopepod
 
   ! -----------------------------------------------
@@ -249,13 +249,13 @@ contains
     call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
       IF ( errorio ) RETURN 
     if ( size(mAdult) .eq. 0) then
-       call parametersFinalize(0.1d0, .true., .true.)
+       call parametersFinalize(0.1d0, logical(.true.,1), logical(.true.,1))
     else
        do iCopepod = 1, size(mAdult)
           call parametersAddGroup(typeCopepodActive, n, mAdult(iCopepod),errorio,errorstr) ! add copepod
             IF ( errorio ) RETURN 
        end do
-       call parametersFinalize(0.001d0, .true., .true.)
+       call parametersFinalize(0.001d0, logical(.true.,1), logical(.true.,1))
     end if
   end subroutine setupGeneric
   ! -----------------------------------------------
@@ -287,7 +287,7 @@ contains
    end do
    
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.001d0, .true., .true.)
+   call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
 
   end subroutine setupNUMmodel
 
@@ -313,7 +313,7 @@ contains
         IF ( errorio ) RETURN 
    end do
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.001d0, .true., .true.)
+   call parametersFinalize(0.001d0, logical(.true.,1), logical(.true.,1))
 
   end subroutine setupNUMmodelSimple
   
@@ -339,7 +339,7 @@ contains
         IF ( errorio ) RETURN 
    end do
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.001d0, .true., .true.)
+   call parametersFinalize(0.007d0,logical(.true.,1), logical(.false.,1))
 
   end subroutine setupGenDiatCope
 
@@ -544,7 +544,7 @@ contains
   ! -----------------------------------------------
   subroutine parametersFinalize(mortHTL, boolQuadraticHTL, boolDecliningHTL)
     real(dp), intent(in):: mortHTL
-    logical, intent(in):: boolQuadraticHTL, boolDecliningHTL
+    logical(1), intent(in):: boolQuadraticHTL, boolDecliningHTL
     integer:: i,j, iGroup, jGroup
     real(dp),parameter :: betaHTL = 500.d0
     real(dp):: mHTL
@@ -666,8 +666,8 @@ contains
     real(dp), intent(in):: mHTL ! The size where HTL is 50% of max
     real(dp), intent(in):: mortalityHTL ! The level of HTL mortality (at a reference size of 1 ugC
                                         ! B/z = 1/l )
-    logical, intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
-    logical, intent(in):: boolDecliningHTL ! Whether the mortality declines with size
+    logical(1), intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
+    logical(1), intent(in):: boolDecliningHTL ! Whether the mortality declines with size
     real(dp), parameter:: mRef = .1d0 ! Reference mass (in ugC)
     !real(dp), parameter:: betaHTL = 500.
     integer:: iGroup
@@ -812,7 +812,7 @@ contains
        gammaN = max(0.d0, min(1.d0, -u(idxN)/(dudt(idxN)*dt)))
     end if
     if ((u(idxDOC) + dudt(idxDOC)*dt) .lt. 0) then
-       gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(dudt(idxDOC)*dt)))
+       gammaDOC = max(0.d0, min(1.d0, u(idxDOC)/(dudt(idxDOC)*dt)))
     end if
     if (nNutrients .gt. 2) then
       if ((u(idxSi) + dudt(idxSi)*dt) .lt. 0) then
@@ -1039,6 +1039,22 @@ contains
     end do
   end subroutine simulateEuler
 
+  ! -----------------------------------------------
+  ! Simulate with Euler integration and also return functions
+  ! -----------------------------------------------
+  subroutine simulateEulerFunctions(u, L, T, tEnd, dt, &
+            ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+    real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
+    real(dp), intent(in):: L      ! Light level
+    real(dp), intent(in):: T ! Temperature
+    real(dp), intent(in):: tEnd ! Time to simulate
+    real(dp), intent(in):: dt    ! time step
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+
+    call simulateEuler(u, L, T, tEnd, dt)
+    call getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+ end subroutine simulateEulerFunctions
+
   !=========================================
   ! Diagnostic functions
   !=========================================
@@ -1132,8 +1148,7 @@ contains
                spec%getProdBact(u( ixStart(i):ixEnd(i) ))
        end select
     end do
-          
-
+   
     !
     ! Make a rough estimate of pico-nano-micro plankton biomasses:
     !
@@ -1141,7 +1156,7 @@ contains
     ESD = 10000. * 1.5 * (m*1d-6)**onethird
     !conversion = 1d-6*1000 ! Convert to gC/m3
     conversion = 1d-3*1000 ! Convert to mgC/m3
-
+    
     do i = idxB, nGrid
        if (ESD(i) .le. 2.) then
           Bpico = Bpico + conversion*u(i)

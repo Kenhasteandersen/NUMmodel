@@ -25,4 +25,12 @@ vel = zeros(1,p.n); % All groups except POM has zero sinking
 vel( p.ixStart(p.ixPOM):p.ixEnd(p.ixPOM) ) = velocity;
 
 calllib(loadNUMmodelLibrary(), 'f_setsinking', vel );
+
+% Set on parallel cluster as well:
+if exist("gcp")
+    if ~isempty(gcp('nocreate'))
+        spmd
+            calllib(loadNUMmodelLibrary(), 'f_setsinking', vel );
+        end
+    end
 end

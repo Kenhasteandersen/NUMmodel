@@ -272,7 +272,7 @@ end subroutine calcGrid
 
     Clost = sum( ( &
       - this%JLreal & ! Fixed carbon
-      - this%JCloss_photouptake & !Fixed carbon which is later exudated
+      - this%JCloss_photouptake & !Fixed carbon which is later exuded
       + this%Jresptot & ! Respiration
       )/this%m * u )
   end function getClostUnicellular
