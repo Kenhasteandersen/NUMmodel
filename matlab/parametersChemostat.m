@@ -94,12 +94,12 @@ if isnan(seasonalOptions.lat_lon)
         % this new seasonal one using the option as the weight.
         %
         for t=1:365
-            if t<125 | t>300
+            if t<125 || t>300
                 d(t) = (1-lambda)*0.5+lambda*0.6;
             else
                 d(t) = (1-lambda)*0.5+lambda*0.02;
             end
-            if t<=60 | t>=280
+            if t<=60 || t>=280
                 L(t) = (1-lambda)*100+lambda*5;
             else
                 L(t) = (1-lambda)*100+lambda*35;

@@ -28,6 +28,7 @@ matlab/tmp_generalistsdiatoms_simple.mat
 matlab/tmp.m
 matlab/tmp.mat
 matlab/watercolumns.pdf
+matlab/ModelResults/*
 Fortran/diatoms_ke.f90
 .DS_Store
 Fortran/a.out

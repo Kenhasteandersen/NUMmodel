@@ -319,6 +319,7 @@ for i = 1:simtime
         % Loss to HTL and POM:
         for j = 1:nGrid
             rates = getRates(p,u(j,:),L(j),T(j));
+            srates(iSave,j).rates=rates;
             % Note: half of the HTL loss is routed directly back to N if we
             % don't have POM:
             if ~sum(ismember(p.typeGroups,100))
@@ -364,6 +365,7 @@ sim.z = sim.z(1:length(idx.z));
 sim.dznom = sim.dznom(1:length(idx.z));
 sim.lat = lat;
 sim.lon = lon;
+sim.rates = srates;
 
 sim.Ntot = (sum(sim.N'.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
     sum(squeeze(sum(sim.B,3))'.*(sim.dznom*ones(1,length(sim.t))))/rhoCN)/1000; % gN/m2 in biomass

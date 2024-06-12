@@ -27,42 +27,42 @@ meanval=0.8373;
 
 
 %% setup simulation
-p = setupGeneralistsSimpleK(n,k, bParallel);
-p = parametersChemostat(p);
-p.tEnd = 365*tEnd;
-p.d = d;
-
-% Change colors for groups of Generalists:
-r=[13 15 56 119 189];
-g=[139 178 192 207 227];
-b=[217 242 242 242 242];
-j=linspace(0.3,0.9,k);
-
-blue(1,:)=[58/255,67/255,186/255];
-blue(2,:)=[4/255,146/255,194/255];
-blue(3,:)=[130/255,237/255,253/255];
-for i=4:k+1
- blue(i,:)=[130/255,237/255,253/255];
-end
-
-for i=2:k+1
-    %p.colGroup{i}=[0,0,j(i-1)];
-    p.colGroup{i}=blue(i-1,:);
-end
-%Change color of N so I can see generalists
-
-p.colNutrients{1}=[0,1,1];
-
-%p.umin=p.umin.*0.5;
-%p.u0(p.idxB:p.n) = 0.5;
-%
-% Set to "normal" HTL mortality if there are no copepods:
-%
-
-setHTL(mortHTL, mHTL, bQuadraticHTL,bDecliningHTL);
+% % % % p = setupGeneralistsSimpleK(n,k, bParallel);
+% % % % p = parametersChemostat(p);
+% % % % p.tEnd = 365*tEnd;
+% % % % p.d = d;
+% % % % 
+% % % % % Change colors for groups of Generalists:
+% % % % r=[13 15 56 119 189];
+% % % % g=[139 178 192 207 227];
+% % % % b=[217 242 242 242 242];
+% % % % j=linspace(0.3,0.9,k);
+% % % % 
+% % % % blue(1,:)=[58/255,67/255,186/255];
+% % % % blue(2,:)=[4/255,146/255,194/255];
+% % % % blue(3,:)=[130/255,237/255,253/255];
+% % % % for i=4:k+1
+% % % %  blue(i,:)=[130/255,237/255,253/255];
+% % % % end
+% % % % 
+% % % % for i=2:k+1
+% % % %     %p.colGroup{i}=[0,0,j(i-1)];
+% % % %     p.colGroup{i}=blue(i-1,:);
+% % % % end
+% % % % %Change color of N so I can see generalists
+% % % % 
+% % % % p.colNutrients{1}=[0,1,1];
+% % % % 
+% % % % %p.umin=p.umin.*0.5;
+% % % % %p.u0(p.idxB:p.n) = 0.5;
+% % % % %
+% % % % % Set to "normal" HTL mortality if there are no copepods:
+% % % % %
+% % % % 
+% % % % setHTL(mortHTL, mHTL, bQuadraticHTL,bDecliningHTL);
 
 %% Simulate
-usesaved='no';
+usesaved='yes';
 mortHTL_vector=linspace(0,0.3,20);
 dvector=mortHTL_vector;
 switch usesaved
