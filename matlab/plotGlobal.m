@@ -34,24 +34,27 @@ tiledlayout(2+bSilicate+sim.p.nGroups,1)
 %text(0, 1, labels(i),'Units','normalized')
 nexttile
 field = getfield(sim.DOC);
-panelGlobal(sim.x,sim.y,log10(field),[0 2],sTitle='Surface DOC (log_{10} {\mu}g_C/l)',sProjection=sProjection);
-set(gca,'XTickLabel','')
+panelGlobal(sim.x,sim.y,field,10.^linspace(0,2,10),...
+    sTitle='Surface DOC',...
+    sUnits='{\mu}g_C/l', sProjection=sProjection);
+set(gca,'XTickLabel','','colorscale','log')
+
 
 % Nitrogen
 nexttile
 field = getfield(sim.N);
-c = panelGlobal(sim.x,sim.y,log10(field),[0 2],sTitle='Surface N (log_{10} {\mu}g_C/l)',sProjection=sProjection);
-c.Label.String  = ' [\mug N l^{-1}]';
-set(gca,'XTickLabel','')
+panelGlobal(sim.x,sim.y,field, 10.^linspace(0,2,10), ...
+    sTitle='Surface N', sUnits='{\mu}g_N/l', sProjection=sProjection);
+set(gca,'XTickLabel','','colorscale','log')
 
 % Silicate
 if bSilicate
     nexttile
     field = getfield(sim.Si);
-    c = panelGlobal(sim.x,sim.y,log10(field),[0 2],sTitle='Surface Si (log_{10} {\mu}g_{Si}/l)',sProjection=sProjection);
-    c.Label.String  = ' [\mug Si l^{-1}]';
+    panelGlobal(sim.x,sim.y,field,10.^linspace(0,2,10),...
+        sTitle='Surface Si', sUnits='{\mu}g_{Si}/l', sProjection=sProjection);
+    set(gca,'XTickLabel','','colorscale','log')
 end
-set(gca,'XTickLabel','')
 
 % Groups
 for i = 1:sim.p.nGroups
@@ -61,11 +64,11 @@ for i = 1:sim.p.nGroups
     if ~bAverageTime
         field = squeeze(field(iTime,:,:));
     end
-    cbar = panelGlobal(sim.x,sim.y,log10(field),...
-        [-2 1], sTitle=strcat(sim.p.nameGroup(i)), sProjection=sProjection);
-    clim([-2 1])
-    cbar.Label.String  = 'g_C/m^2';
-    set(gca,'XTickLabel','')
+    cbar = panelGlobal(sim.x,sim.y,field,...
+        10.^linspace(-2, 1,10), sUnits='g_C/m^2',...
+        sTitle=strcat(sim.p.nameGroup(i)), sProjection=sProjection);
+    clim(10.^[-2 1])
+    set(gca,'XTickLabel','','colorscale','log')
 
     % Multicellular plankton
     %subplot(nPanels,1,nPanels)
@@ -75,12 +78,12 @@ end
 
 if isfield(sim,'CnetPerArea')
     subplot(4,1,4)
-    panelGlobal(sim.x, sim.y, log10(sim.CnetPerArea(:,:,1)), [0 3],...
-        sTitle='Average net primary production (log_{10} g_C/m^2/yr)', ...
-        sProjection=sProjection);
-    clim([8 11])
+    panelGlobal(sim.x, sim.y, sim.CnetPerArea(:,:,1), 10.^linspace(0,3,10),...
+        sTitle='Average net primary production', ...
+        sProjection=sProjection, sUnits='g_C/m^2/yr');
+    clim(10.^[8 11])
 end
-set(gca,'xticklabel','auto')
+set(gca,'xticklabel','auto','colorscale','log')
 
     function field = getfield(fld)
 
