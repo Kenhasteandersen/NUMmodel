@@ -158,7 +158,7 @@ for i = 1:sim.p.nGroups
 end
 
 if strcmp(sim.p.nameModel, 'watercolumn')
-    sgtitle(['Nitrogen & DOC concentration/ Total biomass of each group ({\mu}gC/l) at: lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
+    sgtitle(['Water column at lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
 end
 
 end
