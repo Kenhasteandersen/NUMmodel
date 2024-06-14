@@ -89,69 +89,67 @@ nexttile
 %z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
 %panelField([t t(end)], -z, N');
 %surface(t,-z, N)
-contourf(t,-z,log10(N),linspace(-2,3,options.nLevels),'LineStyle','none')
-title('Nitrogen (log_{10} {\mu}g_N/l)')
+contourf(t,-z,N,logspace(-2,3,options.nLevels),'LineStyle','none')
+title('Nitrogen')
 ylabel('Depth (m)')
 %set(gca,'ColorScale','log')
 %shading interp
 axis tight
-colorbar('ticks',-2:3)
+h = colorbar('ticks',10.^(-2:3));
+h.Label.String = '{\mu}g_N/l';
 %caxis([-1 2])
 ylim(ylimit)
 xlim(xlimit)
-clim([-2,3])
+set(gca, 'colorscale','log')
 set(gca,'XTickLabel','')
 
 if isfield(sim,'Si')
     nexttile
     %surface(t,-z, Si)
-    contourf(t,-z,log10(Si),linspace(-2,3,options.nLevels),'LineStyle','none')
+    contourf(t,-z,Si,logspace(-2,3,options.nLevels),'LineStyle','none')
     % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
-    title('Silicate (log_{10} {\mu}g_{Si}/l)')
+    title('Silicate')
     ylabel('Depth (m)')
     %set(gca,'ColorScale','log')
     %shading interp
     axis tight
-    colorbar('ticks',-2:3)
+    h = colorbar('ticks',10.^(-2:3));
+    h.Label.String = '{\mu}g_{Si}/l';
     %caxis([0.1 1000])
     ylim(ylimit)
     xlim(xlimit)
-    clim([-2,3])
+    set(gca, 'colorscale','log')
     set(gca,'XTickLabel','')
 end
 
 nexttile
-contourf(t,-z,log10(DOC),options.nLevels,'LineStyle','none')
+contourf(t,-z,DOC,logspace(-2,2,options.nLevels),'LineStyle','none')
 %surface(t,-z, DOC)
-title('DOC (log_{10} {\mu}g_C/l)')
+title('DOC')
 ylabel('Depth (m)')
-%xlabel('Concentration (\mugC l^{-1})')
-%set(gca,'colorscale','log')
-%set(gca,'ColorScale','log')
-shading interp
 axis tight
-colorbar
+h = colorbar('ticks',10.^(-2:2));
+h.Label.String = '{\mu}g_C/l';
 %caxis([0.1,2])
 ylim(ylimit)
 xlim(xlimit)
+set(gca, 'colorscale','log')
 set(gca,'XTickLabel','')
 
 for i = 1:sim.p.nGroups
     nexttile
     %surface(t,-z, squeeze(B(i,:,:)))
     B(B < 0.01) = 0.01; % Set low biomasses to the lower limit to avoid white space in plot
-    contourf(t,-z,log10(squeeze(B(i,:,:))),[linspace(-2,3,options.nLevels)],'LineStyle','none')
-    title(strcat(sim.p.nameGroup(i), ' (log_{10} {\mu}g_C/l)'));
+    contourf(t,-z,(squeeze(B(i,:,:))),[logspace(-2,3,options.nLevels)],'LineStyle','none')
+    title( sim.p.nameGroup(i) );
     ylabel('Depth (m)')
-    %set(gca,'ColorScale','log')
-    %shading interp
     axis tight
-    colorbar
-    %caxis([0.1 100])
-    colorbar('ticks',-2:3,'limits',[-2 3])
+    h = colorbar('ticks',10.^(-2:3));
+    h.Label.String = '{\mu}g_C/l)';
+    set(gca, 'colorscale','log')
     ylim(ylimit)
     xlim(xlimit)
-    clim([-2,3])
+    clim(10.^[-2,3])
     if i ~= sim.p.nGroups
         set(gca,'XTickLabel','')
     else
