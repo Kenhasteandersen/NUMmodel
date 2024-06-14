@@ -11,7 +11,7 @@ function sim = baserunWatercolumn(lat, lon)
 
 arguments
     lat double = 60;
-    lon double = -40;
+    lon double = -15;
 end
 
 p = setupNUMmodel();
