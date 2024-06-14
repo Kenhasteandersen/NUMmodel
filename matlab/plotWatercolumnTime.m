@@ -145,7 +145,7 @@ for i = 1:sim.p.nGroups
     ylabel('Depth (m)')
     axis tight
     h = colorbar('ticks',10.^(-2:3));
-    h.Label.String = '{\mu}g_C/l)';
+    h.Label.String = '{\mu}g_C/l';
     set(gca, 'colorscale','log')
     ylim(ylimit)
     xlim(xlimit)
