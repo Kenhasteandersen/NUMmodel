@@ -1,5 +1,7 @@
 %
-% Make a plot of bacteria, phytoplankton, zooplankton, and the diatom ratio 
+% Make a plot of bacteria, phytoplankton, zooplankton, and the diatom ratio.
+%
+% Requires that the library is loaded with a setup which matches sim.
 % 
 function sim = plotGlobalPhytoplankton(sim, options)
 arguments
@@ -11,7 +13,8 @@ end
 sLibName = loadNUMmodelLibrary();
 ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
 % Get grid volumes:
-load(sim.p.pathGrid,'dv','dz','dx','dy');
+%load(sim.p.pathGrid,'dv','dz','dx','dy');
+dz = sim.dznom;
 ix = ~isnan(sim.N(1,:,:,1)); % Find all relevant grid cells
 
 
@@ -62,7 +65,7 @@ for iTime = ixTime
                     [Bphytotmp, Bzootmp, Bbacteriatmp] = ...
                         calcPhytoZoo(p, u, L(iTime,i,j,k), T(iTime,i,j,k), sLibName);
                     
-                    conv = squeeze(dz(i,j,k));
+                    conv = dz(k);%squeeze(dz(i,j,k));
                     Bphyto(iTime,i,j) = Bphyto(iTime,i,j) + sum(Bphytotmp)*conv; % mgC/m2
                     Bbacteria(iTime,i,j) = Bbacteria(iTime,i,j) + sum(Bbacteriatmp)*conv; % mgC/m2
                     Bzoo(iTime,i,j) = Bzoo(iTime,i,j) + sum(Bzootmp)*conv; % mgC/m2
