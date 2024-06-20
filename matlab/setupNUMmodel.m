@@ -5,7 +5,7 @@ function p = setupNUMmodel(mAdultPassive, mAdultActive, n, nCopepods, nPOM, opti
 
 arguments
     mAdultPassive (1,:) = [0.2 5];  % Adult masses of passive copepods
-    mAdultActive (1,:) = [1 316 1000];  % 3 log-spaced adult masses of active copepods
+    mAdultActive (1,:) = logspace(0,3,3);  % 3 log-spaced adult masses of active copepods
     n = 10;  % Number of size groups in generalist and diatom spectra
     nCopepods = 6;  % Number of stages in copepod groups
     nPOM = 1;  % Number of POM size groups
