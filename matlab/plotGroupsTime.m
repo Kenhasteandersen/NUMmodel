@@ -59,30 +59,29 @@ else
     for i = 1:p.nGroups
         ix = (p.ixStart(i):p.ixEnd(i)) - p.idxB + 1;
         B(i,:) = sum(sim.B( :, ix ),2);
-        semilogy(sim.t, B(i,:), 'linewidth',2);
+        semilogy(sim.t, B(i,:), 'linewidth',2,'Color',p.colGroup{i});
         hold on
     end
     hold off
-    legend(p.nameGroup);
-    %ylim([0.1 max(B(:))])
-    xlabel('Time (days)')
-    ylabel('Total biomass (ugC/l)')
+    legend(p.nameGroup,'box','off','location','southeast');
+    set(gca,'XTickLabel','')
+    ylabel('Total biomass (\mug_C/l)')
+    xlim([min(sim.t) max(sim.t)])
     %
     % Mixing rate
     %
     nexttile
-    semilogy(sim.t, d, 'linewidth', 1, 'color', 'r');
-    legend('Mixing rate');
-    xlabel('Time (days)')
-    ylabel('Mixing rate (/days)')
+    semilogy(sim.t, d, 'linewidth', 2, 'color', 'r');
+    set(gca,'XTickLabel','')
+    ylabel('Mixing rate (1/day)')
+    xlim([min(sim.t) max(sim.t)])
     %
     % Light
     %
     nexttile
-    semilogy(sim.t, L, 'linewidth', 1, 'color', 'y');
-    legend('Light');
+    plot(sim.t, L, 'linewidth', 2, 'color', 'y');
     xlabel('Time (days)')
-    ylabel('Light (\mu mol s^-1 m^-1)')
-
+    ylabel('Light (\mu mol s^{-1} m^{-1})')
+    xlim([min(sim.t) max(sim.t)])
 end
 
