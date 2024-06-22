@@ -7,14 +7,13 @@ modelling framework.  The model is described in:
 
 Try the [online simulator of the unicellular model](http://oceanlife.dtuaqua.dk/Plankton/R/).
 
-:fire: **This is alpha-software in development. Things may be broken and results may not be correct** :fire:
-
 
 
 https://user-images.githubusercontent.com/13268353/148120839-6bbfc0ac-69f1-445b-9b9f-b3880436bf2f.mp4
+_The figures shows a setup with only unicellular generalists run with the MIT ECCO transport matrices. The inset shows a high latitude water column at 60N, 15E, with the lower panel illustrating the trophic strategies: blue for DOC uptake (osmotrophy/bacteria), green for phototrophy, and red for phagotrophy._
 
 
-The core library is written in Fortran2008 and is interfaced from matlab or R.
+The core library is written in Fortran2008 and is interfaced from matlab and with a minimal frontend in  R (see http://oceanlife.dtuaqua.dk/Plankton/R).
 
 ### Installation
 The library requires a recent version of matlab (2021 or later). On windows it requires the Matlab MEX module to be installed (Home -> Add-ons -> Get Add-ons -> MATLAB Support for MinGW-w64 C/C++ Compiler); on mac it requires Xcode to be installed. To run global simulation it further requires that the mapping toolbox is installed.  Compiled versions of the library is available for windows (64 bit), linux and osx.  Compiling the library requires a Fortran compiler, e.g., gfortran.  Use the makefile in the Fortran directory. Edit the compiler and flags in the makefile to suit your operating system and compile by writing: `make`.
