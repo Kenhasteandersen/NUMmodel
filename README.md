@@ -33,8 +33,8 @@ All units are in micro gC/l (or micro gN/l for nutrient concentration). Units of
 #### Medium-level matlab routines
 The routines operates with two basic structures: a *parameter* structure and a *simulation* structure. The parameter structure contains all parameters needed for a simulation. The simulation structure contains all the output, which can be used for analysis or for plotting.
 
-*Parameters* are set with two calls: one to setup the size spectra to simulate and one to add the parameters for the simulation (chemostat or global). The size spectra are setup with a call to `setupXX` where XX represent the setup, e.g., `setupGeneralistsOnly` or `setupNUMmodel` (the latter includes copepods).  Parameters for the simulation are subsequently set with a call to `parametersChemostat`, `parametersWatercolumn`, or `parametersGlobal`. For example: `p = parametersChemostat( setupGeneralistsOnly() );`.
+*Parameters* are set with two calls: one to setup the size spectra to simulate and one to add the parameters for the simulation (chemostat or global). The size spectra are setup with a call to `setupXX` where XX represent the setup, e.g., `setupGeneralistsOnly` or `setupNUMmodel` (the latter includes copepods).  Parameters for the simulation are subsequently set with a call to `parametersChemostat`, `parametersWatercolumn`, or `parametersGlobal`. For example: `p = parametersChemostat( setupGeneralistsOnly() );` (see the wiki for a description of the parameter structure).
 
-*Simulations* are performed with calls to a simulation routine: `sim = simulationChemostat(p)`, `sim = simulationWatercolumn(p, latitude, longitude)`, or `sim = simulationGlobal(p)`, where `p` is the parameter structure.
+*Simulations* are performed with calls to a simulation routine: `sim = simulationChemostat(p)`, `sim = simulationWatercolumn(p, latitude, longitude)`, or `sim = simulationGlobal(p)`, where `p` is the parameter structure (see the wiki for a description of the simulatio structure).
 
-*Plots* are made with calls to the plot routines. A series of basic plots are made by a call to `plotSimulation(sim)`.
+*Plots* are made with calls to the plot routines. `plotSimulation(sim)` make a series of basic plots of a simulation.
