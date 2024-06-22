@@ -11,7 +11,7 @@ Try the [online simulator of the unicellular model](http://oceanlife.dtuaqua.dk/
 
 https://user-images.githubusercontent.com/13268353/148120839-6bbfc0ac-69f1-445b-9b9f-b3880436bf2f.mp4
 
-_The figures shows a setup with only unicellular generalists run with the MIT ECCO transport matrices. The inset shows a high latitude water column at 60N, 15E, with the lower panel illustrating the trophic strategies: blue for DOC uptake (osmotrophy/bacteria), green for phototrophy, and red for phagotrophy._
+_The figure above shows a setup with only unicellular generalists run with the MIT ECCO transport matrices. The inset shows a high latitude water column at 60N, 15E, with the lower panel illustrating the trophic strategies: blue for DOC uptake (osmotrophy/bacteria), green for phototrophy, and red for phagotrophy._
 
 
 The core library is written in Fortran2008 and is interfaced from matlab and with a minimal frontend in  R (see http://oceanlife.dtuaqua.dk/Plankton/R).
