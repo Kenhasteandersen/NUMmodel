@@ -24,10 +24,9 @@ There are three levels of routines: top-level, medium-level and low-level.  Ther
 #### Top-level matlab routines
 These routines run a simulation and returns the results in a `sim` structure:
 
-* `baserunChemostat(mAdult)`.  Runs a chemostat version of the model and plots the output. The argument is the adult body masses of copepods (in micro gram carbon) - send in an empty list to run only with unicellular plankton.
-* `baserunChemostatEuler(mAdult)`. Uses the Fortran library and simple Euler time-stepping.
+* `baserunChemostat()`.  Runs a chemostat version of the model and plots the output.
 * `baserunWatercolumn`. Runs a watercolumn extracted from a transport matrix at a specific location.
-* `baserunGlobal()`. Runs a global simulation with only generalists. It uses transport matrices which must be downloaded separately and placed in the directory `TMs`. Transport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs (choose MITgcm_2.8deg).
+* `baserunGlobal()`. Runs a global simulation with only generalists. It uses transport matrices which  must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs (choose MITgcm_2.8deg) and placed in the directory `TMs`. Transport matrices.
 
 All units are in micro gC/l (or micro gN/l for nutrient concentration). Units of light are micro mol photons per m2 per second.
 
