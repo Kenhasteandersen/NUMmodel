@@ -21,7 +21,7 @@ module diatoms
        procedure :: calcRates => calcRatesDiatoms
        procedure :: calcDerivativesDiatoms
        procedure :: printRates => printRatesDiatoms
-       procedure :: getProdNet => getProdNetDiatoms
+      ! procedure :: getProdNet => getProdNetDiatoms
      end type spectrumDiatoms
 
      public  initDiatoms, spectrumDiatoms, calcRatesDiatoms, calcDerivativesDiatoms

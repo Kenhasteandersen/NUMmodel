@@ -17,8 +17,8 @@ sim.B(sim.B<0) = 0;
 savesim.B = sim.B(end,:,:,:,:);
 savesim.t = 0;
 savesim.p = sim.p;
-sim = savesim;
+siminit = savesim;
 
-save(path,'sim','-v7.3');
+save(path,'siminit','-v7.3');
 
     
