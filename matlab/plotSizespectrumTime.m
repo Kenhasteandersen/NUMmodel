@@ -65,7 +65,7 @@ set(gca,'xscale','log')
 set(gca, 'colorscale','log')
 
 c = colorbar;
-c.Label.String = "log_{10}({\mu}g_C/L)";
+c.Label.String = "{\mu}g_C/L";
 sgtitle(sTitle)
 xlabel('Mass (\mugC)')
 ylabel('Time (days)')

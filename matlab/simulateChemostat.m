@@ -1,6 +1,8 @@
 
 %
-% Simulate the chemostat.
+% Simulate the chemostat.  To run a seasonally varying simulation, set the
+% "lat_lon" option in "parametersChemostat".
+%
 % In:
 %  p - parameter object obtained by calling a "setup" function followed
 %      by a call to parametersChemostat; see e.g. the default value below.

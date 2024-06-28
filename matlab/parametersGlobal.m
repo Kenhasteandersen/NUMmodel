@@ -101,7 +101,7 @@ p.BC_POMclosed = false; % Whether the bottom BC for POM is open or closed
 %
 p.bUse_parday_light = true; % Using the parday file includes changes in cloud cover
                              % but only works with MITgcm_2.8
-p.kw = 0.09; % Damping of light by water; m^-1
+p.kw = 0.07; % Damping of light by water; m^-1
 % Parameters used to calculate light if not using parday:
 p.EinConv = 4.57; % conversion factor from W m^-2 to \mu mol s^-1 m^-2 (Thimijan & Heins 1983)
 p.PARfrac = 0.4; % Fraction of light available as PAR. Source unknown

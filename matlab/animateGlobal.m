@@ -25,13 +25,13 @@ arguments
     options.sFilename char = "Global";
     options.sProjection char = "fast"; % or use e.g. "ortho"
     options.bSpin logical = false; % whether to spin the globe (works best with sProjection="ortho".
-    options.time double = 10; % The duration of the animations (in seconds)
+    options.time double = 10; % The duration of the animation (in seconds)
     options.vContourLevels = double([min(field( ~isinf(field))), max(field(:))]); % Passed to panelGlobal
     options.color double = [1 1 1]; % background color
     options.bColorbar logical = true; % Whether to make the colorbar
     options.width double = -1; % The size of the video (If "-1" then use current window size)
     options.height double = -1;
-    options.bIncludeWatercolumn logical = false; % Make an inset with "plotGlobalWatercolum" 
+    options.bIncludeWatercolumn logical = false; % Make an inset with "plotGlobalWatercolumn" 
     options.lat double = 60; % The latitude to select for inset
     options.lon double = -15; % The longitude to select for inset
 end

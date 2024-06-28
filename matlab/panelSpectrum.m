@@ -2,9 +2,11 @@
 % Plot Sheldon biomass spectrum. The biomasses are normalised by the log of
 % the ratio between upper and lower masses in each bin
 %
+% Plots the average over the last half of the simulation time
+%
 % In:
 %  sim - simulation structure
-%  ixTime - the time step to plot (defaults to the last)
+%  ixTime - the time step to plot with dashed lines (defaults to the last)
 % Options:
 %  bPlotStrategies - whether to plot the strategies in the background
 %
@@ -69,11 +71,14 @@ for iGroup = 1:p.nGroups
     % Plot the spectrum:
     %
     sim.B(sim.B<=0) = 1e-100; % avoid negative values
+    B = exp( mean( log(sim.B(ixAve, ixB)./log(Delta)),1));
+    %B( B<1e-5 ) = nan;
     legendentries(iGroup+1) = ...
-        loglog(m, exp( mean( log(sim.B(ixAve, ixB)./log(Delta)),1)), 'linewidth',2,...
+        loglog(m, B, 'linewidth',2,...
         'color',p.colGroup{iGroup});
-    loglog(m, sim.B(ixTime, ixB)./log(Delta), ':','linewidth',1,...
-        'color',p.colGroup{iGroup})
+    B = sim.B(ixTime, ixB)./log(Delta);
+    %B( B<1e-5 ) = nan;
+    loglog(m, B, ':','linewidth',1, 'color',p.colGroup{iGroup})
 
     sLegend{iGroup+1} = p.nameGroup{iGroup};
 end

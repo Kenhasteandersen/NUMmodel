@@ -75,7 +75,7 @@ tiledlayout(4,1,'tilespacing','compact','padding','compact')
 % Spectrum
 %
 nexttile
-panelSpectrum(s,iTime)
+panelSpectrum(s,iTime,bPlotStrategies=false)
 xlabel('')
 set(gca,'XTickLabel','');
 %
