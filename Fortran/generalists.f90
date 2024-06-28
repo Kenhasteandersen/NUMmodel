@@ -23,8 +23,8 @@ module generalists
     procedure :: calcRates => calcRatesGeneralists
     procedure :: calcDerivativesGeneralists
     procedure :: printRates => printRatesGeneralists
-    procedure :: getProdNet => getProdNetGeneralists
-    procedure :: getProdBact => getProdBactGeneralists 
+   ! procedure :: getProdNet => getProdNetGeneralists
+   ! procedure :: getProdBact => getProdBactGeneralists 
   end type spectrumGeneralists
  
   public initGeneralists, spectrumGeneralists, calcRatesGeneralists, calcDerivativesGeneralists
@@ -125,11 +125,11 @@ contains
        !
        ! Calculation of down-regulation factors for
        ! N-uptake  
-       this%dN(i) = min(1., 1./this%JN(i)*(Jnetp(i)-this%JF(i)*(1+bg))/(1+bg+bN))
+       this%dN(i) = min(1.d0, 1./this%JN(i)*(Jnetp(i)-this%JF(i)*(1+bg))/(1+bg+bN))
        ! If synthesis-limited then down-regulate feeding:
        ! Photosynthesis
        if (this%JL(i) .gt. 0) then ! Needed to avoid the risk of division with zero if JL = 0
-        this%dL(i) = min(1.,1./(this%JL(i)*(1-bL))*((this%JN(i)+this%JF(i))*(1+bg)-this%JDOC(i)*(1-bDOC)&
+        this%dL(i) = min(1.d0,1./(this%JL(i)*(1-bL))*((this%JN(i)+this%JF(i))*(1+bg)-this%JDOC(i)*(1-bDOC)&
              -this%JF(i)*(1-bF)+ftemp2*this%Jresp(i)+bN*this%JN(i))) !+bN*this%JN(i)
        else
         this%dL(i) = -1.
@@ -145,7 +145,7 @@ contains
        !
        if (this%dL(i).lt.0) then
         this%dL(i)=0
-        this%dDOC(i) =min(1.,1/(this%JDOC(i)*(1-bDOC))*((this%JN(i)+this%JF(i))*(1+bg)-this%JF(i)*(1-bF)&
+        this%dDOC(i) =min(1.d0,1/(this%JDOC(i)*(1-bDOC))*((this%JN(i)+this%JF(i))*(1+bg)-this%JF(i)*(1-bF)&
                 + bN*this%JN(i)+ftemp2*this%Jresp(i)))
        else 
         this%dDOC(i)=1.
