@@ -1,4 +1,4 @@
-%θ
+%
 % Make a set of basic plots of a simulation
 %
 function plotSimulation(sim, options)
@@ -7,14 +7,14 @@ arguments
     sim = struct;
     % Options for global plots:
     options.sProjection = 'fast';
-    options.lat = 60;
-    options.lon = -15;
+    options.lat = 60;  % Latitude for watercolumn plots in global simulations
+    options.lon = -15;  % Longitude for watercolumn plots in global simulations
     options.tDayPlot = -170; % Days before last time to make size spectrum plot etc.
 end
+
 if (options.tDayPlot < 0)
     options.tDayPlot = sim.t(end) + options.tDayPlot;
 end
-
 
 switch sim.p.nameModel
     
