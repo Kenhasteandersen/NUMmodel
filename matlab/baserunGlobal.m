@@ -45,7 +45,7 @@ sim.B(sim.B<0)=0; % Get rid of negative biomasses
 % Plots:
 %
 % disp('Plotting')
-%  plotSimulation(sim)
+plotSimulation(sim)
 
 checkConservation(sim);
 %
