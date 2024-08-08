@@ -1,8 +1,16 @@
 %
-% Plot a size spectrum at a given time (day).
+% Plot a size spectrum, rates, and trophic level as a function of size.
+%
 % If the simulation is a watercolumn then indicate also the depth layer.
 % If the simulation is global then indicate depth layer, and latitude and longitude.
 % 
+% In:
+%  sim - the simulation structure to plot
+%  time - time (in days) to plot
+%  iDepth - Depth layer to plot (only for water column and global
+%           simulations; defaults to the top layer).
+%  lat, lon - Latitude and longitude (only for global simulations).
+%
 function s = plotSizespectrum(sim, time, iDepth, lat, lon)
 arguments
     sim struct;
