@@ -1,7 +1,8 @@
 %
 % Make a plot of bacteria, phytoplankton, zooplankton, and the diatom ratio.
 %
-% Requires that the library is loaded with a setup which matches sim.
+% Requires that the library is loaded with a setup which matches sim and
+% that it is setup with bParallel=true.
 % 
 function sim = plotGlobalPhytoplankton(sim, options)
 arguments
@@ -47,7 +48,7 @@ p = sim.p;
 ixGeneralists = p.typeGroups==1 | p.typeGroups==5;
 ixDiatoms = p.typeGroups==3 | p.typeGroups==4;
 
-for iTime = ixTime
+parfor iTime = ixTime
     for i = 1:nX
         for j = 1:nY
             for k = 1:nZ
