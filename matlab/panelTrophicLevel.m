@@ -1,15 +1,13 @@
 
-function panelTrophicLevel(sim,rates,lat,lon)
+function panelTrophicLevel(p,B,rates)
 
 arguments
-    sim struct;
+    p struct;
+    B;
     rates struct;
-    lat double = [];
-    lon double = [];
 end
 
-lambda=calcTrophicLevel(sim,rates,lat,lon);
-p=sim.p;
+lambda = calcTrophicLevel(p,B,rates);
 name={};
 presence=zeros(1,11);
 
