@@ -37,7 +37,7 @@ jF  = rates.jFreal; % Uptake of Food
 %Sort the masses in ascending order
 [~,mSorted]=sort(p.m(p.idxB:end));
 
-lambda = 0*B;;
+lambda = 0*B;
 lambda(mSorted(1))=1;
 for i=2:length(lambda)
     idx = mSorted(i);
@@ -45,13 +45,16 @@ for i=2:length(lambda)
         lambda(idx)=1; %for cells not eating
     else
         %trophic level
-        lambda(idx)=(jPP(idx)+jF(idx)*(1+sum(theta(idx,:).*lambda.*B(end,:))/sum(theta(idx,:).*B)))/(jPP(idx)+jF(idx)); 
+        lambda(idx)=(jPP(idx)+jF(idx)*(1+sum(theta(idx,:).*lambda.*B)/sum(theta(idx,:).*B)))/(jPP(idx)+jF(idx)); 
     end
 end 
 %
 % Calc the trophic level of HTL:
 %
-lambdaHTL = 1 + sum( rates.mortHTL'.*B.*lambda ) / sum( rates.mortHTL'.*B );
+lambdaHTL = 1 + sum( rates.mortHTL'.*B.*lambda ) / sum( rates.mortHTL'.*B )
+if lambdaHTL>5
+    keyboard
+end
     
 
 
