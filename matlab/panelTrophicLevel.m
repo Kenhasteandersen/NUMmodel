@@ -1,5 +1,18 @@
+%
+% Makes a panel with the trophic levels of each spectrum group
+%
+% In:
+%  p - a structure with parameters from a setup
+%  rates - a structure with jDOC, jLreal and jF rates (from getRates)
+%
+% Out:
+%  lambda - the trophic level vector of all size groups that are not
+%          nutrients.
+%  lambdaHTL - The trophic level of the HTL calculated as 1 plus the biomass
+%           weighted mean of the HTL consumption.
+%
 
-function panelTrophicLevel(p,B,rates)
+function [lambda, lambdaHTL] = panelTrophicLevel(p,B,rates)
 
 arguments
     p struct;
@@ -7,7 +20,7 @@ arguments
     rates struct;
 end
 
-lambda = calcTrophicLevel(p,B,rates);
+[lambda, lambdaHTL] = calcTrophicLevel(p,B,rates);
 name={};
 presence=zeros(1,11);
 
