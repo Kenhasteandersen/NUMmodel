@@ -2,6 +2,13 @@
 % Load fortran library. If it is already loaded, it returns the library
 % name.
 %
+% In:
+%  bParallel: whether to prepare the library for parallel processing
+%             (default to false).
+%
+% Out:
+%  The library name.
+%
 function sLibname = loadNUMmodelLibrary(bParallel)
 
 if nargin==0
@@ -23,7 +30,7 @@ end
 % Find the correct library for the OS:
 %
 switch computer('arch')
-    case {'maci','maci64','maca64'}
+    case {'maci','maci64','maca64'} % Note: does not distinguish between intel and arm libraries
         sLibname = 'libNUMmodel_matlab';
         sExtension = '.dylib';
     case {'glnx86','glnxa64'}

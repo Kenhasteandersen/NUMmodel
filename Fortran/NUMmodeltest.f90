@@ -1,3 +1,7 @@
+!
+! This file contains test code to run the NUM model directly without interfacing through matlab 
+! or R. It is a mess as it is only used for testing purposes.
+!
 program NUMmodeltest
   use NUMmodel
   use globals
@@ -125,4 +129,3 @@ write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
 !end do
 
   end program NUMmodeltest
- 

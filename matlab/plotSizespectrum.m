@@ -103,7 +103,8 @@ set(gca,'XTickLabel','');
 xlabel('')
 
 nexttile
-panelTrophicLevel(sim,sim.rates,lat,lon);
+%panelTrophicLevel(sim,sim.rates,lat,lon);
+panelTrophicLevel(sim.p, s.B(iTime,:), sim.rates);
 
 
 if strcmp(sim.p.nameModel, 'watercolumn')

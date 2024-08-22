@@ -15,7 +15,7 @@ DOC = sim.DOC;
 Si = sim.Si;
 BB = sim.B;
 
-for iTime = find(sim.t>sim.t(end)-365)
+parfor iTime = find(sim.t>sim.t(end)-365)
     for ix = 1:nx
         for iy = 1:ny
             if isfield(sim.p,'idxSi')
