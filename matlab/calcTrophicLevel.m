@@ -51,7 +51,7 @@ end
 %
 % Calc the trophic level of HTL:
 %
-lambdaHTL = 1 + sum( rates.mortHTL'.*B.*lambda ) / sum( rates.mortHTL'.*B )
+lambdaHTL = 1 + sum( rates.mortHTL'.*B.*lambda ) / sum( rates.mortHTL'.*B );
 if lambdaHTL>5
     keyboard
 end
