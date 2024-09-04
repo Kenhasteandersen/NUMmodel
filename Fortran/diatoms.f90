@@ -36,7 +36,7 @@ module diatoms
        logical(1), intent(out):: errorio 
        character(c_char), dimension(*), intent(out) :: errorstr
        integer:: i
-       real(dp), parameter:: mMin = 3.1623d-9
+       !real(dp), parameter:: mMin = 3.1623d-9
        real(dp), parameter:: rho = 0.4*1d-6
        real(dp) :: mMinDiatom, mMaxDiatom, v, alphaL, rLstar,  alphaN
        real(dp) :: rNstar, cLeakage, delta, alphaJ, cR, palatability
@@ -77,8 +77,8 @@ module diatoms
        !
        this%r = (threequarters/pi * this%m/rho/(1-v))**onethird  ! Andy's approximation
       ! this%nu = 3*delta/this%r
-      this%nu = 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
-        (v**twothirds + (1.+v)**twothirds)
+      this%nu = 6**twothirds * pi**onethird * delta * (this%m/rho)**(-onethird) * &
+        (1. + v**twothirds) / (1. - v)**twothirds
        do i = 1,this%n
         this%nu(i) = min(1.d0, this%nu(i))
        enddo
@@ -121,7 +121,8 @@ module diatoms
           !
           ! Potential net uptake
           Jnetp(i) = this%JL(i)*(1-bL)+this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
-          if (Jnetp(i) .lt. 0.d0) then ! There is not enough carbon to satisfy standard metabolism. Then only take up carbon and no resources
+          if (Jnetp(i) .lt. 0.d0) then ! There is not enough carbon to satisfy standard metabolism. 
+                                       ! Then only take up carbon and no resources
              dN(i) = 0.
              dSi(i) = 0.
              dDOC(i) = 1.

@@ -161,20 +161,20 @@ contains
   end subroutine f_simulateEuler
 
   subroutine f_simulateEulerFunctions(u, L, T, tEnd, dt, &
-    ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
+    ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL) bind(c)
     real(c_double), intent(inout):: u(nGrid) ! Initial conditions and result after integration
     real(c_double), intent(in), value:: L,T,tEnd,dt
-    real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+    real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
 
     call simulateEulerFunctions(u, L, T, tEnd, dt, &
-      ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+      ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
   end subroutine f_simulateEulerFunctions
 
-   subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro) bind(c)
+   subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL) bind(c)
     real(c_double), intent(in):: u(nGrid)
-    real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+    real(c_double), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
 
-    call getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
+    call getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
   end subroutine f_getFunctions
 
   subroutine f_getBalance(u, dudt, Cbalance, Nbalance, Sibalance) bind(c)

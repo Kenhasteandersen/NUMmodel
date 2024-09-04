@@ -84,7 +84,8 @@ void f_simulateeulerfunctions(
 				  double *eHTL,
 				  double *Bpico,
 				  double *Bnano,
-				  double *Bmicro);
+				  double *Bmicro,
+				  double *mHTL);
 
 void f_getmass(
 				double *m,
@@ -103,7 +104,8 @@ void f_getfunctions(
 		    double *eHTL,
 		    double *Bpico,
 		    double *Bnano,
-		    double *Bmicro);
+		    double *Bmicro,
+			double *mHTL);
 
 void f_getbalance(
 	const double u[],

@@ -237,6 +237,7 @@ if options.bCalcAnnualAverages
     BpicoAnnualMean = zeros( nb,1 );
     BnanoAnnualMean = zeros( nb,1 );
     BmicroAnnualMean = zeros( nb,1 );
+    mHTLmean = zeros( nb,1 );
 end
 
 % ---------------------------------------
@@ -294,11 +295,12 @@ for i=1:simtime
                 Bpico1 = 0;
                 Bnano1 = 0;
                 Bmicro1 = 0;
+                mHTL1 = 0;
 
-                [u(k,:), ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1] = ...
+                [u(k,:), ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1,mHTL1] = ...
                     calllib(sLibname, 'f_simulateeulerfunctions', ...
                     u(k,:), L(k), T(k), dtTransport, dt, ...
-                    ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1);
+                    ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1,mHTL1);
                
                 ProdNet(i,k) = ProdNet1;
                 ProdHTL(i,k) = ProdHTL1;
@@ -308,6 +310,10 @@ for i=1:simtime
                 BpicoAnnualMean(k) = BpicoAnnualMean(k) + Bpico1;
                 BnanoAnnualMean(k) = BnanoAnnualMean(k) + Bnano1;
                 BmicroAnnualMean(k) = BmicroAnnualMean(k) + Bmicro1;
+                if mHTL1>0
+                    mHTLmean(k) = mHTLmean(k) + log(mHTL1)*ProdHTL1;
+                end
+                
             end
         else
             %
@@ -411,12 +417,22 @@ if options.bCalcAnnualAverages
         sim.ProdNet(i,:,:) = integrate_over_depth(squeeze(mean(ProdNet(ix,:),1))');
         sim.ProdHTL(i,:,:) = integrate_over_depth(squeeze(mean(ProdHTL(ix,:),1))');
     end
+    % Average productions:
     sim.ProdGrossAnnual(1,:,:) = integrate_over_depth(ProdGrossAnnual);
     sim.ProdNetAnnual(1,:,:) = integrate_over_depth(ProdNetAnnual);
     sim.ProdHTLAnnual(1,:,:) = integrate_over_depth(ProdHTLAnnual);
+    % Average biomasses:
     sim.BpicoAnnualMean(1,:,:) = integrate_over_depth(BpicoAnnualMean);
     sim.BnanoAnnualMean(1,:,:) = integrate_over_depth(BnanoAnnualMean);
     sim.BmicroAnnualMean(1,:,:) = integrate_over_depth(BmicroAnnualMean);
+    % Average HTL size:
+    tmp = squeeze(single(matrixToGrid(mHTLmean, [], p.pathBoxes, p.pathGrid)) / (365/p.dtTransport));
+    sim.mHTLAnnualMean = zeros(length(sim.x), length(sim.y), length(sim.z));
+    for i = 1:length(sim.z)
+      sim.mHTLAnnualMean(:,:,i) = ...
+          exp(squeeze(reshape((tmp(:,:,i)),1,length(sim.x),length(sim.y)) ./ sim.ProdHTLAnnual));
+    end
+  
 end
 
 %%%%%%%%%%%%%%%%%%%%%%

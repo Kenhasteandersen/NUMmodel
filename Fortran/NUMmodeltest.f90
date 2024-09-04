@@ -8,7 +8,7 @@ program NUMmodeltest
   implicit none
 
   real(dp), allocatable:: u0(:), u00(:), dudt(:)
-  real(dp):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+  real(dp):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
   integer:: i
   real(dp):: Nbalance,Cbalance, Sibalance
   !real(dp):: myout
@@ -101,9 +101,10 @@ program NUMmodeltest
   Bpico=0
   Bnano=0
   Bmicro=0
+  mHTL=0.d0
 
- call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
-write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
+ call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
+write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL,mHTL
   !write(*,*) dudt
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()

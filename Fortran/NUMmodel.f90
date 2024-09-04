@@ -905,16 +905,16 @@ contains
   ! Simulate with Euler integration and also return functions
   ! -----------------------------------------------
   subroutine simulateEulerFunctions(u, L, T, tEnd, dt, &
-            ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+            ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
     real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
     real(dp), intent(in):: L      ! Light level
     real(dp), intent(in):: T ! Temperature
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
-    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
 
     call simulateEuler(u, L, T, tEnd, dt)
-    call getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+    call getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
  end subroutine simulateEulerFunctions
 
   !=========================================
@@ -977,9 +977,9 @@ contains
   ! Get the ecosystem functions as calculated from the last call
   ! to calcDerivatives
   ! ---------------------------------------------------
-  subroutine getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+  subroutine getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
     real(dp), intent(in):: u(nGrid)
-    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
     real(dp) :: conversion
     real(dp) :: ESD(nGrid)
     real(dp):: m(nGrid), mDelta(nGrid)
@@ -992,6 +992,7 @@ contains
     Bpico = 0.d0
     Bnano = 0.d0
     Bmicro = 0.d0
+    mHTL = 0.d0
     !
     ! Get primary production only from unicellular spectra:
     !
@@ -1036,10 +1037,12 @@ contains
     ! HTL production:
     !  
     do i = 1, nGroups
-       !ProdHTL = ProdHTL + 365*conversion* &
-        ProdHTL = ProdHTL + conversion* &
+      ProdHTL = ProdHTL + conversion* &
           sum(group(i)%spec%mortHTL*u( ixStart(i):ixEnd(i) ))
+      mHTL = mHTL + conversion * &
+          sum(log(group(i)%spec%m) * group(i)%spec%mortHTL*u( ixStart(i):ixEnd(i) ))
     end do
+    mHTL = exp( mHTL / ProdHTL )
 
     eHTL = ProdHTL / ProdNet
  

@@ -102,13 +102,13 @@ end subroutine
     !call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
 !end subroutine f_simulateChemostatEuler
 
-  subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
+  subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
     use globals
     use NUMmodel, only: getFunctions, nGrid
     real(dp), intent(in) :: u(nGrid)
-    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
 
-    call getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
+    call getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
   end subroutine f_getFunctions
   
 !  subroutine f_getBalance(Nbalance, Cbalance)
