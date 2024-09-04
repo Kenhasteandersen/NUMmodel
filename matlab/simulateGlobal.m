@@ -229,6 +229,8 @@ tSave = [];
 % Matrices for annual averages:
 %
 if options.bCalcAnnualAverages
+    ProdNet = zeros( simtime, nb,1);
+    ProdHTL = zeros( simtime, nb,1);
     ProdGrossAnnual = zeros( nb,1 );
     ProdNetAnnual = zeros( nb,1 );
     ProdHTLAnnual = zeros( nb,1 );
@@ -298,6 +300,8 @@ for i=1:simtime
                     u(k,:), L(k), T(k), dtTransport, dt, ...
                     ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1);
                
+                ProdNet(i,k) = ProdNet1;
+                ProdHTL(i,k) = ProdHTL1;
                 ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
                 ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
                 ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;
@@ -400,6 +404,13 @@ sim.B(sim.B<0) = 0.;
 sim.DOC(sim.DOC<0) = 0.;
 
 if options.bCalcAnnualAverages
+    sim.ProdNet = zeros(nSave,length(sim.x), length(sim.y));
+    sim.ProdHTL = zeros(nSave,length(sim.x), length(sim.y));
+    for i = 1:nSave
+        ix = floor((simtime/nSave)*(i-1)+1) : (simtime/nSave*i);
+        sim.ProdNet(i,:,:) = integrate_over_depth(squeeze(mean(ProdNet(ix,:),1))');
+        sim.ProdHTL(i,:,:) = integrate_over_depth(squeeze(mean(ProdHTL(ix,:),1))');
+    end
     sim.ProdGrossAnnual(1,:,:) = integrate_over_depth(ProdGrossAnnual);
     sim.ProdNetAnnual(1,:,:) = integrate_over_depth(ProdNetAnnual);
     sim.ProdHTLAnnual(1,:,:) = integrate_over_depth(ProdHTLAnnual);
