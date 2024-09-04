@@ -10,8 +10,10 @@
 % Input:
 %  p: parameter structure from parametersGlobal
 %  sim: (optional) simulation to use for initial conditions
-%  options.bCalcAnnualAverages: increases the simulation time of the last year by a
-%                       factor 10
+%  options.bCalcAnnualAverages: This option calculates ecosystem functions
+%            (sim.ProdNet, sim.ProdNetAnnual etc) during the simulation, 
+%            thus making them more accurate. It increases the simulation 
+%            time of the last year.
 %  options.bVerbose: Write out progress on the terminal
 %  options.bNinit: Use only nutrient fields for initialization
 %
