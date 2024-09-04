@@ -243,8 +243,8 @@ contains
       call parametersAddGroup(typeCopepodActive, nCopepod, mAdultActive(iCopepod),errorio,errorstr) ! add copepod
         IF ( errorio ) RETURN 
    end do
-   
-   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
+   ! POM with nPOM size classes and max size 1 ugC:
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
    call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
 
   end subroutine setupNUMmodel
@@ -270,7 +270,8 @@ contains
       call parametersAddGroup(typeCopepodActive, nCopepod, mAdult(iCopepod),errorio,errorstr) ! add copepod
         IF ( errorio ) RETURN 
    end do
-   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
+   ! POM with nPOM size classes and max size 1 ugC:
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
    call parametersFinalize(0.001d0, logical(.true.,1), logical(.true.,1))
 
   end subroutine setupNUMmodelSimple
@@ -295,8 +296,8 @@ contains
    do iCopepod = 1, size(mAdult)
       call parametersAddGroup(typeCopepodActive, nCopepod, mAdult(iCopepod),errorio,errorstr) ! add copepod
         IF ( errorio ) RETURN 
-   end do
-   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
+   end do! POM with nPOM size classes and max size 1 ugC:
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
    call parametersFinalize(0.007d0,logical(.true.,1), logical(.false.,1))
 
   end subroutine setupGenDiatCope
@@ -504,6 +505,7 @@ contains
     !   Delta: ratio between upper and lower body mass in size groups
     !
     function calcPhi(z, beta,sigma, Delta) result(res)
+      use ieee_arithmetic
       real(dp), intent(in):: z,beta,sigma,Delta
       real(dp):: res, s
 
@@ -518,6 +520,9 @@ contains
          2*Erf(Log(z/beta)/Sqrt(s))*Log(z/beta) + &
          Erf((Log(beta) - Log(Delta*z))/Sqrt(s))*Log((Delta*z)/beta)))/2.))/ &
          ((-1 + Delta)*Log(Delta)) )
+      end if
+      if (ieee_is_nan(res)) then
+         res = 0.d0
       end if
     end function calcPhi
 
