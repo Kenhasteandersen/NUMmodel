@@ -13,7 +13,7 @@
 %  Bpico, Bnano, Bmicro - biomasses in pico, nano, and micro size groups
 %                         (gC/m3).
 %
-function [ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro] = ...
+function [ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL] = ...
     getFunctions(u, L, T, sLibName)
 arguments
     u double;
@@ -40,7 +40,8 @@ eHTL = 0;
 Bpico = 0;
 Bnano = 0;
 Bmicro = 0;
+mHTL = 0;
 
-[u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro]...
+[u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL]...
     = calllib(sLibName, 'f_getfunctions', ...
-    u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro);
+    u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL);

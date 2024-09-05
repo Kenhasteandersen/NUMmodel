@@ -38,12 +38,12 @@ switch sim.p.nameModel
         if sim.p.nNutrients==3
             u = [sim.N(end), sim.DOC(end),sim.Si(end), sim.B(end,:)];
             [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
-                sim.Bpico, sim.Bnano, sim.Bmicro] = ...=
+                sim.Bpico, sim.Bnano, sim.Bmicro, sim.mHTL] = ...=
                 getFunctions(u, sim.L, sim.T);
         else
             u = [sim.N(end), sim.DOC(end), sim.B(end,:)];
             [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
-                sim.Bpico, sim.Bnano, sim.Bmicro] = ...=
+                sim.Bpico, sim.Bnano, sim.Bmicro, sim.mHTL] = ...=
                 getFunctions(u, sim.L, sim.T);
         end
         % Multiply by the assumed depth of the productive layer:
@@ -103,7 +103,7 @@ switch sim.p.nameModel
                             squeeze(sim.DOC(iTime,k)), ...
                             squeeze(sim.B(iTime,k,:))'];
                     end
-                    [ProdGross1, ProdNet1,ProdHTL1,ProdBact1,~,Bpico1,Bnano1,Bmicro1] = ...
+                    [ProdGross1, ProdNet1,ProdHTL1,ProdBact1,~,Bpico1,Bnano1,Bmicro1,mHTL1] = ...
                         getFunctions(u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
                     % Multiply by the thickness of each layer:
                     %rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
