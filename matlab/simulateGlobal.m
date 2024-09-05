@@ -428,13 +428,8 @@ if options.bCalcAnnualAverages
     sim.BnanoAnnualMean(1,:,:) = integrate_over_depth(BnanoAnnualMean);
     sim.BmicroAnnualMean(1,:,:) = integrate_over_depth(BmicroAnnualMean);
     % Average HTL size:
-    tmp = squeeze(single(matrixToGrid(mHTLmean, [], p.pathBoxes, p.pathGrid)) / (365/p.dtTransport));
-    sim.mHTLAnnualMean = zeros(length(sim.x), length(sim.y), length(sim.z));
-    for i = 1:length(sim.z)
-      sim.mHTLAnnualMean(:,:,i) = ...
-          exp(squeeze(reshape((tmp(:,:,i)),1,length(sim.x),length(sim.y)) ./ sim.ProdHTLAnnual));
-    end
-  
+    sim.mHTLAnnualMean = exp( matrixToGrid(mHTLmean./ProdNetAnnual, [], p.pathBoxes, p.pathGrid) );
+    sim.mHTLAnnualMean = squeeze(sim.mHTLAnnualMean(:,:,1)); % Only surface layer
 end
 
 %%%%%%%%%%%%%%%%%%%%%%
