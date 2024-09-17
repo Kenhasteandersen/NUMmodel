@@ -61,9 +61,9 @@ ylabel('Gains (day^{-1})')
 if isfield(p, 'ixSi')
     cap={'Feeding','N','Light','Si','DOC','Max. growth rate','Growth rate'};
     legend(cap, ...
-        'location','northwest','box','off')
+        'location','eastoutside','box','off')
 else
     cap={'Feeding','N','Light','DOC','Max. growth rate','Growth rate'};
     legend(cap, ...
-        'location','northwest','box','off')
+        'location','eastoutside','box','off')
 end

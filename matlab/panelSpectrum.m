@@ -92,5 +92,5 @@ ylabel('Sheldon biomass ({\mu}gC/L)')
 %sLegend=[captionedstrat,sLegend];
 
 lh = legend(legendentries, sLegend, 'box','off');
-lh.Location='northeast';
+lh.Location='eastoutside';
 
