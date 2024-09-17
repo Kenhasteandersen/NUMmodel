@@ -4,9 +4,13 @@
 % Warning: the "setup" function needs to be called before this plot is
 % made. If not matlab may crash or the results be incorrect.
 %
-% All biomasses are normalized to "Sheldon" spectra by dividing biomass
+% Top panels: biomasses. All biomasses are normalized to "Sheldon" spectra by dividing biomass
 % with ln(Delta) (the ratio between the upper and lower mass in each mass
 % bin); see Andersen and Visser (2023) Box V.
+%
+% Bottom panels: Trophic strategy (for unicellulars) or feeding level (for
+% multicellulars). The trophic strategy is a RGB color where the level of R
+% correspond to phagotrophy, G to phototrophy, and B to osmotrophy.
 %
 % In:
 %  sim
