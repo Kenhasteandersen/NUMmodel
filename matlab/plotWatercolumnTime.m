@@ -6,9 +6,10 @@
 % In:
 %  sim - simulation structure either from global or from watercolumn
 %  lat, lon - latitude and longitude (only to extract from global run)
+%
 % Optional named arguments:
 %  bNewplot - boolean that decides whether to setup the plot
-%  depthMax - mx depth for ylimit.
+%  depthMax - max depth.
 %  bOnlyLastYear - boolean deciding whether to only plot the last year
 %
 function plotWatercolumnTime(sim, lat, lon, options)
@@ -90,7 +91,7 @@ nexttile
 %panelField([t t(end)], -z, N');
 %surface(t,-z, N)
 contourf(t,-z,N,logspace(-2,3,options.nLevels),'LineStyle','none')
-title('Nitrogen')
+title('Nitrogen','FontWeight','normal')
 ylabel('Depth (m)')
 %set(gca,'ColorScale','log')
 %shading interp
@@ -108,7 +109,7 @@ if isfield(sim,'Si')
     %surface(t,-z, Si)
     contourf(t,-z,Si,logspace(-2,3,options.nLevels),'LineStyle','none')
     % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
-    title('Silicate')
+    title('Silicate','FontWeight','normal')
     ylabel('Depth (m)')
     %set(gca,'ColorScale','log')
     %shading interp
@@ -125,7 +126,7 @@ end
 nexttile
 contourf(t,-z,DOC,logspace(-2,2,options.nLevels),'LineStyle','none')
 %surface(t,-z, DOC)
-title('DOC')
+title('DOC','FontWeight','normal')
 ylabel('Depth (m)')
 axis tight
 h = colorbar('ticks',10.^(-2:2));
@@ -141,7 +142,7 @@ for i = 1:sim.p.nGroups
     %surface(t,-z, squeeze(B(i,:,:)))
     B(B < 0.01) = 0.01; % Set low biomasses to the lower limit to avoid white space in plot
     contourf(t,-z,(squeeze(B(i,:,:))),[logspace(-2,3,options.nLevels)],'LineStyle','none')
-    title( sim.p.nameGroup(i) );
+    title( sim.p.nameGroup(i) ,'FontWeight','normal');
     ylabel('Depth (m)')
     axis tight
     h = colorbar('ticks',10.^(-2:3));
