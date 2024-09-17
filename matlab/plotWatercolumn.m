@@ -1,4 +1,4 @@
-% θ
+% 
 % Plot a water column from either a global or a water column simulation.
 %
 % Warning: the "setup" function needs to be called before this plot is
@@ -14,7 +14,7 @@
 %  lat, lon - latitude and longitude (only for global simulation)
 %  Optional:
 %  options.bNewplot - whether to clear the figure.
-%  options.depthMax - mx depth for ylimit.
+%  options.depthMax - max depth.
 %
 function plotWatercolumn(sim, time, lat,lon, options)
 
