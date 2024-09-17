@@ -157,7 +157,7 @@ for iGroup = 1:sim.p.nGroups
 
     caxis([0.01 100])
 
-    title(sim.p.nameGroup(iGroup))
+    title(sim.p.nameGroup(iGroup),'fontweight','normal')
     if (iGroup==1)
         ylabel('Depth (m)')
     else
