@@ -94,7 +94,7 @@ for i = 1:length(z)-1
             if f(j,i) < fc
                 colFeeding(j,i,:) = [0, 1, f(j,i)/fc]; % Below critical feeding level
             else
-                colFeeding(j,i,:) = [f(j,i), 0, 0]; % Above critical feeding level
+                colFeeding(j,i,:) = [min(1,3*f(j,i)), 0, 0]; % Above critical feeding level
             end
         end
     end
