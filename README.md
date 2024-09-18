@@ -14,8 +14,9 @@ https://user-images.githubusercontent.com/13268353/148120839-6bbfc0ac-69f1-445b-
 
 _The figure above shows a setup with only unicellular generalists run with the MIT ECCO transport matrices. The inset shows a high latitude water column at 60N, 15E, with the lower panel illustrating the trophic strategies: blue for DOC uptake (osmotrophy/bacteria), green for phototrophy, and red for phagotrophy._
 
-### Paper describing and using the NUM model:
-* K.H. Andersen and A.W. Visser: From first principles to structure and function of unicellular plankton communities (2023) [Progress in Oceanography (213) 102995](https://www.sciencedirect.com/science/article/pii/S0079661123000381?via%3Dihub).
+### Papers using the NUM model:
+* Application to the biological carbon pump: C. Serra-Pompei, B.A Ward, J. Pinti, A.W Visser, T. Kiørboe, K.H Andersen (2022): Linking plankton size spectra and community composition to carbon export and its efficiency. [Global Biogeochemical Cycles 36(5), e2021GB007275](https://agupubs.onlinelibrary.wiley.com/doi/epdf/10.1029/2021GB007275).
+* Grigoratou, Maria, Camila Serra-Pompei, Adam Kemberling, and Andrew J. Pershing. Hot and hungry: [A mechanistic approach to the direct and indirect effects of marine heatwaves on plankton communities](https://assets-eu.researchsquare.com/files/rs-4194638/v1/09fb2960-27da-42ac-a1d7-3ba3ea1004fc.pdf?c=1712816635). (2024).
 
 ### Installation
 The library requires a recent version of matlab (2021 or later).  Installation and compilation instructions are given in the wiki.
