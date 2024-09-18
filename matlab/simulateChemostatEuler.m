@@ -53,10 +53,11 @@ eHTL = 0;
 Bpico = 0;
 Bnano = 0;
 Bmicro = 0;
-[u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro] = ...
+mHTL = 0;
+[u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL] = ...
     calllib(loadNUMmodelLibrary(), 'f_simulateeulerfunctions', u, ...
     L, T, p.tEnd, 0.01,  ...
-    ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro);
+    ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL);
 
 
 %
