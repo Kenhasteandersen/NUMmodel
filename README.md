@@ -17,8 +17,7 @@ _The figure above shows a setup with only unicellular generalists run with the M
 
 
 ### Installation
-The library requires a recent version of matlab (2021 or later). On windows it requires the Matlab MEX module to be installed (Home -> Add-ons -> Get Add-ons -> MATLAB Support for MinGW-w64 C/C++ Compiler); on mac it requires Xcode to be installed. To run global simulation it further requires that the mapping toolbox is installed and that transport matrices are downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs (choose MITgcm_2.8deg) and placed in the directory `TMs`.  Compiled versions of the library are available for windows (64 bit), linux and osx.  Compiling instructions are given in the wiki.
-
+The library requires a recent version of matlab (2021 or later).  Installation and compilation instructions are given in the wiki.
 ### Basic structure
 There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.
 #### Top-level matlab routines
