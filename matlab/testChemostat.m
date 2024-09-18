@@ -1,6 +1,6 @@
 function bSuccess = testChemostat(value)
 
-sim = baserunChemostat([]);
+sim = baserunChemostat();
 
 sumB = sum(sim.B(:));
 if ( sumB > 0.99*value && sumB < 1.01*value )
