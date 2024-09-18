@@ -17,7 +17,7 @@ _The figure above shows a setup with only unicellular generalists run with the M
 
 
 ### Installation
-The library requires a recent version of matlab (2021 or later). On windows it requires the Matlab MEX module to be installed (Home -> Add-ons -> Get Add-ons -> MATLAB Support for MinGW-w64 C/C++ Compiler); on mac it requires Xcode to be installed. To run global simulation it further requires that the mapping toolbox is installed.  Compiled versions of the library is available for windows (64 bit), linux and osx.  Compiling the library requires a Fortran compiler, e.g., gfortran.  Use the makefile in the Fortran directory. Edit the compiler and flags in the makefile to suit your operating system and compile by writing: `make`.
+The library requires a recent version of matlab (2021 or later). On windows it requires the Matlab MEX module to be installed (Home -> Add-ons -> Get Add-ons -> MATLAB Support for MinGW-w64 C/C++ Compiler); on mac it requires Xcode to be installed. To run global simulation it further requires that the mapping toolbox is installed and that transport matrices are downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs (choose MITgcm_2.8deg) and placed in the directory `TMs`.  Compiled versions of the library are available for windows (64 bit), linux and osx.  Compiling instructions are given in the wiki.
 
 ### Basic structure
 There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.
@@ -26,15 +26,15 @@ These routines run a simulation and returns the results in a `sim` structure:
 
 * `baserunChemostat()`.  Runs a chemostat version of the model and plots the output.
 * `baserunWatercolumn`. Runs a watercolumn extracted from a transport matrix at a specific location.
-* `baserunGlobal()`. Runs a global simulation with only generalists. It uses transport matrices which  must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs (choose MITgcm_2.8deg) and placed in the directory `TMs`. Transport matrices.
+* `baserunGlobal()`. Runs a global simulation with only unicellular generalists. 
 
 All units are in micro gC/l (or micro gN/l for nutrient concentration). Units of light are micro mol photons per m2 per second.
 
 #### Medium-level matlab routines
-The routines operates with two basic structures: a *parameter* structure and a *simulation* structure. The parameter structure contains all parameters needed for a simulation. The simulation structure contains all the output, which can be used for analysis or for plotting.
+The routines operates with two basic structures: a *parameter* structure and a *simulation* structure. The parameter structure contains all parameters needed for a simulation. The simulation structure contains all the output, which can be used for analysis or for plotting.  See more details on the wiki page.
 
-*Parameters* are set with two calls: one to setup the size spectra to simulate and one to add the parameters for the simulation (chemostat or global). The size spectra are setup with a call to `setupXX` where XX represent the setup, e.g., `setupGeneralistsOnly` or `setupNUMmodel` (the latter includes copepods).  Parameters for the simulation are subsequently set with a call to `parametersChemostat`, `parametersWatercolumn`, or `parametersGlobal`. For example: `p = parametersChemostat( setupGeneralistsOnly() );` (see the wiki for a description of the parameter structure).
+*Parameters* are set with two calls: one to setup the size spectra to simulate and one to add the parameters for the simulation (chemostat or global). The size spectra are setup with a call to `setupXX` where XX represent the setup, e.g., `setupNUMmodel` or `setupGeneralistsOnly` or (the latter onlu includes unicellular generalists).  Parameters for the simulation are subsequently set with a call to `parametersChemostat`, `parametersWatercolumn`, or `parametersGlobal`. For example: `p = parametersChemostat( setupGeneralistsOnly() );` (see the wiki for a description of the parameter structure).
 
-*Simulations* are performed with calls to a simulation routine: `sim = simulationChemostat(p)`, `sim = simulationWatercolumn(p, latitude, longitude)`, or `sim = simulationGlobal(p)`, where `p` is the parameter structure (see the wiki for a description of the simulatio structure).
+*Simulations* are performed with calls to a simulation routine: `sim = simulationChemostat(p)`, `sim = simulationWatercolumn(p, latitude, longitude)`, or `sim = simulationGlobal(p)`, where `p` is the parameter structure (see the wiki for a description of the simulation structure).
 
-*Plots* are made with calls to the plot routines. `plotSimulation(sim)` make a series of basic plots of a simulation.
+*Plots* are made with calls to the plot routines. `plotSimulation(sim)` makes a series of basic plots of a simulation.
