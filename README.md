@@ -5,10 +5,9 @@ modelling framework.  The model is described in:
 * Copepods: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities "Researchgate"). 
 * Application to biological pump: Serra-Pompei et al (2022) Progress in Oceanography (189) 102473: [Zooplankton trophic dynamics drive carbon export efficiency](https://www.biorxiv.org/content/10.1101/2021.03.08.434455v1 "BioRxiv").
 
-Try the [online simulator of the unicellular model](http://oceanlife.dtuaqua.dk/Plankton/R/).
-
 The core library is written in Fortran2008 and is interfaced from matlab and with a minimal frontend in  R (see http://oceanlife.dtuaqua.dk/Plankton/R).
 
+<img width="812" alt="image" src="https://github.com/user-attachments/assets/a0fc29cc-8134-4e93-8d98-4b94dcb82f83">
 
 https://user-images.githubusercontent.com/13268353/148120839-6bbfc0ac-69f1-445b-9b9f-b3880436bf2f.mp4
 
