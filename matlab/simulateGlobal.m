@@ -233,6 +233,7 @@ tSave = [];
 if options.bCalcAnnualAverages
     ProdNet = zeros( simtime, nb,1);
     ProdHTL = zeros( simtime, nb,1);
+    mHTL = zeros( simtime, nb,1);
     ProdGrossAnnual = zeros( nb,1 );
     ProdNetAnnual = zeros( nb,1 );
     ProdHTLAnnual = zeros( nb,1 );
@@ -306,6 +307,7 @@ for i=1:simtime
                
                 ProdNet(i,k) = ProdNet1;
                 ProdHTL(i,k) = ProdHTL1;
+                mHTL(i,k) = mHTL1;
                 ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
                 ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
                 ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;
@@ -418,7 +420,13 @@ if options.bCalcAnnualAverages
         ix = floor((simtime/nSave)*(i-1)+1) : (simtime/nSave*i);
         sim.ProdNet(i,:,:) = integrate_over_depth(squeeze(mean(ProdNet(ix,:),1))');
         sim.ProdHTL(i,:,:) = integrate_over_depth(squeeze(mean(ProdHTL(ix,:),1))');
+        tmp = single(matrixToGrid( squeeze(mHTL(i,:))', [], p.pathBoxes, p.pathGrid));
+        sim.mHTL(i,:,:) = tmp(:,:,1);
     end
+    %for i = 1:simtime
+    %    sim.mHTL(i,:,:,:) = single(matrixToGrid( squeeze(mHTL(i,:))', [], p.pathBoxes, p.pathGrid));
+    %end
+    
     % Average productions:
     sim.ProdGrossAnnual(1,:,:) = integrate_over_depth(ProdGrossAnnual);
     sim.ProdNetAnnual(1,:,:) = integrate_over_depth(ProdNetAnnual);
@@ -428,7 +436,7 @@ if options.bCalcAnnualAverages
     sim.BnanoAnnualMean(1,:,:) = integrate_over_depth(BnanoAnnualMean);
     sim.BmicroAnnualMean(1,:,:) = integrate_over_depth(BmicroAnnualMean);
     % Average HTL size:
-    sim.mHTLAnnualMean = exp( matrixToGrid(mHTLmean./ProdNetAnnual, [], p.pathBoxes, p.pathGrid) );
+    sim.mHTLAnnualMean = exp( matrixToGrid(mHTLmean./ProdHTLAnnual, [], p.pathBoxes, p.pathGrid) );
     sim.mHTLAnnualMean = squeeze(sim.mHTLAnnualMean(:,:,1)); % Only surface layer
 end
 
