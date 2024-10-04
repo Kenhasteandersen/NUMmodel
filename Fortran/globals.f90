@@ -13,7 +13,7 @@ module globals
 
   ! Temperature scalings parameters:
   real(dp) :: fTemp2, fTemp15 ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
-  real(dp), parameter:: Tref = 10. ! Reference temperature
+  real(dp), parameter:: Tref = 10.d0 ! Reference temperature
   
   !
   ! Specification of what to do with HTL losses:

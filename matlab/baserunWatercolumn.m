@@ -1,11 +1,11 @@
 %
-% Run a watercolumn with only generalists
+% Run a watercolumn with the NUMmodel setup
 %
 % In:
 %  lat, lon - latitude and longitude
 %
 % Out:
-%  As simulation structure
+%  A simulation structure
 %
 function sim = baserunWatercolumn(lat, lon)
 
