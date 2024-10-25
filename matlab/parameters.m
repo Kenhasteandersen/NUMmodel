@@ -14,6 +14,8 @@ end
 %
 iGeneralists = 1;
 iCopepods = 10;
+iZooplankton = 10;
+
 
 p = parametersInit();
 p.mAdult = mAdult;
@@ -31,6 +33,10 @@ p = parametersAddgroup(iGeneralists, p, n, 0.1);
 %
 for i = 1:length(mAdult)
     p = parametersAddgroup(iCopepods, p, n, mAdult(i));
+end
+
+for i = 1:length(mAdult)
+    p = parametersAddgroup(iZooplankton, p, n, mAdult(i));
 end
 % =========================================
 % Calculate interaction matrix:

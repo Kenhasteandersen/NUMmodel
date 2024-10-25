@@ -7,8 +7,8 @@ arguments
     options.sProjection string = 'fast';
 end
             
-Bactive = calcBiomassGroup(sim,11);
-Bpassive = calcBiomassGroup(sim,10);
+Bactive = calcBiomassGroup(sim,12);
+Bpassive = calcBiomassGroup(sim,13);
 
 %%
 % plot

@@ -23,10 +23,18 @@ void f_setupnummodel(const int n, const int nCopepod, const int nPOM,
 					const int nCopepodsActive, const double mAdultActive[], 
 					bool *Clost, char *errorstr);
 
-void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, const int nCopepods, 
+void f_setupnummodelzoo(const int n, const int nZooplankton, const int nPOM,
+                    const int nZooplanktonsGelatinous, const double mAdultGelatinous[],
+                    const int nZooplanktonsNongelatinous, const double mAdultNongelatinous[],
+                    bool *Clost, char *errorstr);
+
+void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, const int nCopepods,
                                         const double mAdult[], bool *Clost, char *errorstr);
 
 void f_setupgendiatcope(const int n,const int nCopepod, const int nPOM, const int nCopepods, 
+                                        const double mAdult[], bool *Clost, char *errorstr);
+
+void f_setupgendiatzoo(const int n,const int nZooplankton, const int nPOM, const int nZooplanktons,
                                         const double mAdult[], bool *Clost, char *errorstr);
 
 void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);

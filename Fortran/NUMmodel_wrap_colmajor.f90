@@ -7,8 +7,8 @@ module NUMmodel_wrap
        setupDiatoms_simpleOnly, setupGeneralistsDiatoms_simple, &
        setupGeneralistsDiatoms, &
        setupGeneralistsSimpleCopepod, &
-       setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
-       calcderivatives, &
+       setupGeneric, setupNUMmodel, setupNUMmodelSimple,  setupGenDiatCope, &
+       setupGenDiatZoo, setupNUMmodelZoo, calcderivatives, &
        simulateChemostatEuler, simulateEuler, simulateEulerFunctions, getFunctions, &
        setHTL, setmortHTL, setSinking, getRates, getBalance, getLost, theta
 
@@ -98,6 +98,15 @@ contains
     call setupNUMmodel(n,nCopepod,nPOM, mAdultPassive, mAdultActive,errorio, errorstr)
   end subroutine f_setupNUMmodel
 
+  subroutine f_setupNUMmodelZoo(n,nZooplankton,nPOM, nZooplanktonsGelatinous, mAdultGelatinous, & 
+    nZooplanktonsNongelatinous, mAdultNongelatinous, errorio, errorstr) bind(c)
+    integer(c_int), intent(in), value:: n,nZooplankton,nPOM, nZooplanktonsGelatinous, nZooplanktonsNongelatinous
+    real(c_double), intent(in):: mAdultGelatinous(nZooplanktonsGelatinous), mAdultNongelatinous(nZooplanktonsNongelatinous)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupNUMmodelZoo(n,nZooplankton,nPOM, mAdultGelatinous, mAdultNongelatinous,errorio, errorstr)
+  end subroutine f_setupNUMmodelZoo
+
     subroutine f_setupNUMmodelSimple(n,nCopepod,nPOM, nCopepods, mAdult, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
     real(c_double), intent(in):: mAdult(nCopepods)
@@ -113,6 +122,14 @@ contains
     character(c_char), dimension(*) :: errorstr
     call setupGenDiatCope(n,nCopepod,nPOM,mAdult,errorio, errorstr)
   end subroutine f_setupGenDiatCope
+
+  subroutine f_setupGenDiatZoo(n,nZooplankton,nPOM, nZooplanktons, mAdult, errorio, errorstr) bind(c)
+    integer(c_int), intent(in), value:: n,nZooplankton,nPOM, nZooplanktons
+    real(c_double), intent(in):: mAdult(nZooplanktons)
+    logical(c_bool), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
+    call setupGenDiatZoo(n,nZooplankton,nPOM,mAdult,errorio, errorstr)
+  end subroutine f_setupGenDiatZoo
 
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL

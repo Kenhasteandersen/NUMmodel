@@ -15,6 +15,7 @@ module NUMmodel
   use generalists_simple
   use diatoms_simple
   use copepods
+  use zooplanktons
   use diatoms
   use POM
   use read_input_module
@@ -32,6 +33,8 @@ module NUMmodel
   integer, parameter :: typeDiatom_simple = 4
   integer, parameter :: typeCopepodActive = 10
   integer, parameter :: typeCopepodPassive = 11
+  integer, parameter :: typeZooplanktonNongelatinous = 12
+  integer, parameter :: typeZooplanktonGelatinous = 13
   integer, parameter :: typePOM = 100
   !
   ! Variables that contain the size spectrum groups
@@ -250,6 +253,39 @@ contains
   end subroutine setupNUMmodel
 
   ! -----------------------------------------------
+  ! Full NUM model setup with generalists, zooplankton, and POM
+  ! -----------------------------------------------
+  subroutine setupNUMmodelZoo(n, nZooplankton, nPOM, mAdultGelatinous, mAdultNongelatinous,errorio,errorstr)
+   integer, intent(in):: n, nZooplankton, nPOM ! number of size classes in each group
+   real(dp), intent(in):: mAdultGelatinous(:), mAdultNongelatinous(:)
+   logical(1), intent(out):: errorio ! Whether to losses to the deep
+   character(c_char), dimension(*) :: errorstr
+   integer:: iZooplankton
+ 
+   call parametersInit(size(mAdultNongelatinous)+size(mAdultGelatinous)+3, 2*n + nPOM &
+           + nZooplankton*(size(mAdultGelatinous)+size(mAdultNongelatinous)), 3,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
+   IF ( errorio ) RETURN 
+
+   do iZooplankton = 1, size(mAdultGelatinous)
+      call parametersAddGroup(typeZooplanktonGelatinous, nZooplankton, mAdultGelatinous(iZooplankton),errorio,errorstr) ! add zooplankton 
+        IF ( errorio ) RETURN 
+   end do
+   
+   do iZooplankton = 1, size(mAdultNongelatinous)
+      call parametersAddGroup(typeZooplanktonNongelatinous, nZooplankton, mAdultNongelatinous(iZooplankton),errorio,errorstr) ! add zooplankton 
+        IF ( errorio ) RETURN 
+   end do
+   ! POM with nPOM size classes and max size 1 ugC:
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
+   call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
+
+  end subroutine setupNUMmodelZoo
+
+  ! -----------------------------------------------
   ! Full NUM model setup with generalistsSImple, copepods, and POM
   ! -----------------------------------------------
     subroutine setupNUMmodelSimple(n, nCopepod, nPOM, mAdult,errorio,errorstr)
@@ -275,7 +311,7 @@ contains
    call parametersFinalize(0.001d0, logical(.true.,1), logical(.true.,1))
 
   end subroutine setupNUMmodelSimple
-  
+
   ! -------------------------------------------------------
   ! A generic setup with generalists, diatoms and copepods
   ! -------------------------------------------------------
@@ -301,6 +337,33 @@ contains
    call parametersFinalize(0.007d0,logical(.true.,1), logical(.false.,1))
 
   end subroutine setupGenDiatCope
+
+  
+  ! -------------------------------------------------------
+  ! A generic setup with generalists, diatoms and zooplankton
+  ! -------------------------------------------------------
+  subroutine setupGenDiatZoo(n, nZooplankton, nPOM, mAdult,errorio,errorstr)
+   integer, intent(in):: n, nZooplankton, nPOM ! number of size classes in each group
+   real(dp), intent(in):: mAdult(:)
+   logical(1), intent(out):: errorio ! Whether to losses to the deep
+   character(c_char), dimension(*) :: errorstr
+   integer:: iZooplankton
+ 
+   call parametersInit(size(mAdult)+3, 2*n + nPOM + nZooplankton*size(mAdult), 3,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeDiatom, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
+
+   do iZooplankton = 1, size(mAdult)
+      call parametersAddGroup(typeZooplanktonNongelatinous, nZooplankton, mAdult(iZooplankton),errorio,errorstr) ! add zooplankton
+        IF ( errorio ) RETURN 
+   end do! POM with nPOM size classes and max size 1 ugC:
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
+   call parametersFinalize(0.007d0,logical(.true.,1), logical(.false.,1))
+
+  end subroutine setupGenDiatZoo
 
   ! ======================================
   !  Model initialization stuff:
@@ -379,6 +442,7 @@ contains
     type(spectrumDiatoms_simple):: specDiatoms_simple
     type(spectrumDiatoms):: specDiatoms
     type(spectrumCopepod):: specCopepod
+    type(spectrumZooplankton):: specZooplankton
     type(spectrumPOM):: specPOM
     !
     ! Find the group number and grid location:
@@ -413,6 +477,12 @@ contains
    case(typeCopepodActive)
       call initCopepod(specCopepod, active, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
+  case(typeZooplanktonGelatinous)
+      call initZooplankton(specZooplankton, gelatinous, n, mMax, errorio, errorstr)
+      allocate (group( iCurrentGroup )%spec, source=specZooplankton)
+   case(typeZooplanktonNongelatinous)
+      call initZooplankton(specZooplankton, nongelatinous, n, mMax, errorio, errorstr)
+      allocate (group( iCurrentGroup )%spec, source=specZooplankton)
    case(typePOM)
       call initPOM(specPOM, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
@@ -448,6 +518,8 @@ contains
                !
                select type (spec => group(iGroup)%spec) ! Predator group
                   type is (spectrumCopepod)
+                 select type (spec => group(iGroup)%spec) ! Predator group
+                   type is (spectrumZooplankton)
                     select type (specPrey => group(jGroup)%spec) ! Prey group
                       type is (spectrumDiatoms)
                           theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
@@ -455,8 +527,9 @@ contains
                       type is (spectrumDiatoms_simple)
                            theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
                             spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
-                     end select
-               end select
+                      end select
+                 end select
+	      end select
             end do
          end do
       end do
@@ -704,6 +777,16 @@ contains
       end select
     end do
     !
+   do iGroup = 1, nGroups
+      select type (spec => group(iGroup)%spec)
+      type is (spectrumZooplankton)
+         call calcDerivativesZooplankton(spec, &
+            upositive(ixStart(iGroup):ixEnd(iGroup)), &
+            dudt(idxN), &
+            dudt(ixStart(iGroup):ixEnd(iGroup)))
+      end select
+    end do
+    !
     ! Transfer POM to POM group:
     !
     if (idxPOM .ne. 0) then
@@ -866,7 +949,10 @@ contains
        !
        if (bLosses) then
          do iGroup = 1, nGroups
-            if ( (group(iGroup)%spec%type .ne. typeCopepodActive) .and. (group(iGroup)%spec%type .ne. typeCopepodPassive) ) then
+             if ( (group(iGroup)%spec%type .ne. typeCopepodActive) .and. &
+                 (group(iGroup)%spec%type .ne. typeCopepodPassive) .and. &
+                 (group(iGroup)%spec%type .ne. typeZooplanktonNongelatinous) .and. &
+                 (group(iGroup)%spec%type .ne. typeZooplanktonGelatinous) ) then
                dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) + diff*(0.d0 - u(idxB:nGrid))
             end if
          end do
