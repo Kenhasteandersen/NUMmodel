@@ -10,7 +10,7 @@ module NUMmodel_wrap
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, simulateEulerFunctions, getFunctions, &
-       setHTL, setmortHTL, setSinking, getRates, getBalance, getLost, theta
+       setHTL, setmortHTL, getMortHTL, setSinking, getRates, getBalance, getLost, theta
 
   use globals
 
@@ -114,19 +114,6 @@ contains
     call setupGenDiatCope(n,nCopepod,nPOM,mAdult,errorio, errorstr)
   end subroutine f_setupGenDiatCope
 
-  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
-    real(c_double), intent(in), value:: mHTL, mortHTL
-    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL
-
-    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
-  end subroutine f_setHTL 
-
-  subroutine f_setMortHTL(mortHTL) bind(c)
-    real(c_double), intent(in):: mortHTL(nGrid-idxB+1)
-
-    call setMortHTL(mortHTL)
-  end subroutine f_setMortHTL
-
   subroutine test(x) bind(c)
     integer(c_int), intent(in), value:: x
    write(6,*) 'test'
@@ -169,6 +156,24 @@ contains
     call simulateEulerFunctions(u, L, T, tEnd, dt, &
       ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
   end subroutine f_simulateEulerFunctions
+
+  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
+    real(c_double), intent(in), value:: mHTL, mortHTL
+    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL
+
+    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
+  end subroutine f_setHTL 
+
+  subroutine f_setMortHTL(mortHTL) bind(c)
+    real(c_double), intent(in):: mortHTL(nGrid-idxB+1)
+
+    call setMortHTL(mortHTL)
+  end subroutine f_setMortHTL
+
+  subroutine f_getMortHTL( mortalityHTL, selectionHTL) bind(c)
+    real(c_double), dimension (nGrid-idxB+1), intent(inout):: mortalityHTL, selectionHTL
+    call getMortHTL( mortalityHTL, selectionHTL )
+  end subroutine f_getMortHTL
 
    subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL) bind(c)
     real(c_double), intent(in):: u(nGrid)

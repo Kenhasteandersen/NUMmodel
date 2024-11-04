@@ -29,10 +29,6 @@ void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, cons
 void f_setupgendiatcope(const int n,const int nCopepod, const int nPOM, const int nCopepods, 
                                         const double mAdult[], bool *Clost, char *errorstr);
 
-void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
-
-void f_setmorthtl(const double mortHTL[]);
-
 void f_calcderivatives(
 		       const double u[],
 		       const double L,
@@ -94,6 +90,15 @@ void f_getmass(
 void f_getsinking(double *velocity);
 
 void f_setsinking(double *velocity);
+
+void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
+
+void f_setmorthtl(const double mortHTL[]);
+
+void f_getmorthtl( 
+	double mortalityHTL[],
+	double selectionHTL[]
+);
 
 void f_getfunctions(
 			double u[],
