@@ -234,6 +234,7 @@ if options.bCalcAnnualAverages
     ProdNet = zeros( simtime, nb,1);
     ProdHTL = zeros( simtime, nb,1);
     mHTL = zeros( simtime, nb,1);
+    BHTL = zeros( simtime, nb, p.n-p.idxB+1 );
     ProdGrossAnnual = zeros( nb,1 );
     ProdNetAnnual = zeros( nb,1 );
     ProdHTLAnnual = zeros( nb,1 );
@@ -241,6 +242,8 @@ if options.bCalcAnnualAverages
     BnanoAnnualMean = zeros( nb,1 );
     BmicroAnnualMean = zeros( nb,1 );
     mHTLmean = zeros( nb,1 );
+
+    [~, pHTL] = getMortHTL(p);
 end
 
 % ---------------------------------------
@@ -308,6 +311,12 @@ for i=1:simtime
                 ProdNet(i,k) = ProdNet1;
                 ProdHTL(i,k) = ProdHTL1;
                 mHTL(i,k) = mHTL1;
+
+                %rates = getRates(p, u(k,:), sim.L(k), sim.T(k), sLibname, false);
+
+                utmp = u(k,:);
+                BHTL(i,k,:) = BHTL(i,k,:) + reshape( utmp(p.idxB:end) .* pHTL, 1, 1, p.n-p.idxB+1);
+
                 ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
                 ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
                 ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;
@@ -426,6 +435,14 @@ if options.bCalcAnnualAverages
     %for i = 1:simtime
     %    sim.mHTL(i,:,:,:) = single(matrixToGrid( squeeze(mHTL(i,:))', [], p.pathBoxes, p.pathGrid));
     %end
+    % Average mHTL
+    mHTLdepthsum = zeros(length(sim.x), length(sim.y));
+    for i = 1:size(BHTL,3)
+        BHTLdepthsum(:,:,i) = integrate_over_depth( sum(squeeze(BHTL(:,:,i)),1)');
+        mHTLdepthsum = mHTLdepthsum + log(p.m(p.idxB+i-1))*BHTLdepthsum(:,:,i);
+    end
+    sim.mHTLAnnualMean = exp( mHTLdepthsum ./ sum(BHTLdepthsum,3) );
+    sim.BHTL = BHTL;
     
     % Average productions:
     sim.ProdGrossAnnual(1,:,:) = integrate_over_depth(ProdGrossAnnual);
@@ -436,8 +453,8 @@ if options.bCalcAnnualAverages
     sim.BnanoAnnualMean(1,:,:) = integrate_over_depth(BnanoAnnualMean);
     sim.BmicroAnnualMean(1,:,:) = integrate_over_depth(BmicroAnnualMean);
     % Average HTL size:
-    sim.mHTLAnnualMean = exp( matrixToGrid(mHTLmean./ProdHTLAnnual, [], p.pathBoxes, p.pathGrid) );
-    sim.mHTLAnnualMean = squeeze(sim.mHTLAnnualMean(:,:,1)); % Only surface layer
+    %sim.mHTLAnnualMean = exp( matrixToGrid(mHTLmean./ProdHTLAnnual, [], p.pathBoxes, p.pathGrid) );
+    %sim.mHTLAnnualMean = squeeze(sim.mHTLAnnualMean(:,:,1)); % Only surface layer
 end
 
 %%%%%%%%%%%%%%%%%%%%%%
