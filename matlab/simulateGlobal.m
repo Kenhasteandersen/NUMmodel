@@ -439,7 +439,6 @@ if options.bCalcAnnualAverages
     mHTLdepthsum = zeros(length(sim.x), length(sim.y));
     BHTLdepthsum = zeros(length(sim.x), length(sim.y),size(BHTL,3));
     for i = 1:size(BHTL,3)
-        i
         BHTLdepthsum(:,:,i) = integrate_over_depth( sum(squeeze(BHTL(:,:,i)),1)');
         mHTLdepthsum = mHTLdepthsum + log(p.m(p.idxB+i-1))*BHTLdepthsum(:,:,i);
     end
