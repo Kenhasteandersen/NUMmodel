@@ -13,16 +13,16 @@ module spectrum
      integer:: n  ! Number of size classes
 
      ! Grid:
-     real(dp), dimension(:), allocatable:: m(:)  ! Geometric center mass of size-bin
-     real(dp), dimension(:), allocatable:: mLower(:)  ! Smallest size in the bin
-     real(dp), dimension(:), allocatable:: mDelta(:)   ! Width of the bin
-     real(dp), dimension(:), allocatable:: z(:) ! Ratio btw upper and lower size of bin
+     real(dp), dimension(:), allocatable:: m  ! Geometric center mass of size-bin
+     real(dp), dimension(:), allocatable:: mLower  ! Smallest size in the bin
+     real(dp), dimension(:), allocatable:: mDelta   ! Width of the bin
+     real(dp), dimension(:), allocatable:: z ! Ratio btw upper and lower size of bin
      ! Feeding:
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width
      real(dp):: epsilonF ! Assimilation efficiency
      real(dp):: epsilonL ! Light Assimilation efficiency
-     real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), f(:)
+     real(dp), dimension(:), allocatable:: flvl, AF, JFmax, JF, f
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
      real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp, Jresptot
@@ -164,7 +164,7 @@ contains
      this%mDelta(i) =  exp(x + 0.5*deltax)-this%mLower(i)
      this%z(i) = this%mLower(i)/(this%mLower(i) + this%mDelta(i))
   end do
-  this%mort2constant = 0.004/log(this%m(2) / this%m(1))
+  this%mort2constant = 0.004/log( (this%mLower(2)+this%mDelta(1)) / this%mLower(1) )
 end subroutine calcGrid
 
 !function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
