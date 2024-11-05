@@ -9,8 +9,8 @@ Files:
 
  The library current implements the following plankton groups:
 - `Generalists.f90`. Mixotrophs (bacteria, flaggelates, dinoflaggelates and ciliates). Tested and working.
-- `Copepods.f90`. Copepods defined by their adult size. Working but not fully calibrated.
-- `Diatoms.f90`. Diatoms. Not working.
+- `Copepods.f90`. Copepods defined by their adult size. Tested and working
+- `Diatoms.f90`. Diatoms. Working
 - `Diatoms_simple.f90`. Very simple version of diatoms. Working but not thoroughly tested.
-- `Generalists_csp.f90`. Implementation of the simpler version of generalists from Serra-Pompei (2020). Not working.
+- `Generalists_simple.f90`. Very simple version of generalists. Tested and working
 - `POM.f90`. Particular organic matter spectrum.

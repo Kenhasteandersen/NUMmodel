@@ -1,7 +1,16 @@
 %
-% Plot a size spectrum at a given lat, lon, index of depth, and time
-% (day).
+% Plot a size spectrum, rates, and trophic level as a function of size.
+%
+% If the simulation is a watercolumn then indicate also the depth layer.
+% If the simulation is global then indicate depth layer, and latitude and longitude.
 % 
+% In:
+%  sim - the simulation structure to plot
+%  time - time (in days) to plot
+%  iDepth - Depth layer to plot (only for water column and global
+%           simulations; defaults to the top layer).
+%  lat, lon - Latitude and longitude (only for global simulations).
+%
 function s = plotSizespectrum(sim, time, iDepth, lat, lon)
 arguments
     sim struct;
@@ -30,47 +39,51 @@ switch sim.p.nameModel
     case 'watercolumn'
         % Extract from a single water column:
         z = sim.z;
-        s.B = squeeze(sim.B(iDepth,:,:))';
+        s.B = squeeze(sim.B(:,iDepth,:));
         if isfield(sim,'Si')
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), sim.Si(iDepth, iTime), ...
+            u = [sim.N(iTime,iDepth), sim.DOC(iTime,iDepth), sim.Si(iTime,iDepth), ...
                 squeeze(s.B(iTime,:))];
         else
-            u = [sim.N(iDepth,iTime), sim.DOC(iDepth,iTime), squeeze(s.B(iTime,:))];
+            u = [sim.N(iTime,iDepth), sim.DOC(iTime,iDepth), squeeze(s.B(iTime,:))];
         end
-        s.L = sim.L(iDepth,iTime);
-        s.T = sim.T(iDepth,iTime);
+        s.L = sim.L(iTime,iDepth);
+        s.T = sim.T(iTime,iDepth);
         
     case 'global'
         % Extract from global run:
         idx = calcGlobalWatercolumn(lat,lon,sim);
         z = [sim.z(idx.z)-0.5*sim.dznom(idx.z); sim.z(idx.z(end))+0.5*sim.dznom(idx.z(end))];
-        s.B = squeeze(sim.B(idx.x, idx.y, iDepth, :, :))';
+        s.B = squeeze(sim.B(:, idx.x, idx.y, iDepth, :));
         if isfield(sim,'Si')
-            u = [sim.N(idx.x, idx.y,iDepth,iTime), ...
-                sim.DOC(idx.x, idx.y,iDepth,iTime), ...
-                sim.Si(idx.x, idx.y,iDepth,iTime), ...
-                squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))'];
+            u = [sim.N(iTime,idx.x, idx.y,iDepth), ...
+                sim.DOC(iTime,idx.x, idx.y,iDepth), ...
+                sim.Si(iTime,idx.x, idx.y,iDepth), ...
+                squeeze(sim.B(iTime,idx.x, idx.y, iDepth, :))'];
         else
-            u = [sim.N(idx.x, idx.y,iDepth,iTime), ...
-                sim.DOC(idx.x, idx.y,iDepth,iTime), ...
-                squeeze(sim.B(idx.x, idx.y, iDepth, :, iTime))'];
+            u = [sim.N(iTime,idx.x, idx.y,iDepth), ...
+                sim.DOC(iTime,idx.x, idx.y,iDepth), ...
+                squeeze(sim.B(iTime,idx.x, idx.y, iDepth, :))'];
         end
-        s.L = sim.L(idx.x, idx.y, iDepth,iTime);
-        s.T = sim.T(idx.x, idx.y, iDepth,iTime);
+        s.L = sim.L(iTime,idx.x, idx.y, iDepth);
+        s.T = sim.T(iTime,idx.x, idx.y, iDepth);
 end
 
 s.p = sim.p;
 s.t = sim.t;
+if ~isfield('sim','rates')
+    sim.rates = getRates(sim.p, u, s.L, s.T);
+end
+s.rates = sim.rates;
 %
 % Setup tiles:
 %
 clf
-tiledlayout(3,1,'tilespacing','compact','padding','compact')
+tiledlayout(4,1,'tilespacing','compact','padding','compact')
 %
 % Spectrum
 %
 nexttile
-panelSpectrum(s,iTime)
+panelSpectrum(s,iTime,bPlotStrategies=false)
 xlabel('')
 set(gca,'XTickLabel','');
 %
@@ -78,9 +91,6 @@ set(gca,'XTickLabel','');
 %
 nexttile
 
-if ~isfield('sim','rates')
-    sim.rates = getRates(sim.p, u, s.L, s.T);
-end
 %panelGains(sim.p,rates)
 panelGains(sim.p, sim.rates);
 set(gca,'XTickLabel','');
@@ -89,8 +99,13 @@ set(gca,'XTickLabel','');
 %
 nexttile
 panelLosses(sim.p, sim.rates);
+set(gca,'XTickLabel','');
+xlabel('')
 
-s.rates = sim.rates;
+nexttile
+%panelTrophicLevel(sim,sim.rates,lat,lon);
+panelTrophicLevel(sim.p, s.B(iTime,:), sim.rates);
+
 
 if strcmp(sim.p.nameModel, 'watercolumn')
 

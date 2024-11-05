@@ -1,33 +1,23 @@
 %
-% Run a watercolumn with only generalists
+% Run a watercolumn with the NUMmodel setup
 %
 % In:
 %  lat, lon - latitude and longitude
 %
 % Out:
-%  As simulation structure
+%  A simulation structure
 %
-function sim = baserunWatercolumn(mAdult, lat, lon)
+function sim = baserunWatercolumn(lat, lon)
 
 arguments
-    mAdult double = []
     lat double = 60;
-    lon double = -10;
+    lon double = -15;
 end
 
-% p = setupGeneralistsOnly(25);
-p = setupGeneric(mAdult);
+p = setupNUMmodel();
+
 p = parametersWatercolumn(p);
-p.tEnd = 1095;
-
-%
-% Set to "normal" HTL mortality if there are no copepods:
-%
-if isempty(mAdult)
-    setHTL(0.1, 1/500^1.5, false, false);
-else 
-    setHTL(0.1, 1, true, true);
-end
+p.tEnd = 5*365;
 
 sim = simulateWatercolumn(p, lat,lon);
 

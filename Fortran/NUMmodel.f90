@@ -1,16 +1,23 @@
-
 !
-! Module to handle the NUM model framework
+! The NUM model framework
+! 
+! This module consists of three parts:
+!  1) Setting up a new simulation. This handled by all the subroutines starting with
+!     setupXXX and parametersXXX.
+!  2) The core routines to make a derivative and simulate with Euler integration
+!  3) The remaining subroutines are getting information out about parameters or the simulation
 !
 module NUMmodel
+  use iso_c_binding, only: c_char, c_null_char
   use globals
   use spectrum
   use generalists
+  use generalists_simple
   use diatoms_simple
-  use generalists_csp
   use copepods
   use diatoms
   use POM
+  use read_input_module
   implicit none
 
   ! Indices into the state-variable vector:
@@ -19,21 +26,21 @@ module NUMmodel
   integer, parameter :: idxSi = 3
 
   ! Types of spectra:
-   integer, parameter :: typeGeneralist = 1
-   integer, parameter :: typeGeneralist_csp = 2
-   integer, parameter :: typeDiatom = 3
-   integer, parameter :: typeDiatom_simple = 4  
-   integer, parameter :: typeCopepodActive = 10
-   integer, parameter :: typeCopepodPassive = 11
-   integer, parameter :: typePOM = 100
+  integer, parameter :: typeGeneralistSimple = 1
+  integer, parameter :: typeGeneralist = 5  
+  integer, parameter :: typeDiatom = 3
+  integer, parameter :: typeDiatom_simple = 4
+  integer, parameter :: typeCopepodActive = 10
+  integer, parameter :: typeCopepodPassive = 11
+  integer, parameter :: typePOM = 100
   !
   ! Variables that contain the size spectrum groups
   !
   integer:: nGroups ! Number of groups
-  integer:: iCurrentGroup ! The current group to be added
+  integer:: iCurrentGroup ! The current group to be added (used in the parametersXX subroutines)
   integer:: nNutrients ! Number of nutrient state variables
   integer:: idxB ! First index into non-nutrient groups (=nNutrients+1)
-  integer:: nGrid ! Total number of grid points incl.  points for nutrients
+  integer:: nGrid ! Total number of state variables in u incl. variables for nutrients
   type(spectrumContainer), allocatable :: group(:) ! Structure pointing to each group
   integer, dimension(:), allocatable :: ixStart, ixEnd ! Indices into u for each group
 
@@ -61,143 +68,239 @@ contains
   ! ======================================
 
   ! -----------------------------------------------
+  ! A basic setup with only simple generalists
+  ! -----------------------------------------------
+  subroutine setupGeneralistsSimpleOnly(n,errorio,errorstr)
+    integer, intent(in):: n
+    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    character(c_char), dimension(*) :: errorstr
+    
+    call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
+  end subroutine setupGeneralistsSimpleOnly
+  
+  ! -----------------------------------------------
   ! A basic setup with only generalists
   ! -----------------------------------------------
-  subroutine setupGeneralistsOnly(n)
+  subroutine setupGeneralistsOnly(n,errorio,errorstr)
     integer, intent(in):: n
-    call parametersInit(1, n, 2) ! 1 group, n size classes (excl nutrients and DOC)
-    call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
-    call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
+    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    character(c_char), dimension(*) :: errorstr
+    call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr) ! generalists with n size classes
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
   end subroutine setupGeneralistsOnly
 
   ! -----------------------------------------------
+  ! A basic setup with generalists simple and POM
+  ! -----------------------------------------------
+  subroutine setupGeneralistsSimplePOM(n, nPOM,errorio,errorstr)
+    integer, intent(in):: n, nPOM
+    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    character(c_char), dimension(*) :: errorstr
+    call parametersInit(2, n+nPOM, 2,errorio,errorstr) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
+  end subroutine setupGeneralistsSimplePOM
+  
+  
+    ! -----------------------------------------------
   ! A basic setup with generalists and POM
   ! -----------------------------------------------
-  subroutine setupGeneralistsPOM(n, nPOM)
-   integer, intent(in):: n, nPOM
-   call parametersInit(2, n+nPOM, 2) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
-   call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
-   call parametersAddGroup(typePOM, nPOM, 1.0d0) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.1d0, .false., .false.) ! Use standard "linear" mortality
- end subroutine setupGeneralistsPOM
-
-  ! -----------------------------------------------
-  ! A basic setup with only generalists -- (Serra-Pompei et al 2020 version)
-  ! -----------------------------------------------
-   !subroutine setupGeneralistsOnly_csp()
-   !  call parametersInit(1, 10, 2) ! 1 group, 10 size classes (excl nutrients and DOC)
-   !  call parametersAddGroup(typeGeneralist_csp, 10, 10.d0**(-1.3d0)) ! generalists with 10 size classes
-   !  call parametersFinalize(0.003d0, .true., .true.) ! Serra-Pompei (2020))
-   !end subroutine setupGeneralistsOnly_csp
+  subroutine setupGeneralistsPOM(n, nPOM,errorio,errorstr)
+    integer, intent(in):: n, nPOM
+    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    character(c_char), dimension(*) :: errorstr
+    call parametersInit(2, n+nPOM, 2,errorio,errorstr) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typeGeneralist, n, 0.d0,errorio,errorstr) ! generalists with n size classes
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typePOM, nPOM, 1.0d0,errorio,errorstr) ! POM with nPOM size classes and max size 1 ugC
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1)) ! Use standard "linear" mortality
+  end subroutine setupGeneralistsPOM
 
   ! -----------------------------------------------
   ! A basic setup with only diatoms:
   ! -----------------------------------------------
-  subroutine setupDiatomsOnly(n)
-   integer, intent(in):: n
-   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
-   call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
-   call parametersFinalize(0.1d0, .false., .false.)
- end subroutine setupDiatomsOnly
+  subroutine setupDiatomsOnly(n,errorio,errorstr)
+    integer, intent(in):: n
+    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    character(c_char), dimension(*) :: errorstr
+    call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typeDiatom, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
+    call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
+  end subroutine setupDiatomsOnly
 
-!  ! -----------------------------------------------
-!   ! A basic setup with only simple diatoms:
-!   ! -----------------------------------------------
- subroutine setupDiatoms_simpleOnly(n)
+  ! -----------------------------------------------
+  ! A basic setup with only simple diatoms:
+  ! -----------------------------------------------
+  subroutine setupDiatoms_simpleOnly(n,errorio,errorstr)
    integer, intent(in):: n
-   call parametersInit(1, n, 3) ! 1 group, n size classes (excl nutrients)
-   call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
-   call parametersFinalize(0.1d0, .false., .false.)
- end subroutine setupDiatoms_simpleOnly
+   logical(1), intent(out):: errorio ! Whether to losses to the deep
+   character(c_char), dimension(*) :: errorstr
+   call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeDiatom_simple, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
+   call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
+  end subroutine setupDiatoms_simpleOnly
  
   ! -----------------------------------------------
   ! Generalists and diatoms:
   ! -----------------------------------------------
-   subroutine setupGeneralistsDiatoms(n)
+   subroutine setupGeneralistsDiatoms(n,errorio,errorstr)
       integer, intent(in):: n
-      call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
-      call parametersAddGroup(typeDiatom, n, 1.d0) ! diatoms with n size classes
-      call parametersFinalize(.1d0, .false., .false.)
+      logical(1), intent(out):: errorio ! Whether to losses to the deep
+      character(c_char), dimension(*) :: errorstr
+      call parametersInit(2, 2*n, 3,errorio,errorstr)
+        IF ( errorio ) RETURN 
+      call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr) ! generalists with n size classes
+        IF ( errorio ) RETURN 
+      call parametersAddGroup(typeDiatom, n, 0.d0,errorio,errorstr) ! diatoms with n size classes
+      call parametersFinalize(.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
    end subroutine setupGeneralistsDiatoms
  
-   subroutine setupGeneralistsDiatoms_simple(n)
+   subroutine setupGeneralistsDiatoms_simple(n,errorio,errorstr)
       integer, intent(in):: n
-      call parametersInit(2, 2*n, 3)
-      call parametersAddGroup(typeGeneralist, n, 0.0d0) ! generalists with n size classes
-      call parametersAddGroup(typeDiatom_simple, n, 1.d0) ! diatoms with n size classes
-      call parametersFinalize(0.1d0, .false., .false.)
+      logical(1), intent(out):: errorio ! Whether to losses to the deep
+      character(c_char), dimension(*) :: errorstr
+      call parametersInit(2, 2*n, 3,errorio,errorstr)
+        IF ( errorio ) RETURN 
+      call parametersAddGroup(typeGeneralistSimple, n, 0.d0,errorio,errorstr) ! generalists with n size classes
+        IF ( errorio ) RETURN 
+      call parametersAddGroup(typeDiatom_simple, n, 1.d0,errorio,errorstr) ! diatoms with n size classes
+      call parametersFinalize(0.1d0, logical(.FALSE.,1), logical(.FALSE.,1))
    end subroutine setupGeneralistsDiatoms_simple
  
   ! -----------------------------------------------
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------
-  subroutine setupGeneralistsCopepod()
-    call parametersInit(2, 20, 2)
-    call parametersAddGroup(typeGeneralist, 10, 0.0d0)
-    call parametersAddGroup(typeCopepodActive, 10, .1d0) ! add copepod with adult mass .1 mugC
-    call parametersFinalize(0.003d0, .true., .true.) ! Use quadratic mortality
-  end subroutine setupGeneralistsCopepod
+  subroutine setupGeneralistsSimpleCopepod(errorio,errorstr)
+    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    character(c_char), dimension(*) :: errorstr
+    call parametersInit(2, 20, 2,errorio,errorstr)
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typeGeneralistSimple, 10, 0.0d0,errorio,errorstr)
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typeCopepodActive, 10, .1d0,errorio,errorstr) ! add copepod with adult mass .1 mugC
+    call parametersFinalize(0.003d0, logical(.true.,1), logical(.true.,1)) ! Use quadratic mortality
+  end subroutine setupGeneralistsSimpleCopepod
 
   ! -----------------------------------------------
   ! A generic setup with generalists and a number of copepod species
   ! -----------------------------------------------
-  subroutine setupGeneric(mAdult)
+  subroutine setupGeneric(mAdult,errorio,errorstr)
     real(dp), intent(in):: mAdult(:)
+    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    character(c_char), dimension(*) :: errorstr
     integer, parameter:: n = 10 ! number of size classes in each group
     integer:: iCopepod
 
-    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-    call parametersAddGroup(typeGeneralist, n, 0.0d0)
+    call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2,errorio,errorstr)
+      IF ( errorio ) RETURN 
+    call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
+      IF ( errorio ) RETURN 
     if ( size(mAdult) .eq. 0) then
-       call parametersFinalize(0.1d0, .true., .true.)
+       call parametersFinalize(0.1d0, logical(.true.,1), logical(.true.,1))
     else
        do iCopepod = 1, size(mAdult)
-          call parametersAddGroup(typeCopepodActive, n, mAdult(iCopepod)) ! add copepod
+          call parametersAddGroup(typeCopepodActive, n, mAdult(iCopepod),errorio,errorstr) ! add copepod
+            IF ( errorio ) RETURN 
        end do
-       call parametersFinalize(0.001d0, .true., .true.)
+       call parametersFinalize(0.001d0, logical(.true.,1), logical(.true.,1))
     end if
   end subroutine setupGeneric
   ! -----------------------------------------------
   ! Full NUM model setup with generalists, copepods, and POM
   ! -----------------------------------------------
-  subroutine setupNUMmodel(n, nCopepod, nPOM, mAdultPassive, mAdultActive)
+  subroutine setupNUMmodel(n, nCopepod, nPOM, mAdultPassive, mAdultActive,errorio,errorstr)
    integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
    real(dp), intent(in):: mAdultPassive(:), mAdultActive(:)
+   logical(1), intent(out):: errorio ! Whether to losses to the deep
+   character(c_char), dimension(*) :: errorstr
    integer:: iCopepod
  
-   call parametersInit(size(mAdultActive)+size(mAdultPassive)+3, 2*n + nPOM + nCopepod*(size(mAdultPassive)+size(mAdultActive)), 3)
-   call parametersAddGroup(typeGeneralist, n, 0.0d0)
-   call parametersAddGroup(typeDiatom_simple, n, 1.0d0)
+   call parametersInit(size(mAdultActive)+size(mAdultPassive)+3, 2*n + nPOM &
+           + nCopepod*(size(mAdultPassive)+size(mAdultActive)), 3,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
+   IF ( errorio ) RETURN 
 
    do iCopepod = 1, size(mAdultPassive)
-      call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod)) ! add copepod
+      call parametersAddGroup(typeCopepodPassive, nCopepod, mAdultPassive(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
    end do
    
    do iCopepod = 1, size(mAdultActive)
-      call parametersAddGroup(typeCopepodActive, nCopepod, mAdultActive(iCopepod)) ! add copepod
+      call parametersAddGroup(typeCopepodActive, nCopepod, mAdultActive(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
    end do
-   
-   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM)) ! POM with nPOM size classes and max size 1 ugC
-   call parametersFinalize(0.001d0, .true., .true.)
+   ! POM with nPOM size classes and max size 1 ugC:
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
+   call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
 
   end subroutine setupNUMmodel
 
   ! -----------------------------------------------
-  ! A generic setup with generalists and a number of copepod species
+  ! Full NUM model setup with generalistsSImple, copepods, and POM
   ! -----------------------------------------------
-  !subroutine setupGeneric_csp(mAdult)
-  !  real(dp), intent(in):: mAdult(:)
-  !  integer, parameter:: n = 10 ! number of size classes in each group
-  !  integer:: iCopepod
+    subroutine setupNUMmodelSimple(n, nCopepod, nPOM, mAdult,errorio,errorstr)
+   integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
+   real(dp), intent(in):: mAdult(:)
+   logical(1), intent(out):: errorio ! Whether to losses to the deep
+   character(c_char), dimension(*) :: errorstr
+   integer:: iCopepod
+ 
+   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeGeneralistSimple, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeDiatom_simple, n, 1.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
 
-   ! call parametersInit(size(mAdult)+1, n*(size(mAdult)+1), 2)
-   ! call parametersAddGroup(typeGeneralist_csp, n, 0.1d0)
-   ! do iCopepod = 1, size(mAdult)
-   !    call parametersAddGroup(typeCopepod, n, mAdult(iCopepod)) ! add copepod
-   ! end do
-   ! call parametersFinalize(0.003d0, .true., .true.)
-  !end subroutine setupGeneric_csp
+   do iCopepod = 1, size(mAdult)
+      call parametersAddGroup(typeCopepodActive, nCopepod, mAdult(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
+   end do
+   ! POM with nPOM size classes and max size 1 ugC:
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
+   call parametersFinalize(0.001d0, logical(.true.,1), logical(.true.,1))
+
+  end subroutine setupNUMmodelSimple
+  
+  ! -------------------------------------------------------
+  ! A generic setup with generalists, diatoms and copepods
+  ! -------------------------------------------------------
+  subroutine setupGenDiatCope(n, nCopepod, nPOM, mAdult,errorio,errorstr)
+   integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
+   real(dp), intent(in):: mAdult(:)
+   logical(1), intent(out):: errorio ! Whether to losses to the deep
+   character(c_char), dimension(*) :: errorstr
+   integer:: iCopepod
+ 
+   call parametersInit(size(mAdult)+3, 2*n + nPOM + nCopepod*size(mAdult), 3,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeDiatom, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
+   call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
+     IF ( errorio ) RETURN 
+
+   do iCopepod = 1, size(mAdult)
+      call parametersAddGroup(typeCopepodActive, nCopepod, mAdult(iCopepod),errorio,errorstr) ! add copepod
+        IF ( errorio ) RETURN 
+   end do! POM with nPOM size classes and max size 1 ugC:
+   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
+   call parametersFinalize(0.007d0,logical(.true.,1), logical(.false.,1))
+
+  end subroutine setupGenDiatCope
 
   ! ======================================
   !  Model initialization stuff:
@@ -209,12 +312,21 @@ contains
   !    nnGroups: number of size spectrum groups
   !    nnGrid: total length of the grid (excl nnNutrients points for N, DOC, etc.)
   ! -----------------------------------------------
-  subroutine parametersInit(nnGroups, nnGrid, nnNutrients)
+  subroutine parametersInit(nnGroups, nnGrid, nnNutrients,errorio,errorstr)
     integer, intent(in):: nnGrid, nnGroups, nnNutrients
+    logical(1), intent(out):: errorio 
+    character(c_char), dimension(*), intent(out) :: errorstr
+    !
+    ! read general input parameters:
+    !
+    errorio=.false.
+    call read_input(inputfile,'general','rhoCN',rhoCN,errorio,errorstr)
+    call read_input(inputfile,'general','fracHTL_to_N',fracHTL_to_N,errorio,errorstr)
+    call read_input(inputfile,'general','fracHTL_to_POM',fracHTL_to_POM,errorio,errorstr)
+    !call read_input(inputfile,'general')
     !
     ! Set groups:
     !
-    call read_namelist_general()
 
     nGroups = nnGroups
     iCurrentGroup = 0
@@ -246,22 +358,26 @@ contains
     allocate(pHTL(nGrid))
     allocate(theta(nGrid,nGrid))     ! Interaction matrix:
   end subroutine parametersInit
+  
+ 
 
   ! -----------------------------------------------
   !  Add a size spectrum group
   !  In:
   !    typeGroup: the group type (see definitions in Globals.f90
   !    n: number of grid points
-  !    mMax: the maximum size (mid-point in grid cell)
+  !    mMax: the maximum size (upper size of a grid cell)
   ! -----------------------------------------------
-  subroutine parametersAddGroup(typeGroup, n, mMax)
+  subroutine parametersAddGroup(typeGroup, n, mMax,errorio,errorstr)
     integer, intent(in):: typeGroup, n
     real(dp), intent(in):: mMax
+    logical(1), intent(out) :: errorio
+    character(c_char), dimension(*) :: errorstr
 
     type(spectrumGeneralists) :: specGeneralists
+    type(spectrumGeneralistsSimple) :: specGeneralistsSimple
     type(spectrumDiatoms_simple):: specDiatoms_simple
     type(spectrumDiatoms):: specDiatoms
-    type(spectrumGeneralists_csp):: specGeneralists_csp
     type(spectrumCopepod):: specCopepod
     type(spectrumPOM):: specPOM
     !
@@ -279,29 +395,29 @@ contains
     ! Add the group
     !
     select case (typeGroup)
+    case (typeGeneralistSimple)
+      call initGeneralistsSimple(specGeneralistsSimple, n, errorio, errorstr)
+      allocate( group( iCurrentGroup )%spec, source=specGeneralistsSimple )
     case (typeGeneralist)
-      call initGeneralists(specGeneralists, n)
+      call initGeneralists(specGeneralists, n, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specGeneralists )
     case (typeDiatom_simple)
-      call initDiatoms_simple(specDiatoms_simple, n, mMax)
+      call initDiatoms_simple(specDiatoms_simple, n, mMax, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms_simple )
     case (typeDiatom)
-      call initDiatoms(specDiatoms, n, mMax)
+      call initDiatoms(specDiatoms, n, errorio, errorstr)
       allocate( group( iCurrentGroup )%spec, source=specDiatoms )
-    case (typeGeneralist_csp)
-      call initGeneralists_csp(specGeneralists_csp, n, mMax)
-      allocate( group ( iCurrentGroup )%spec, source=specGeneralists_csp )
    case(typeCopepodPassive)
-      call initCopepod(specCopepod, passive, n, mMax)
+      call initCopepod(specCopepod, passive, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
    case(typeCopepodActive)
-      call initCopepod(specCopepod, active, n, mMax)
+      call initCopepod(specCopepod, active, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
    case(typePOM)
-      call initPOM(specPOM, n, mMax)
+      call initPOM(specPOM, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
       idxPOM = iCurrentGroup 
-    end select
+   end select
 
   end subroutine parametersAddGroup
   ! -----------------------------------------------
@@ -310,7 +426,7 @@ contains
   ! -----------------------------------------------
   subroutine parametersFinalize(mortHTL, boolQuadraticHTL, boolDecliningHTL)
     real(dp), intent(in):: mortHTL
-    logical, intent(in):: boolQuadraticHTL, boolDecliningHTL
+    logical(1), intent(in):: boolQuadraticHTL, boolDecliningHTL
     integer:: i,j, iGroup, jGroup
     real(dp),parameter :: betaHTL = 500.d0
     real(dp):: mHTL
@@ -327,6 +443,20 @@ contains
                   calcPhi(group(iGroup)%spec%m(i)/group(jGroup)%spec%m(j), &
                      group(iGroup)%spec%beta, group(iGroup)%spec%sigma, &
                      group(iGroup)%spec%z(i))
+               !
+               ! Passive copepods have a lower preference for feeding on diatoms:
+               !
+               select type (spec => group(iGroup)%spec) ! Predator group
+                  type is (spectrumCopepod)
+                    select type (specPrey => group(jGroup)%spec) ! Prey group
+                      type is (spectrumDiatoms)
+                          theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
+                            spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
+                      type is (spectrumDiatoms_simple)
+                           theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
+                            spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
+                     end select
+               end select
             end do
          end do
       end do
@@ -375,6 +505,7 @@ contains
     !   Delta: ratio between upper and lower body mass in size groups
     !
     function calcPhi(z, beta,sigma, Delta) result(res)
+      use ieee_arithmetic
       real(dp), intent(in):: z,beta,sigma,Delta
       real(dp):: res, s
 
@@ -390,83 +521,12 @@ contains
          Erf((Log(beta) - Log(Delta*z))/Sqrt(s))*Log((Delta*z)/beta)))/2.))/ &
          ((-1 + Delta)*Log(Delta)) )
       end if
+      if (ieee_is_nan(res)) then
+         res = 0.d0
+      end if
     end function calcPhi
 
   end subroutine parametersFinalize
-  !
-  ! Set the "HTL" mortality experienced by the largest groups.
-  !
-  ! IN:
-  !  mHTL : The mass where the HTL mortality begins to act
-  !  mortalityHTL : the level of the morality (see below)
-  !  boolQuadraticHTL : whether to use a constant mortality (false) or a mortality
-  !                     that is proportional to the biomass density (true)
-  !  boolDecliningHTL : whether the mortality declines with size as mass^-1/4 (true)
-  !                     or is constant (false)
-  !
-  ! If the mortality is constant (boolQuadraticHTL=false) then the mortality is at a level 
-  ! of mortalityHTL at mHTL. The mortality may decline from there is boolDecliningHTL = true.
-  !
-  ! If the mortality is "quadratic" (boolQuadratic=true) then the mortality is
-  ! at a level mortalityHTL at mHTL if the biomass density is 1 (ugC/l) / ugC.
-  !
-  ! The decline in mortality (boolDecliningHTL=true) is set such that the mortality
-  ! is mortalityHTL at a mass mRef = .1 ugC.
-  !
-  subroutine setHTL(mHTL, mortalityHTL, boolQuadraticHTL, boolDecliningHTL)
-    real(dp), intent(in):: mHTL ! The size where HTL is 50% of max
-    real(dp), intent(in):: mortalityHTL ! The level of HTL mortality (at a reference size of 1 ugC
-                                        ! B/z = 1/l )
-    logical, intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
-    logical, intent(in):: boolDecliningHTL ! Whether the mortality declines with size
-    real(dp), parameter:: mRef = .1d0 ! Reference mass (in ugC)
-    !real(dp), parameter:: betaHTL = 500.
-    integer:: iGroup
- 
-    !     
-    ! Calc htl mortality
-    !
-
-    ! Find the selectivity:
-    do iGroup = 1, nGroups
-      pHTL( ixStart(iGroup):ixEnd(iGroup) ) = &
-          (1 / (1+(group(iGroup)%spec%m/mHTL)**(-2))) ! The size selectivity switch around mHTL
-      if (boolDecliningHTL) then
-         pHTL( ixStart(iGroup):ixEnd(iGroup) ) = pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
-             * (group(iGroup)%spec%m/mHTL)**(-0.25)
-      end if
-    enddo
-
-    if (.not. boolQuadraticHTL) then
-      !
-      ! Standard HTL mortality that is constant over time:
-      !
-      do iGroup = 1, nGroups
-         group(iGroup)%spec%mortHTL = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
-      end do
-    else
-      !
-      ! Linear HTL mortality (commonly referred to as "quadratic")
-      ! The selectivity is now normalized by the width of the size classes
-      !
-      do iGroup = 1, nGroups
-        pHTL( ixStart(iGroup):ixEnd(iGroup) ) = mortalityHTL &
-           * pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
-           / log(1/group(iGroup)%spec%z)
-      end do
-    end if
-
-    bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
-  end subroutine setHTL
-
-  subroutine setMortHTL(mortHTL)
-   real(dp), intent(in):: mortHTL(nGrid-idxB+1)
-   integer:: iGroup
-
-   do iGroup = 1, nGroups
-      group(iGroup)%spec%mortHTL = mortHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) )
-   end do
-  end subroutine setMortHTL
   
   ! ======================================
   !  Calculate rates and derivatives:
@@ -491,7 +551,7 @@ contains
     real(dp), intent(in):: L, T, dt, u(nGrid)
     real(dp), intent(inout) :: dudt(nGrid)
     integer:: i, j, iGroup, ix
-    real(dp):: gammaN, gammaDOC, gammaSi, Nbalance
+    real(dp):: gammaN, gammaDOC, gammaSi
 
     dudt = 0.d0
     !
@@ -524,7 +584,7 @@ contains
     if (bQuadraticHTL) then
        do iGroup = 1, nGroups
          group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) &
-            * u(ixStart(iGroup):ixEnd(iGroup))
+            * upositive(ixStart(iGroup):ixEnd(iGroup))
        end do
      end if
     !
@@ -542,7 +602,7 @@ contains
        gammaN = max(0.d0, min(1.d0, -u(idxN)/(dudt(idxN)*dt)))
     end if
     if ((u(idxDOC) + dudt(idxDOC)*dt) .lt. 0) then
-       gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(dudt(idxDOC)*dt)))
+       gammaDOC = max(0.d0, min(1.d0, u(idxDOC)/(dudt(idxDOC)*dt)))
     end if
     if (nNutrients .gt. 2) then
       if ((u(idxSi) + dudt(idxSi)*dt) .lt. 0) then
@@ -574,11 +634,11 @@ contains
                ix = ixStart(iGroup)+i-1
                if (thetaPOM(ix) .ne. 0) then
                   j = ixStart(idxPOM)+thetaPOM(ix)-1 ! find the size class that it delivers POM to
-                  dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*u(ix) 
+                  dudt(j) = dudt(j) + group(iGroup)%spec%jPOM(i)*upositive(ix) 
                end if
                ! Throw a fraction of HTL production into the largest POM group:
                dudt(ixEnd(idxPOM)) = dudt(ixEnd(idxPOM)) + &
-                 fracHTL_to_POM * u(ix) * group(iGroup)%spec%mortHTL(i)
+                 (1-fracHTL_to_N) * upositive(ix) * group(iGroup)%spec%mortHTL(i)
             end do
          end if
       end do
@@ -598,23 +658,23 @@ contains
     do iGroup = 1, nGroups
       if (iGroup .ne. idxPOM) then
         dudt(idxN) = dudt(idxN) + &
-            fracHTL_to_N * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
+            fracHTL_to_N * sum( upositive(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
       end if
     end do
     !
     ! Check: Should be close to zero
     !
-    Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN
-    do iGroup = 1, nGroups
-      Nbalance = Nbalance  &
-        + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
-        + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
-    end do
+    !Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN
+    !do iGroup = 1, nGroups
+    !  Nbalance = Nbalance  &
+    !    + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
+    !    + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
+    !end do
     !write(*,*) 'N balance:', Nbalance
 
     contains
 
-     !
+  !
   ! Calculate derivatives for unicellular groups
   ! In:
   !   gammaN and gammaDOC are reduction factors [0...1] of uptakes of N and DOC,
@@ -627,6 +687,9 @@ contains
    !
    do iGroup = 1, nGroups
       select type (spec => group(iGroup)%spec)
+      type is (spectrumGeneralistsSimple)
+         call calcRatesGeneralistsSimple(spec, &
+                     L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
       type is (spectrumGeneralists)
          call calcRatesGeneralists(spec, &
                      L, upositive(idxN), upositive(idxDOC), gammaN, gammaDOC)
@@ -635,10 +698,7 @@ contains
                      L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
       type is (spectrumDiatoms)
          call calcRatesDiatoms(spec, &
-                     L, upositive(idxN), upositive(idxSi), gammaN, gammaSi)
-      type is (spectrumGeneralists_csp)
-         call calcRatesGeneralists_csp(spec, &
-                     L, upositive(idxN), F( ixStart(iGroup):ixEnd(iGroup) ), gammaN)
+                     L, upositive(idxN),  upositive(idxDOC), upositive(idxSi),gammaN, gammaDOC, gammaSi)
       end select
    end do
    !
@@ -667,6 +727,10 @@ contains
    
    do iGroup = 1, nGroups
       select type (spec => group(iGroup)%spec)
+      type is (spectrumGeneralistsSimple)
+         call calcDerivativesGeneralistsSimple(spec, &
+              upositive(ixStart(iGroup):ixEnd(iGroup)), &
+              dudt(idxN), dudt(idxDOC), dudt(ixStart(iGroup):ixEnd(iGroup)))
       type is (spectrumGeneralists)
          call calcDerivativesGeneralists(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
@@ -678,11 +742,7 @@ contains
       type is (spectrumDiatoms)
          call calcDerivativesDiatoms(spec, &
               upositive(ixStart(iGroup):ixEnd(iGroup)), &
-              dudt(idxN), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
-      type is (spectrumGeneralists_csp)
-         call calcDerivativesGeneralists_csp(spec, &
-              upositive(ixStart(iGroup):ixEnd(iGroup)), &
-              dudt(idxN), dudt(ixStart(iGroup):ixEnd(iGroup)))              
+              dudt(idxN), dudt(idxDOC), dudt(idxSi), dudt(ixStart(iGroup):ixEnd(iGroup)))
       end select
    end do
  end subroutine calcDerivativesUnicellulars
@@ -754,16 +814,29 @@ contains
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
     real(dp) :: dudt(nGrid)
-    integer:: i, iEnd
+    integer:: i
 
-    iEnd = floor(tEnd/dt)
-
-    do i=1, iEnd
+    do i = 1, floor(tEnd/dt)
        call calcDerivatives(u, L, T, dt, dudt)
        u = u + dudt*dt
     end do
   end subroutine simulateEuler
 
+  ! -----------------------------------------------
+  ! Simulate with Euler integration and also return functions
+  ! -----------------------------------------------
+  subroutine simulateEulerFunctions(u, L, T, tEnd, dt, &
+            ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
+    real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
+    real(dp), intent(in):: L      ! Light level
+    real(dp), intent(in):: T ! Temperature
+    real(dp), intent(in):: tEnd ! Time to simulate
+    real(dp), intent(in):: dt    ! time step
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
+
+    call simulateEuler(u, L, T, tEnd, dt)
+    call getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
+ end subroutine simulateEulerFunctions
 
   !=========================================
   ! Diagnostic functions
@@ -785,7 +858,7 @@ contains
    N = 0
    N = u(idxN)
    do i = 1, nGrid
-      N = N + u(nNutrients+i)/5.68
+      N = N + u(nNutrients+i)/rhoCN
    end do
  end function calcN
  
@@ -809,14 +882,117 @@ contains
       end do
      
    end subroutine getSinking
+   !
+   ! Set the sinking velocity of all groups. Typically used to change the velocity of POM
+   !
+   subroutine setSinking(velocity)
+      real(dp), intent(in) :: velocity(nGrid)
+      integer:: iGroup
   
+      do iGroup = 1, nGroups
+         group(iGroup)%spec%velocity = velocity( (ixStart(iGroup)):(ixEnd(iGroup)) )
+      end do
+    end subroutine setSinking
+  
+    !
+  ! Set the "HTL" mortality experienced by the largest groups.
+  !
+  ! IN:
+  !  mHTL : The mass where the HTL mortality begins to act
+  !  mortalityHTL : the level of the morality (see below)
+  !  boolQuadraticHTL : whether to use a constant mortality (false) or a mortality
+  !                     that is proportional to the biomass density (true)
+  !  boolDecliningHTL : whether the mortality declines with size as mass^-1/4 (true)
+  !                     or is constant (false)
+  !
+  ! If the mortality is constant (boolQuadraticHTL=false) then the mortality is at a level 
+  ! of mortalityHTL at mHTL. The mortality may decline from there is boolDecliningHTL = true.
+  !
+  ! If the mortality is "quadratic" (boolQuadratic=true) then the mortality is
+  ! at a level mortalityHTL at mHTL if the biomass density is 1 (ugC/l) / ugC.
+  !
+  ! The decline in mortality (boolDecliningHTL=true) is set such that the mortality
+  ! is mortalityHTL at a mass mRef = .1 ugC.
+  !
+  subroutine setHTL(mHTL, mortalityHTL, boolQuadraticHTL, boolDecliningHTL)
+   real(dp), intent(in):: mHTL ! The size where HTL is 50% of max
+   real(dp), intent(in):: mortalityHTL ! The level of HTL mortality (at a reference size of 1 ugC
+                                       ! B/z = 1/l )
+   logical(1), intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
+   logical(1), intent(in):: boolDecliningHTL ! Whether the mortality declines with size
+   !real(dp), parameter:: mRef = .1d0 ! Reference mass (in ugC)
+   !real(dp), parameter:: betaHTL = 500.
+   integer:: iGroup
+
+   !     
+   ! Calc htl mortality
+   !
+
+   pHTL = 0.d0
+   ! Find the selectivity:
+   do iGroup = 1, nGroups
+     if (iGroup .ne. idxPOM) then ! POM is unaffected by HTL mortality
+        pHTL( ixStart(iGroup):ixEnd(iGroup) ) = &
+            (1 / (1+(group(iGroup)%spec%m/mHTL)**(-2))) ! The size selectivity switch around mHTL
+        if (boolDecliningHTL) then
+           pHTL( ixStart(iGroup):ixEnd(iGroup) ) = pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
+               * (group(iGroup)%spec%m/mHTL)**(-0.25)
+        end if
+     end if
+   end do
+
+   if (.not. boolQuadraticHTL) then
+     !
+     ! Standard HTL mortality that is constant over time:
+     !
+     do iGroup = 1, nGroups
+        group(iGroup)%spec%mortHTL = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
+     end do
+   else
+     !
+     ! Linear HTL mortality (commonly referred to as "quadratic")
+     ! The selectivity is now normalized by the width of the size classes
+     !
+     do iGroup = 1, nGroups
+       pHTL( ixStart(iGroup):ixEnd(iGroup) ) = mortalityHTL &
+          * pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
+          / log(1/group(iGroup)%spec%z)
+     end do
+   end if
+
+   bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
+ end subroutine setHTL
+ !
+ ! Routine for the user to override the calculation of HTL mortality done by setHTL:
+ !
+ subroutine setMortHTL(mortHTL)
+  real(dp), intent(in):: mortHTL(nGrid-idxB+1)
+  integer:: iGroup
+
+  do iGroup = 1, nGroups
+     group(iGroup)%spec%mortHTL = mortHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) )
+  end do
+ end subroutine setMortHTL
+ !
+ ! Get the HTL mortality as pHTL * mortHTL. This can be used to calculate the loss either by
+ ! multiplying with u or u^2, as determined by the bQuadratic. The vector does not include the 
+ ! the nutrient pools (length nGrid-idxB+1).
+ !
+ subroutine getMortHTL(mortalityHTL, bQuadratic)
+   real(dp), dimension (nGrid-idxB+1), intent(inout):: mortalityHTL
+   logical(1), intent(out):: bQuadratic
+
+   mortalityHTL = pHTL( idxB:nGrid )
+   bQuadratic = bQuadraticHTL
+end subroutine getMortHTL
+
   ! ---------------------------------------------------
   ! Get the ecosystem functions as calculated from the last call
   ! to calcDerivatives
   ! ---------------------------------------------------
-  subroutine getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro)
+  subroutine getFunctions(u, ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
     real(dp), intent(in):: u(nGrid)
-    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
     real(dp) :: conversion
     real(dp) :: ESD(nGrid)
     real(dp):: m(nGrid), mDelta(nGrid)
@@ -829,10 +1005,12 @@ contains
     Bpico = 0.d0
     Bnano = 0.d0
     Bmicro = 0.d0
+    mHTL = 0.d0
     !
     ! Get primary production only from unicellular spectra:
     !
-    conversion = 365.*1d-6*1000. ! Convert to gC/yr/m3
+    !conversion = 365.*1d-6*1000. ! Convert to gC/yr/m3
+    conversion = 1d-3*1000. ! Convert to mgC/d/m3
     do i = 1, nGroups
        select type (spec => group(i)%spec)
           class is (spectrumUnicellular)
@@ -846,12 +1024,15 @@ contains
                spec%getProdBact(u( ixStart(i):ixEnd(i) ))
        end select
     end do
+   
     !
     ! Make a rough estimate of pico-nano-micro plankton biomasses:
     !
     call getMass(m, mDelta )
     ESD = 10000. * 1.5 * (m*1d-6)**onethird
-    conversion = 1d-6*1000 ! Convert to gC/m3
+    !conversion = 1d-6*1000 ! Convert to gC/m3
+    conversion = 1d-3*1000 ! Convert to mgC/m3
+    
     do i = idxB, nGrid
        if (ESD(i) .le. 2.) then
           Bpico = Bpico + conversion*u(i)
@@ -869,47 +1050,138 @@ contains
     ! HTL production:
     !  
     do i = 1, nGroups
-       ProdHTL = ProdHTL + 365*conversion* &
+      ProdHTL = ProdHTL + conversion* &
           sum(group(i)%spec%mortHTL*u( ixStart(i):ixEnd(i) ))
+      mHTL = mHTL + conversion * &
+          sum(log(group(i)%spec%m) * group(i)%spec%mortHTL*u( ixStart(i):ixEnd(i) ))
     end do
+    mHTL = exp( mHTL / ProdHTL )
 
     eHTL = ProdHTL / ProdNet
  
   end subroutine getFunctions
 
   ! ---------------------------------------------------
-  ! Returns mass conservation calculated from last call to calcDerivatives
+  ! Returns mass conservation calculated from last call to calcDerivatives.
+  ! The numbers returned are the changes in carbon, N, and Si relative to the 
+  ! concentrations of N, DOC, and Si, in units of 1/day
+  ! 
+  ! ISSUE:
+  ! Does not deal with remin2 losses
+  !
   ! ---------------------------------------------------
-  subroutine getBalance(u, dudt, Nbalance,Cbalance)
+subroutine getBalance(u, dudt, Cbalance,Nbalance,SiBalance)
    real(dp), intent(in):: u(nGrid), dudt(nGrid)
-   real(dp), intent(out):: Nbalance, Cbalance
+   real(dp), intent(out):: Cbalance, Nbalance, Sibalance
+   real(dp) :: Clost, Nlost, SiLost
+   integer :: iGroup
+
+   call getLost(u, Clost, Nlost, SiLost) ! Find what is lost from the system
+   !
+   ! The balance is the change in the nutrient + the change in biomass + whatever is lost:
+   !
+   Cbalance = dudt(idxDOC) + sum( dudt(idxB:nGrid) )       + Clost
+   Nbalance = dudt(idxN)   + sum( dudt(idxB:nGrid) )/rhoCN + Nlost 
+   ! Only diatom groups for silicate
+   Sibalance = dudt(idxSi) + SiLost 
+
+   do iGroup = 1, nGroups
+      select type ( spec => group(iGroup)%spec )
+         type is (spectrumDiatoms)
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0 ! rhoC:Si hardcoded here
+            
+         type is (spectrumDiatoms_simple)
+            Sibalance = Sibalance + sum( dudt( ixStart(iGroup):ixEnd(iGroup) ) )/3.4d0 ! rhoC:Si hardcoded here
+      end select
+   end do
+   !
+   ! Normalize by the concentrations:
+   !
+   Cbalance = Cbalance / u(idxDOC)
+   Nbalance = Nbalance / u(idxN)
+   if (nNutrients .gt. 2) then
+     Sibalance = Sibalance / u(idxSi)
+   else
+     Sibalance = 0.d0
+   endif
+
+end subroutine getBalance
+!
+! Return what is lost (or gained) of carbon, nutrients and silicate from the system:
+!
+subroutine getLost(u, Clost, Nlost, SiLost)
+   real(dp), intent(in):: u(nGrid)
+   real(dp), intent(out):: Clost, Nlost, SiLost
    integer:: iGroup
-   
-   iGroup = 1 ! Do it only for the first group:
-   select type ( spec => group(iGroup)%spec )
-      type is (spectrumGeneralists)
-         Nbalance = spec%getNbalanceGeneralists(u(idxN), dudt(idxN), &
-                     u(ixStart(iGroup):ixEnd(iGroup) ), &
-                     dudt( ixStart(iGroup):ixEnd(iGroup) ))
-         Cbalance = spec%getCbalanceGeneralists(u(idxDOC), dudt(idxDOC), &
-                     u(ixStart(iGroup):ixEnd(iGroup) ), &
-                     dudt( ixStart(iGroup):ixEnd(iGroup) )) 
-    end select
-   end subroutine getBalance
-   
-!   ! ---------------------------------------------------
-!   ! Returns the rates calculated from last call to calcDerivatives
-!   ! ---------------------------------------------------
-  subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-    jTot, jMax, jFmax, jR, jLossPassive, &
+   real(dp) :: HTLloss, POMloss
+   real(dp),parameter :: rhoCSi = 3.4d0 ! Hard coded here
+
+   Clost = 0.d0
+   Nlost = 0.d0
+   SiLost = 0.d0
+
+   do iGroup = 1, nGroups
+      !
+      ! Get carbon losses from each group:
+      !
+      Clost = Clost + group(iGroup)%spec%getClost( &
+         u(ixStart(iGroup):ixEnd(iGroup)))
+      !
+      ! Deal with higher trophic level losses and POM:
+      !
+      HTLloss = sum( group(iGroup)%spec%mortHTL * u(ixStart(iGroup):ixEnd(iGroup) ))
+      POMloss = sum( group(iGroup)%spec%jPOM * u(ixStart(iGroup):ixEnd(iGroup)) )
+
+      if (idxPOM .eq. 0) then
+         !
+         ! If there is no POM, then POM is lost from the system:
+         !
+         Nlost = Nlost + (1-fracHTL_to_N) * HTLloss/rhoCN ! The part of POM which is not respired
+         Clost = Clost +  HTLloss  ! Both respiration losses and POM losses
+      
+         Nlost = Nlost + POMloss / rhoCN
+         Clost = Clost + POMloss   
+      else
+         !
+         ! If there is POM then just account for the respiration
+         !
+         Clost = Clost +  fracHTL_to_N * HTLloss  ! Respiration losses from HTL
+      end if
+      !
+      ! Deal with silicate balance. Clunky and does not deal with remin2-losses
+      !
+      select type ( spec => group(iGroup)%spec )
+         type is (spectrumDiatoms)
+            ! Consumed silicate is considered lost:
+            SiLost = SiLost + ( &
+               sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
+               + HTLloss & ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + POMloss) / rhoCSi ! POM from diatoms is lost:
+            
+         type is (spectrumDiatoms_simple)
+           ! NOT IMPLEMENTED
+            SiLost = SiLost + ( &
+               sum( spec%mortpred*u(ixStart(iGroup):ixEnd(iGroup)) ) & ! The silicate from consumed diatoms is lost
+               + HTLloss & ! All HTL silicate is lost. rhoCSi is hard-coded here
+               + POMloss) / rhoCSi ! POM from diatoms is lost:
+      
+      end select
+   end do
+end subroutine getLost
+
+  ! ---------------------------------------------------
+  ! Returns the rates calculated from last call to calcDerivatives
+  ! ---------------------------------------------------
+  subroutine getRates(jN, jDOC, jL, jSi, jF, jFreal, ff,&
+    jTot, jMax, jFmax, jR, jResptot, jLossPassive, &
     jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
     use globals
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
-    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
+    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), ff(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmax(nGrid-nNutrients)
-    real(dp), intent(out):: jR(nGrid-nNutrients)
+    real(dp), intent(out):: jR(nGrid-nNutrients), jResptot(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
     real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
@@ -929,6 +1201,7 @@ contains
       mort2( i1:i2 ) = group(iGroup)%spec%mort2
       jNloss( i1:i2 ) = group(iGroup)%spec%JNloss / group(iGroup)%spec%m
       jR( i1:i2 ) = fTemp2 * group(iGroup)%spec%Jresp / group(iGroup)%spec%m
+      jResptot( i1:i2 ) = group(iGroup)%spec%JResptot / group(iGroup)%spec%m
       jPOM( i1:i2 ) = group(iGroup)%spec%jPOM
 
       select type (spectrum => group(iGroup)%spec)
@@ -939,6 +1212,15 @@ contains
         jMax( i1:i2 ) = fTemp2 * spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
         jLreal( i1:i2 ) = spectrum%JLreal / spectrum%m
+        ff( i1:i2 ) = group(iGroup)%spec%f
+      class is (spectrumMulticellular)
+        jN( i1:i2 ) = 0.d0
+        jDOC( i1:i2 ) = 0.d0
+        jL( i1:i2 ) = 0.d0
+        jMax( i1:i2 ) = 0.d0
+        jLossPassive( i1:i2 ) = 0.d0
+        jLreal( i1:i2 ) = 0.d0
+        ff( i1:i2 ) = 0.d0
       end select
 
       select type (spectrum => group(iGroup)%spec)

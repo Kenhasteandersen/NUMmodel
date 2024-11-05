@@ -3,7 +3,7 @@
 % Conservation is enforced rather crudely.
 %
 % Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
-% (choose MITgcm_ECCO), and be put into the location 'NUMmodel/TMs/'
+% (choose MITgcm_ECCO), and put it into the location 'NUMmodel/TMs/'
 %
 % Input:
 %  p: parameter structure
@@ -28,7 +28,7 @@ arguments
     lon = 0;
     sim struct = [];
     options.bExtractcolumn logical = false; % Extract the watercolumn even though a saved one exists
-    options.bRecalcLight logical = false; % Recalc the light (different from the extracted watercolumn)
+    %options.bRecalcLight logical = false; % Recalc the light (different from the extracted watercolumn)
     options.dayFixed double = 0;
 end
 disp('Preparing simulation')
@@ -91,7 +91,7 @@ end
 versionTMcolumnCurrent = 2; % Current version of the water column
 if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extract water column if the loaded one is too old
     versionTMcolumn = versionTMcolumnCurrent;
-    fprintf('-> Extracting water column from transport matrix')
+    fprintf('-> Extracting water column from transport matrix\n')
     %
     % Check that transport matrix files exist:
     %
@@ -127,33 +127,14 @@ if (versionTMcolumn~=versionTMcolumnCurrent) || options.bExtractcolumn  % Extrac
     %
     % Calc Light:
     %
-    L0 = zeros(nGrid,365/p.dtTransport);
-    for i = 1:365/p.dtTransport
-        zup = sim.z - 0.5*sim.dznom; % Top of a box
-        zup = zup(1:length(idxGrid));
-        dz = sim.dznom(1:length(idxGrid));
-        Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*zup);
-        L0(:,i) = Lup.*(1-exp(-p.kw*dz))./(p.kw*dz);
-    end
+    %L0 = calclight;
 
     fprintf('\n');
-    save(sFile,'AimpM','Tmat','L0','versionTMcolumn');
+    save(sFile,'AimpM','Tmat','versionTMcolumn');
 end
 
-if options.bRecalcLight
-    %
-    % Calc Light:
-    %
-    L0 = zeros(nGrid,365/p.dtTransport);
-    for i = 1:365/p.dtTransport
-        zup = sim.z - 0.5*sim.dznom; % Top of a box
-        zup = zup(1:length(idxGrid));
-        dz = sim.dznom(1:length(idxGrid));
-        Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*zup);
-        L0(:,i) = Lup.*(1-exp(-p.kw*dz))./(p.kw*dz);
-        %Lold = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*Zbox(idxGrid));
-    end
-end
+L0 = calclight;
+
 % Get sinking matrix:
 [Asink,p] = calcSinkingMatrix(p, sim, nGrid);
 % ---------------------------------------
@@ -168,13 +149,13 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 if isfield(sim,'B')
     disp('Starting from previous simulation.');
-    u(:,ixN) = sim.N(:,end);
-    u(:, ixDOC) = sim.DOC(:,end);
+    u(:,ixN) = sim.N(end,:);
+    u(:, ixDOC) = sim.DOC(end,:);
     if bSilicate
-        u(:, ixSi) = sim.Si(:,end);
+        u(:, ixSi) = sim.Si(end,:);
     end
     for i = 1:p.n -p.idxB+1
-        u(:, ixB(i)) = sim.B(:,i,end);
+        u(:, ixB(i)) = sim.B(end,:,i);
     end
 else
     if exist(strcat(p.pathN0,'.mat'),'file')
@@ -183,29 +164,52 @@ else
     else
         u(:, ixN) = p.u0(p.idxN)*ones(nb,1);
     end
-    u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
+
     if bSilicate
-        u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+        if exist(strcat(p.pathSi0,'.mat'),'file')
+            load(p.pathSi0, 'Si');
+            u(:, ixSi) = gridToMatrix(Si, [], p.pathBoxes, p.pathGrid);
+        else
+            u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
+        end
     end
+
+    u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
     u(:, ixB) = ones(nb,1)*p.u0(ixB);
     u = u(idxGrid,:); % Use only the specific water column
 end
-p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
+%p.u0(ixN) = u(nGrid,ixN); % Use the nitrogen concentration in the last grid cell as BC
+if bSilicate
+    p.u0(ixSi) = u(nGrid,ixSi);
+end
+%
+% Set BCvalue:
+%
+BCvalue = p.BCvalue;
+%if size(BCvalue,1)==1
+%    BCvalue = ones(length(ixBottom),1)*BCvalue;
+%end
+% If BCvalue == -1 then use the bottom value from the initial conditions:
+for i = 1:length(BCvalue)
+    if BCvalue(i)==-1
+        BCvalue(i) = u(end,i)';
+    end
+end
 %
 % Matrices for saving the solution:
 %
 iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
 
-sim.N = zeros(length(idx.z),nSave);
+sim.N = zeros(nSave, length(idx.z));
 if bSilicate
     sim.Si = sim.N;
 end
 sim.DOC = sim.N;
-sim.B = zeros(length(idx.z), p.n-p.idxB+1, nSave);
+sim.B = zeros(nSave, length(idx.z), p.n-p.idxB+1);
 sim.L = sim.N;
 sim.T = sim.N;
-sim.Nloss = zeros(1,nSave);
+sim.Nloss = zeros(nSave,1);
 sim.NlossHTL = sim.Nloss;
 tSave = [];
 %
@@ -219,7 +223,7 @@ tSave = [];
 %   sim.BnanoAnnualMean = zeros( nb,1 );
 %   sim.BmicroAnnualMean = zeros( nb,1 );
 %end
-
+sLibName = loadNUMmodelLibrary();
 % ---------------------------------------
 % Run transport matrix simulation
 % ---------------------------------------
@@ -257,10 +261,14 @@ for i = 1:simtime
     %            int32(n), u(k,:), L(k), T(k), 0.5, dt);
     %    end
     %else
+
     for k = 1:nGrid
-        u(k,:) = calllib(loadNUMmodelLibrary(), 'f_simulateeuler', ...
+        u(k,:) = calllib(sLibName, 'f_simulateeuler', ...
             u(k,:),L(k), T(k), dtTransport, dt);
     end
+
+    %if sum(u(:)<0)
+    %    fprintf("Time step %i, #i\n", [i, sum(u(:)<0)]);
     %end
 
     if any(isnan(u))
@@ -276,34 +284,39 @@ for i = 1:simtime
         u(:,j) = squeeze(Asink(j,:,:)) * u(:,j);
     end
     % Bottom BC for nutrients:
-    u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
-        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+    u(end, 1:p.nNutrients) = u(end, 1:p.nNutrients) +  ...
+        p.BCmixing(1:p.nNutrients)*p.dtTransport .* ...
+        ( BCvalue(1:p.nNutrients) - u(end,1:p.nNutrients) );
 
-    if bSilicate
-        u(end, p.idxSi) = u(end, p.idxSi) +  p.dtTransport* ...
-        p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxSi)-u(end,p.idxSi));
-    end
+    %u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
+    %    p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
+
+    %if bSilicate
+    %    u(end, p.idxSi) = u(end, p.idxSi) +  p.dtTransport* ...
+    %    p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxSi)-u(end,p.idxSi));
+    %end
+
     %
     % Enforce minimum concentration
     %
-    for k = 1:nGrid
-        u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
-    end
+    %for k = 1:nGrid
+    %    u(k,u(k,:)<p.umin) = p.umin(u(k,:)<p.umin);
+    %end
     %
     % Save timeseries in grid format
     %
     if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
         iSave = iSave + 1;
-        sim.N(:,iSave) = u(:,ixN);
-        sim.DOC(:,iSave) = u(:,ixDOC);
+        sim.N(iSave,:) = u(:,ixN);
+        sim.DOC(iSave,:) = u(:,ixDOC);
         if bSilicate
-            sim.Si(:,iSave) = u(:,ixSi);
+            sim.Si(iSave,:) = u(:,ixSi);
         end
         for j = 1:p.n-p.idxB+1
-            sim.B(:,j,iSave) = u(:,ixB(j));
+            sim.B(iSave,:,j) = u(:,ixB(j));
         end
-        sim.L(:,iSave) = L;
-        sim.T(:,iSave) = T;
+        sim.L(iSave,:) = L;
+        sim.T(iSave,:) = T;
         % Loss to HTL and POM:
         for j = 1:nGrid
             rates = getRates(p,u(j,:),L(j),T(j));
@@ -353,9 +366,9 @@ sim.dznom = sim.dznom(1:length(idx.z));
 sim.lat = lat;
 sim.lon = lon;
 
-sim.Ntot = (sum(sim.N.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
-    sum(squeeze(sum(sim.B,2)).*(sim.dznom*ones(1,length(sim.t))))/5.68)/1000; % gN/m2 in biomass
-sim.Nprod = p.DiffBottom*(p.u0(p.idxN)-sim.N(end,:))/1000; % Diffusion in from the bottom; gN/m2/day
+sim.Ntot = (sum(sim.N'.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
+    sum(squeeze(sum(sim.B,3))'.*(sim.dznom*ones(1,length(sim.t))))/rhoCN)/1000; % gN/m2 in biomass
+sim.Nprod = p.BCmixing(p.idxN)*(p.BCvalue(p.idxN)-sim.N(:,end))*sim.dznom(end)/1000; % Diffusion in from the bottom; gN/m2/day
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
 %     sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
@@ -370,36 +383,72 @@ sim.Nprod = p.DiffBottom*(p.u0(p.idxN)-sim.N(end,:))/1000; % Diffusion in from t
 %     tmp = single(matrixToGrid(sim.BmicroAnnualMean, [], p.pathBoxes, p.pathGrid));
 %     sim.BmicroAnnualMean = squeeze(tmp(:,:,1));
 % end
-end
+
+
 
 %
-% Setup matrix for sinking
+% Setup matrix for sinking. Uses an implicit first-order upwind scheme
 %
-function [Asink,p] = calcSinkingMatrix(p, sim, nGrid)
-%
-% Get sinking velocities from libNUMmodel:
-%
-p.velocity = 0*p.m;
-p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
-p.idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
-%
-% Set up the matrix:
-%
-Asink = zeros(p.n,nGrid,nGrid);
-for i = 1:nGrid
-    k = p.velocity/(sim.dznom(i)*p.dtTransport);
-    Asink(:,i,i) = 1+k;
-    if (i ~= 1)
-        Asink(:,i,i-1) = -k;
+    function [Asink,p] = calcSinkingMatrix(p, sim, nGrid)
+        %
+        % Get sinking velocities from libNUMmodel:
+        %
+        p.velocity = 0*p.m;
+        p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
+        p.idxSinking = find(p.velocity ~= 0); % Find indices of groups with sinking
+        %
+        % Set up the matrix:
+        %
+        Asink = zeros(p.n,nGrid,nGrid);
+        for i = 1:nGrid
+            k = p.velocity*p.dtTransport/sim.dznom(i);
+            Asink(:,i,i) = 1+k;
+            if (i ~= 1)
+                Asink(:,i,i-1) = -k;
+            end
+        end
+        % Bottom BC:
+        if p.BC_POMclosed
+            Asink(:,end,end) = 1;
+        end
+        %
+        % Invert matrix to make it ready for use:
+        %
+        for i = 1:p.n
+            Asink(i,:,:) = inv(squeeze(Asink(i,:,:)));
+        end
     end
-end
-% Bottom BC:
-Asink(end) = 1;
-%
-% Invert matrix to make it ready for use:
-%
-for i = 1:p.n
-    Asink(i,:,:) = inv(squeeze(Asink(i,:,:)));
-end
+
+    function L0 = calclight()
+        L0 = zeros(nGrid,365/p.dtTransport);
+
+        if p.bUse_parday_light
+            if exist(p.pathPARday,'file')
+                load(p.pathPARday,'parday');
+            else
+                error('PARday file does not exist. Set p.bUse_parday_light = false');
+            end
+        end
+
+        for i = 1:365/p.dtTransport
+            % zup = sim.z - 0.5*sim.dznom; % Top of a box
+            % zup = zup(1:length(idxGrid));
+            % dz = sim.dznom(1:length(idxGrid));
+            % if p.bUse_parday_light
+            %     Lup = 1e6*parday(idx.x,idx.y,1,i)/(24*60*60).*exp(-p.kw*zup);
+            % else
+            %     Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid),i/2,1).*exp(-p.kw*zup);
+            % end
+            % L0(:,i) = Lup.*(1-exp(-p.kw*dz))./(p.kw*dz);
+            if p.bUse_parday_light
+                Lup = 1e6*parday(idx.x,idx.y,1,i)/(24*60*60);
+            else
+                Lup = p.EinConv*p.PARfrac*daily_insolation(0,Ybox(idxGrid(1)),i*p.dtTransport,1);
+            end
+            L0(:,i) = Lup*exp(-p.kw*sim.z(1:nGrid));
+        end
+
+    end
+
 end
 

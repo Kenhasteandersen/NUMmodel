@@ -4,16 +4,17 @@ arguments
     sProjection string = 'fast';
 end
 %
-% Calculate pico-nano-micro in each water column and average over the year (assuming monthly data):
+% Calculate pico-nano-micro in each water column and average over the year:
 %
 if ~isfield(sim,'Bpnm')
     sim.Bpnm = zeros(length(sim.x), length(sim.y), 3);
-    for iTime = find(sim.t > sim.t(end)-365) % Average over last year
+    ixTime = find(sim.t > sim.t(end)-365);
+    for iTime = ixTime % Average over last year
         for i = 1:length(sim.x)
             for j = 1:length(sim.y)
                 tmp = [0 0 0];
                 for k = 1:length(sim.z)
-                    tmp2 = calcPicoNanoMicro(squeeze(sim.B(i,j,k,:,iTime)), sim.p.m(3:end));
+                    tmp2 = calcPicoNanoMicro(sim.p,squeeze(sim.B(iTime,i,j,k,:)));
                     tmp2(isnan(tmp2))=0;
                     tmp = tmp + tmp2 * sim.dznom(k)*0.001; % gC/m2
                 end
@@ -21,7 +22,7 @@ if ~isfield(sim,'Bpnm')
             end
         end
     end
-    sim.Bpnm = sim.Bpnm/iTime;
+    sim.Bpnm = sim.Bpnm/length(ixTime);
 end
 
 %%

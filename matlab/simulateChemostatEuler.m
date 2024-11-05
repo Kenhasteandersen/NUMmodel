@@ -32,9 +32,8 @@ if options.bUnicellularloss
 else
     ix = 1:(p.idxB-1); % Nutrients
 end
-uDeep = p.u0;
-uDeep(p.idxB:end) = 0;
-uDeep(1) = p.uDeep; %Nutrients from the layer below the chemostat layer
+uDeep = p.uDeep;
+uDeep(p.idxB:length(p.u0)) = 0;
 %
 % Simulate:
 %
@@ -45,10 +44,27 @@ u = calllib(loadNUMmodelLibrary(), 'f_simulatechemostateuler', u, ...
     L, T, ...
     int32(p.idxB-1), ...
     p.u0(1:(p.idxB-1)), p.d, p.tEnd, 0.01, options.bUnicellularloss);
+
+ProdGross = 0;
+ProdNet = 0;
+ProdHTL = 0;
+ProdBact = 0;
+eHTL = 0;
+Bpico = 0;
+Bnano = 0;
+Bmicro = 0;
+mHTL = 0;
+[u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL] = ...
+    calllib(loadNUMmodelLibrary(), 'f_simulateeulerfunctions', u, ...
+    L, T, p.tEnd, 0.01,  ...
+    ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL);
+
+
 %
 % Assemble result:
 %
 sim.t = p.tEnd;
+sim.u = u;
 sim.N = u(p.idxN);
 sim.DOC = u(p.idxDOC);
 if isfield(p, 'idxSi')
@@ -64,6 +80,6 @@ sim.L = L;
 sim.T = T;
 sim.bUnicellularloss = options.bUnicellularloss;
 
-[sim.Nbalance, sim.Cbalance] = getBalance(u, sim.L, sim.T); % in units per day
+[sim.Cbalance, sim.Nbalance, sim.Sibalance] = getBalance(u, sim.L, sim.T); % in units per day
 
 end

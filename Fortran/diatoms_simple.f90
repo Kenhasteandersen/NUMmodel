@@ -10,50 +10,12 @@
 module diatoms_simple
     use globals
     use spectrum
+    use read_input_module
     implicit none
 
     private
-    !
-    ! Stoichiometry:
-    !
-    !real(dp), parameter:: rhoCN = 5.68
-    real(dp), parameter:: rhoCSi = 3.4 
-    !
-    ! Cell properties
-    !
-     real(dp), parameter:: v=0.6 ! Vacuole fraction. Could be estimated by comparing the density of flagellages and diatoms in Menden-Deuer (2000)
-    !
-    ! Light uptake:
-    !
-    real(dp), parameter:: epsilonL = 0.8 ! Light uptake efficiency
-    real(dp), parameter:: alphaL = 0.3
-    real(dp), parameter:: rLstar = 7.5
-    !
-    ! Costs
-    !
-    real(dp), parameter :: bL = 0 !0.08 ! cost of light harvesting mugC(mugC)^-1
-    real(dp), parameter :: bN = 0. ! cost of N uptake mugC(mugN)^-1
-    real(dp), parameter :: bSi = 0. ! cost of Si uptake mugC(mugSi)^-1
-    !
-    ! Dissolved nutrient uptake:
-    !
-    real(dp), parameter:: alphaN = 0.972 / (1-v) ! L/d/mugC/mum^2
-    real(dp), parameter:: rNstar = 0.4 ! mum
-    !
-    ! Metabolism
-    !
-    real(dp), parameter:: cLeakage = 0.03 ! passive leakage of C and N
-    real(dp), parameter:: c = 0.0015 ! Parameter for cell wall fraction of mass.
-    real(dp), parameter:: delta = 0.05 ! Thickness of cell wall in mum
-    real(dp), parameter:: alphaJ = 1.5 ! Constant for jmax.  per day
-    real(dp), parameter:: cR = 0.1
-    !
-    ! Bio-geo:
-    !
-    real(dp), parameter:: remin = 0.0 ! fraction of mortality losses reminerilized to N and DOC
-    real(dp), parameter:: remin2 = 0.5d0 ! fraction of virulysis remineralized to N and DOC
-    !real(dp), parameter:: reminHTL = 0.d0 ! fraction of HTL mortality remineralized
-    
+    real(dp) :: rhoCSi, epsilonL, bN, bSi, remin2
+
     type, extends(spectrumUnicellular) :: spectrumDiatoms_simple
       real(dp), dimension(:), allocatable:: JSi
 
@@ -68,36 +30,62 @@ module diatoms_simple
     public calcDerivativesDiatoms_simple, printRatesDiatoms_simple
   contains
       
-    subroutine initDiatoms_simple(this, n, mMax)
+    subroutine initDiatoms_simple(this, n, mMax,errorio,errorstr)
+      use iso_c_binding, only: c_char
       class(spectrumDiatoms_simple):: this
       real(dp), intent(in):: mMax
       integer, intent(in):: n
-      real(dp), parameter:: mMin = 5.d-8
+      logical(1), intent(out):: errorio 
+      character(c_char), dimension(*), intent(out) :: errorstr
       real(dp), parameter:: rho = 0.4*1d6*1d-12
-  
-      call this%initUnicellular(n, mMin, mMax)
+      real(dp) :: mMin, v, alphaL, rLstar,  alphaN
+      real(dp) :: rNstar, cLeakage, delta, alphaJ, cR
+      real(dp) :: palatability
+      ! no errors to begin with
+       errorio=.false.
+       
+       print*, 'Loading parameter for diatoms simple from ', inputfile, ':'
+       call read_input(inputfile,'diatoms_simple','mMin',mMin,errorio,errorstr)
+       call this%initUnicellular(n, mMin, mMax)
+       call read_input(inputfile,'diatoms_simple','rhoCSi',rhoCSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','v',v,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','epsilonL',epsilonL,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','alphaL',alphaL,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','rLstar',rLstar,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','alphaN',alphaN,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','rNstar',rNstar,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','bN',bN,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','bSi',bSi,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','cLeakage',cLeakage,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','delta',delta,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','alphaJ',alphaJ,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','cR',cR,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','remin2',remin2,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','palatability',palatability,errorio,errorstr)
+      
+      
       allocate(this%JSi(this%n))
       !
       ! Radius:
       !
       this%r = (threequarters/pi * this%m/rho/(1-v))**onethird  ! Andy's approximation
+      this%nu = 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
+        (v**twothirds + (1.+v)**twothirds)
 
-      this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
-      this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m
+      ! Affinities are the same as for the generalists divided by a factor (1-v):
+      this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m / (1-v)
+      this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu) / (1-v)
       this%AF = 0.d0
       this%JFmax = 0.d0
 
       this%JlossPassive = cLeakage/this%r * this%m ! in units of C
   
-      !nu = c * this%m**(-onethird)
-      this%nu = 6**twothirds*pi**onethird*delta * (this%m/rho)**(-onethird) * &
-        (v**twothirds + (1.+v)**twothirds)
-
       this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
       this%Jresp = cR*alphaJ*this%m
+      this%JDOCreal = 0.d0
   
       this%beta = 0.d0 ! No feeding
-      this%palatability = 0.5d0 ! Lower risk of predation
+      this%palatability = palatability ! Lower risk of predation
     end subroutine initDiatoms_simple
  
     subroutine calcRatesDiatoms_simple(this, L, N, Si, gammaN, gammaSi)
@@ -119,12 +107,12 @@ module diatoms_simple
          ! Estimate the limiting growth nutrient (Liebig):
          !
          JmaxT = max(0.d0, fTemp2 * this%Jmax(i))
-         this%Jtot(i) = min( JmaxT, this%JN(i), this%JL(i)-this%Jresp(i), this%JSi(i) )
+         this%Jtot(i) = min( JmaxT, this%JN(i), this%JL(i)-ftemp2*this%Jresp(i), this%JSi(i) )
          !    
          ! Account for possible carbon limitation due to carbon costs of uptakes:
          !
          this%Jtot(i) = min( this%Jtot(i), &
-            this%JL(i)-this%Jresp(i) - (bN/rhoCN + bSi/rhoCSi)*this%Jtot(i) )
+            this%JL(i)-ftemp2*this%Jresp(i) - (bN/rhoCN + bSi/rhoCSi)*this%Jtot(i) )
          
          ! Jtot synthesis limitation:
         if (this%Jtot(i) .gt. 0.) then
@@ -132,6 +120,7 @@ module diatoms_simple
         end if
 
         this%JLreal(i) = this%JL(i)
+        this%Jresptot(i) = fTemp2*this%Jresp(i)
       end do
     end subroutine calcRatesDiatoms_simple
   
@@ -143,8 +132,10 @@ module diatoms_simple
       integer:: i
   
       this%mort2 = this%mort2constant*u
+      this%jPOM = (1-remin2)*this%mort2 ! non-remineralized mort2 => POM
+
       do i = 1, this%n
-        mortloss = u(i)*(remin2*this%mort2(i)) !+reminHTL*this%mortHTL(i))
+        mortloss = remin2 * this%mort2(i)*u(i) !+reminHTL*this%mortHTL(i))
         !
         ! Update nitrogen:
         !
@@ -175,8 +166,8 @@ module diatoms_simple
 
      end do
    end subroutine calcDerivativesDiatoms_simple
-     
-   subroutine printRatesDiatoms_simple(this)
+
+  subroutine printRatesDiatoms_simple(this)
      class(spectrumDiatoms_simple), intent(in):: this
 
      write(*,*) "Diatoms_simple with ", this%n, " size classes:"

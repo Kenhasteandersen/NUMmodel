@@ -1,6 +1,6 @@
 
 %
-% Sets the higher trophic level mortality. Already done by default in the 
+% Sets the higher trophic level mortality. Already done by default in the
 % setup function, so this function is only needed to override the defaults.
 %
 % HTL mortality is either a standard mortality that is fixed by mortHTL, or
@@ -29,5 +29,16 @@ arguments
     bDecliningHTL logical = false;
 end
 
+
 calllib(loadNUMmodelLibrary(), 'f_sethtl', ...
     double(mHTL), double(mortHTL), logical(bQuadraticHTL), logical(bDecliningHTL) );
+
+% Set on parallel cluster as well:
+if exist("gcp")
+    if ~isempty(gcp('nocreate'))
+        spmd
+            calllib(loadNUMmodelLibrary(), 'f_sethtl', ...
+                double(mHTL), double(mortHTL), logical(bQuadraticHTL), logical(bDecliningHTL) );
+        end
+    end
+end

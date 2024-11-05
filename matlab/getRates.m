@@ -9,14 +9,16 @@
 %  T - Temperature
 %
 % Out
-%  Struct with rates
+%  Struct with rates in units of 1/day
 %
-function rates = getRates(p, u, L, T)
+function rates = getRates(p, u, L, T, sLibName, bCalcDerivative)
 arguments
     p struct;
     u double;
     L double;
     T double;
+    sLibName = loadNUMmodelLibrary();
+    bCalcDerivative = true;
 end
 
 if length(u) ~= p.n
@@ -26,8 +28,10 @@ end
 % First make a call to calc a derivative:
 %
 dudt = 0*u';
-calllib(loadNUMmodelLibrary(), 'f_calcderivatives', ...
-            u, L, T, 0.0, dudt);
+if bCalcDerivative
+    calllib(sLibName, 'f_calcderivatives', ...
+        u, L, T, 0.0, dudt);
+end
 %
 % Then extract the rates:
 %
@@ -38,10 +42,12 @@ jL = zero;
 jSi = zero;
 jF = zero;
 jFreal = zero;
+f = zero;
 jTot = zero;
 jMax = zero;
 jFmaxx = zero;
 jR = zero;
+jResptot = zero;
 jLossPassive = zero;
 jNloss = zero;
 jLreal = zero;
@@ -51,12 +57,12 @@ mortHTL = zero;
 mort2 = zero;
 mort = zero;
 
-[rates.jN, rates.jDOC, rates.jL, rates.jSi, rates.jF, rates.jFreal, rates.jTot, rates.jMax, rates.jFmaxx, ...
-    rates.jR, rates.jLossPassive, rates.jNloss, rates.jLreal, rates.jPOM, rates.mortpred, rates.mortHTL, ...
+[rates.jN, rates.jDOC, rates.jL, rates.jSi, rates.jF, rates.jFreal, rates.f, rates.jTot, rates.jMax, rates.jFmaxx, ...
+    rates.jR, rates.jRespTot, rates.jLossPassive, rates.jNloss, rates.jLreal, rates.jPOM, rates.mortpred, rates.mortHTL, ...
     rates.mort2, rates.mort] = ...
-    calllib(loadNUMmodelLibrary(), 'f_getrates', ...
-    jN, jDOC, jL, jSi, jF, jFreal,...
-    jTot, jMax, jFmaxx, jR, jLossPassive, ...
+    calllib(sLibName, 'f_getrates', ...
+    jN, jDOC, jL, jSi, jF, jFreal, f, ...
+    jTot, jMax, jFmaxx, jR, jResptot, jLossPassive, ...
     jNloss,jLreal, jPOM, ...
     mortpred, mortHTL, mort2, mort);
 rates.dudt = dudt;

@@ -2,6 +2,13 @@
 % Load fortran library. If it is already loaded, it returns the library
 % name.
 %
+% In:
+%  bParallel: whether to prepare the library for parallel processing
+%             (default to false).
+%
+% Out:
+%  The library name.
+%
 function sLibname = loadNUMmodelLibrary(bParallel)
 
 if nargin==0
@@ -16,18 +23,18 @@ end
 %
 % Check that input files are available:
 %
-if ~exist('../input/input.nlm','file')
-    error('The input file ../input/input.nlm is not available.');
+if ~exist('../input/input.h','file')
+    error('The input file ../input/input.h is not available.');
 end
 %
 % Find the correct library for the OS:
 %
 switch computer('arch')
-    case {'maci','maci64'}
+    case {'maci','maci64','maca64'} % Note: does not distinguish between intel and arm libraries
         sLibname = 'libNUMmodel_matlab';
         sExtension = '.dylib';
     case {'glnx86','glnxa64'}
-        sLibname = 'libNUMmodel_linux_matlab';
+        sLibname = 'libNUMmodel_matlab';
         sExtension = '.so';
     case {'win32','win64'}
         sLibname = 'libNUMmodel_matlab';
@@ -41,6 +48,9 @@ end
 path = fileparts(mfilename('fullpath'));
 
 if bParallel
+    if ~exist("gcp")
+        error('Running parallel simulation requires that the matlab parallel toolbox is installed.\n');
+    end
     if isempty(gcp('nocreate'))
         parpool('AttachedFiles',...
             {strcat(path,'/../lib/',sLibname,sExtension),...

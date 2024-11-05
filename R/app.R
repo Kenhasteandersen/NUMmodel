@@ -21,13 +21,13 @@ bUseF = TRUE
 # ===================================================
 
 uiChemostat <- fluidPage(
-  # tags$head(
-  #   # Add google analytics tracking:
-  #   includeHTML(("googleanalytics.html")),
-  #   # Make rules widers:
-  #   tags$style(HTML("hr {border-top: 1px solid #000000;}"))
-  # )
-  # ,
+  tags$head(
+     # Add google analytics tracking:
+     includeHTML(("analytics.html")),
+     # Make rules widers:
+     tags$style(HTML("hr {border-top: 1px solid #000000;}"))
+  )
+  ,
   h1('Size-based plankton simulator'),
   p('Simulate a plankton ecosystem in the upper part of a watercolumn. 
    Cell size is the only trait characterizing each plankton group.
@@ -41,8 +41,9 @@ uiChemostat <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       selectInput("setup", "Setup:",
-                  c("Unicellular" = "GeneralistsOnly",
-                    "Uni+multicellular" = "Generic"))
+                  c("Unicellular (simple)" = "GeneralistsSimpleOnly",
+                    "Unicellular" = "GeneralistsOnly"))
+                    #"Uni+multicellular" = "Generic"))
       ,
       sliderInput("L",
                   "Light (PAR; uE/m2/s)",
@@ -132,7 +133,8 @@ uiChemostat <- fluidPage(
           #),
           plotOutput("plotSpectrum", width="600px", height="300px"),
           plotOutput("plotRates", width="600px", height="300px"),
-          plotOutput("plotLeaks", width="600px", height="200px")
+          plotOutput("plotLeaks", width="600px", height="200px"),
+          plotOutput("plotDeltas", width="600px", height="200px")
         )
         ,
         tabPanel(
@@ -196,6 +198,7 @@ serverChemostat <- function(input, output) {
   output$plotSpectrum <- renderPlot(plotSpectrum(sim(), input$t))
   output$plotRates <- renderPlot(plotRates(sim(), t=input$t))
   output$plotLeaks = renderPlot(plotLeaks(sim(), input$t))
+  output$plotDeltas = renderPlot(plotDeltas(sim()))
   output$plotComplexRates <- renderPlot(plotComplexRates(sim(), input$t))
   output$plotTime <- renderPlot(plotTimeline(sim(), input$t))
   output$plotSeasonalTimeline <- renderPlot(plotSeasonalTimeline(sim()))

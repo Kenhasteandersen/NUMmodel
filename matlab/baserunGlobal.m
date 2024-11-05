@@ -7,6 +7,7 @@
 % In:
 %  With no arguments it runs the simple generalist model
 %  With a parameter argument it runs the setup specified in the parameters.
+%
 % Out:
 %  A simulation structure
 %
@@ -17,8 +18,6 @@ function sim = baserunGlobal(p)
 if (nargin==0)
     p = setupGeneralistsOnly(10, true); % Use 10 size groups and parallel execution
     p = parametersGlobal(p); % Use standard low-res model
-    %p = parametersGlobal(10,2); % Use MITgcm_ECCO
-    p.tEnd = 365;
 end
 %
 % Simulate
@@ -34,11 +33,11 @@ else
 end
 sim.B(sim.B<0)=0; % Get rid of negative biomasses
 %disp('Calculating functions')
-%sim = calcGlobalFunction(sim); % Calculate functions
+%sim = calcFunction(sim); % Calculate functions
 %
 % Plots:
 %
-disp('Plotting')
+% disp('Plotting')
 plotSimulation(sim)
 
 checkConservation(sim);

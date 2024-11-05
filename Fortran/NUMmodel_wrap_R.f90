@@ -1,17 +1,34 @@
 
-subroutine f_setupGeneralistsOnly(n)
+
+subroutine f_setupGeneralistsSimpleOnly(n, errorio, errorstr)
+  use NUMmodel, only:  setupGeneralistsSimpleOnly
+  use globals
+  use iso_c_binding, only: c_bool, c_char
+  integer, intent(in):: n
+  logical(c_bool), intent(out) :: errorio
+  character(c_char), dimension(*) :: errorstr
+  call setupGeneralistsSimpleOnly(n, errorio, errorstr)
+end subroutine f_setupGeneralistsSimpleOnly
+
+subroutine f_setupGeneralistsOnly(n, errorio, errorstr)
   use NUMmodel, only:  setupGeneralistsOnly
   use globals
+  use iso_c_binding, only: c_bool, c_char
   integer, intent(in):: n
-  call setupGeneralistsOnly(n)
+  logical(c_bool), intent(out) :: errorio
+  character(c_char), dimension(*) :: errorstr
+  call setupGeneralistsOnly(n, errorio, errorstr)
 end subroutine f_setupGeneralistsOnly
 
-subroutine f_setupGeneric(nAdult, mAdult)
+subroutine f_setupGeneric(nAdult, mAdult, errorio, errorstr)
   use NUMmodel, only:  setupGeneric
   use globals
+  use iso_c_binding, only: c_bool, c_char
   integer, intent(in):: nAdult
   real(dp), intent(in):: mAdult(nAdult)
-  call setupGeneric(mAdult)
+  logical(c_bool), intent(out) :: errorio
+  character(c_char), dimension(*) :: errorstr
+  call setupGeneric(mAdult, errorio, errorstr)
 end subroutine 
 
 !!$  subroutine f_setupGeneralistsCopepod()
@@ -33,9 +50,11 @@ end subroutine
 
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
     use globals
+    use iso_c_binding, only: c_double, c_int, c_bool, c_char, c_null_char
+
     use NUMmodel, only: setHTL
     real(dp), intent(in):: mHTL, mortHTL
-    logical, intent(in):: bQuadraticHTL, bDecliningHTL
+    logical(c_bool), intent(in):: bQuadraticHTL, bDecliningHTL
 
     call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
   end subroutine f_setHTL
@@ -51,24 +70,24 @@ end subroutine
   end subroutine f_calcDerivatives
 
 ! Returns the rates calculated from last call to calcDerivatives
-  subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-    jTot, jMax, jFmaxx, jR, jLossPassive, &
+  subroutine f_getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
+    jTot, jMax, jFmaxx, jR, jRespTot, jLossPassive, &
     jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
     use globals
     use NUMmodel, only: getRates, nNutrients, nGrid
     real(dp), intent(out):: jN(nGrid-nNutrients), jDOC(nGrid-nNutrients), jL(nGrid-nNutrients)
     real(dp), intent(out):: jSi(nGrid-nNutrients)
-    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients)
+    real(dp), intent(out):: jF(nGrid-nNutrients), jFreal(nGrid-nNutrients), f(nGrid-nNutrients)
     real(dp), intent(out):: jTot(nGrid-nNutrients), jMax(nGrid-nNutrients), jFmaxx(nGrid-nNutrients)
-    real(dp), intent(out):: jR(nGrid-nNutrients)
+    real(dp), intent(out):: jR(nGrid-nNutrients), jRespTot(nGrid-nNutrients)
     real(dp), intent(out):: jLossPassive(nGrid-nNutrients), jNloss(nGrid-nNutrients), jLreal(nGrid-nNutrients)
     real(dp), intent(out):: jPOM(nGrid-nNutrients)
     real(dp), intent(out):: mortpred(nGrid-nNutrients), mortHTL(nGrid-nNutrients)
     real(dp), intent(out):: mort2(nGrid-nNutrients), mort(nGrid-nNutrients)
 
-    call getRates(jN, jDOC, jL, jSi, jF, jFreal,&
-    jTot, jMax, jFmaxx, jR, jLossPassive, &
+    call getRates(jN, jDOC, jL, jSi, jF, jFreal, f, &
+    jTot, jMax, jFmaxx, jR, jRespTot, jLossPassive, &
     jNloss,jLreal, jPOM, &
     mortpred, mortHTL, mort2, mort)
   end subroutine f_getRates
@@ -83,13 +102,13 @@ end subroutine
     !call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
 !end subroutine f_simulateChemostatEuler
 
-  subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
+  subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
     use globals
     use NUMmodel, only: getFunctions, nGrid
     real(dp), intent(in) :: u(nGrid)
-    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+    real(dp), intent(out):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
 
-    call getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
+    call getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
   end subroutine f_getFunctions
   
 !  subroutine f_getBalance(Nbalance, Cbalance)

@@ -43,22 +43,22 @@ p.widthProductiveLayer = 20; % (meters) only used for calcFunctions
 p.tEnd = 365;  % Time to run in days
 p.tSave = 1;
 
-p.uDeep = 50; % Nutrients of the layer below the chemostat layer
+p.uDeep(1:p.idxB-1) = p.u0(1:p.idxB-1); % Nutrients of the layer below the chemostat layer
 p.u0(1) = 1; % Nitrogen concentration
 
 %
 % Set minimum concentrations:
 %
-p.umin = 0*p.u0;
-for iGroup = 1:p.nGroups
-    ix = p.ixStart(iGroup):p.ixEnd(iGroup);
-    if p.typeGroups(iGroup) < 10
-        p.umin(ix) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Minimum B concentration for unicellular groups
-    end
-    if p.typeGroups(iGroup)>=10 && p.typeGroups(iGroup)<100
-        p.umin(ix(1)) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Send in some nauplii in copepod groups
-    end
-end
+%p.umin = 0*p.u0;
+%for iGroup = 1:p.nGroups
+%    ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+%    if p.typeGroups(iGroup) < 10
+%        p.umin(ix) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Minimum B concentration for unicellular groups
+%    end
+%    if p.typeGroups(iGroup)>=10 && p.typeGroups(iGroup)<100
+%        p.umin(ix(1)) = 1e-5*p.mDelta(ix(1))/p.m(ix(1)); % Send in some nauplii in copepod groups
+%    end
+%end
 
 
 %

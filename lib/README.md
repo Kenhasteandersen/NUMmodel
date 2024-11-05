@@ -1,1 +1,1 @@
-Pre-compiled libraries
+Pre-compiled libraries provided for windows (.dll), linux (.so), and ARM Mac (.dylib).

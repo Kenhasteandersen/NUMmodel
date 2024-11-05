@@ -17,17 +17,20 @@ p.typeGroups(p.nGroups) = typeGroup;
 
 switch p.typeGroups(p.nGroups)
     case 1
-        p.nameGroup{p.nGroups} = 'Generalists';
+        p.nameGroup{p.nGroups} = 'Generalists simple';
         p.colGroup{p.nGroups} = [0 0 0.75];
-    case 2
-        p.nameGroup{p.nGroups} = 'Generalists CSP';
-        p.colGroup{p.nGroups} = [0 0 0.75];
+    %case 2
+    %    p.nameGroup{p.nGroups} = 'Generalists CSP';
+    %    p.colGroup{p.nGroups} = [0 0 0.75];
     case 3
         p.nameGroup{p.nGroups} = 'Diatoms';
         p.colGroup{p.nGroups} = [0 0.5 0];
     case 4
         p.nameGroup{p.nGroups} = 'Diatoms simple';
         p.colGroup{p.nGroups} = [0 0.5 0];
+    case 5
+        p.nameGroup{p.nGroups} = 'Generalists';
+        p.colGroup{p.nGroups} = [0 0 0.75];
     case 10
         p.nameGroup{p.nGroups} = sprintf('Passive copepod %.1f {\\mu}g',mAdult);
         p.colGroup{p.nGroups} = [0.6 0.0 0];

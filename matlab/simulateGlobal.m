@@ -10,22 +10,30 @@
 % Input:
 %  p: parameter structure from parametersGlobal
 %  sim: (optional) simulation to use for initial conditions
-%  bCalcAnnualAverages: increases the simulation time by a factor 2-3
+%  options.bCalcAnnualAverages: This option calculates ecosystem functions
+%            (sim.ProdNet, sim.ProdNetAnnual etc) during the simulation, 
+%            thus making them more accurate. It increases the simulation 
+%            time of the last year.
+%  options.bVerbose: Write out progress on the terminal
+%  options.bNinit: Use only nutrient fields for initialization
 %
 % Output:
 %  sim: structure with simulation results
 %
-function sim = simulateGlobal(p, sim, bCalcAnnualAverages)
+function sim = simulateGlobal(p, sim, options)
 
 arguments
     p struct;
     sim struct = [];
-    bCalcAnnualAverages = false; % Whether to calculate annual averages
+    options.bCalcAnnualAverages = false; % Whether to calculate annual averages
+    options.bVerbose = true; % Whether to write output on the terminal
+    options.bNinit = false;
 end
 %
 % Get the global parameters if they are not already set:
 %
 if ~isfield(p,'nameModel')
+    disp('Parameters not set. Using standard parameters for global run.');
     p = parametersGlobal(p);
 end
 
@@ -41,7 +49,9 @@ ixB = p.idxB:p.n;
 
 %Tbc = [];
 
-disp('Preparing simulation')
+if options.bVerbose
+    disp('Preparing simulation')
+end
 %
 % Check that files exist:
 %
@@ -65,29 +75,40 @@ mon = [0 31 28 31 30 31 30 31 31 30 31 30 ];
 %
 % Initial conditions:
 %
-if ~isempty(sim)
-    disp('Starting from previous simulation.');
-    u(:,ixN) = gridToMatrix(squeeze(double(sim.N(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
-    u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
-    if bSilicate
-        u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(:,:,:,end))),[],p.pathBoxes, p.pathGrid);
-    end
-    for i = 1:p.n -p.idxB+1
-        u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(:,:,:,i,end)))),[],p.pathBoxes, p.pathGrid);
-    end
+if exist(strcat(p.pathN0,'.mat'),'file')
+    load(p.pathN0, 'N');
+    u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
 else
-    if exist(strcat(p.pathN0,'.mat'),'file')
-        load(p.pathN0, 'N');
-        u(:, ixN) = gridToMatrix(N, [], p.pathBoxes, p.pathGrid);
+    u(:, ixN) = p.u0(p.idxN)*ones(nb,1);
+end
+u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
+if bSilicate
+    if exist(strcat(p.pathSi0,'.mat'),'file')
+        load(p.pathSi0, 'Si');
+        u(:, ixSi) = gridToMatrix(Si, [], p.pathBoxes, p.pathGrid);
     else
-        u(:, ixN) = 150*ones(nb,1);
-    end
-    u(:, ixDOC) = zeros(nb,1) + p.u0(ixDOC);
-    if bSilicate
         u(:, ixSi) = zeros(nb,1) + p.u0(ixSi);
     end
-    u(:, ixB) = ones(nb,1)*p.u0(ixB);
 end
+u(:, ixB) = ones(nb,1)*p.u0(ixB);
+
+if ~isempty(sim)
+    if options.bVerbose
+        disp('Starting from previous simulation.');
+    end
+    u(:,ixN) = gridToMatrix(squeeze(double(sim.N(end,:,:,:))),[],p.pathBoxes, p.pathGrid);
+    u(:, ixDOC) = gridToMatrix(squeeze(double(sim.DOC(end,:,:,:))),[],p.pathBoxes, p.pathGrid);
+    if bSilicate
+        u(:, ixSi) = gridToMatrix(squeeze(double(sim.Si(end,:,:,:))),[],p.pathBoxes, p.pathGrid);
+    end
+    if ~options.bNinit
+        for i = 1:p.n -p.idxB+1
+            u(:, ixB(i)) = gridToMatrix(squeeze(double(squeeze(sim.B(end,:,:,:,i)))),[],p.pathBoxes, p.pathGrid);
+        end
+    end
+end
+
+sim = load(p.pathGrid,'x','y','z','dznom','bathy'); % Get grid
 %
 % Load temperature:
 %
@@ -100,10 +121,18 @@ end
 % Load Light:
 %
 if p.bUse_parday_light
-    load 'Transport Matrix/parday';
+    if exist(p.pathPARday,'file')
+        load(p.pathPARday);
+        for i = 1:length(sim.z)
+            parday(:,:,i,:) = parday(:,:,1,:);
+        end
+        parday = gridToMatrix(parday, [], p.pathBoxes, p.pathGrid);
+    else
+        error('PARday file does not exist. Set p.bUse_parday_light = false');
+    end
 end
 L0 = zeros(nb,365/p.dtTransport );
-for i = 1:730
+for i = 1:365/p.dtTransport
     if p.bUse_parday_light
         L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox);
     else
@@ -112,9 +141,8 @@ for i = 1:730
     end
 end
 %
-% Calculate sinking matrices:
+% Calculate sinking matrices. Uses an explicit first-order upwind scheme:
 %
-sim = load(p.pathGrid,'x','y','z','dznom','bathy');
 % Get sinking velocities from libNUMmodel:
 p.velocity = 0*p.m;
 p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
@@ -122,6 +150,9 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 idxSinking = find(p.velocity ~= 0);
 
 if ~isempty(idxSinking)
+    if options.bVerbose
+        disp('Allocating sinking matrices')
+    end
     % Allocate sinking matrices:
     Asink = {};
     for l = 1:length(idxSinking)
@@ -129,62 +160,98 @@ if ~isempty(idxSinking)
     end
     % Find the indices into the grid
     xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid);
-    idxLower = zeros(1,nb);
     % Run through all latitudes and longitudes:
     for i = 1:size(xx,1)
         for j = 1:size(xx,2)
             % Find the watercolumn indices:
             idxGrid = squeeze(xx(i, j, :));
             idxGrid = idxGrid( ~isnan(idxGrid));
-
             if ~isempty(idxGrid)
                 % Run through all sinking state variables
                 for l = 1:length(idxSinking)
-                    % Top level loses mass
-                    Asink{l}(idxGrid(1),idxGrid(1)) = 1-min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(1));
-                    for k = 2:length(idxGrid)
+                    for k = 1:length(idxGrid)
                         flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(k));
-                        % Other levels loses mass:
+                        % Loss of mass ...
                         Asink{l}(idxGrid(k),idxGrid(k)) = 1-flx;
-                        % ... and receives mass from the level above
-                        Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
+                        % Gain from above
+                        if (k > 1)
+                            Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
+                        end
+                    end
+                    if p.BC_POMclosed
+                        Asink{l}(idxGrid(k),idxGrid(k)) = 1; % Closed BC; no loss of mass at the bottom
                     end
                 end
             end
         end
     end
 end
-
+%%
+% Find indices of bottom cells for bottom boundary condition:
+%
+xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid); % Find the indices into the grid
+ixBottom = []; % Indices to all the bottom cells
+dzBottom = []; % The width of all the bottom cells.
+for i = 1:size(xx,1)
+    for j = 1:size(xx,2)
+        ixZ = isnan( xx(i,j,:) );
+        if ~ixZ(1)
+            idx = find(ixZ==0,1,'last'); % Find the last cell
+            ixBottom = [ixBottom xx(i,j,idx)];
+            dzBottom = [dzBottom sim.dznom(idx)];
+        end
+    end
+end
+% Set BCvalue:
+BCvalue = p.BCvalue;
+if size(BCvalue,1)==1
+    BCvalue = ones(length(ixBottom),1)*BCvalue;
+end
+% If BCvalue == -1 then use the bottom value from the initial conditions:
+for i = 1:size(BCvalue,2)
+    if BCvalue(1,i)==-1
+        BCvalue(:,i) = u(ixBottom,i)';
+    end
+end
 %%
 % Matrices for saving the solution:
 %
 iSave = 0;
 nSave = floor(p.tEnd/p.tSave) + sign(mod(p.tEnd,p.tSave));
-sim.N = single(zeros(length(sim.x), length(sim.y), length(sim.z),nSave));
+sim.N = single(zeros(nSave,length(sim.x), length(sim.y), length(sim.z)));
 if bSilicate
     sim.Si = sim.N;
 end
 sim.DOC = sim.N;
-sim.B = single(zeros(length(sim.x), length(sim.y), length(sim.z), p.n-p.idxB+1, nSave));
+sim.B = single(zeros(nSave, length(sim.x), length(sim.y), length(sim.z), p.n-p.idxB+1));
 sim.L = sim.N;
 sim.T = sim.N;
 tSave = [];
 %
 % Matrices for annual averages:
 %
-if bCalcAnnualAverages
-    sim.ProdGrossAnnual = zeros( nb,1 );
-    sim.ProdNetAnnual = zeros( nb,1 );
-    sim.ProdHTLAnnual = zeros( nb,1 );
-    sim.BpicoAnnualMean = zeros( nb,1 );
-    sim.BnanoAnnualMean = zeros( nb,1 );
-    sim.BmicroAnnualMean = zeros( nb,1 );
+if options.bCalcAnnualAverages
+    ProdNet = zeros( simtime, nb,1);
+    ProdHTL = zeros( simtime, nb,1);
+    mHTL = zeros( simtime, nb,1);
+    BHTL = zeros( nb, p.n );
+    ProdGrossAnnual = zeros( nb,1 );
+    ProdNetAnnual = zeros( nb,1 );
+    ProdHTLAnnual = zeros( nb,1 );
+    BpicoAnnualMean = zeros( nb,1 );
+    BnanoAnnualMean = zeros( nb,1 );
+    BmicroAnnualMean = zeros( nb,1 );
+
+    [mortHTL, bQuadratic] = getMortHTL(p);
 end
 
 % ---------------------------------------
 % Run transport matrix simulation
 % ---------------------------------------
-disp('Starting simulation')
+
+if options.bVerbose
+    disp('Starting simulation')
+end
 sLibname = loadNUMmodelLibrary();
 dtTransport = p.dtTransport;
 n = p.n;
@@ -212,37 +279,66 @@ for i=1:simtime
 
         month = mod(month + 1, 12);
     end
-
-    %
-    % Enforce minimum B concentration
-    %
-    for k = 1:n
-        u(u(:,k)<p.umin(k),k) = p.umin(k);
-    end
     %
     % Run Euler time step for dtTransport days:
     %
     L = L0(:,mod(i,365/p.dtTransport)+1);
     dt = p.dt;
 
+    %N = calc_tot_n(p,u);
+
     if ~isempty(gcp('nocreate'))
-        parfor k = 1:nb
+        if options.bCalcAnnualAverages && i > simtime - 365/p.dtTransport
             %
-            % Integrate ODEs:
+            % Integrate and calculate functions (only last year):
             %
-            u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
-                u(k,:), L(k), T(k), dtTransport, dt);
+            nNutrients = p.nNutrients;
+            parfor k = 1:nb
+                ProdGross1 = 0;
+                ProdNet1 = 0;
+                ProdHTL1 = 0;
+                ProdBact1 = 0;
+                eHTL1 = 0;
+                Bpico1 = 0;
+                Bnano1 = 0;
+                Bmicro1 = 0;
+                mHTL1 = 0;
+
+                [u(k,:), ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1,mHTL1] = ...
+                    calllib(sLibname, 'f_simulateeulerfunctions', ...
+                    u(k,:), L(k), T(k), dtTransport, dt, ...
+                    ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1,mHTL1);
+               
+                ProdNet(i,k) = ProdNet1;
+                ProdHTL(i,k) = ProdHTL1;
+                mHTL(i,k) = mHTL1;
+                BHTL(k,:) = BHTL(k,:) + u(k,:).^(1+bQuadratic) .* [zeros(1,nNutrients), mortHTL];
+
+                ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
+                ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
+                ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;
+                BpicoAnnualMean(k) = BpicoAnnualMean(k) + Bpico1;
+                BnanoAnnualMean(k) = BnanoAnnualMean(k) + Bnano1;
+                BmicroAnnualMean(k) = BmicroAnnualMean(k) + Bmicro1;
+            end
+        else
+            %
+            % Just integrate ODEs:
+            %
+            parfor k = 1:nb
+                u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
+                    u(k,:), L(k), T(k), dtTransport, dt);
+            end
         end
     else
         for k = 1:nb
             u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
                 u(k,:),L(k), T(k), dtTransport, dt);
-            %u(k,1) = u(k,1) + 0.5*(p.u0(1)-u(k,1))*0.5;
-            % If we use ode23:
-            %[t, utmp] = ode23(@fDerivLibrary, [0 0.5], u(k,:), [], L(k));
-            %u(k,:) = utmp(end,:);
         end
     end
+
+    %calc_tot_n(p,u)/N - 1
+    %N = calc_tot_n(p,u);
     %
     % Sinking:
     %
@@ -251,17 +347,36 @@ for i=1:simtime
             u(:,idxSinking(l)) = Asink{l}*u(:,idxSinking(l));
         end
     end
+    %calc_tot_n(p,u)/N - 1
+    %N = calc_tot_n(p,u);
+    %
+    % Bottom BC for nutrient fields. The boundary allows diffusion from the
+    % bottom into the cell. The diffusivity is controlled by p.BCdiffusion
+    % and the bottom value by p.BCvalue. These parameters are set in
+    % parametersGlobal:
+    %
+    for k = 1:p.nNutrients
+        u(ixBottom, k) = u(ixBottom, k) +  p.dtTransport* ...
+            p.BCmixing(k)./dzBottom'.*(BCvalue(:,k)-u(ixBottom,k));
+    end
+    %calc_tot_n(p,u)/N - 1
+    %N = calc_tot_n(p,u);
     %
     % Transport
     %
     if p.bTransport
         u =  Aimp*(Aexp*u);
     end
+    %calc_tot_n(p,u)/N - 1
+    %N = calc_tot_n(p,u);
+    %fprintf('---\n')
     %
     % Save timeseries in grid format
     %
     if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
-        fprintf('t = %u days',floor(i/2))
+        if options.bVerbose
+            fprintf('t = %u days',floor(i/2))
+        end
 
         if any(isnan(u))
             warning('NaNs after running current time step');
@@ -269,38 +384,28 @@ for i=1:simtime
         end
 
         iSave = iSave + 1;
-        sim.N(:,:,:,iSave) = single(matrixToGrid(u(:,ixN), [], p.pathBoxes, p.pathGrid));
-        sim.DOC(:,:,:,iSave) = single(matrixToGrid(u(:,ixDOC), [], p.pathBoxes, p.pathGrid));
+        sim.N(iSave,:,:,:) = single(matrixToGrid(u(:,ixN), [], p.pathBoxes, p.pathGrid));
+        sim.DOC(iSave,:,:,:) = single(matrixToGrid(u(:,ixDOC), [], p.pathBoxes, p.pathGrid));
         if bSilicate
-            sim.Si(:,:,:,iSave) = single(matrixToGrid(u(:,ixSi), [], p.pathBoxes, p.pathGrid));
+            sim.Si(iSave,:,:,:) = single(matrixToGrid(u(:,ixSi), [], p.pathBoxes, p.pathGrid));
         end
         for j = 1:p.n-p.idxB+1
-            sim.B(:,:,:,j,iSave) = single(matrixToGrid(u(:,ixB(j)), [], p.pathBoxes, p.pathGrid));
+            sim.B(iSave,:,:,:,j) = single(matrixToGrid(u(:,ixB(j)), [], p.pathBoxes, p.pathGrid));
         end
-        sim.L(:,:,:,iSave) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
-        sim.T(:,:,:,iSave) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
-        tSave = [tSave, i/p.dtTransport];
-        fprintf('.\n');
-    end
-    %
-    % Update annual averages:
-    %
-    if bCalcAnnualAverages
-        for k = 1:nb
-            [ProdGross1, ProdNet1,ProdHTL1,eHTL,Bpico1,Bnano1,Bmicro1] = ...
-                getFunctions(u(k,:), L(k), T(k));
-            sim.ProdGrossAnnual(k) = sim.ProdGrossAnnual(k) + ProdGross1/(p.tEnd*2);
-            sim.ProdNetAnnual(k) = sim.ProdNetAnnual(k) + ProdNet1/(p.tEnd*2);
-            sim.ProdHTLAnnual(k) = sim.ProdHTLAnnual(k) + ProdHTL1/(p.tEnd*2);
-            sim.BpicoAnnualMean(k) = sim.BpicoAnnualMean(k) + Bpico1/(p.tEnd*2*365);
-            sim.BnanoAnnualMean(k) = sim.BnanoAnnualMean(k) + Bnano1/(p.tEnd*2*365);
-            sim.BmicroAnnualMean(k) = sim.BmicroAnnualMean(k) + Bmicro1/(p.tEnd*2*365);
+        sim.L(iSave,:,:,:) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
+        sim.T(iSave,:,:,:) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
+        tSave = [tSave, i*p.dtTransport];
+        if options.bVerbose
+            fprintf('.\n');
         end
     end
 end
 time = toc;
-fprintf('Solving time: %2u:%02u:%02u\n', ...
-    [floor(time/3600), mod(floor(time/60),60), floor(mod(time,60))]);
+if options.bVerbose
+    fprintf('Solving time: %2u:%02u:%02u\n', ...
+        [floor(time/3600), mod(floor(time/60),60), floor(mod(time,60))]);
+end
+
 % ---------------------------------------
 % Put results into sim structure:
 % ---------------------------------------
@@ -310,18 +415,45 @@ sim.Ntot = calcGlobalN(sim);
 sim.B(sim.B<0) = 0.;
 sim.DOC(sim.DOC<0) = 0.;
 
-if bCalcAnnualAverages
-    tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
-    sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.ProdNetAnnual, [], p.pathBoxes, p.pathGrid));
-    sim.ProdNetAnnual = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.ProdHTLAnnual, [], p.pathBoxes, p.pathGrid));
-    sim.ProdHTLAnnual = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.BpicoAnnualMean, [], p.pathBoxes, p.pathGrid));
-    sim.BpicoAnnualMean = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.BnanoAnnualMean, [], p.pathBoxes, p.pathGrid));
-    sim.BnanoAnnualMean = squeeze(tmp(:,:,1));
-    tmp = single(matrixToGrid(sim.BmicroAnnualMean, [], p.pathBoxes, p.pathGrid));
-    sim.BmicroAnnualMean = squeeze(tmp(:,:,1));
+if options.bCalcAnnualAverages
+    sim.ProdNet = zeros(nSave,length(sim.x), length(sim.y));
+    sim.ProdHTL = zeros(nSave,length(sim.x), length(sim.y));
+    for i = 1:nSave
+        ix = floor((simtime/nSave)*(i-1)+1) : (simtime/nSave*i);
+        sim.ProdNet(i,:,:) = integrate_over_depth(squeeze(mean(ProdNet(ix,:),1))');
+        sim.ProdHTL(i,:,:) = integrate_over_depth(squeeze(mean(ProdHTL(ix,:),1))');
+        tmp = single(matrixToGrid( squeeze(mHTL(i,:))', [], p.pathBoxes, p.pathGrid));
+        sim.mHTL(i,:,:) = tmp(:,:,1);
+    end
+    % Average mHTL
+    mHTLdepthsum = zeros(length(sim.x), length(sim.y));
+    BHTLdepthsum = zeros(length(sim.x), length(sim.y),size(BHTL,2));
+    for i = p.idxB:size(BHTL,2)
+        BHTLdepthsum(:,:,i) = integrate_over_depth( squeeze(BHTL(:,i)));
+        mHTLdepthsum = mHTLdepthsum + log(p.m(i))*BHTLdepthsum(:,:,i);
+    end
+    sim.mHTLAnnualMean = exp( mHTLdepthsum ./ sum(BHTLdepthsum,3) );
+    sim.BHTL = BHTLdepthsum;
+    
+    % Average productions:
+    sim.ProdGrossAnnual(1,:,:) = integrate_over_depth(ProdGrossAnnual);
+    sim.ProdNetAnnual(1,:,:) = integrate_over_depth(ProdNetAnnual);
+    sim.ProdHTLAnnual(1,:,:) = integrate_over_depth(ProdHTLAnnual);
+    % Average biomasses:
+    sim.BpicoAnnualMean(1,:,:) = integrate_over_depth(BpicoAnnualMean);
+    sim.BnanoAnnualMean(1,:,:) = integrate_over_depth(BnanoAnnualMean);
+    sim.BmicroAnnualMean(1,:,:) = integrate_over_depth(BmicroAnnualMean);
 end
+
+%%%%%%%%%%%%%%%%%%%%%%
+    function area = integrate_over_depth(conc)
+        tmp = single(matrixToGrid(conc, [], p.pathBoxes, p.pathGrid)) / (365/p.dtTransport);
+        tmp( isnan(tmp) ) = 0;
+        area = zeros(length(sim.x), length(sim.y));
+        for iz = 1:length(sim.dznom)
+            area = area + squeeze(tmp(:,:,iz))*sim.dznom(iz);
+        end
+    end
+
 end
+

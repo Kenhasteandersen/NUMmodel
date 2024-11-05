@@ -1,48 +1,74 @@
+!
+! This file contains test code to run the NUM model directly without interfacing through matlab 
+! or R. It is a mess as it is only used for testing purposes.
+!
 program NUMmodeltest
   use NUMmodel
   use globals
   implicit none
 
   real(dp), allocatable:: u0(:), u00(:), dudt(:)
-  real(dp):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro
+  real(dp):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
   integer:: i
+  real(dp):: Nbalance,Cbalance, Sibalance
+  logical(1) :: TRUE1
+  logical(1):: FALSE1
+  !real(dp):: myout
+  character(len=20) :: errorstr
+  logical(1):: errorio=.false. ! Whether to losses to the deep
+  logical(1):: bQuadratic
 
+  TRUE1 = .true.
+  FALSE1 = .false.
+  !call setupNUMmodel( (/0.1d0, 1.0d0 /) )
 
-  !call setupGeneric( (/0.1d0, 1.0d0 /) )
-  !call setHTL(0.0001d0, 1.d0, .true.)
+  !call setupGeneralistsOnly(10)
+  !call setupGeneralistsSimpleOnly(10)
 
-  !call setupGeneralistsCopepod()
-  !call setHTL(0.1d0, 0.1d0, .false., .false.)
-  !call setupGeneralistsOnly(5)
-  !call setupGeneralistsPOM(10,5)
-  call setupNUMmodel(10,10,10, (/0.1d0, 1.0d0 /), (/1.d0, 10.d0, 100.d0, 1000.d0/) )
+  ! !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /), errorio, errorstr)
+
+  !call setupGeneralistsDiatoms(6,errorio,errorstr)
+  !call setupDiatomsOnly(10,errorio,errorstr)
+  
+  !call setupGeneralistsOnly(5,errorio,errorstr)
+  !call setupGeneralistsPOM(5,1, errorio, errorstr)
+  !call setupNUMmodel(10,6,1, (/.2d0, 5.d0 /), (/1.d0, 31.6d0, 1000.d0/) ,errorio,errorstr)
+  !call setupGeneralistsDiatoms(10, errorio, errorstr)
+  !call setupGeneric( (/1.d0 /), errorio, errorstr )
+  !call setupGeneralistsDiatoms(10, errorio, errorstr)
+  call setupNUMmodel(5,5,1, (/1.d0 /), (/10.d0/),errorio,errorstr)
+  call setHTL(0.005d0, 0.1d0, TRUE1, FALSE1)
+
+  if (errorio .eqv. .false.) then
+    print*, 'Parameters loaded correctly'
+  else
+    print*, 'Error loading parameter ', errorstr
+  end if
+
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
   allocate(dudt(nGrid))
   u00(idxN) = 150.d0
-  u00(idxDOC) = 10.d0
-  !u00(idxSi) = 10.d0
+  u00(idxDOC) = .1d0
+  u00(idxSi) = 200.d0
   do i = idxB, nGrid
-     u00(i) = 10 + 0.1*(i-2)
+     u00(i) = 1! + 0.1*(i-2)
   end do
-  !u00(17:22) = 0.d0 ! No POM
   dudt = 0.d0
 
- 
-  !write(*,*) group(1)%spec%velocity
-  !write(*,*) group(2)%spec%velocity
-  !write(*,*) group(3)%spec%velocity
-  !write(*,*) group(4)%spec%velocity
   !call getSinking(u00)
   !write(*,*) u00
-  !write(*,*) u00
-  !call simulateChemostatEuler(u00, 60.d0, 100.d0, (/150.d0, 0.d0/), 0.01d0, .01d0, 0.01d0, logical(.true.,1))
-  !write(*,*) u00
+  !u00(8:12) = 5.d0
+
+  !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
+  !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
+  !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
+  !                      u  ,  L  ,   T  ,   dt , dudt
   
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
-  call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
-  call printRates()
+  !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
+  !call printRates()
 
   !select type (spec => group(1)%spec)
   !    type is (spectrumGeneralists)
@@ -50,11 +76,12 @@ program NUMmodeltest
   !      write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
   !end select
   
-  !write(*,*) 'dudt:',dudt
-  !write(*,*) 'u',u00
+  call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()
-
-  !write(*, '(6f10.6)') theta
+  !write(*,*) dudt
+  !write(*,*) 'ngrid',nGrid
+  !write(*,*) 'ngroups',nGroups
+  !write(*,*) 'nbutrients',nNutrients
 
   ProdGross = 0
   ProdNet = 0
@@ -64,24 +91,42 @@ program NUMmodeltest
   Bpico=0
   Bnano=0
   Bmicro=0
+  mHTL=0.d0
 
-  !call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro)
-  !write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL
-  !write(*,*) u00
+ !call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
+!write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL,mHTL
+  !write(*,*) dudt
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
-
-!!$  u0=u00
-!!$  call simulateChemostatEuler(u0, 100.d0, 150.d0, 0.05d0, 300.d0, 0.01d0)
-!!$  call printU(u0)
- ! call calcDerivatives(u00, 150.d0, 0.1d0)
+  !call printRates()
+  !!$  u0=u00
+  !!$  call printU(u0)
+  ! call calcDerivatives(u00, 150.d0, 0.1d0)
 
  ! write(6,*) theta(3:5, 3:5)
- !call printRates(m, rates)
+ ! 
+ !call printRates()
+ !
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
-!  call setupGeneralistsOnly()
+ !write(*,*) Bpico, Bnano, Bmicro
+!  call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
+!    write(*,*) 'Nbalance:', Nbalance
+!    write(*,*) 'Cbalance:', Cbalance
+!    write(*,*) 'Sibalance:', Sibalance
+   
 
-  !call getFunctions(ProdGross, ProdNet,ProdHTL,eHTL,Bpico,Bnano,Bmicro)
-  !write(*,*) Bpico, Bnano, Bmicro
-  
-end program NUMmodeltest
+!do i = 5,9
+!   write(*,*) i, theta(i+3,6:9)
+!end do
+
+deallocate(u0)
+deallocate(u00)
+allocate(u0(nGrid-idxB+1))
+allocate(u00(nGrid-idxB+1))
+
+call getMortHTL(u00,bQuadratic)
+!write(*,*) u00
+write(*,*) u00
+write(*,*) bQuadratic
+
+  end program NUMmodeltest
