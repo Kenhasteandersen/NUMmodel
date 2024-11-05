@@ -425,9 +425,6 @@ if options.bCalcAnnualAverages
         tmp = single(matrixToGrid( squeeze(mHTL(i,:))', [], p.pathBoxes, p.pathGrid));
         sim.mHTL(i,:,:) = tmp(:,:,1);
     end
-    %for i = 1:simtime
-    %    sim.mHTL(i,:,:,:) = single(matrixToGrid( squeeze(mHTL(i,:))', [], p.pathBoxes, p.pathGrid));
-    %end
     % Average mHTL
     mHTLdepthsum = zeros(length(sim.x), length(sim.y));
     BHTLdepthsum = zeros(length(sim.x), length(sim.y),size(BHTL,2));
