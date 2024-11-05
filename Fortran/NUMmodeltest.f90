@@ -11,42 +11,33 @@ program NUMmodeltest
   real(dp):: ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL
   integer:: i
   real(dp):: Nbalance,Cbalance, Sibalance
+  logical(1) :: TRUE1
+  logical(1):: FALSE1
   !real(dp):: myout
   character(len=20) :: errorstr
   logical(1):: errorio=.false. ! Whether to losses to the deep
+  logical(1):: bQuadratic
+
+  TRUE1 = .true.
+  FALSE1 = .false.
   !call setupNUMmodel( (/0.1d0, 1.0d0 /) )
 
   !call setupGeneralistsOnly(10)
   !call setupGeneralistsSimpleOnly(10)
 
-  !call parametersFinalize(0.d0, .false.)
-  
-  
-  !call setupGeneralistsDiatoms_simple(10)
-  !call setupGeneralistsOnly(10)
-  !call setupGenDiatCope(3,3,(/0.1d0, 1.0d0 /))
-  !call setupGenDiatCope(3,5,1,(/0.1d0, 1.0d0 /))
-   !               2 gens cop POM   mAdult     
-   !call setupNUMmodel(3 , 1 , 2 ,(/0.1d0 /), (/1.d0 /))
-  !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /), errorio, errorstr)
+  ! !call setupGenDiatCope(3 , 1 , 2 ,(/0.1d0 /), errorio, errorstr)
 
-   !              gen-diat-cop      POM      mAdult    
-  !call setupGenDiatCope(3,   2,    1,    (/0.1d0, 1.d0/))
-
-  call setupGeneralistsDiatoms(6,errorio,errorstr)
-  !call setupDiatoms_simpleOnly(10)
+  !call setupGeneralistsDiatoms(6,errorio,errorstr)
   !call setupDiatomsOnly(10,errorio,errorstr)
-  !call setupDiatoms_simpleOnly(10)
   
   !call setupGeneralistsOnly(5,errorio,errorstr)
   !call setupGeneralistsPOM(5,1, errorio, errorstr)
-  !call setupGeneralistsDiatoms_simple(10)
-  !call setupNUMmodel(5,5,1, (/1.d0 /), (/10.d0/) ,errorio,errorstr)
-  !call setupNUMmodelsimple(10,10,10, (/0.1d0, 1.0d0/) )
+  !call setupNUMmodel(10,6,1, (/.2d0, 5.d0 /), (/1.d0, 31.6d0, 1000.d0/) ,errorio,errorstr)
   !call setupGeneralistsDiatoms(10, errorio, errorstr)
   !call setupGeneric( (/1.d0 /), errorio, errorstr )
   !call setupGeneralistsDiatoms(10, errorio, errorstr)
-  !call setupNUMmodelNOPOM(5,5,1, (/1.d0 /), (/10.d0/),errorio,errorstr)
+  call setupNUMmodel(5,5,1, (/1.d0 /), (/10.d0/),errorio,errorstr)
+  call setHTL(0.005d0, 0.1d0, TRUE1, FALSE1)
 
   if (errorio .eqv. .false.) then
     print*, 'Parameters loaded correctly'
@@ -54,7 +45,6 @@ program NUMmodeltest
     print*, 'Error loading parameter ', errorstr
   end if
 
-  !call setHTL(0.1d0, 0.1d0, .false., .false.)
 
   allocate(u0(nGrid))
   allocate(u00(nGrid))
@@ -87,8 +77,8 @@ program NUMmodeltest
   !end select
   
   call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
-  call printRates()
-  write(*,*) dudt
+  !call printRates()
+  !write(*,*) dudt
   !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
   !write(*,*) 'nbutrients',nNutrients
@@ -103,8 +93,8 @@ program NUMmodeltest
   Bmicro=0
   mHTL=0.d0
 
- call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
-write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL,mHTL
+ !call getFunctions(u00, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
+!write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL,mHTL
   !write(*,*) dudt
   !call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   !call printRates()
@@ -128,5 +118,15 @@ write(*,*) ProdGross, ProdNet,ProdHTL, ProdBact, eHTL,mHTL
 !do i = 5,9
 !   write(*,*) i, theta(i+3,6:9)
 !end do
+
+deallocate(u0)
+deallocate(u00)
+allocate(u0(nGrid-idxB+1))
+allocate(u00(nGrid-idxB+1))
+
+call getMortHTL(u00,bQuadratic)
+!write(*,*) u00
+write(*,*) u00
+write(*,*) bQuadratic
 
   end program NUMmodeltest

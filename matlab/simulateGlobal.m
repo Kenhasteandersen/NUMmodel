@@ -433,7 +433,7 @@ if options.bCalcAnnualAverages
         mHTLdepthsum = mHTLdepthsum + log(p.m(i))*BHTLdepthsum(:,:,i);
     end
     sim.mHTLAnnualMean = exp( mHTLdepthsum ./ sum(BHTLdepthsum,3) );
-    sim.BHTL = BHTL;
+    sim.BHTL = BHTLdepthsum;
     
     % Average productions:
     sim.ProdGrossAnnual(1,:,:) = integrate_over_depth(ProdGrossAnnual);
