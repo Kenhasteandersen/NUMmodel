@@ -320,14 +320,7 @@ for i=1:simtime
                 BpicoAnnualMean(k) = BpicoAnnualMean(k) + Bpico1;
                 BnanoAnnualMean(k) = BnanoAnnualMean(k) + Bnano1;
                 BmicroAnnualMean(k) = BmicroAnnualMean(k) + Bmicro1;
-                %if mHTL1>0
-                %    mHTLmean(k) = mHTLmean(k) + log(mHTL1)*ProdHTL1;
-                %end
-                
             end
-            %for k = 1:nb
-            %    BHTL(i,k,:) = BHTL(i,k,:) + reshape(u(k,idxB:end) .* pHTL, 1, 1, nn-idxB+1);
-            %end
         else
             %
             % Just integrate ODEs:
@@ -453,9 +446,6 @@ if options.bCalcAnnualAverages
     sim.BpicoAnnualMean(1,:,:) = integrate_over_depth(BpicoAnnualMean);
     sim.BnanoAnnualMean(1,:,:) = integrate_over_depth(BnanoAnnualMean);
     sim.BmicroAnnualMean(1,:,:) = integrate_over_depth(BmicroAnnualMean);
-    % Average HTL size:
-    %sim.mHTLAnnualMean = exp( matrixToGrid(mHTLmean./ProdHTLAnnual, [], p.pathBoxes, p.pathGrid) );
-    %sim.mHTLAnnualMean = squeeze(sim.mHTLAnnualMean(:,:,1)); % Only surface layer
 end
 
 %%%%%%%%%%%%%%%%%%%%%%
