@@ -4,12 +4,14 @@
 % In: 
 %   p
 % Out:
-%   mortHTL - vector of the HTL mortality for all biomass groups
-%   pHTL    - vector of the HTL selectivity for all biomass groups
+%   mortHTL - vector of the HTL mortality for all biomass groups. Must be
+%       multiplied by B if bQuadratic = true.
+%   bQuadratic - whether the mortality should be multiplied by B or not
+%       (boolean)
 %
-function [mortHTL, pHTL] = getMortHTL(p)
+function [mortHTL, bQuadratic] = getMortHTL(p)
 
 mortHTL = zeros(1,p.n - p.idxB+1);
-pHTL = mortHTL;
-[mortHTL, pHTL] = calllib(loadNUMmodelLibrary(), 'f_getmorthtl', mortHTL, pHTL);
+bQuadratic = false;
+[mortHTL, bQuadratic] = calllib(loadNUMmodelLibrary(), 'f_getmorthtl', mortHTL, logical(bQuadratic));
 

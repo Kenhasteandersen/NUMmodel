@@ -974,18 +974,16 @@ contains
   end do
  end subroutine setMortHTL
  !
- ! Get the HTL mortality and pHTL. The two vectors returned does not include the 
+ ! Get the HTL mortality as pHTL * mortHTL. This can be used to calculate the loss either by
+ ! multiplying with u or u^2, as determined by the bQuadratic. The vector does not include the 
  ! the nutrient pools (length nGrid-idxB+1).
  !
- subroutine getMortHTL(mortalityHTL, selectionHTL)
-   real(dp), dimension (nGrid-idxB+1), intent(inout):: mortalityHTL, selectionHTL
-   integer:: iGroup
+ subroutine getMortHTL(mortalityHTL, bQuadratic)
+   real(dp), dimension (nGrid-idxB+1), intent(inout):: mortalityHTL
+   logical(1), intent(out):: bQuadratic
 
-   do iGroup = 1, nGroups
-      mortalityHTL( ixStart(iGroup)-idxB+1:ixEnd(iGroup)-idxB+1 ) = &
-         group(iGroup)%spec%mortHTL
-   end do
-   selectionHTL = pHTL( idxB:nGrid )
+   mortalityHTL = pHTL( idxB:nGrid )
+   bQuadratic = bQuadraticHTL
 end subroutine getMortHTL
 
   ! ---------------------------------------------------

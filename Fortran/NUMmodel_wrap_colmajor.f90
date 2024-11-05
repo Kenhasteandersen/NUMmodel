@@ -170,9 +170,10 @@ contains
     call setMortHTL(mortHTL)
   end subroutine f_setMortHTL
 
-  subroutine f_getMortHTL( mortalityHTL, selectionHTL) bind(c)
-    real(c_double), dimension (nGrid-idxB+1), intent(inout):: mortalityHTL, selectionHTL
-    call getMortHTL( mortalityHTL, selectionHTL )
+  subroutine f_getMortHTL( mortalityHTL, bQuadratic) bind(c)
+    real(c_double), dimension (nGrid-idxB+1), intent(inout):: mortalityHTL
+    logical(c_bool), intent(out):: bQuadratic
+    call getMortHTL( mortalityHTL, bQuadratic )
   end subroutine f_getMortHTL
 
    subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL) bind(c)

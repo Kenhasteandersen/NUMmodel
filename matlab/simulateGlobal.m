@@ -234,21 +234,21 @@ if options.bCalcAnnualAverages
     ProdNet = zeros( simtime, nb,1);
     ProdHTL = zeros( simtime, nb,1);
     mHTL = zeros( simtime, nb,1);
-    BHTL = zeros( simtime, nb, p.n-p.idxB+1 );
+    BHTL = zeros( nb, p.n );
     ProdGrossAnnual = zeros( nb,1 );
     ProdNetAnnual = zeros( nb,1 );
     ProdHTLAnnual = zeros( nb,1 );
     BpicoAnnualMean = zeros( nb,1 );
     BnanoAnnualMean = zeros( nb,1 );
     BmicroAnnualMean = zeros( nb,1 );
-    mHTLmean = zeros( nb,1 );
 
-    [~, pHTL] = getMortHTL(p);
+    [mortHTL, bQuadratic] = getMortHTL(p);
 end
 
 % ---------------------------------------
 % Run transport matrix simulation
 % ---------------------------------------
+
 if options.bVerbose
     disp('Starting simulation')
 end
@@ -292,6 +292,7 @@ for i=1:simtime
             %
             % Integrate and calculate functions (only last year):
             %
+            nNutrients = p.nNutrients;
             parfor k = 1:nb
                 ProdGross1 = 0;
                 ProdNet1 = 0;
@@ -311,11 +312,7 @@ for i=1:simtime
                 ProdNet(i,k) = ProdNet1;
                 ProdHTL(i,k) = ProdHTL1;
                 mHTL(i,k) = mHTL1;
-
-                %rates = getRates(p, u(k,:), sim.L(k), sim.T(k), sLibname, false);
-
-                utmp = u(k,:);
-                BHTL(i,k,:) = BHTL(i,k,:) + reshape( utmp(p.idxB:end) .* pHTL, 1, 1, p.n-p.idxB+1);
+                BHTL(k,:) = BHTL(k,:) + u(k,:).^(1+bQuadratic) .* [zeros(1,nNutrients), mortHTL];
 
                 ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
                 ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
@@ -323,11 +320,14 @@ for i=1:simtime
                 BpicoAnnualMean(k) = BpicoAnnualMean(k) + Bpico1;
                 BnanoAnnualMean(k) = BnanoAnnualMean(k) + Bnano1;
                 BmicroAnnualMean(k) = BmicroAnnualMean(k) + Bmicro1;
-                if mHTL1>0
-                    mHTLmean(k) = mHTLmean(k) + log(mHTL1)*ProdHTL1;
-                end
+                %if mHTL1>0
+                %    mHTLmean(k) = mHTLmean(k) + log(mHTL1)*ProdHTL1;
+                %end
                 
             end
+            %for k = 1:nb
+            %    BHTL(i,k,:) = BHTL(i,k,:) + reshape(u(k,idxB:end) .* pHTL, 1, 1, nn-idxB+1);
+            %end
         else
             %
             % Just integrate ODEs:
@@ -437,10 +437,10 @@ if options.bCalcAnnualAverages
     %end
     % Average mHTL
     mHTLdepthsum = zeros(length(sim.x), length(sim.y));
-    BHTLdepthsum = zeros(length(sim.x), length(sim.y),size(BHTL,3));
-    for i = 1:size(BHTL,3)
-        BHTLdepthsum(:,:,i) = integrate_over_depth( sum(squeeze(BHTL(:,:,i)),1)');
-        mHTLdepthsum = mHTLdepthsum + log(p.m(p.idxB+i-1))*BHTLdepthsum(:,:,i);
+    BHTLdepthsum = zeros(length(sim.x), length(sim.y),size(BHTL,2));
+    for i = p.idxB:size(BHTL,2)
+        BHTLdepthsum(:,:,i) = integrate_over_depth( squeeze(BHTL(:,i)));
+        mHTLdepthsum = mHTLdepthsum + log(p.m(i))*BHTLdepthsum(:,:,i);
     end
     sim.mHTLAnnualMean = exp( mHTLdepthsum ./ sum(BHTLdepthsum,3) );
     sim.BHTL = BHTL;

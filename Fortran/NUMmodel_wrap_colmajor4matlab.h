@@ -97,7 +97,7 @@ void f_setmorthtl(const double mortHTL[]);
 
 void f_getmorthtl( 
 	double mortalityHTL[],
-	double selectionHTL[]
+	bool *bQuadratic
 );
 
 void f_getfunctions(
