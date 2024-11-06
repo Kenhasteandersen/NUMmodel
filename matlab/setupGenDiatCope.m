@@ -55,7 +55,7 @@ p = parametersAddgroup(5,p,n);
 
 
 for i = 1:length(mAdult)
-    p = parametersAddgroup(10,p,nCopepods, mAdult(i));
+    p = parametersAddgroup(11,p,nCopepods, mAdult(i));
 end
 
 % POM:

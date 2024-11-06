@@ -66,10 +66,10 @@ p = parametersAddgroup(3,p,n);
 
 % Copepods:
 for i = 1:length(mAdultPassive)
-    p = parametersAddgroup(10,p, nCopepods, mAdultPassive(i));
+    p = parametersAddgroup(11,p, nCopepods, mAdultPassive(i));
 end
 for i = 1:length(mAdultActive)
-    p = parametersAddgroup(11,p, nCopepods, mAdultActive(i));
+    p = parametersAddgroup(10,p, nCopepods, mAdultActive(i));
 end
 
 % POM:
