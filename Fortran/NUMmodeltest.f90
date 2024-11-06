@@ -124,6 +124,9 @@ deallocate(u00)
 allocate(u0(nGrid-idxB+1))
 allocate(u00(nGrid-idxB+1))
 
+u0 = 0.5d0
+u0(2) = 0.25d0
+call setMortHTL(2.d0,u0, TRUE1)
 call getMortHTL(u00,bQuadratic)
 !write(*,*) u00
 write(*,*) u00

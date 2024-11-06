@@ -93,7 +93,7 @@ void f_setsinking(double *velocity);
 
 void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
 
-void f_setmorthtl(const double mortHTL[]);
+void f_setmorthtl(const double mortHTL, const double *pHTL, const bool bQuadratic);
 
 void f_getmorthtl( 
 	double mortalityHTL[],

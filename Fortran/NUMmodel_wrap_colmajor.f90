@@ -164,10 +164,12 @@ contains
     call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
   end subroutine f_setHTL 
 
-  subroutine f_setMortHTL(mortHTL) bind(c)
-    real(c_double), intent(in):: mortHTL(nGrid-idxB+1)
+  subroutine f_setMortHTL(mortHTL, pHTL, bQuadratic) bind(c)
+    real(c_double), intent(in), value:: mortHTL
+    real(c_double), intent(in):: pHTL(nGrid-idxB+1)
+    logical(c_bool), intent(in), value:: bQuadratic
 
-    call setMortHTL(mortHTL)
+    call setMortHTL(mortHTL, pHTL, bQuadratic)
   end subroutine f_setMortHTL
 
   subroutine f_getMortHTL( mortalityHTL, bQuadratic) bind(c)

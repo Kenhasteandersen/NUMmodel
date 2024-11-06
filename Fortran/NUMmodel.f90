@@ -965,13 +965,18 @@ contains
  !
  ! Routine for the user to override the calculation of HTL mortality done by setHTL:
  !
- subroutine setMortHTL(mortHTL)
-  real(dp), intent(in):: mortHTL(nGrid-idxB+1)
+ subroutine setMortHTL(mortHTL, ppHTL, bQuadratic)
+  real(dp), intent(in):: mortHTL, ppHTL(nGrid-idxB+1)
+  logical(1), intent(in):: bQuadratic
   integer:: iGroup
 
+  bQuadraticHTL = bQuadratic
+
   do iGroup = 1, nGroups
-     group(iGroup)%spec%mortHTL = mortHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) )
+      pHTL(ixStart(iGroup):ixEnd(iGroup)) = ppHTL((ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1))
+      group(iGroup)%spec%mortHTL = mortHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
   end do
+  
  end subroutine setMortHTL
  !
  ! Get the HTL mortality as pHTL * mortHTL. This can be used to calculate the loss either by
