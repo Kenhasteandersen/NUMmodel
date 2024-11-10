@@ -80,19 +80,19 @@ module diatoms
       this%nu = 6**twothirds * pi**onethird * delta * (this%m/rho)**(-onethird) * &
         (1. + v**twothirds) / (1. - v)**twothirds
        do i = 1,this%n
-        this%nu(i) = min(1.d0, this%nu(i))
+         this%nu(i) = min(1.d0, this%nu(i))
        enddo
        
        ! Affinities are the same as for the generalists divided by a factor (1-v):
        this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m / (1-v)
        this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu) / (1-v)
-       this%AF = 0.d0
+       this%AF = 0.d0 ! No feeding
        this%JFmax = 0.d0
  
        this%JlossPassive = cLeakage/this%r * this%m ! in units of C
  
        this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
-       this%Jresp = cR*alphaJ*this%m ! decrease suggested by Ken
+       this%Jresp = cR*alphaJ*this%m 
    
        this%beta = 0.d0 ! No feeding
        this%palatability = palatability ! Lower risk of predation
@@ -102,179 +102,104 @@ module diatoms
        class(spectrumDiatoms), intent(inout):: this
        real(dp), intent(in):: gammaN, gammaSi, gammaDOC
        real(dp), intent(in):: L, N, Si, DOC
-       real(dp):: f, JmaxT
-       real(dp):: dL(this%n), dN(this%n), dDOC(this%n), dSi(this%n), Jnetp(this%n), Jnet(this%n),Jlim(this%n)
+       real(dp):: JmaxT, tmp
+       real(dp):: dN(this%n), dSi(this%n), Jnetp(this%n), Jnet(this%n)
        integer:: i
    
        do i = 1, this%n
           !
-          ! Uptakes
+          ! Encounters:
           !
           this%JN(i) =  ftemp15* gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
           this%JDOC(i) = ftemp15*gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
           this%JSi(i) = ftemp15* gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
           this%JL(i) =  epsilonL * this%AL(i)*L  ! Photoharvesting
           JmaxT = fTemp2*this%Jmax(i)
-
-         ! write(*,*) this%JL(i)
-          jlim(i)=0.0
+          ! 
+          ! Calculate downregulation of nutrient uptakes:
           !
-          ! Potential net uptake
-          Jnetp(i) = this%JL(i)*(1-bL)+this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
-          if (Jnetp(i) .lt. 0.d0) then ! There is not enough carbon to satisfy standard metabolism. 
-                                       ! Then only take up carbon and no resources
-             dN(i) = 0.
-             dSi(i) = 0.
-             dDOC(i) = 1.
-             dL(i) = 1.
-             Jnet(i) = 0.
+          Jnetp(i) = this%JL(i)*(1-bL) + this%JDOC(i)*(1-bDOC) - ftemp2*this%Jresp(i)
+          tmp = Jnetp(i) / (1.d0 + bg + bN + bSi)
+          ! N:
+          if (this%JN(i) .eq. 0.d0) then
+            dN(i) = 1.d0
           else
-           !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
-          !
-          ! Calculation of down-regulation factors for
-          ! N-uptake
-          if (this%JN(i).gt.0) then
-            dN(i) = min(1.d0, 1.d0/this%JN(i)*Jnetp(i)/(1.d0+bg +bN+bSi))
-          else 
-            dN(i)=1.
-          end if  
-          ! Si-uptake
-          if (this%JSi(i).gt.0.) then
-            dSi(i) = min(1.d0, 1.d0/this%JSi(i)*Jnetp(i)/(1.d0+bg +bN+bSi))
-          else 
-            dSi(i)=1.
-          end if 
-          dDOC(i)=1.
-          !------------ up to this point all good -----------------
-          !
-          !write(*,*) dN(i),dSi(i), Jnetp(i), jlim(i)
-
-           if (dN(i)==1 .and. dSi(i)==1) then
-             if ( this%JN(i)<this%JSi(i) ) then
-                 jlim(i)=this%JN(i)
-                if (this%JSi(i).gt.0.) then
-                 dSi(i)= jlim(i)/this%JSi(i)
-                end if
-                ! write(*,*) i, 'if (dN(i)==1 .and. dSi(i)==1)'
-             else if ( this%JSi(i)<=this%JN(i) ) then
-                 jlim(i)= this%JSi(i)
-                if (this%JN(i).gt.0.) then
-                 dN(i)= jlim(i)/this%JN(i) 
-                end if 
-               !  write(*,*) i,'( this%JSi(i)<this%JN(i) )'
-             end if
-           end if   
-           
-           if  ( dSi(i)==1 .and. dN(i)<1 ) then       ! If Si is the limiting resource
-              jlim(i)=this%JSi(i)
-              if (this%JN(i).gt.0.) then
-               dN(i)= jlim(i)/this%jN(i)
-              end if
-              !write(*,*) i,'( dSi(i)==1 .and. dN(i)<1 ) '
-           else if ( dN(i)==1 .and. dSi(i)<1 ) then   ! If N is the limiting resource
-              jlim(i)=this%JN(i)
-              if (this%JSi(i).gt.0.) then
-               dSi(i)= jlim(i)/this%JSi(i)
-              end if
-           end if
-           !
-           if  ( dSi(i)<1 .and. dN(i)<1 ) then  ! this check might be redundant, but just to make sure
-              dL(i)=1
-             Jnetp(i) = dL(i)*this%jL(i)*(1-bL)+dDOC(i)*this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
-             Jnet(i)  = max(0.d0,1.d0/(1.d0+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
-            jlim(i)=Jnet(i)
-           end if
-           if (this%JL(i)>0.) then
-             dL(i) = min(1.d0, 1.d0/(this%jL(i)*(1.d0-bL))*(jlim(i)*(1+bg+bSi+bN) &
-             -(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) )
-
-
-             !write(*,*) 1./(this%jL(i)*(1-bL))*(jlim(i)*(1+bg+bSi+bN)-(1-bDOC)*this%JDOC(i)+ftemp2*this%Jresp(i)) 
-           
-           else 
-             dL(i)=-1.
-           end if
-           !write(*,*) jlim(i)/this%m(i),dL(i)
-           !
-           if (dL(i)<0.) then ! It means that there's is too much C taken up 
-             dL(i) = 0       ! We set light uptake to 0 and downregulate DOC uptake
-             dDOC(i) = min(1.d0, 1.d0/(this%JDOC(i)*(1-bDOC))*(Jlim(i)*(1.d0+bg+bSi+bN) + ftemp2*this%Jresp(i)))  
-           end if
-             Jnetp(i) = dL(i)*this%jL(i)*(1-bL)+dDOC(i)*this%JDOC(i)*(1-bDOC)-ftemp2*this%Jresp(i)
-             !Jnet(i)  = max(0.,1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i))))
-             Jnet(i)  = 1./(1+bg)*(jnetp(i)-(bN*dN(i)*this%jN(i)+bSi*dSi(i)*this%JSi(i)))
-
-             !write(*,*) i, Jnetp(i)/this%m(i),dL(i)
-             if ( dSi(i)<1 .and. dN(i)<1 ) then
-              jlim(i)=Jnet(i)
-              if (this%JN(i).gt.0.) then
-              dN(i)=jlim(i)/this%JN(i)
-              end if
-              if (this%JSi(i).gt.0.) then
-              dSi(i)=jlim(i)/this%JSi(i)
-              end if
-
-             end if
-          !
-          ! Down-regulated fluxes: the uptake flux JX is multiplied by the reduction factor dX , X= N, DOC, Si or L
-          !
-          ! update jnetp with delta's
-          !
-          !Jnetp  = this%JL(i)*(1-bL)+dDOC(i)*this%jDOC(i)*(1-bDOC)-this%Jresp(i)   
-          !Jnet = max(0., 1./(1+bg)*(Jnetp - (bN*dN(i)*this%JN(i)+bSi*dSi(i)*this%JSi(i)))) 
-            end if   
-          !
-          ! Saturation of net growth
-          !
-          f = (Jnet(i))/(Jnet(i)+ JmaxT)
-          if ((Jnet(i) + JmaxT).eq.0) then
-           f=0.
+            dN(i) = min( 1.d0, tmp/this%JN(i) )
           end if
-      
+          ! Silicate:
+          if (this%JSi(i) .eq. 0.d0) then
+            dSi(i) = 1.d0
+          else
+            dSi(i) = min( 1.d0, tmp/this%JSi(i) )
+          end if
+          Jnet(i) = 1.d0/(1+bg) * ( this%JDOC(i)*(1-bDOC) + this%JL(i)*(1-bL) &
+             - ftemp2*this%Jresp(i) - bN*dN(i)*this%JN(i) - bSi*dSi(i)*this%JSi(i) )
+          !
+          ! Adjust Jnet according to limitation:
+          !
+          if ( JNetp(i) .lt. 0.d0) then  ! Check for severe light limitation
+            Jnet(i) = -ftemp2*this%Jresp(i) + this%JDOC(i)*(1-bDOC) + this%JL(i)*(1-bL)
+          else  
+            ! Check for nutrient limitation:
+            if ( (dSi(i).ge.1.d0) .or. (dN(i).ge.1.d0) ) then
+              if (this%JSi(i) .gt. this%JN(i) ) then
+                JNet(i) = this%JN(i) ! N limitation
+              else  
+                JNet(i) = this%JSi(i) ! Si limitation
+              end if
+            end if
+          end if 
+          !
+          ! Synthesis limitation:
+          !
+          if ( Jnet(i) .gt. this%JlossPassive(i) ) then ! Apply FR only if net growth is positive
+            Jnet(i) = JmaxT * Jnet(i) / ( Jnet(i) + JmaxT )
+          endif
+          this%Jtot(i) = Jnet(i) - this%JlossPassive(i)
+          ! Calculate synthesis-limited uptakes:
+          this%JNreal(i) = max( 0.d0, JNet(i) )
+          this%JSireal(i) = max( 0.d0, JNet(i) )
+          !
+          ! Regulate carbon uptakes for growth + respiration towards lowered jNet.
+          !
 
-          !write(*,*) i, dN(i),dDOC(i),dL(i),dSi(i)
-
-          this%JNreal(i) =   (1-f)*dN(i)   * this%JN(i) 
-          this%JDOCreal(i) = (1-f)*dDOC(i) * this%JDOC(i)
-          this%JLreal(i) =   (1-f)*dL(i)   * this%JL(i)
-          this%JSireal(i) =  (1-f)*dSi(i)  * this%JSi(i)
-          this%Jtot(i)= f*JmaxT - (1-f)*this%JlossPassive(i)!+ fTemp2*this%Jresp(i))
-          this%jNet(i) = Jnet(i)
-        ! this%JCtot(i) = & 
-        !
-        ! (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i) )&
-        ! - (1-f)*fTemp2*this%Jresp(i) &
-        ! - ( (1-f)*(bDOC*dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)*bL+bN*dN(i)*this%JN(i)+bN*dSi(i)*this%JSi(i))&
-        ! + (1-f)*bg*Jnet(i) )
-        !  (1-f)*(dDOC(i)*this%JDOC(i)+dL(i)*this%JL(i)- fTemp2*this%Jresp(i) &
-        ! - bN*dN(i)*this%JN(i)-bSi*dSi(i)*this%JSi(i) -bg*Jnet(i) &
-        ! -bDOC*dDOC(i)*this%JDOC(i)-dL(i)*this%JL(i)*bL)
-             
+          tmp = ( (1 - bDOC)*this%jDOC(i) + (1 - bL)*this%jL(i)  )
+          if (tmp .eq. 0.0d0) then
+            this%jDOCreal(i) = 0.0d0
+            this%jLreal(i) = 0.0d0
+          else
+            tmp = ( Jnet(i) + bg*max(0.d0, JNet(i)) + bN*this%JNreal(i) + bSi*this%JSireal(i) + ftemp2*this%Jresp(i)) &
+                  / ( (1 - bDOC)*this%jDOC(i) + (1 - bL)*this%jL(i)  )
+            this%jDOCreal(i) = tmp * this%jDOC(i)
+            this%jLreal(i) = tmp * this%jL(i)
+          endif
+          ! Prioritize DOC:
+          !tmp = Jnet(i) + bg*max(0.d0, Jnet(i)) + bN*this%JNreal(i) + bSi*this%JSireal(i) + ftemp2*this%Jresp(i)
+          !this%jDOCreal(i) = min( this%JDOC(i), tmp/(1-bDOC) )
+          ! And then light:
+          !this%JLreal(i) = min( this%JL(i), (tmp - this%jDOCreal(i)*(1-bDOC))/(1-bL) )
+          !
+          ! Losses:
+          !
+          this%JNlossLiebig(i) = max( 0.d0, -Jnet(i) )  ! Exude surplus N and Si
+          this%JClossLiebig(i) = 0.d0 ! There are never surplus C uptakes
           this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
-          this%Jresptot(i) = &
-              fTemp2*this%Jresp(i) + & !
-              bDOC*this%JDOCreal(i) + &
-              bL*this%JLreal(i) + &
-              bN*this%JNreal(i) + &
-              bSi*this%JSireal(i) + &
-              bg*Jnet(i)
-          !
-          !write(*,*) jlim(i),dN(i),dSi(i)
+          this%Jresptot(i)= &
+            fTemp2*this%Jresp(i) + &
+            bDOC*this%JDOCreal(i) + &
+            bL*this%JLreal(i) + &
+            bN*this%JNreal(i) + &
+            bSi*this%JSireal(i) + &
+            max(0.d0, bg*Jnet(i))
+          
+          this%f(i) = 0.d0
+         end do
 
-          !write(*,*) 'N budget', i,':',(this%JNreal(i)-(1-f)*this%JlossPassive(i) &
-          !- this%Jtot(i))/this%m(i)
-          !
-          !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
-          !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
-
-          !write(*,*) 'Si budget', i,':',(this%JSi(i)-this%JlossPassive(i) - (this%JSi(i)-this%JlossPassive(i)-this%Jtot(i)) &
-          !- this%Jtot(i))/this%m(i)
-          this%f(i)=f
-         !write(*,*) this%JCloss_photouptake(i), this%JLreal(i),dL(i)
-        end do
-        this%jN = this%jNreal  ! Needed to get the the actual uptakes out with "getRates"
+        ! Needed to get the right rates with getRates:
+        this%jN = this%jNreal  
+        this%JSi = this%JSireal
         this%jDOC = this%jDOCreal
-        this%JSi = this%jSireal
+        this%JNloss = this%JNlossLiebig
      end subroutine calcRatesDiatoms
    
      subroutine calcDerivativesDiatoms(this, u, dNdt, dDOCdt, dSidt, dudt)
@@ -293,49 +218,36 @@ module diatoms
          !
          dNdt = dNdt  &
          + ((-this%JNreal(i) &!+ (this%JN(i)- this%JlossPassive(i) -this%Jtot(i)) &
-         + (1-this%f(i))*this%JlossPassive(i))/this%m(i) &
+         + this%JlossPassive(i) &
+         + this%JNlossLiebig(i))/this%m(i) & ! Losses when growth is negative
          + remin2*this%mort2(i) &
-         !+ reminHTL*this%mortHTL(i) &
-         )* u(i)/rhoCN
+           )* u(i)/rhoCN
          !
          ! Update DOC:
          !
          dDOCdt = dDOCdt &
          + ((-this%JDOCreal(i) &
-         +  (1-this%f(i))*this%JlossPassive(i) &
+         +  this%JlossPassive(i) &
          +  this%JCloss_photouptake(i))/this%m(i) &
          +  remin2*this%mort2(i) &
-         !+  reminHTL*this%mortHTL(i) &
-         ) * u(i)
+           ) * u(i)
          ! update Si
          dSidt = dSidt &
          + ((-this%JSireal(i) &
-         +   (1-this%f(i))*this%JlossPassive(i) )/this%m(i) &
+         +   this%JlossPassive(i) &
+         +   this%JNlossLiebig(i) )/this%m(i) & ! Losses when growth is negative
          +  remin2*this%mort2(i) &
-         !+  reminHTL*this%mortHTL(i) &
-         ) * u(i)/rhoCSi
+           ) * u(i)/rhoCSi
          !
          ! Update the diatoms:
          !
-         dudt(i) = (this%Jtot(i)/this%m(i)  &
-         !- mort(i) &
+         dudt(i) = &
+           (this%Jtot(i)/this%m(i)  &
          - this%mortpred(i) &
          - this%mort2(i) &
-         - this%mortHTL(i))*u(i)
-
-         ! write(*,*) this%mortpred(i)*u(i) 
-
-
-         !write(*,*) 'Nbalance =',i, ':', (dNdt + sum( dudt &
-         !+ (1-reminHTL)*this%mortHTL*u &
-         !+ (1-1)*this%mort2*u & ! full N remineralization of viral mortality
-         !   )/rhoCN) 
-
-            !write(*,*) 'Nbalance =',i, ':', (dNdt + sum( dudt(i:this%n) &
-            !+ (1-reminHTL)*this%mortHTL(i:this%n)*u(i:this%n) &
-            !+ (1-1)*this%mort2(i:this%n)*u(i:this%n) & ! full N remineralization of viral mortality
-             !  )/rhoCN) 
-      end do
+         - this%mortHTL(i) &
+           )*u(i)
+     end do
     end subroutine calcDerivativesDiatoms
       
     subroutine printRatesDiatoms(this)

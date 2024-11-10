@@ -49,11 +49,11 @@ program NUMmodeltest
   allocate(u0(nGrid))
   allocate(u00(nGrid))
   allocate(dudt(nGrid))
-  u00(idxN) = 150.d0
-  u00(idxDOC) = .1d0
-  u00(idxSi) = 200.d0
+  u00(idxN) = 1.d0
+  u00(idxDOC) = 0.01d0
+  u00(idxSi) = 0.d0
   do i = idxB, nGrid
-     u00(i) = 1! + 0.1*(i-2)
+     u00(i) = 0.0686d0 !+ 0.1*(i-2)
   end do
   dudt = 0.d0
 
@@ -77,8 +77,8 @@ program NUMmodeltest
   !end select
   
   call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
-  !call printRates()
-  !write(*,*) dudt
+  call printRates()
+  write(*,*) dudt
   !write(*,*) 'ngrid',nGrid
   !write(*,*) 'ngroups',nGroups
   !write(*,*) 'nbutrients',nNutrients
@@ -109,10 +109,11 @@ program NUMmodeltest
  ! write(6,*) 'xxxx'
  ! call setupGeneric( (/0.1d0, 1.0d0 /) )
  !write(*,*) Bpico, Bnano, Bmicro
-!  call getBalance(u00, dudt, Nbalance,Cbalance,Sibalance)
-!    write(*,*) 'Nbalance:', Nbalance
-!    write(*,*) 'Cbalance:', Cbalance
-!    write(*,*) 'Sibalance:', Sibalance
+  write(*,*) dudt
+  call getBalance(u00, dudt, Cbalance,Nbalance,Sibalance)
+  write(*,*) 'Cbalance:', Cbalance
+  write(*,*) 'Nbalance:', Nbalance
+  write(*,*) 'Sibalance:', Sibalance
    
 
 !do i = 5,9
