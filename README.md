@@ -21,7 +21,7 @@ _The figure above shows a setup with only unicellular generalists run with the M
 ### Installation
 The library requires a recent version of matlab (2021 or later).  Installation and compilation instructions are given in the wiki.
 ### Basic structure
-There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.
+There are three levels of routines: top-level, medium-level and low-level.  There are three model systems: an upper ocean represented as a chemostat, a water column, and a global simulation with transport matrices.
 #### Top-level matlab routines
 These routines run a simulation and returns the results in a `sim` structure:
 
