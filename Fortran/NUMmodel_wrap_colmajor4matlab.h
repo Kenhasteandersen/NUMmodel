@@ -91,7 +91,8 @@ void f_getsinking(double *velocity);
 
 void f_setsinking(double *velocity);
 
-void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL);
+void f_sethtl(const double mHTL, const double mortHTL, const bool bQuadraticHTL, const bool bDecliningHTL, 
+				const bool bCopepodsOnly);
 
 void f_setmorthtl(const double mortHTL, const double *pHTL, const bool bQuadratic);
 

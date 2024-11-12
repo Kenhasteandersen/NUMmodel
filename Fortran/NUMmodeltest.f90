@@ -37,7 +37,7 @@ program NUMmodeltest
   !call setupGeneric( (/1.d0 /), errorio, errorstr )
   !call setupGeneralistsDiatoms(10, errorio, errorstr)
   call setupNUMmodel(5,5,1, (/1.d0 /), (/10.d0/),errorio,errorstr)
-  call setHTL(0.005d0, 0.1d0, TRUE1, FALSE1)
+  !call setHTL(0.005d0, 0.1d0, TRUE1, FALSE1, )
 
   if (errorio .eqv. .false.) then
     print*, 'Parameters loaded correctly'

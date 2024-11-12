@@ -157,11 +157,11 @@ contains
       ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
   end subroutine f_simulateEulerFunctions
 
-  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
+  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, bCopepodsOnly) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
-    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL
+    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL, bCopepodsOnly
 
-    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
+    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, bCopepodsOnly)
   end subroutine f_setHTL 
 
   subroutine f_setMortHTL(mortHTL, pHTL, bQuadratic) bind(c)

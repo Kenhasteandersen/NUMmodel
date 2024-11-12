@@ -246,7 +246,7 @@ contains
    ! POM with nPOM size classes and max size 1 ugC:
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
    call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
-
+   call setHTL(1.d0, 0.03d0, logical(.true.,1), logical(.false.,1), logical(.true.,1)) ! Only HTL on copepods
   end subroutine setupNUMmodel
 
   ! -----------------------------------------------
@@ -472,7 +472,7 @@ contains
    ! Calc the mass where HTL mortality is 50%
    mHTL = mHTL/betaHTL**1.5
 
-   call setHTL(mHTL, mortHTL, boolQuadraticHTL, boolDecliningHTL)
+   call setHTL(mHTL, mortHTL, boolQuadraticHTL, boolDecliningHTL, logical(.FALSE.,1))
    !
    ! If there is a POM group then calculate the interactions with other groups
    !
@@ -904,6 +904,7 @@ contains
   !                     that is proportional to the biomass density (true)
   !  boolDecliningHTL : whether the mortality declines with size as mass^-1/4 (true)
   !                     or is constant (false)
+  !  boolCopepodsOnly : If true, only copepods are affected (but still with the size selectivity)
   !
   ! If the mortality is constant (boolQuadraticHTL=false) then the mortality is at a level 
   ! of mortalityHTL at mHTL. The mortality may decline from there is boolDecliningHTL = true.
@@ -914,14 +915,13 @@ contains
   ! The decline in mortality (boolDecliningHTL=true) is set such that the mortality
   ! is mortalityHTL at a mass mRef = .1 ugC.
   !
-  subroutine setHTL(mHTL, mortalityHTL, boolQuadraticHTL, boolDecliningHTL)
+  subroutine setHTL(mHTL, mortalityHTL, boolQuadraticHTL, boolDecliningHTL, boolCopepodsOnly)
    real(dp), intent(in):: mHTL ! The size where HTL is 50% of max
    real(dp), intent(in):: mortalityHTL ! The level of HTL mortality (at a reference size of 1 ugC
                                        ! B/z = 1/l )
    logical(1), intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
    logical(1), intent(in):: boolDecliningHTL ! Whether the mortality declines with size
-   !real(dp), parameter:: mRef = .1d0 ! Reference mass (in ugC)
-   !real(dp), parameter:: betaHTL = 500.
+   logical(1), intent(in):: boolCopepodsOnly ! Whether the mortality only affects copepods
    integer:: iGroup
 
    !     
@@ -938,7 +938,15 @@ contains
            pHTL( ixStart(iGroup):ixEnd(iGroup) ) = pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
                * (group(iGroup)%spec%m/mHTL)**(-0.25)
         end if
-     end if
+      end if
+      ! Remove selection of unicellulars if boolCopepodsOnly = TRUE
+      if (boolCopepodsOnly) then
+         select type (spec => group(iGroup)%spec) ! Predator group
+         type is (spectrumCopepod)
+            pHTL( ixStart(iGroup):ixEnd(iGroup) ) = 0.d0
+         end select
+      end if
+ 
    end do
 
    if (.not. boolQuadraticHTL) then
