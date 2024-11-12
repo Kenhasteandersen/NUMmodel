@@ -943,7 +943,9 @@ contains
       if (boolCopepodsOnly) then
          select type (spec => group(iGroup)%spec) ! Predator group
          type is (spectrumCopepod)
-            pHTL( ixStart(iGroup):ixEnd(iGroup) ) = 0.d0
+            ! Do nothing
+         class default
+            pHTL( ixStart(iGroup):ixEnd(iGroup) ) = 0.d0 ! All other than copepods = 0
          end select
       end if
  
