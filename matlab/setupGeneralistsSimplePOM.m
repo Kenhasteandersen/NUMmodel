@@ -57,6 +57,7 @@ p.u0(p.ixStart(1):p.ixEnd(1)) = 1; % Initial conditions
 % POM:
 p = parametersAddgroup(100, p, nPOM);
 p.u0(p.ixStart(2):p.ixEnd(2)) = 0; % Initial conditions
+setSinkingPOM(p,11);
 
 p = getMass(p);
 
