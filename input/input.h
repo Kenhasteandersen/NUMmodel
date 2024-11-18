@@ -152,7 +152,7 @@
 ! DIATOMS INPUT PARAMETERS
 !***********************************************************************
   mMinDiatom = 1.d-6            ! Description [mug C]
-  mMaxDiatom = 0.01		! Description [mug C]
+  mMaxDiatom = 0.01		          ! Description [mug C]
   rhoCSi = 3.4                  ! Carbon:Si mass ratio
   v  = 0.8                      ! Vacuole volume fraction
 
