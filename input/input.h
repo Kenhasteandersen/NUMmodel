@@ -4,11 +4,7 @@
 ! ======================================================================!
 ! This file contains the input parameters for the NUM Model.            !
 ! The parameters are read in in the different initialization            !
-! routines with a call to read_input(filename). The file contains       !
-! several different namelists initialized by                            !
-!       &input_namelist                                                 !
-!and ended by                                                           !
-!       /                                                               !   
+! routines with a call to read_input(filename).                         !   
 ! Comments can be added with an exclamation mark (!)                    !
 ! A descrition of each parameter is provided alongside the parameter    !
 ! along with the units in square brackets ([unit]). A glossary is found !
@@ -73,7 +69,7 @@
 ! GENERALISTS INPUT PARAMETERS
 ! -generalists with explict metabolic costs
 !***********************************************************************
-  mMinGeneralist = 1.1623d-9    ! Description [mug C]
+  mMinGeneralist = 1d-8    ! Description [mug C]
   mMaxGeneralist = 1.0d0	! Description [mug C]
   rho = 0.4d-6
 
@@ -155,10 +151,10 @@
 !***********************************************************************
 ! DIATOMS INPUT PARAMETERS
 !***********************************************************************
-  mMinDiatom = 1.d-8            ! Description [mug C]
-  mMaxDiatom = 1.0		! Description [mug C]
+  mMinDiatom = 1.d-6            ! Description [mug C]
+  mMaxDiatom = 0.01		! Description [mug C]
   rhoCSi = 3.4                  ! Carbon:Si mass ratio
-  v  = 0.6                      ! Vacuole volume fraction
+  v  = 0.8                      ! Vacuole volume fraction
 
 ! Light uptake:
 !--------------
@@ -193,7 +189,7 @@
 
 ! Vulnerability to predation:
 !----------------------------
-  palatability = 0.5
+  palatability = 0.25
   
 !***********************************************************************
 ! COPEPODS ACTIVE INPUT PARAMETERS
