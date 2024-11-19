@@ -73,7 +73,7 @@
 ! GENERALISTS INPUT PARAMETERS
 ! -generalists with explict metabolic costs
 !***********************************************************************
-  mMinGeneralist = 1.1623d-9    ! Description [mug C]
+  mMinGeneralist = 1.0d-8   ! Description [mug C]
   mMaxGeneralist = 1.0d0	! Description [mug C]
   rho = 0.4d-6
 
@@ -81,6 +81,7 @@
 !--------------
   epsilonL = 0.8d0                ! Light uptake efficiency []
   alphaL = 0.3d0                  ! Scaling factor for light [unit]
+  mUpperAlphaL = 0.003d0          ! Upper size for phototrophy
   rLstar = 7.5d0                  ! Description [unit]
   bL = 0.08d0                     ! Cost of light harvesting [mugC/mugC]
 

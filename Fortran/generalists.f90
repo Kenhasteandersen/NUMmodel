@@ -41,7 +41,7 @@ contains
     integer:: i
     !real(dp), parameter:: rho != 0.4*1d6*1d-12
     real(dp) :: mMinGeneralist, mMaxGeneralist, rho
-    real(dp) :: alphaL, rLstar !Light uptake
+    real(dp) :: alphaL, rLstar, mUpperAlphaL !Light uptake
     real(dp) :: alphaN, rNstar !osmotrophic uptake
     real(dp) :: alphaF, cF !Phagotrophy
     real(dp) :: cLeakage, delta, alphaJ, cR !Metabolism
@@ -54,6 +54,7 @@ contains
     call read_input(inputfile,'generalists','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     call read_input(inputfile,'generalists','alphaL',alphaL,errorio,errorstr)
+    call read_input(inputfile,'generalists','mUpperAlphaL',mUpperAlphaL,errorio,errorstr)
     call read_input(inputfile,'generalists','rLstar',rLstar,errorio,errorstr)
     call read_input(inputfile,'generalists','alphaN',alphaN,errorio,errorstr)
     call read_input(inputfile,'generalists','rNstar',rNstar,errorio,errorstr)
@@ -87,6 +88,11 @@ contains
 
     this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
     this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu)
+    do i = 1, n
+      if (this%m(i) .gt. mUpperAlphaL) then
+        this%AL(i) = 0.d0
+      end if
+    end do
     this%AF = alphaF*this%m
     this%JFmax = cF/this%r * this%m
     

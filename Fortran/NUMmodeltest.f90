@@ -116,21 +116,5 @@ program NUMmodeltest
   write(*,*) 'Sibalance:', Sibalance
    
 
-!do i = 5,9
-!   write(*,*) i, theta(i+3,6:9)
-!end do
-
-deallocate(u0)
-deallocate(u00)
-allocate(u0(nGrid-idxB+1))
-allocate(u00(nGrid-idxB+1))
-
-u0 = 0.5d0
-u0(2) = 0.25d0
-call setMortHTL(2.d0,u0, TRUE1)
-call getMortHTL(u00,bQuadratic)
-!write(*,*) u00
-write(*,*) u00
-write(*,*) bQuadratic
-
+!
   end program NUMmodeltest
