@@ -303,7 +303,7 @@ end subroutine calcGrid
   !end function getCbalanceUnicellular
   !
   ! Returns the net primary production calculated as the total amount of carbon fixed
-  ! by photsynthesis minus the respiration. Units: mugC/day/m3
+  ! by photsynthesis minus the respiration. Units: mugC/day/l
   ! (See Andersen and Visser (2023) table 5)
   !
   function getProdNet(this, u) result(ProdNet)
@@ -320,7 +320,7 @@ end subroutine calcGrid
   end function getProdNet
   !
   ! Returns the net bacterial production calculated as the total amount of DOC
-  ! taken up minus the respiration. Units: mugC/day/m3
+  ! taken up minus the respiration. Units: mugC/day/l
   ! (See Andersen and Visser (2023) table 5)
   !
   function getProdBactUnicellular(this, u) result(ProdBact)
