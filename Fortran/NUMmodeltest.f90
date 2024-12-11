@@ -16,7 +16,6 @@ program NUMmodeltest
   !real(dp):: myout
   character(len=20) :: errorstr
   logical(1):: errorio=.false. ! Whether to losses to the deep
-  logical(1):: bQuadratic
 
   TRUE1 = .true.
   FALSE1 = .false.
