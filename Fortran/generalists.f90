@@ -298,7 +298,7 @@ function getProdNetGeneralists(this, u) result(ProdNet)
     endif
 
     if ( (this%JLreal(i) + this%JDOCreal(i)+ this%JFreal(i)) .ne. 0.d0 ) then
-      tmp2 = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i) + this%JFreal(i))
+      tmp2 = this%JLreal(i) / (this%JLreal(i)/epsilonL + this%JDOCreal(i) + this%JFreal(i))
     else
       tmp2 = 0.d0
     endif

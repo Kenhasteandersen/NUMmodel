@@ -280,7 +280,7 @@ contains
 
    do i = 1, this%n
      if ( (this%JLreal(i) + this%JDOCreal(i)) .ne. 0.d0 ) then
-       tmp = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i))
+       tmp = this%JLreal(i) / (this%JLreal(i)/epsilonL + this%JDOCreal(i))
      else
        tmp = 0.d0
      endif
