@@ -67,6 +67,7 @@ module spectrum
     procedure :: getCLost => getClostUnicellular
     procedure :: getProdNet
     procedure :: getProdBact => getProdBactUnicellular
+
   end type spectrumUnicellular
 
   ! ------------------------------------------------
@@ -272,6 +273,14 @@ end subroutine calcGrid
       )/this%m * u )
   end function getClostUnicellular
 
+  function getProdNet(this, u) result(ProdNet)
+    real(dp):: ProdNet
+    class(spectrumUnicellular), intent(in):: this
+    real(dp), intent(in):: u(this%n)
+
+    ProdNet = -1. ! Set to -1 because procedure should be overloaded
+  end function getProdNet
+ 
   subroutine printRatesUnicellular(this)
     class (spectrumUnicellular), intent(in):: this 
     
@@ -302,23 +311,11 @@ end subroutine calcGrid
   !  )
   !end function getCbalanceUnicellular
   !
-  ! Returns the net primary production calculated as the total amount of carbon fixed
+  ! AbstractReturns the net primary production calculated as the total amount of carbon fixed
   ! by photsynthesis minus the respiration. Units: mugC/day/l
   ! (See Andersen and Visser (2023) table 5)
   !
-  !function getProdNet(this, u) result(ProdNet)
-  !  real(dp):: ProdNet
-  !  class(spectrumUnicellular), intent(in):: this
-  !  real(dp), intent(in):: u(this%n)
-  !  integer:: i
- 
-  !  ProdNet = 0.d0
-  !  do i = 1, this%n
-  !     ProdNet = ProdNet + max( 0.d0, &
-  !                 (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
-  !  end do
-  !end function getProdNet
-  !
+    !
   ! Returns the net bacterial production calculated as the total amount of DOC
   ! taken up minus the respiration. Units: mugC/day/l
   ! (See Andersen and Visser (2023) table 5)
