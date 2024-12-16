@@ -306,18 +306,18 @@ end subroutine calcGrid
   ! by photsynthesis minus the respiration. Units: mugC/day/l
   ! (See Andersen and Visser (2023) table 5)
   !
-  function getProdNet(this, u) result(ProdNet)
-    real(dp):: ProdNet
-    class(spectrumUnicellular), intent(in):: this
-    real(dp), intent(in):: u(this%n)
-    integer:: i
+  !function getProdNet(this, u) result(ProdNet)
+  !  real(dp):: ProdNet
+  !  class(spectrumUnicellular), intent(in):: this
+  !  real(dp), intent(in):: u(this%n)
+  !  integer:: i
  
-    ProdNet = 0.d0
-    do i = 1, this%n
-       ProdNet = ProdNet + max( 0.d0, &
-                   (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
-    end do
-  end function getProdNet
+  !  ProdNet = 0.d0
+  !  do i = 1, this%n
+  !     ProdNet = ProdNet + max( 0.d0, &
+  !                 (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
+  !  end do
+  !end function getProdNet
   !
   ! Returns the net bacterial production calculated as the total amount of DOC
   ! taken up minus the respiration. Units: mugC/day/l

@@ -23,7 +23,7 @@ module generalists
     procedure :: calcRates => calcRatesGeneralists
     procedure :: calcDerivativesGeneralists
     procedure :: printRates => printRatesGeneralists
-   ! procedure :: getProdNet => getProdNetGeneralists
+    procedure :: getProdNet => getProdNetGeneralists
    ! procedure :: getProdBact => getProdBactGeneralists 
   end type spectrumGeneralists
  
@@ -298,7 +298,7 @@ function getProdNetGeneralists(this, u) result(ProdNet)
     endif
 
     if ( (this%JLreal(i) + this%JDOCreal(i)+ this%JFreal(i)) .ne. 0.d0 ) then
-      tmp2 = this%JLreal(i) / (this%JLreal(i)/epsilonL + this%JDOCreal(i) + this%JFreal(i))
+      tmp2 = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i) + this%JFreal(i))
     else
       tmp2 = 0.d0
     endif
@@ -306,8 +306,8 @@ function getProdNetGeneralists(this, u) result(ProdNet)
     resp = &
       fTemp2*this%Jresp(i) + & ! Basal metabolism
       bL*this%JLreal(i) + &    ! Light uptake metabolism
-      bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is not associated to DOC uptake  
-      bg*this%Jnet(i) * tmp2 ! The fraction of growth not associated with DOC or feeding
+      bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is associated with light uptake  
+      bg*this%Jnet(i) * tmp2 ! The fraction of growth associated with light uptake
     ProdNet = ProdNet + max( 0.d0, (this%JLreal(i)/epsilonL - resp) * u(i)/this%m(i) )
 
   end do
