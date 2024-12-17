@@ -69,7 +69,7 @@
 ! GENERALISTS INPUT PARAMETERS
 ! -generalists with explict metabolic costs
 !***********************************************************************
-  mMinGeneralist = 1.0d-8   ! Description [mug C]
+  mMinGeneralist = 1.0d-9   ! Description [mug C]
   mMaxGeneralist = 1.0d0	! Description [mug C]
   rho = 0.4d-6
 
