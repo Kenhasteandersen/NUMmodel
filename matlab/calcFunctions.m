@@ -15,7 +15,7 @@
 %                         biomasses (mgC/m2)
 %         sim.Bplankton - All planktion, except (dead) POM (mgC/m2)
 %         sim.ChlArea (mgChl/m2)
-%         
+%
 %         For global simulations additional fields are:
 %         sim.Ntotal    - total dissolved N as a function of time (mugN)
 %         sim.DOCtotal  - total dissolved DOC (mugC)
@@ -35,16 +35,22 @@ end
 switch sim.p.nameModel
 
     case 'chemostat'
-        if sim.p.nNutrients==3
-            u = [sim.N(end), sim.DOC(end),sim.Si(end), sim.B(end,:)];
-            [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
-                sim.Bpico, sim.Bnano, sim.Bmicro, sim.mHTL] = ...=
-                getFunctions(u, sim.L, sim.T);
-        else
-            u = [sim.N(end), sim.DOC(end), sim.B(end,:)];
-            [sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL,...
-                sim.Bpico, sim.Bnano, sim.Bmicro, sim.mHTL] = ...=
-                getFunctions(u, sim.L, sim.T);
+        for i = 1:length(sim.t)
+            if length(sim.L)>1
+                L = interp1(1:length(sim.L), sim.L, sim.t(i) );
+            else
+                L = sim.L;
+            end
+            T = sim.T;
+            if sim.p.nNutrients==3
+                u = [sim.N(i), sim.DOC(i),sim.Si(i), sim.B(i,:)];
+
+            else
+                u = [sim.N(i), sim.DOC(i), sim.B(i,:)];
+            end
+            [sim.ProdGross(i), sim.ProdNet(i), sim.ProdHTL(i), sim.ProdBact(i), sim.eHTL(i),...
+                sim.Bpico(i), sim.Bnano(i), sim.Bmicro(i), sim.mHTL(i)] = ...=
+                getFunctions(u, L, T);
         end
         % Multiply by the assumed depth of the productive layer:
         sim.ProdGross = sim.ProdGross * sim.p.widthProductiveLayer;
@@ -55,16 +61,17 @@ switch sim.p.nameModel
         sim.Bnano = sim.Bnano * sim.p.widthProductiveLayer;
         sim.Bmicro = sim.Bmicro * sim.p.widthProductiveLayer;
         sim.Btotal = sum(sim.B,2) * sim.p.widthProductiveLayer; % mgC/m^2
-        sim.ChlArea = sum( calcChl( sim.B(end,:), sim.rates, sim.L) ) * sim.p.widthProductiveLayer;
+        %sim.ChlArea = sum( calcChl( sim.B(end,:), sim.rates, sim.L) ) * sim.p.widthProductiveLayer;
         %ChlArea now in mgChl/m^2
         if options.bPrintSummary
+           
             fprintf("----------------------------------------------\n")
-            fprintf("Final total biomass:  %8.3f mgC/m2\n", sim.Btotal(end));
-            fprintf("Final Chl:            %8.3f gChl/m2\n", sim.ChlArea)
-            fprintf("Final gross PP:       %8.3f mgC/m2/day\n", sim.ProdGross)
-            fprintf("Final net PP:         %8.3f mgC/m2/day\n", sim.ProdNet)
-            fprintf("Final net bact prod.: %8.3f mgC/m2/day\n", sim.ProdBact)
-            fprintf("Final HTL production: %8.3f mgC/m2/day\n", sim.ProdHTL)
+            fprintf("Mean total biomass:  %8.3f mgC/m2\n", mean(sim.Btotal));
+            %fprintf("Final Chl:            %8.3f gChl/m2\n", sim.ChlArea)
+            fprintf("Mean gross PP:       %8.3f mgC/m2/day\n", mean(sim.ProdGross));
+            fprintf("Mean net PP:         %8.3f mgC/m2/day\n", mean(sim.ProdNet));
+            fprintf("Mean net bact prod.: %8.3f mgC/m2/day\n", mean(sim.ProdBact));
+            fprintf("Mean HTL production: %8.3f mgC/m2/day\n", mean(sim.ProdHTL));
             fprintf("----------------------------------------------\n")
         end
 
@@ -87,8 +94,8 @@ switch sim.p.nameModel
             Bnano = 0;
             Bmicro = 0;
             Bplankton = 0;
-            ChlArea = 0; 
-            ChlVolume = zeros(1, nZ); 
+            ChlArea = 0;
+            ChlVolume = zeros(1, nZ);
             % Integrate over depth:
             for k = 1:nZ
                 if ~isnan(sim.N(iTime,k))
@@ -107,7 +114,7 @@ switch sim.p.nameModel
                         getFunctions(u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
                     % Multiply by the thickness of each layer:
                     %rates = getRates(sim.p, u, sim.L(iTime,k), sim.T(iTime,k), sLibName);
-                    
+
                     conv = sim.dznom(k);
                     ProdGross = ProdGross + ProdGross1*conv;
                     ProdNet = ProdNet + ProdNet1*conv;
@@ -137,7 +144,7 @@ switch sim.p.nameModel
             sim.Bmicro(iTimenow) = Bmicro;
             sim.Bplankton(iTimenow) = Bplankton;
             sim.Btotal = sim.Bpico + sim.Bnano + sim.Bmicro; %mgC/m^2
-            sim.ChlArea(iTimenow) = ChlArea; 
+            sim.ChlArea(iTimenow) = ChlArea;
             sim.ChlVolume(iTimenow,:) = ChlVolume;
         end
         sim.eHTL = sim.ProdHTL./sim.ProdNet;
@@ -154,7 +161,7 @@ switch sim.p.nameModel
         end
 
     case 'global'
-        
+
         if ~isfield(sim,'ProdGross')
             sLibName = loadNUMmodelLibrary();
             ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
@@ -189,7 +196,7 @@ switch sim.p.nameModel
             L = sim.L;
             T = sim.T;
             p = sim.p;
-            
+
             for iTime = ixTime
                 for i = 1:nX
                     for j = 1:nY
@@ -307,8 +314,8 @@ switch sim.p.nameModel
 
 end
 
-function Bphyto = calcBphyto(B, rates) % Calculate the phytoplankton biomass
-    Bphyto = sum( B .* rates.jLreal./(rates.jLreal+rates.jFreal+rates.JDOCreal) );
-end
+    function Bphyto = calcBphyto(B, rates) % Calculate the phytoplankton biomass
+        Bphyto = sum( B .* rates.jLreal./(rates.jLreal+rates.jFreal+rates.JDOCreal) );
+    end
 
 end
