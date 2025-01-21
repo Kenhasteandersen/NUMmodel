@@ -44,7 +44,6 @@ switch sim.p.nameModel
             T = sim.T;
             if sim.p.nNutrients==3
                 u = [sim.N(i), sim.DOC(i),sim.Si(i), sim.B(i,:)];
-
             else
                 u = [sim.N(i), sim.DOC(i), sim.B(i,:)];
             end
