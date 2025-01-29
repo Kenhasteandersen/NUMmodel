@@ -4,13 +4,22 @@
 % Requires that the library is loaded with a setup which matches sim and
 % that it is setup with bParallel=true.
 %
+% In:
+%  sim - simulation structure
+%
+% Optional:
+%  sProjection - the projection to use
+%  bPlot - Whether to make the plot (default = true)
+%  bOnlySurface - Whether to only analyse surface values (default = false)
+%
 function sim = plotGlobalPhytoplankton(sim, options)
 arguments
     sim struct;
     options.sProjection = 'fast'; %projection to use. Defaults to 'fast'. Other projections
     %               requires that the mapping toolbox is installed.
     %               Good projection is 'eckert4'.
-    options.bPlot = true;
+    options.bPlot = true; % Whether to make the plot
+    options.bOnlySurface = false; % Whether to only use the surface or the entire depth
 end
 sLibName = loadNUMmodelLibrary();
 ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
@@ -29,6 +38,9 @@ BphytoOthers = Bphyto;
 nX = length(sim.x);
 nY = length(sim.y);
 nZ = length(sim.z);
+if options.bOnlySurface
+    nZ = 1;
+end
 %
 % Extract fields from sim:
 %
