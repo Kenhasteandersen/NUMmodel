@@ -1,5 +1,16 @@
 %
-% Setup with generalists, diatoms, passive and active copepods, and POM
+% Setup with generalists, diatoms, passive and active copepods, and POM.
+%
+% In:
+%   mAdultPassive - the adult masses of passive copepods (default [0.2 5])
+%   mAdultActive  - the adult masses of active copepods (logspace(0,3,3) )
+%   n             - No. of unicellular size groups (10)
+%   nCopepods     - No. of stages in the copepod groups (6)
+%   nPOM          - No. of POM size groups (1)
+%   bParallel     - whether to prepare a parallel run (FALSE)
+%
+% Out:
+%   p             - The parameter structure
 %
 function p = setupNUMmodel(mAdultPassive, mAdultActive, n, nCopepods, nPOM, options)
 
