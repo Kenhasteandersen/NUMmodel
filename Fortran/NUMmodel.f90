@@ -586,6 +586,10 @@ contains
          group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) &
             * upositive(ixStart(iGroup):ixEnd(iGroup))
        end do
+      else
+         do iGroup = 1, nGroups
+            group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) 
+          end do
      end if
     !
     ! Calc derivatives of unicellular groups (predictor step)
@@ -960,6 +964,7 @@ contains
      !
      do iGroup = 1, nGroups
         group(iGroup)%spec%mortHTL = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
+        pHTL( ixStart(iGroup):ixEnd(iGroup) ) = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) ) ! Needed for some odd reason
      end do
    else
      !
