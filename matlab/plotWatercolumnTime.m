@@ -16,8 +16,8 @@ function plotWatercolumnTime(sim, lat, lon, options)
 
 arguments
     sim struct;
-    lat double = [];
-    lon double = [];
+    lat double = 60;
+    lon double = -40;
     options.bNewPlot logical = true;
     options.depthMax {mustBePositive} = [];
     options.bOnlyLastYear = false;
