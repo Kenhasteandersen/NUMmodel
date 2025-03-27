@@ -1,7 +1,7 @@
 %
 % Plot annual average biomass of active and passive copepods
 %
-function plotGlobalCopepods(sim, options)
+function [Bactive, Bpassive] = plotGlobalCopepods(sim, options)
 arguments
     sim struct;
     options.sProjection string = 'fast';
