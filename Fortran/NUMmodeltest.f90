@@ -50,7 +50,7 @@ program NUMmodeltest
   allocate(dudt(nGrid))
   u00(idxN) = 1.d0
   u00(idxDOC) = 0.01d0
-  u00(idxSi) = 0.d0
+  u00(idxSi) = 0.01d0
   do i = idxB, nGrid
      u00(i) = 0.0686d0 !+ 0.1*(i-2)
   end do
@@ -65,7 +65,7 @@ program NUMmodeltest
   !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
   
-  !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
+  call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
   !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
   !call printRates()
 
@@ -75,6 +75,8 @@ program NUMmodeltest
   !      write(*,*) getCbalanceGeneralists(spec, u00(idxDOC), dudt(idxDOC), u00(idxB:nGrid), dudt(idxB:nGrid))    
   !end select
   
+call setHTL(0.1d0, 1.d0, logical(.false.,1),logical(.false.,1),logical(.true.,1))
+
   call calcDerivatives(u00, 60.d0, 15.d0, 0.1d0, dudt)
   call printRates()
   write(*,*) dudt

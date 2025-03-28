@@ -245,8 +245,8 @@ contains
    end do
    ! POM with nPOM size classes and max size 1 ugC:
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
-   call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
-   call setHTL(1.d0, 0.03d0, logical(.true.,1), logical(.false.,1), logical(.true.,1)) ! Only HTL on copepods
+   call parametersFinalize(0.13d0, logical(.true.,1), logical(.false.,1))
+   call setHTL(1.d0, 0.13d0, logical(.true.,1), logical(.false.,1), logical(.true.,1)) ! Only HTL on copepods
   end subroutine setupNUMmodel
 
   ! -----------------------------------------------
@@ -586,6 +586,10 @@ contains
          group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) &
             * upositive(ixStart(iGroup):ixEnd(iGroup))
        end do
+      else
+         do iGroup = 1, nGroups
+            group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) 
+          end do
      end if
     !
     ! Calc derivatives of unicellular groups (predictor step)
@@ -894,7 +898,7 @@ contains
       end do
     end subroutine setSinking
   
-    !
+  !
   ! Set the "HTL" mortality experienced by the largest groups.
   !
   ! IN:
@@ -907,14 +911,17 @@ contains
   !  boolCopepodsOnly : If true, only copepods are affected (but still with the size selectivity)
   !
   ! If the mortality is constant (boolQuadraticHTL=false) then the mortality is at a level 
-  ! of mortalityHTL at mHTL. The mortality may decline from there is boolDecliningHTL = true.
+  ! of mortalityHTL at mHTL. The mortality may decline with size if boolDecliningHTL = true.
   !
   ! If the mortality is "quadratic" (boolQuadratic=true) then the mortality is
-  ! at a level mortalityHTL at mHTL if the biomass density is 1 (ugC/l) / ugC.
+  ! at a level mortalityHTL at mHTL if the biomass density is 1 (ugC/l) / ugC. Further, the mortality
+  ! is corrected for the width of the size groups. 
   !
   ! The decline in mortality (boolDecliningHTL=true) is set such that the mortality
   ! is mortalityHTL at a mass mRef = .1 ugC.
   !
+  ! If boolCopepodsOnly=true then the HTL mortality affects only copepods.
+  !  
   subroutine setHTL(mHTL, mortalityHTL, boolQuadraticHTL, boolDecliningHTL, boolCopepodsOnly)
    real(dp), intent(in):: mHTL ! The size where HTL is 50% of max
    real(dp), intent(in):: mortalityHTL ! The level of HTL mortality (at a reference size of 1 ugC
@@ -957,6 +964,7 @@ contains
      !
      do iGroup = 1, nGroups
         group(iGroup)%spec%mortHTL = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
+        pHTL( ixStart(iGroup):ixEnd(iGroup) ) = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) ) ! Needed for some odd reason
      end do
    else
      !
@@ -996,8 +1004,11 @@ contains
  subroutine getMortHTL(mortalityHTL, bQuadratic)
    real(dp), dimension (nGrid-idxB+1), intent(inout):: mortalityHTL
    logical(1), intent(out):: bQuadratic
+   integer:: iGroup
 
-   mortalityHTL = pHTL( idxB:nGrid )
+   do iGroup = 1, nGroups
+      mortalityHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) ) = group(iGroup)%spec%mortHTL
+   end do
    bQuadratic = bQuadraticHTL
 end subroutine getMortHTL
 

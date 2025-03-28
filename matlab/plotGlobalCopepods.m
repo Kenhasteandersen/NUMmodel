@@ -14,7 +14,7 @@ Bpassive = calcBiomassGroup(sim,10);
 %%
 % plot
 %
-if bPlot
+if options.bPlot
     clf
     tiledlayout(2,1)
 
