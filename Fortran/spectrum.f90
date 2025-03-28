@@ -16,7 +16,7 @@ module spectrum
      real(dp), dimension(:), allocatable:: m  ! Geometric center mass of size-bin
      real(dp), dimension(:), allocatable:: mLower  ! Smallest size in the bin
      real(dp), dimension(:), allocatable:: mDelta   ! Width of the bin
-     real(dp), dimension(:), allocatable:: z ! Ratio btw upper and lower size of bin
+     real(dp), dimension(:), allocatable:: z ! Ratio btw lower and upper size of bin
      ! Feeding:
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width

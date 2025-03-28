@@ -102,7 +102,7 @@ contains
     class(spectrumDiatoms), intent(inout):: this
     real(dp), intent(in):: gammaN, gammaSi, gammaDOC
     real(dp), intent(in):: L, N, Si, DOC
-    real(dp):: JmaxT, tmp
+    real(dp):: JmaxT, tmp, f
     real(dp):: dN(this%n), dSi(this%n), Jnetp(this%n), Jnet(this%n)
     integer:: i
 
@@ -152,8 +152,10 @@ contains
        !
        ! Synthesis limitation:
        !
+       f = 0
        if ( Jnet(i) .gt. this%JlossPassive(i) ) then ! Apply FR only if net growth is positive
-         Jnet(i) = JmaxT * Jnet(i) / ( Jnet(i) + JmaxT )
+         f = Jnet(i) / ( Jnet(i) + JmaxT )
+         Jnet(i) = JmaxT * f
        endif
        this%Jtot(i) = Jnet(i) - this%JlossPassive(i)
        ! Calculate synthesis-limited uptakes:
@@ -192,7 +194,7 @@ contains
          bSi*this%JSireal(i) + &
          max(0.d0, bg*Jnet(i))
        
-       this%f(i) = 0.d0
+       this%f(i) = f
       end do
 
      ! Needed to get the right rates with getRates:
