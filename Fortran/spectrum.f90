@@ -142,6 +142,7 @@ contains
     this%JNlossLiebig = 0.d0
     this%JNloss = 0.d0
     this%jCloss = 0.d0
+    this%mortHTL = 0.d0
   end subroutine initSpectrum
 
   !
