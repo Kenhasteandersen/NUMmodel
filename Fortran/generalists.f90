@@ -146,10 +146,8 @@ contains
        !
        ! Synthesis limitation:
        !
-       f = 0
        if ( this%Jnet(i) .gt. this%JlossPassive(i) ) then ! Apply FR only if net growth is positive
-        f = this%Jnet(i) / ( this%Jnet(i) + JmaxT )
-         this%Jnet(i) = JmaxT * f
+         this%Jnet(i) = JmaxT * this%Jnet(i) / ( this%Jnet(i) + JmaxT )
        endif
        this%Jtot(i) = this%Jnet(i) - this%JlossPassive(i)
 

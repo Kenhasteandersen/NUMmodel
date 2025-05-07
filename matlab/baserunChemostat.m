@@ -4,9 +4,9 @@
 % Out:
 %  sim: Structure holding the results of the simulation
 %
-function sim = baserunChemostat()
 
-p = setupNUMmodel();       % Sets up the model
+
+p = setupGeneralistsOnly();       % Sets up the model
 p = parametersChemostat(p);% Sets up the chemostat environment
 
 p.tEnd = 500; % Run 500 days

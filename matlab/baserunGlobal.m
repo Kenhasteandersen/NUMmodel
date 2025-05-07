@@ -17,7 +17,7 @@ function sim = baserunGlobal(p)
 %
 if (nargin==0)
     p = setupGeneralistsOnly(10, true); % Use 10 size groups and parallel execution
-    p = parametersGlobal(p); % Use standard low-res model
+    p = parametersGlobal(p,2); % Use standard low-res model
 end
 %
 % Simulate
