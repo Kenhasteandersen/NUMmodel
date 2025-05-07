@@ -1,7 +1,7 @@
 %
 % Make a set of basic plots of a simulation
 %
-function plotSimulation(sim, options)
+function plotSimulationTest(sim, options)
 
 arguments
     sim = struct;
@@ -33,36 +33,37 @@ switch sim.p.nameModel
         end
         
     case 'watercolumn'
-                
-        figure(1)
+               
+        a=figure(1);
         clf
         plotWatercolumnTime(sim,'depthMax',200);
-        
-        figure(2)
-        clf
-        plotWatercolumn(sim,options.tDayPlot,'depthMax',200);
-        
-        figure(3)
-        % Find the depth of maximum biomass:
-        Bdepth = sum( sim.B(options.tDayPlot,:,:),3 );
-        iDepth = find(Bdepth==max(Bdepth));
-         
-        %plotSizespectrum(sim,options.tDayPlot,iDepth);
-        plotSizeSpectrumTest(sim,options.tDayPlot,iDepth);
-        % plotSizespectrum(sim,iDepth);
 
-        figure(4)
-        % Find the depth of maximum average biomass:
-        Bdepth = sum(sum( sim.B(:,:,:),3 ),1);
-        iDepth = find(Bdepth==max(Bdepth));
-        plotSizespectrumTime(sim,iDepth);
- 
-        %figure(5)
-        %plotWatercolumnCommunity(sim)
+
+        b=figure(2);
+        clf
+        plotWatercolumntest(sim,1500,'depthMax',200);
+
+        % figure(3)
+        % % Find the depth of maximum biomass:
+        % Bdepth = sum( sim.B(options.tDayPlot,:,:),3 );
+        % iDepth = find(Bdepth==max(Bdepth));
+        % 
+        % %plotSizespectrum(sim,options.tDayPlot,iDepth);
+        % plotSizeSpectrumTest(sim,options.tDayPlot,iDepth);
+        % % plotSizespectrum(sim,iDepth);
+        % 
+        % figure(4)
+        % % Find the depth of maximum average biomass:
+        % Bdepth = sum(sum( sim.B(:,:,:),3 ),1);
+        % iDepth = find(Bdepth==max(Bdepth));
+        % plotSizespectrumTime(sim,iDepth);
+        % 
+        % %figure(5)
+        % %plotWatercolumnCommunity(sim)
 
         %figure(6)
         %plotWatercolumnCommunity(sim, day)
-   
+
     case 'global'
         figure(1)
         clf

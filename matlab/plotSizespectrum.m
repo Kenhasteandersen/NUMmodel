@@ -74,6 +74,9 @@ if ~isfield('sim','rates')
     sim.rates = getRates(sim.p, u, s.L, s.T);
 end
 s.rates = sim.rates;
+sim_rates=sim.rates;
+save('sim_rates.mat', 'sim_rates');
+show_s=s
 %
 % Setup tiles:
 %
@@ -92,6 +95,7 @@ set(gca,'XTickLabel','');
 nexttile
 
 %panelGains(sim.p,rates)
+
 panelGains(sim.p, sim.rates);
 set(gca,'XTickLabel','');
 %

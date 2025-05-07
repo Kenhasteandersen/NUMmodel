@@ -7,9 +7,9 @@
 %             (default to false).
 %
 % Out:
-%  The library name and the path of the NUMmodel library
+%  The library name.
 %
-function [sLibname, path] = loadNUMmodelLibrary(bParallel)
+function sLibname = loadNUMmodelLibrary(bParallel)
 
 if nargin==0
     bParallel = false;
@@ -63,5 +63,3 @@ else
             strcat(path,'/../Fortran/NUMmodel_wrap_colmajor4matlab.h'));
     end
 end
-
-path = regexprep(path,'(\w+)$',''); % Removes "matlab"

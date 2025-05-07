@@ -9,10 +9,11 @@
 %
 % Returns a handle to all the patches
 %
-function h = panelField(x,y,z)
+function h = panelField(x,y,z,ax)
 
 arguments
     x,y,z double;
+    ax=[]
 end
 %
 % Check size of z:
@@ -28,12 +29,14 @@ end
 for i = 1:length(x)-1
     for j = 1:length(y)-1
         if length(dim)==2
+            disp("hip hip hip")
             h(i,j) = patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j), 'edgecolor','none');
         else
-            h(i,j) = patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j,:), 'edgecolor','none');
+            %disp('houra')
+            h(i,j) = patch(x(i+[0,1,1,0]), y(j+[0,0,1,1]), z(i,j,:), 'edgecolor','none','parent', ax);
         end
     end
 end
 
-axis tight
+%axis tight
 end

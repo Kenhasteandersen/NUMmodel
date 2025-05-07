@@ -14,13 +14,17 @@ arguments
     lon double = -15;
 end
 
-p = setupNUMmodel();
+close all force;
+clc;
+p = setupGeneralistsDiatoms();
 
 p = parametersWatercolumn(p);
-p.tEnd = 5*365;
+p.tEnd = 365;
 
 sim = simulateWatercolumn(p, lat,lon);
+save('sim.mat', 'sim');
+exploreSimulations2(sim);
 
-plotSimulation(sim)
+%plotSimulationTest(sim)
 
-checkConservation(sim);
+%checkConservation(sim);

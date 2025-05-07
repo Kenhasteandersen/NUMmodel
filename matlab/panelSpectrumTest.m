@@ -10,7 +10,7 @@
 % Options:
 %  bPlotStrategies - whether to plot the strategies in the background
 %
-function panelSpectrum(sim, ixTime, options)
+function panelSpectrumTest(sim, ixTime, options)
 arguments
     sim struct;
     ixTime {mustBeInteger} = length(sim.t); % Defaults to last time step
@@ -18,9 +18,7 @@ arguments
 end
 
 p = sim.p;
-sim_b=sim.B;
-save('p.mat', 'p');
-save('sim_B.mat', 'sim_b');
+
 if options.bPlotStrategies
     rates=sim.rates;
     %
