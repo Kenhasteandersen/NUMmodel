@@ -144,3 +144,5 @@ lib/libNUMmodel_R.so
 *.so
 *.mat
 matlab/sim.mat
+*.mat
+matlab/sim.mat
