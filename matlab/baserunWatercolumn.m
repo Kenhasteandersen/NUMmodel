@@ -22,7 +22,7 @@ p = parametersWatercolumn(p);
 p.tEnd = 365;
 
 sim = simulateWatercolumn(p, lat,lon);
-save('sim.mat', 'sim');
+
 exploreSimulations2(sim);
 
 %plotSimulationTest(sim)
