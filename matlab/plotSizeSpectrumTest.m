@@ -5,16 +5,19 @@ arguments
     iDepth {mustBeInteger} = 1;
     lat double = [];
     lon double = [];
-    parent {mustBeA(parent, {'matlab.ui.Figure', 'matlab.ui.container.Panel', 'matlab.ui.container.GridLayout', 'matlab.graphics.layout.TiledChartLayout'})} = []
+    parent = []
 end
 
 
 % Create tiledlayout depending on parent
 if isempty(parent)
+    disp("okayyyyyy")
     tl = tiledlayout(4, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
 elseif isa(parent, 'matlab.graphics.layout.TiledChartLayout')
+    disp(parent)
     tl = parent; % Reuse the parent tiledlayout if already given
 else
+    disp("youpiiiiiiii")
     tl = tiledlayout(parent, 4, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
 end
 
@@ -74,22 +77,22 @@ sim_rates = sim.rates;
 save('sim_rates.mat', 'sim_rates');
 
 % --- Now plotting on the tiles ---
-nexttile(tl)
-panelSpectrum(s, iTime, bPlotStrategies=false);
+ax1=nexttile(tl)
+panelSpectrum(s, iTime, ax1,bPlotStrategies=false);
 xlabel('');
-set(gca, 'XTickLabel', '');
+set(ax1, 'XTickLabel', '');
 
-nexttile(tl)
-panelGains(sim.p, sim.rates);
-set(gca, 'XTickLabel', '');
+ax2=nexttile(tl)
+panelGains(sim.p, sim.rates,[],ax2);
+set(ax2,'XTickLabel', '');
 
-nexttile(tl)
-panelLosses(sim.p, sim.rates);
-set(gca, 'XTickLabel', '');
-xlabel('');
-
-nexttile(tl)
-panelTrophicLevel(sim.p, s.B(iTime, :), sim.rates);
+% ax3=nexttile(tl)
+% panelLosses(sim.p, sim.rates);
+% set(gca,ax3 ,'XTickLabel', '');
+% xlabel('');
+% 
+% ax4=nexttile(tl)
+% panelTrophicLevel(sim.p, s.B(iTime, :), sim.rates,ax4);
 
 if strcmp(sim.p.nameModel, 'watercolumn')
     sgtitle(tl, ['Day = ', num2str(time), ...

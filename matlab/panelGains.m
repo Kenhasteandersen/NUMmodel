@@ -1,70 +1,64 @@
-function panelGains(p,rates, bDrawStrategies)
-
+function h = panelGains(p, rates, bDrawStrategies, ax)
 arguments
-    p, rates struct;
-    bDrawStrategies = false;
+    p struct
+    rates struct
+    bDrawStrategies = false
+    ax = []
 end
 
-% brackground depending on trophic strategies
+% Activate axis
+if isempty(ax)
+    ax = gca;
+end
+axes(ax); % Activate
+
+cla(ax); % Clear axis content
+hold(ax, 'on');
+
+% Output handle storage
+h.lines = [];
+h.legend = [];
+
+% Background strategies
 if bDrawStrategies
-    calcTrophicStrategy(p, rates);
+    calcTrophicStrategy(p, rates); % No handle returned here
 end
 
-
+% Plot gains per group
 for iGroup = 1:p.nGroups
-    ix = (p.ixStart(iGroup):p.ixEnd(iGroup))-p.idxB+1;
-    m = p.m(ix+p.idxB-1);
+    ix = (p.ixStart(iGroup):p.ixEnd(iGroup)) - p.idxB + 1;
+    m = p.m(ix + p.idxB - 1);
 
-    %
-    % Generalists and copepods:
-    %
-    if ((p.typeGroups(iGroup)~=3) && (p.typeGroups(iGroup)~=4))
-        semilogx(m, rates.jFreal(ix), 'r-', 'linewidth',2)
-        hold on
-        semilogx(m, rates.jN(ix), 'b-','linewidth',2)
-        semilogx(m, rates.jLreal(ix), 'g-','linewidth',2)
-        semilogx(m, rates.jDOC(ix), 'color',[181 100 30]/256,'linewidth',2)
-        semilogx(m, rates.jMax(ix), 'k:')
-        % Total:
-        semilogx(m, rates.jTot(ix), 'k-', 'linewidth',2)
-
+    if ((p.typeGroups(iGroup) ~= 3) && (p.typeGroups(iGroup) ~= 4))
+        h.lines(end+1) = semilogx(ax, m, rates.jFreal(ix), 'r-', 'LineWidth', 2);
+        h.lines(end+1) = semilogx(ax, m, rates.jN(ix), 'b-', 'LineWidth', 2);
+        h.lines(end+1) = semilogx(ax, m, rates.jLreal(ix), 'g-', 'LineWidth', 2);
+        h.lines(end+1) = semilogx(ax, m, rates.jDOC(ix), 'Color', [181 100 30]/256, 'LineWidth', 2);
+        h.lines(end+1) = semilogx(ax, m, rates.jMax(ix), 'k:');
+        h.lines(end+1) = semilogx(ax, m, rates.jTot(ix), 'k-', 'LineWidth', 2);
     end
-    %
-    % Diatoms:
-    %
-    if ((p.typeGroups(iGroup)==3) || (p.typeGroups(iGroup)==4))
-        semilogx(m, rates.jSi(ix), 'color',[181 180 0]/256,'linewidth',2)
-        hold on
-        semilogx(m, rates.jN(ix), 'b--','linewidth',2)
-        semilogx(m, rates.jLreal(ix), 'g--','linewidth',2)
-        semilogx(m, rates.jDOC(ix), 'color',[181 100 30]/256,'linewidth',2)
-        semilogx(m, rates.jMax(ix), 'k:')
-        semilogx(m, rates.jTot(ix), 'k--', 'linewidth',2)
-    end
-    %
-    % Rates for copepods:
-    %
-    %if (p.typeGroups(iGroup) >= 10)
-    %    semilogx(m, rates.jF(ix), 'r-', 'linewidth',2)
-    %    hold on
-    %    semilogx(m, p.jFmax(ix),'k:')
-    %end
 
+    if ((p.typeGroups(iGroup) == 3) || (p.typeGroups(iGroup) == 4))
+        h.lines(end+1) = semilogx(ax, m, rates.jSi(ix), 'Color', [181 180 0]/256, 'LineWidth', 2);
+        h.lines(end+1) = semilogx(ax, m, rates.jN(ix), 'b--', 'LineWidth', 2);
+        h.lines(end+1) = semilogx(ax, m, rates.jLreal(ix), 'g--', 'LineWidth', 2);
+        h.lines(end+1) = semilogx(ax, m, rates.jDOC(ix), 'Color', [181 100 30]/256, 'LineWidth', 2);
+        h.lines(end+1) = semilogx(ax, m, rates.jMax(ix), 'k:');
+        h.lines(end+1) = semilogx(ax, m, rates.jTot(ix), 'k--', 'LineWidth', 2);
+    end
 end
 
+hold(ax, 'off');
 
-
-hold off
-ylim([0 2])
-xlim(calcXlim(p))
-ylabel('Gains (day^{-1})')
+ylim(ax, [0 2]);
+xlim(ax, calcXlim(p));
+ylabel(ax, 'Gains (day^{-1})');
 
 if isfield(p, 'ixSi')
-    cap={'Feeding','N','Light','Si','DOC','Max. growth rate','Growth rate'};
-    legend(cap, ...
-        'location','eastoutside','box','off')
+    cap = {'Feeding','N','Light','Si','DOC','Max. growth rate','Growth rate'};
 else
-    cap={'Feeding','N','Light','DOC','Max. growth rate','Growth rate'};
-    legend(cap, ...
-        'location','eastoutside','box','off')
+    cap = {'Feeding','N','Light','DOC','Max. growth rate','Growth rate'};
+end
+
+h.legend = legend(ax, cap, 'Location', 'eastoutside', 'Box', 'off');
 end
