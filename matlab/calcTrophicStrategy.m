@@ -5,10 +5,7 @@ arguments
     bDrawStrategies = true; % Whether to draw background rectangles
 end
 
-if isempty(ax) || ~isvalid(ax)
-    fig = figure;
-    ax = axes(fig);
-end
+
 
 rhoCN = 5.68;
 col = zeros(length(rates.jL), 3);

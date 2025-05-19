@@ -43,7 +43,7 @@ end
 hold(ax, 'off');
 xlim(ax, calcXlim(p));
 ylabel(ax, 'Losses (day^{-1})');
-xlabel(ax, 'Mass ({\mu}g_C)');
+%xlabel(ax, 'Mass ({\mu}g_C)');
 set(ax, 'XScale', 'log'); % Ensures logarithmic scale
 
 legend(ax, {'Predation', 'Respiration', 'Viral lysis', 'Passive exudation', 'HTL'}, ...

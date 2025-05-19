@@ -12,7 +12,7 @@ p = sim.p;
 if isempty(ax)
     ax = gca;
 end
-axes(ax); % Explicitly use given axis
+
 
 cla(ax); % Clear current content
 hold(ax, 'on');
@@ -77,7 +77,7 @@ end
 ylim(ax, [0.0001, 500]);
 xlim(ax, calcXlim(sim.p));
 
-xlabel(ax, 'Mass ({\mu}g_C)');
+%xlabel(ax, 'Mass ({\mu}g_C)');
 ylabel(ax, 'Sheldon biomass ({\mu}g_C/L)');
 
 lh = legend(ax, legendentries, sLegend, 'Box', 'off');
