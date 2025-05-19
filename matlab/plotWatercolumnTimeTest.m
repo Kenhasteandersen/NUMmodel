@@ -57,16 +57,16 @@ B(:,1,:) = B(:,2,:);
 
 if isa(appFigure, 'matlab.graphics.layout.TiledChartLayout')
     % appFigure is already a tiledlayout
-    disp('Using provided tiledlayout.');
+    
     returnPlot = appFigure;
     delete(allchild(returnPlot));  % Clear previous plots
 elseif isa(appFigure, {'matlab.ui.Figure', 'matlab.ui.container.Panel', 'matlab.ui.container.GridLayout'})
     % Create a new tiledlayout if given a Figure, Panel, or GridLayout
     if ~strcmp(plotType, 'Biomass')
-        disp("No biomass seen, creating new 1x1 layout")
+        
         returnPlot = tiledlayout(appFigure, 1, 1, 'TileSpacing', 'tight', 'Padding', 'loose');
     else
-        disp("Biomass detected, creating new multi-row layout")
+        
         returnPlot = tiledlayout(appFigure, sim.p.nGroups, 1, 'TileSpacing', 'tight', 'Padding', 'loose');
     end
 else
@@ -77,7 +77,7 @@ end
 if isempty(options.depthMax)
     options.depthMax = max(z);
 end
-ylimit = [-options.depthMax, 0];
+ylimit = [-400, 0];
 xlimit = [sim.t(1) sim.t(end)];
 if options.bOnlyLastYear
     xlimit(1) = sim.t(end)-365;

@@ -20,7 +20,7 @@ hold(ax, 'on');
 if options.bPlotStrategies
     rates = sim.rates;
     % Background color depending on trophic strategies
-    [strategy, col] = calcTrophicStrategy(p, rates);
+    [strategy, col] = calcTrophicStrategy(p, rates,ax);
 end
 
 sLegend = {};

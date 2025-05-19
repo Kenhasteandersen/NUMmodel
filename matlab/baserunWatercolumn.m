@@ -14,8 +14,7 @@ arguments
     lon double = -15;
 end
 
-close all force;
-clc;
+
 p = setupGeneralistsDiatoms();
 
 p = parametersWatercolumn(p);

@@ -11,13 +11,13 @@ end
 
 % Create tiledlayout depending on parent
 if isempty(parent)
-    disp("okayyyyyy")
+    
     tl = tiledlayout(4, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
 elseif isa(parent, 'matlab.graphics.layout.TiledChartLayout')
-    disp(parent)
+    
     tl = parent; % Reuse the parent tiledlayout if already given
 else
-    disp("youpiiiiiiii")
+    
     tl = tiledlayout(parent, 4, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
 end
 
@@ -76,29 +76,23 @@ s.rates = sim.rates;
 sim_rates = sim.rates;
 save('sim_rates.mat', 'sim_rates');
 
-% --- Now plotting on the tiles ---
-ax1=nexttile(tl)
+%% --- Now plotting on the tiles ---
+ax1=nexttile(tl);
 panelSpectrum(s, iTime, ax1,bPlotStrategies=false);
 xlabel('');
 set(ax1, 'XTickLabel', '');
 
-ax2=nexttile(tl)
-panelGains(sim.p, sim.rates,[],ax2);
+ax2=nexttile(tl);
+panelGainsTest(sim.p, sim.rates,[],ax2);
 set(ax2,'XTickLabel', '');
 
-% ax3=nexttile(tl)
-% panelLosses(sim.p, sim.rates);
-% set(gca,ax3 ,'XTickLabel', '');
-% xlabel('');
-% 
-% ax4=nexttile(tl)
-% panelTrophicLevel(sim.p, s.B(iTime, :), sim.rates,ax4);
+ax3=nexttile(tl);
+panelLosses(sim.p, sim.rates,[],ax3);
+set(ax3 ,'XTickLabel', '');
+xlabel('');
 
-if strcmp(sim.p.nameModel, 'watercolumn')
-    sgtitle(tl, ['Day = ', num2str(time), ...
-                 ', lat = ', num2str(sim.lat), char(176), ...
-                 ', lon = ', num2str(sim.lon), char(176), ...
-                 ', depth of max biomass: ', num2str(z(iDepth)), ' m']);
-end
+ax4=nexttile(tl);
+panelTrophicLevel(sim.p, s.B(iTime, :), sim.rates,ax4);
+
 
 end

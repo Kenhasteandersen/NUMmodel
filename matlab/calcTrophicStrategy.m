@@ -1,17 +1,18 @@
-%
-% Returns a vector of strategies determined by the uptake rates
-% Second return argument is colors corresponding to each strategy
-%
-function [strategy, col] = calcTrophicStrategy(p, rates, bDrawStrategies)
-
+function [strategy, col] = calcTrophicStrategy(p, rates, ax, bDrawStrategies)
 arguments
     p, rates struct
-    bDrawStrategies = true; % Whether to draw strategies in the background
+    ax = []; % Optional target axis
+    bDrawStrategies = true; % Whether to draw background rectangles
+end
+
+if isempty(ax) || ~isvalid(ax)
+    fig = figure;
+    ax = axes(fig);
 end
 
 rhoCN = 5.68;
-
-col = zeros(length(rates.jL),3);
+col = zeros(length(rates.jL), 3);
+strategy = cell(length(rates.jL), 1);
 
 for i = 1:length(rates.jL)
     strategy{i} = 'Unknown';
@@ -32,69 +33,69 @@ for i = 1:length(rates.jL)
     if (rates.jFreal(i)/rates.jL(i) > 0.25) || (rates.jF(i) > rates.jN(i)*rhoCN)
         strategy{i} = 'Mixotroph';
         col(i,:) = [1,0.749,0.749];
-
     end
 
     if (rates.jNloss(i) > 1e-5) && (rates.jN(i) < rates.jF(i)/rhoCN)
         strategy{i} = 'Heterotroph';
         col(i,:) = [1,0.6,0.6];
     end
-
 end
 
 if bDrawStrategies
-    %
-    % Background color depending on trophic strategies:
-    %
-    iGroup = 1; %select the group for which the background is drawn
+    % --- Draw background color according to trophic strategy ---
+    % No 'axes(ax)' here to avoid creating new figure windows
+    hold(ax, 'on');
+
+    iGroup = 1;
     ix = (p.ixStart(iGroup):p.ixEnd(iGroup));
     m = p.m(ix);
-    color = col(ix-(p.idxB-1),:);
-    colori = color(1,:);
+    color = col(ix - (p.idxB - 1), :);
+    stratn = strategy(ix - (p.idxB - 1));
+
     Xlim = calcXlim(p);
     Xmin = Xlim(1);
     Xmax = Xlim(2);
-    rectangle(Position=[Xmin,0.0001,(m(2)+m(1))/2-Xmin,500], FaceColor=colori, EdgeColor=colori);
-    hold on
-    stratn = strategy(ix-(p.idxB-1));
-    captionedstrat = [stratn(1)];
-    color2caption = [colori];
-    for i = 2:length(ix)-1
-        colori=color(i,:);
-        step=(m(i)+m(i+1))/2-(m(i-1)+m(i))/2;
-        rectangle(Position=[(m(i-1)+m(i))/2,0.0001,step,500], FaceColor=colori, EdgeColor=colori);
+    Ymin = 0.0001;
+    Ymax = 500;
 
-        %color for the legend, removing duplicates
-        if ~ismember(stratn(i), captionedstrat)
-            captionedstrat=[captionedstrat,stratn(i)];
-            color2caption=cat(1,color2caption,colori);
+    colori = color(1,:);
+    rectangle(ax, 'Position', [Xmin, Ymin, (m(2)+m(1))/2 - Xmin, Ymax - Ymin], ...
+        'FaceColor', colori, 'EdgeColor', colori);
+
+    captionedstrat = {stratn{1}};
+    color2caption = colori;
+
+    for i = 2:length(ix)-1
+        colori = color(i,:);
+        step = (m(i+1)+m(i))/2 - (m(i-1)+m(i))/2;
+        rectangle(ax, 'Position', [(m(i-1)+m(i))/2, Ymin, step, Ymax - Ymin], ...
+            'FaceColor', colori, 'EdgeColor', colori);
+
+        % Add to legend if new strategy not already included
+        if ~ismember(stratn{i}, captionedstrat)
+            captionedstrat{end+1} = stratn{i};
+            color2caption = [color2caption; colori];
         end
     end
 
-    colori=color(length(ix),:);
-    rectangle(Position=[(m(length(ix)-1)+m(length(ix)))/2,0.0001,Xmax-(m(length(ix)-1)+m(length(ix)))/2,500], FaceColor=colori, EdgeColor=colori);
-    if ~ismember(stratn(length(ix)), captionedstrat)
-        captionedstrat=[captionedstrat,stratn(length(ix))];
-        color2caption=cat(1,color2caption,colori);
+    % Last rectangle
+    colori = color(end,:);
+    xStart = (m(end-1)+m(end))/2;
+    rectangle(ax, 'Position', [xStart, Ymin, Xmax - xStart, Ymax - Ymin], ...
+        'FaceColor', colori, 'EdgeColor', colori);
+
+    if ~ismember(stratn{end}, captionedstrat)
+        captionedstrat{end+1} = stratn{end};
+        color2caption = [color2caption; colori];
     end
 
-    % Empty plots for setting legend
-    dum=[];
-    for i=1:length(captionedstrat)
-        dummyplot=plot(NaN, NaN, 's', 'MarkerSize', 10, 'MarkerFaceColor', color2caption(i,:));
-        dum=[dum,dummyplot];
+    % Dummy plots for legend
+    dum = gobjects(1, length(captionedstrat));
+    for i = 1:length(captionedstrat)
+        dum(i) = plot(ax, NaN, NaN, 's', 'MarkerSize', 10, ...
+            'MarkerFaceColor', color2caption(i,:), 'DisplayName', captionedstrat{i});
     end
 
-    set(gca,'XScale', 'log', "Layer", "top")
+    set(ax, 'XScale', 'log', "Layer", "top");
 end
-
-
-
-% strategy = rep('Unknown', p$n)
-%   strategy[r$jN*p$rhoCN>r$jL] = "Light limited"
-%   strategy[r$jL>=r$jN*p$rhoCN] = "Nutrient limited"
-%   strategy[r$jDOC > r$jLreal] = "Osmoheterotroph"
-%   strategy[(r$jNloss>1e-5) & (r$JN<r$JF/p$rhoCN)] = "Heterotroph"
-%   strategy[((r$jFreal/r$jL > 0.25) | (r$jF>r$jN*p$rhoCN) )& !strategy=="Heterotroph"] = "Mixotroph"
-%   return(strategy)
-% }
+end
