@@ -77,7 +77,7 @@ end
 if isempty(options.depthMax)
     options.depthMax = max(z);
 end
-ylimit = [-400, 0];
+ylimit = [-435, 0];
 xlimit = [sim.t(1) sim.t(end)];
 if options.bOnlyLastYear
     xlimit(1) = sim.t(end)-365;
