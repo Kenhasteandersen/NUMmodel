@@ -79,7 +79,7 @@ save('sim_rates.mat', 'sim_rates');
 %% --- Now plotting on the tiles ---
 ax1=nexttile(tl);
 panelSpectrum(s, iTime, ax1,bPlotStrategies=false);
-xlabel('');
+
 set(ax1, 'XTickLabel', '');
 
 ax2=nexttile(tl);
@@ -89,7 +89,7 @@ set(ax2,'XTickLabel', '');
 ax3=nexttile(tl);
 panelLosses(sim.p, sim.rates,[],ax3);
 set(ax3 ,'XTickLabel', '');
-xlabel('');
+
 
 ax4=nexttile(tl);
 panelTrophicLevel(sim.p, s.B(iTime, :), sim.rates,ax4);
