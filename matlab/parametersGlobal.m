@@ -87,7 +87,7 @@ check(p.pathTemp);
 %
 % Numerical parameters:
 %
-p.tEnd =365; % In days
+p.tEnd = 365; % In days
 p.tSave = 365/12; % How often to save results (monthly)
 p.bTransport = true; % Whether to do the transport with the transport matrix
 %
