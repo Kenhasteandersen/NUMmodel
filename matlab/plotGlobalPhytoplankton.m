@@ -3,20 +3,30 @@
 %
 % Requires that the library is loaded with a setup which matches sim and
 % that it is setup with bParallel=true.
-% 
+%
+% In:
+%  sim - simulation structure
+%
+% Optional:
+%  sProjection - the projection to use
+%  bPlot - Whether to make the plot (default = true)
+%  bOnlySurface - Whether to only analyse surface values (default = false)
+%
 function sim = plotGlobalPhytoplankton(sim, options)
 arguments
     sim struct;
     options.sProjection = 'fast'; %projection to use. Defaults to 'fast'. Other projections
-%               requires that the mapping toolbox is installed. 
-%               Good projection is 'eckert4'.
+    %               requires that the mapping toolbox is installed.
+    %               Good projection is 'eckert4'.
+    options.bPlot = true; % Whether to make the plot
+    options.bOnlySurface = false; % Whether to only use the surface or the entire depth
 end
 sLibName = loadNUMmodelLibrary();
 ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
 % Get grid volumes:
 %load(sim.p.pathGrid,'dv','dz','dx','dy');
 dz = sim.dznom;
-ix = ~isnan(sim.N(1,:,:,1)); % Find all relevant grid cells
+%ix = ~isnan(sim.N(1,:,:,1)); % Find all relevant grid cells
 
 
 Bphyto = zeros(length(sim.t), length(sim.x), length(sim.y));
@@ -28,6 +38,9 @@ BphytoOthers = Bphyto;
 nX = length(sim.x);
 nY = length(sim.y);
 nZ = length(sim.z);
+if options.bOnlySurface
+    nZ = 1;
+end
 %
 % Extract fields from sim:
 %
@@ -65,7 +78,7 @@ parfor iTime = ixTime
                     end
                     [Bphytotmp, Bzootmp, Bbacteriatmp] = ...
                         calcPhytoZoo(p, u, L(iTime,i,j,k), T(iTime,i,j,k), sLibName);
-                    
+
                     conv = dz(k);%squeeze(dz(i,j,k));
                     Bphyto(iTime,i,j) = Bphyto(iTime,i,j) + sum(Bphytotmp)*conv; % mgC/m2
                     Bbacteria(iTime,i,j) = Bbacteria(iTime,i,j) + sum(Bbacteriatmp)*conv; % mgC/m2
@@ -86,19 +99,23 @@ sim.Bdiatoms = BphytoDiatoms;
 %%
 % Make plot:
 %
-clf
-tiledlayout(4,1)
+if options.bPlot
+    clf
+    tiledlayout(4,1)
 
-nexttile
-panelGlobal(sim.x, sim.y, mean(sim.Bbacteria(ixTime,:,:),1), sTitle="Bacteria", sUnits="mg_C/m^2", sProjection=options.sProjection)
+    nexttile
+    panelGlobal(sim.x, sim.y, mean(sim.Bbacteria(ixTime,:,:),1), sTitle="Bacteria", sUnits="mg_C/m^2", sProjection=options.sProjection)
 
 
-nexttile
-panelGlobal(sim.x, sim.y, mean(sim.Bphyto(ixTime,:,:),1), sTitle="Phytoplankton", sUnits="mg_C/m^2", sProjection=options.sProjection)
+    nexttile
+    panelGlobal(sim.x, sim.y, mean(sim.Bphyto(ixTime,:,:),1), sTitle="Phytoplankton", sUnits="mg_C/m^2", sProjection=options.sProjection)
 
-nexttile
-panelGlobal(sim.x, sim.y, mean(sim.Bzoo(ixTime,:,:),1), sTitle="Zooplankton", sUnits="mg_C/m^2", sProjection=options.sProjection)
+    nexttile
+    panelGlobal(sim.x, sim.y, mean(sim.Bzoo(ixTime,:,:),1), sTitle="Zooplankton", sUnits="mg_C/m^2", sProjection=options.sProjection)
 
-nexttile
-panelGlobal(sim.x, sim.y, mean(sim.Diatomratio(ixTime,:,:),1), sTitle="Diatom ratio", sUnits="", sProjection=options.sProjection)
-clim([0 1])
+    nexttile
+    panelGlobal(sim.x, sim.y, mean(sim.Diatomratio(ixTime,:,:),1), sTitle="Diatom ratio", sUnits="", sProjection=options.sProjection)
+    clim([0 1])
+end
+
+end

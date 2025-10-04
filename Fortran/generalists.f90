@@ -41,7 +41,7 @@ contains
     integer:: i
     !real(dp), parameter:: rho != 0.4*1d6*1d-12
     real(dp) :: mMinGeneralist, mMaxGeneralist, rho
-    real(dp) :: alphaL, rLstar !Light uptake
+    real(dp) :: alphaL, rLstar, mUpperAlphaL !Light uptake
     real(dp) :: alphaN, rNstar !osmotrophic uptake
     real(dp) :: alphaF, cF !Phagotrophy
     real(dp) :: cLeakage, delta, alphaJ, cR !Metabolism
@@ -54,6 +54,7 @@ contains
     call read_input(inputfile,'generalists','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
     call read_input(inputfile,'generalists','alphaL',alphaL,errorio,errorstr)
+    call read_input(inputfile,'generalists','mUpperAlphaL',mUpperAlphaL,errorio,errorstr)
     call read_input(inputfile,'generalists','rLstar',rLstar,errorio,errorstr)
     call read_input(inputfile,'generalists','alphaN',alphaN,errorio,errorstr)
     call read_input(inputfile,'generalists','rNstar',rNstar,errorio,errorstr)
@@ -87,6 +88,11 @@ contains
 
     this%AN = alphaN * this%r**(-2.) / (1.+(this%r/rNstar)**(-2.)) * this%m
     this%AL = alphaL/this%r * (1-exp(-this%r/rLstar)) * this%m * (1.d0-this%nu)
+    do i = 1, n
+      if (this%m(i) .gt. mUpperAlphaL) then
+        this%AL(i) = 0.d0
+      end if
+    end do
     this%AF = alphaF*this%m
     this%JFmax = cF/this%r * this%m
     
@@ -106,13 +112,13 @@ contains
     class(spectrumGeneralists), intent(inout):: this
     real(dp), intent(in):: gammaN, gammaDOC
     real(dp), intent(in):: L, N, DOC
-    real(dp):: f, JmaxT
+    real(dp):: f, JmaxT, tmp
     real(dp):: Jnetp(this%n)
     integer:: i
 
     do i = 1, this%n
        !
-       ! Uptakes
+       ! Encounters:
        !
        this%JN(i)   = gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
        this%JDOC(i) = gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
@@ -121,79 +127,70 @@ contains
        !
        ! Potential net uptake
        !
-       Jnetp(i)=this%JL(i)*(1-bL)+this%JDOC(i)*(1-bDOC)+this%JF(i)*(1-bF)-ftemp2*this%Jresp(i) ! I think we don't need it
+       Jnetp(i) = this%JL(i)*(1-bL) + this%JDOC(i)*(1-bDOC) + this%JF(i)*(1-bF) - ftemp2*this%Jresp(i)
        !
-       ! Calculation of down-regulation factors for
-       ! N-uptake  
-       this%dN(i) = min(1.d0, 1./this%JN(i)*(Jnetp(i)-this%JF(i)*(1+bg))/(1+bg+bN))
-       ! If synthesis-limited then down-regulate feeding:
-       ! Photosynthesis
-       if (this%JL(i) .gt. 0) then ! Needed to avoid the risk of division with zero if JL = 0
-        this%dL(i) = min(1.d0,1./(this%JL(i)*(1-bL))*((this%JN(i)+this%JF(i))*(1+bg)-this%JDOC(i)*(1-bDOC)&
-             -this%JF(i)*(1-bF)+ftemp2*this%Jresp(i)+bN*this%JN(i))) !+bN*this%JN(i)
+       ! Calculation of down-regulation factors for N-uptake and the net uptake:
+       !
+       if (Jnetp(i) .lt. 0) then
+         this%Jnet(i) = Jnetp(i)  ! Severe carbon limitations => negative growth
+         this%dN(i) = 0.d0
        else
-        this%dL(i) = -1.
+         if (this%JN(i) .eq. 0) then
+           this%dN(i) = 1.d0
+         else
+           this%dN(i) = max( 0.d0, min( 1.d0, (Jnetp(i) - this%JF(i)*(bg+1))/(this%JN(i)*(1+bg+bN)) ) )
+         endif
+         this%Jnet(i) = min( (Jnetp(i)-bN*(this%dN(i)*this%JN(i)))/(1+bg) , & ! Carbon limitation
+                            this%JF(i) + this%dN(i)*this%JN(i))              ! N limitation
+       endif 
+       !
+       ! Synthesis limitation:
+       !
+       f = 0
+       if ( this%Jnet(i) .gt. this%JlossPassive(i) ) then ! Apply FR only if net growth is positive
+        f = this%Jnet(i) / ( this%Jnet(i) + JmaxT )
+         this%Jnet(i) = JmaxT * f
        endif
-       !*************************************************************************
-       !********************************** test *********************************
-       !            MAKES NO DIFFERENCE
-       !if (dN(i).lt.1) then
-       !dL(i)=1
-       !endif
-       !******************************* end of test ******************************
-       !**************************************************************************
-       !
-       if (this%dL(i).lt.0) then
-        this%dL(i)=0
-        this%dDOC(i) =min(1.d0,1/(this%JDOC(i)*(1-bDOC))*((this%JN(i)+this%JF(i))*(1+bg)-this%JF(i)*(1-bF)&
-                + bN*this%JN(i)+ftemp2*this%Jresp(i)))
-       else 
-        this%dDOC(i)=1.
-       end if
-       !write(*,*) dN(i)
-       if (this%dN(i).lt.0) then ! check if N leaks out of the cell
-        this%dN(i)=0.
-        this%Jnet(i) =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
-        + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*this%dN(i)*this%JN(i)) ! was with max(O.,..) 
-        f = (this%Jnet(i) )/(this%Jnet(i) + JmaxT)
-        !if (f .gt. 0) then
+       this%Jtot(i) = this%Jnet(i) - this%JlossPassive(i)
 
-        this%JNlossLiebig(i) = (1-f)*this%JF(i)-f*JmaxT!-1/(1+bg)*(bN*dN(i)*this%JN(i))!this%JF(i)-!this%JF(i)-Jnet(i)!f*JmaxT
+       ! Take up N only to the degree that is is not supplied by feeding (ie priotize feeding):
+       this%JNreal(i) = max( 0.d0, this%Jnet(i) - this%jF(i) )
+       
+       !
+       ! Regulate carbon uptakes for growth + respiration towards lowered jNet.
+       !
+
+       ! First carbon from F assuming no uptakes from DOC and L:
+       this%JFreal(i) = min( this%JF(i), &
+           (this%Jnet(i) + bg*max(0.d0, this%Jnet(i)) + ftemp2*this%Jresp(i) + bN*this%Jnreal(i) )/(1-bF)) 
+       ! Then divide evenly btw DOC and L:
+       tmp = ( (1 - bDOC)*this%jDOC(i) + (1 - bL)*this%jL(i)  )
+       if (tmp .eq. 0.0d0) then
+          this%jDOCreal(i) = 0.0d0
+          this%jLreal(i) = 0.0d0
+       else
+         tmp = ( this%Jnet(i) + bg*max(0.d0, this%JNet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - &
+                this%JFreal(i)*(1 - bF) ) / tmp
+         !if (tmp .lt. 0.d0) then
+         ! tmp = this%Jnet(i) + bg*max(0.d0, this%Jnet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - this%JFreal(i)*(1-bF)
+         ! this%jDOCreal(i) = min( this%JDOC(i), tmp/(1-bDOC) )
+          !And finally light:
+         ! this%JLreal(i) = min( this%JL(i), (tmp - this%jDOCreal(i)*(1-bDOC))/(1-bL) )
+        !else
+          this%jDOCreal(i) = tmp * this%jDOC(i)
+          this%jLreal(i) = tmp * this%jL(i)
         !endif
-       else 
-        this%Jnet(i) =  1./(1+bg)*(this%dDOC(i)*this%JDOC(i)*(1.-bDOC)+this%dL(i)*this%JL(i)*(1-bL) &
-        + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*this%dN(i)*this%JN(i)) ! was with max(O.,..) 
-        f = (this%Jnet(i) )/(this%Jnet(i) + JmaxT)
-        this%JNlossLiebig(i) = 0
-        end if
-       !Jnet =  1./(1+bg)*(dDOC(i)*this%JDOC(i)*(1.-bDOC)+dL(i)*this%JL(i)*(1-bL) &
-       ! + this%JF(i)*(1-bF)- fTemp2*this%Jresp(i) -bN*dN(i)*this%JN(i)) ! was with max(O.,..) 
-       !
-       ! Saturation of net growth
-       !
-       !f = (Jnet(i) )/(Jnet(i) + JmaxT)
-       if ((this%Jnet(i) + JmaxT).eq.0) then
-        f=0.
-       end if
-      !  this%JCtot(i) = & 
-      !      (1-f)*(this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i) + this%JF(i) )&
-      !    - (1-f)*fTemp2*this%Jresp(i) &
-      !    - ( (1-f)*(bDOC*this%dDOC(i)*this%JDOC(i)+this%dL(i)*this%JL(i)*bL+ this%JF(i)*bF+bN*this%dN(i)*this%JN(i))&
-      !       +(1-f)*bg*this%Jnet(i) )
-      !
-       ! Apply saturation to uptake rates
-       !
-       this%JNreal(i)  = this%dN(i)*(1-f)*this%JN(i)
-       this%JDOCreal(i)= this%dDOC(i)*(1-f)*this%JDOC(i)
-       this%JLreal(i)  = this%dL(i)*(1-f)*this%JL(i)
-       this%JFreal(i)  = (1-f)*this%JF(i)
-       this%Jtot(i)    = f*JmaxT - (1-f)*this%JlossPassive(i)
+      endif
+       
+       
+      
+       ! Exude surplus N:
+       this%JNlossLiebig(i) = max( 0.d0, this%Jnreal(i) + this%Jfreal(i) - this%JlossPassive(i) - this%Jtot(i) )
+       this%JClossLiebig(i) = 0.d0 ! There are never surplus C uptakes
       !        
       ! Actual uptakes:
       !
       this%JNtot(i) = this%JNreal(i) + this%JFreal(i)
-      !write(*,*) f,1-f,Jnet(i)   
-      !write(*,*) dN(i),dL(i),this%JNlossLiebig(i)
       !
       ! Losses:
       !
@@ -205,33 +202,23 @@ contains
             bL*this%JLreal(i) + &
             bN*this%JNreal(i) + &
             bF*this%JFreal(i) + &
-            bg*this%Jnet(i)
-
-      !write(*,*) this%Jresptot(i)                 
-      ! 
-      !-------------------------------------------------------
-      ! Test for conservation budget. Should be close to zero:
-      !-------------------------------------------------------
-      !write(*,*) 'N budget', i,':',(this%JNreal(i)+this%JFreal(i)-this%JNlossLiebig(i)-(1-f)*this%JlossPassive(i) &
-      !- this%Jtot(i))/this%m(i)
-
-      !write(*,*) 'C budget', i,':',(this%JCtot(i) -(1-f)*this%JlossPassive(i)&
-      !- this%Jtot(i))/this%m(i) !this works only if we take the negative values of jnet
-      !this%JF(i) = this%JFreal(i)
-
-      this%f(i) = f
-      !this%JF(i) = this%JFreal(i)
+            max(0.d0,bg*this%Jnet(i))
+ 
+      this%f(i) = f   
     end do
-    this%jN = this%jNreal  ! Needed to get the the actual uptakes out with "getRates"
+
+    ! Needed to get the right rates with getRates:
+    this%jN = this%jNreal  
     this%jDOC = this%jDOCreal
     this%JF = this%JFreal
+    this%JNloss = this%JNlossLiebig
     !
     ! Test for conservation budget. Should be close to zero:
     !
     !write(*,*) 'N budget:',(-this%Jtot+this%JN+this%JFreal & ! Gains
     !  -this%JNlossLiebig-this%JlossPassive)/this%m           ! Losses
-    !write(*,*) 'C budget:',(-this%Jtot+this%JLreal+this%JDOC+this%JFreal & ! Gains
-    !  -fTemp2*this%Jresp - this%JClossLiebig - this%JlossPassive)/this%m   ! Losses
+    !write(*,*) 'C budget:',(this%JLreal+this%JDOCreal+this%JFreal & ! Gains
+    !  -this%Jtot-this%Jresptot - this%JClossLiebig - this%JlossPassive)/this%m   ! Losses
 end subroutine calcRatesGeneralists
 
   subroutine calcDerivativesGeneralists(this, u, dNdt, dDOCdt, dudt)
@@ -243,7 +230,7 @@ end subroutine calcRatesGeneralists
 
     this%mort2 = this%mort2constant*u ! "quadratic" mortality
     this%jPOM = (1-remin2)*this%mort2  &! non-remineralized mort2 => POM
-      + (1-reminF)*this%JCloss_feeding/this%m
+              + (1-reminF)*this%JCloss_feeding/this%m ! Feeding losses
 
     do i = 1, this%n
       !
@@ -251,20 +238,20 @@ end subroutine calcRatesGeneralists
       !
       dNdt = dNdt  &
            + ((-this%JNreal(i) &
-           +  (1-this%f(i))*this%JlossPassive(i) &
+           +  this%JlossPassive(i) &
            +  this%JNlossLiebig(i) &     ! N leakage due to excess food
-           +  reminF*this%JCloss_feeding(i))/this%m(i) & !reminF
-           +  remin2*this%mort2(i) & 
+           +  reminF*this%JCloss_feeding(i))/this%m(i) & ! Remineralized feeding losses
+           +  remin2*this%mort2(i) & ! Remineralized viral lysis
            ) * u(i)/rhoCN
       !
       ! Update DOC:
       !
       dDOCdt = dDOCdt &
            + ((-this%JDOCreal(i) &
-           + (1-this%f(i))*this%JlossPassive(i) &
+           +   this%JlossPassive(i) &
            +   this%JCloss_photouptake(i) &
-           +   reminF*this%JCloss_feeding(i))/this%m(i) &
-           +   remin2*this%mort2(i) & 
+           +   reminF*this%JCloss_feeding(i))/this%m(i) & ! Remineralized feeding losses
+           +   remin2*this%mort2(i) & ! Remineralized viral lysis
            ) * u(i)
       !
       ! Update the generalists:
@@ -274,7 +261,6 @@ end subroutine calcRatesGeneralists
            - this%mort2(i) &
            - this%mortHTL(i))*u(i)
    end do
-  
  end subroutine calcDerivativesGeneralists
 
 subroutine printRatesGeneralists(this)
@@ -287,9 +273,9 @@ subroutine printRatesGeneralists(this)
   
   write(*,99) "jFreal:", this%JFreal / this%m
   write(*,99) "jResptot:", this%Jresptot / this%m
-  write(*,99) "deltaL:", this%dL
+  !write(*,99) "deltaL:", this%JLreal/this%JL
   write(*,99) "deltaN:", this%dN
-  write(*,99) "deltaDOC:", this%dDOC
+  !write(*,99) "deltaDOC:", this%JDOCreal/this%JDOC
 end subroutine printRatesGeneralists
 
 !

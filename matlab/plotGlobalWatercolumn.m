@@ -14,7 +14,7 @@ arguments
     sim struct;
     time double;
     lat double = 60;
-    lon double = -10;
+    lon double = -40;
     options.bNewplot  = true;
     options.depthMax {mustBePositive} = [];
 end

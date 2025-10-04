@@ -16,7 +16,7 @@ module spectrum
      real(dp), dimension(:), allocatable:: m  ! Geometric center mass of size-bin
      real(dp), dimension(:), allocatable:: mLower  ! Smallest size in the bin
      real(dp), dimension(:), allocatable:: mDelta   ! Width of the bin
-     real(dp), dimension(:), allocatable:: z ! Ratio btw upper and lower size of bin
+     real(dp), dimension(:), allocatable:: z ! Ratio btw lower and upper size of bin
      ! Feeding:
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width
@@ -142,6 +142,7 @@ contains
     this%JNlossLiebig = 0.d0
     this%JNloss = 0.d0
     this%jCloss = 0.d0
+    this%mortHTL = 0.d0
   end subroutine initSpectrum
 
   !
@@ -287,6 +288,7 @@ end subroutine calcGrid
     write(*,99) "jDOC:", this%JDOCreal / this%m
     write(*,99) "jDOCreal:", this%JDOCreal / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m
+    write(*,99) "jNloss:", this%JNloss / this%m
   end subroutine printRatesUnicellular
 
   !function getCbalanceUnicellular(this, u, dudt) result(Cbalance)
@@ -302,7 +304,7 @@ end subroutine calcGrid
   !end function getCbalanceUnicellular
   !
   ! Returns the net primary production calculated as the total amount of carbon fixed
-  ! by photsynthesis minus the respiration. Units: mugC/day/m3
+  ! by photsynthesis minus the respiration. Units: mugC/day/l
   ! (See Andersen and Visser (2023) table 5)
   !
   function getProdNet(this, u) result(ProdNet)
@@ -319,7 +321,7 @@ end subroutine calcGrid
   end function getProdNet
   !
   ! Returns the net bacterial production calculated as the total amount of DOC
-  ! taken up minus the respiration. Units: mugC/day/m3
+  ! taken up minus the respiration. Units: mugC/day/l
   ! (See Andersen and Visser (2023) table 5)
   !
   function getProdBactUnicellular(this, u) result(ProdBact)

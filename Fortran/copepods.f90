@@ -109,13 +109,13 @@ contains
        !
 
        ! Basal and SDA respiration:
-       this%Jresptot(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i)
+       this%Jresptot(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i) ! Note: we might respire more than we have available. This is accounted for in the starvation later
        ! Available energy:
        nu = this%JF(i) - this%Jresptot(i)
        !this%Jresptot(i) = this%Jresptot(i) - min(0.d0, nu) ! Limit respiration to the energy available
        ! Available energy rate (1/day):
        this%g(i) = max(0.d0, nu)/this%m(i)
-       ! Starvation:
+       ! Starvation is equal to the negative of the available energy rate, if they are starving:
        this%mortStarve(i) = -min(0.d0, nu)/this%m(i)
        !
        ! Mortality:

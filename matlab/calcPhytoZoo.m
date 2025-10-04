@@ -1,5 +1,5 @@
 %
-% Return the biomass of a each group that can be associated with
+% Return the biomass of a each unicellular group that can be associated with
 % phototrophy ("phytoplankton"), osmotrophy ("bacteria"), and phagotrophy
 % ("zooplankton").
 %
