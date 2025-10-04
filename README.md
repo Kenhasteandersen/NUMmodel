@@ -1,4 +1,4 @@
-# NUMmodel
+# NUMmodel 
 Reference implementation of the **Nutrient-Unicellular-Multicellular**
 modelling framework.  The model is described in: 
 * Unicellular plankton: Andersen and Visser: [From cell size and first principles to structure and function of unicellular plankton communities](https://www.biorxiv.org/content/10.1101/2022.05.16.492092v3)
