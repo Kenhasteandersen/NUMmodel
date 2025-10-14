@@ -21,7 +21,7 @@ arguments
     options.bPlot = true; % Whether to make the plot
     options.bOnlySurface = false; % Whether to only use the surface or the entire depth
 end
-sLibName = loadNUMmodelLibrary();
+sLibName = loadNUMmodelLibrary(bParallel=true);
 ixTime = find(sim.t>(max(sim.t)-365)); %nTime = length(sim.t(sim.t >= max(sim.t-365))); % Just do the last year
 % Get grid volumes:
 %load(sim.p.pathGrid,'dv','dz','dx','dy');
