@@ -70,9 +70,10 @@ DOC = [DOC(1,:); DOC];
 B(:,2:length(z),:) = B;
 B(:,1,:) = B(:,2,:);
 
+nTiles = 2+isfield(sim,'Si')+sim.p.nGroups;
 if options.bNewPlot
     clf
-    tiledlayout(2+isfield(sim,'Si')+sim.p.nGroups,1,'tilespacing','tight','padding','tight')
+    tiledlayout(nTiles,1,'tilespacing','tight','padding','tight')
 end
 
 if isempty(options.depthMax)
@@ -91,8 +92,8 @@ nexttile
 %panelField([t t(end)], -z, N');
 %surface(t,-z, N)
 contourf(t,-z,N,logspace(-2,3,options.nLevels),'LineStyle','none')
-title('Nitrogen','FontWeight','normal')
-ylabel('Depth (m)')
+title('Nitrogen','FontWeight','normal','FontSize',10)
+ylabel('  ') % Make space for ylabel at the end
 %set(gca,'ColorScale','log')
 %shading interp
 axis tight
@@ -110,7 +111,7 @@ if isfield(sim,'Si')
     contourf(t,-z,Si,logspace(-2,3,options.nLevels),'LineStyle','none')
     % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
     title('Silicate','FontWeight','normal')
-    ylabel('Depth (m)')
+    %ylabel('Depth (m)')
     %set(gca,'ColorScale','log')
     %shading interp
     axis tight
@@ -127,7 +128,7 @@ nexttile
 contourf(t,-z,DOC,logspace(-2,2,options.nLevels),'LineStyle','none')
 %surface(t,-z, DOC)
 title('DOC','FontWeight','normal')
-ylabel('Depth (m)')
+%ylabel('Depth (m)')
 axis tight
 h = colorbar('ticks',10.^(-2:2));
 h.Label.String = '{\mu}g_C/l';
@@ -143,9 +144,9 @@ for i = 1:sim.p.nGroups
     B(B < 0.01) = 0.01; % Set low biomasses to the lower limit to avoid white space in plot
     contourf(t,-z,(squeeze(B(i,:,:))),[logspace(-2,3,options.nLevels)],'LineStyle','none')
     title( sim.p.nameGroup(i) ,'FontWeight','normal');
-    ylabel('Depth (m)')
+    %ylabel('Depth (m)')
     axis tight
-    h = colorbar('ticks',10.^(-2:3));
+    h = colorbar('ticks',10.^(-2:2:3));
     h.Label.String = '{\mu}g_C/l';
     set(gca, 'colorscale','log')
     ylim(ylimit)
@@ -161,5 +162,7 @@ end
 if strcmp(sim.p.nameModel, 'watercolumn')
     sgtitle(['Water column at lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
 end
+annotation('textbox', [0.075, 0.5, 0.5, 0.04], 'String', 'Depth (m)', 'FontSize', 10,'rotation',90,...
+    'edgecolor','none','VerticalAlignment','bottom');
 
 end
