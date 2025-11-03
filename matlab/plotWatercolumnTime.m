@@ -11,6 +11,7 @@
 %  bNewplot - boolean that decides whether to setup the plot
 %  depthMax - max depth.
 %  bOnlyLastYear - boolean deciding whether to only plot the last year
+%  bMolarUnits - boolean deciding whether to show nutrients in molar units.
 %
 function plotWatercolumnTime(sim, lat, lon, options)
 
@@ -22,6 +23,7 @@ arguments
     options.depthMax {mustBePositive} = [];
     options.bOnlyLastYear = false;
     options.nLevels = 20;
+    options.bMolarUnits = true;
 end
 
 switch sim.p.nameModel
@@ -56,6 +58,14 @@ switch sim.p.nameModel
 end
 N(N<=0) = 1e-8;
 DOC(DOC<=0) = 1e-8;
+% Convert nutrient units:
+if options.bMolarUnits
+    N = N/14;
+    DOC = DOC/12;
+    if exist("Si")
+        Si = Si/28;
+    end
+end
 
 t = sim.t;
 %
@@ -98,7 +108,11 @@ ylabel('  ') % Make space for ylabel at the end
 %shading interp
 axis tight
 h = colorbar('ticks',10.^(-2:3));
-h.Label.String = '{\mu}g_N/l';
+if options.bMolarUnits
+    h.Label.String = '{\mu}M_N';
+else
+    h.Label.String = '{\mu}g_N/l';
+end
 %caxis([-1 2])
 ylim(ylimit)
 xlim(xlimit)
@@ -116,7 +130,12 @@ if isfield(sim,'Si')
     %shading interp
     axis tight
     h = colorbar('ticks',10.^(-2:3));
-    h.Label.String = '{\mu}g_{Si}/l';
+    if options.bMolarUnits
+        h.Label.String = '{\mu}M_{Si}';
+    else
+        h.Label.String = '{\mu}g_{Si}/l';
+    end
+    
     %caxis([0.1 1000])
     ylim(ylimit)
     xlim(xlimit)
@@ -131,7 +150,11 @@ title('DOC','FontWeight','normal')
 %ylabel('Depth (m)')
 axis tight
 h = colorbar('ticks',10.^(-2:2));
-h.Label.String = '{\mu}g_C/l';
+if options.bMolarUnits
+    h.Label.String = '{\mu}M_C';
+else    
+    h.Label.String = '{\mu}g_C/l';
+end
 %caxis([0.1,2])
 ylim(ylimit)
 xlim(xlimit)
