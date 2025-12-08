@@ -99,7 +99,7 @@ contains
     this%JlossPassive = cLeakage/this%r * this%m ! in units of C
 
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
-    this%Jresp =cR*alphaJ*this%m ! decrease basal resp. according to Ken
+    this%Jresp =cR*alphaJ*this%m 
 
     allocate(this%dL(n))
     allocate(this%dN(n))
