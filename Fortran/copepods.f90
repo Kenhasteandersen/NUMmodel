@@ -1,7 +1,7 @@
 !
 ! Module to handle copepods defined by their adult mass.
-! All parameters are for active copepods. Follows Serra-Pompei et al (2020) with
-! the update to respiration in Serra-Pompei (2022).
+! Follows Serra-Pompei et al (2020) with
+! an update to respiration in Serra-Pompei (2022).
 !
 module copepods
   use globals
