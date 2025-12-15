@@ -32,13 +32,13 @@ tiledlayout(2,1)
 
 % Total unicellular biomass:
 nexttile
-handle = panelGlobal(sim.x,sim.y,log10(Bgeneralists+Bdiatoms),[-2 2],sProjection=options.sProjection,...
+panelGlobal(sim.x,sim.y,log10(Bgeneralists+Bdiatoms),[-2 2],sProjection=options.sProjection,...
     sUnits='g_C/m^2');
 
 % diatom fraction:
 nexttile
 panelGlobal(sim.x, sim.y, Bdiatoms./(Bgeneralists+Bdiatoms),0:0.1:1,sProjection=options.sProjection,...
-    sUnits='Fraction diatoms')
+    sUnits='Fraction diatoms');
 
 
   

@@ -23,7 +23,7 @@ if bParallel
         disp(['Error loading ',errortext{i},'. Execution terminated'])
         return
     else
-        disp('done loading input parameters')
+        %disp('done loading input parameters')
     end
 else
     errortext ='                    ';
@@ -34,7 +34,7 @@ else
         disp(['Error loading ',errortext,'. Execution terminated'])
         return
     else
-        disp('done loading input parameters')
+        %disp('done loading input parameters')
     end
 end
 

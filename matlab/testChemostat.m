@@ -1,6 +1,8 @@
 function bSuccess = testChemostat(value)
 
-sim = baserunChemostat([]);
+p = setupNUMmodel();       % Sets up the model
+p = parametersChemostat(p);% Sets up the chemostat environment
+sim = simulateChemostat();
 
 sumB = sum(sim.B(:));
 if ( sumB > 0.99*value && sumB < 1.01*value )

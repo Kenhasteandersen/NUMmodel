@@ -24,14 +24,14 @@ load(fullfile('..','input','input_parameter_headers.mat'));
 % 
 % 
 % thelists={'input_general';'input_generalists_simple';'input_generalists';...
-%     'input_diatoms_simple';'input_diatoms';'input_copepods_active';'input_copepods_passive';...
-%     'input_zooplanktons_nongelatinous';'input_zooplanktons_gelatinous';'input_POM'};
+%     'input_diatoms_simple';'input_diatoms';'input_copepods_active';'input_copepods_passive';'input_zooplanktons_nongelatinous';'input_zooplanktons_gelatinous';...
+%     'input_POM'};
 % 
 % thestrings={str_General;str_Generalists_simple;str_Generalists;...
 %     str_Diatoms_simple;str_Diatoms;str_Copepods_active;...
-%         str_Copepods_passive;str_Zooplanktons_nongelatinous;str_Zooplanktons_gelatinous;str_POM};
-% 
-% thislist='no list defined yet';
+%     str_Copepods_passive;str_Zooplanktons_nongelatinous;str_Zooplanktons_gelatinous;str_POM};
+
+thislist='no list defined yet';
 %--------------------------------------------------------------------------
 % Open and read the text file, line by line
 %--------------------------------------------------------------------------

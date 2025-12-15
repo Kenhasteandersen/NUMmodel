@@ -8,7 +8,7 @@ arguments
     % Options for global plots:
     options.sProjection = 'fast';
     options.lat = 60;  % Latitude for watercolumn plots in global simulations
-    options.lon = -15;  % Longitude for watercolumn plots in global simulations
+    options.lon = -40;  % Longitude for watercolumn plots in global simulations
     options.tDayPlot = -170; % Days before last time to make size spectrum plot etc.
 end
 
@@ -56,6 +56,16 @@ switch sim.p.nameModel
         iDepth = find(Bdepth==max(Bdepth));
         plotSizespectrumTime(sim,iDepth);
  
+        figure(5)
+        clf
+        plotratioWatercolumn(sim,'depthMax',200);
+ 
+        figure(5)
+        clf
+        plotratioWatercolumn(sim,'depthMax',200);
+ 
+
+
         %figure(5)
         %plotWatercolumnCommunity(sim)
 

@@ -6,22 +6,27 @@
 % In:
 %  sim - simulation structure either from global or from watercolumn
 %  lat, lon - latitude and longitude (only to extract from global run)
+%
 % Optional named arguments:
 %  bNewplot - boolean that decides whether to setup the plot
-%  depthMax - mx depth for ylimit.
+%  depthMax - max depth.
 %  bOnlyLastYear - boolean deciding whether to only plot the last year
+%  bMolarUnits - boolean deciding whether to show nutrients in molar units.
 %
 function plotWatercolumnTime(sim, lat, lon, options)
 
 arguments
     sim struct;
-    lat double = [];
-    lon double = [];
+    lat double = 60;
+    lon double = -40;
     options.bNewPlot logical = true;
     options.depthMax {mustBePositive} = [];
     options.bOnlyLastYear = false;
     options.nLevels = 20;
+    options.bMolarUnits = true;
 end
+
+t = sim.t;
 
 switch sim.p.nameModel
     case 'global'
@@ -47,6 +52,12 @@ switch sim.p.nameModel
         for i = 1:sim.p.nGroups
             B(i,:,:) = squeeze(sum(sim.B(:,:,(sim.p.ixStart(i):sim.p.ixEnd(i))-sim.p.idxB+1),3))';
         end
+       % iGel  = 3:7;
+       % iNon  = 8:12;
+       % Bgel  = squeeze(sum(B(iGel,:,:), 1));     % sum over groups 1–7
+       % Bnon  = squeeze(sum(B(iNon,:,:), 1));     % sum over groups 8–14
+       % RatioGel = Bgel ./ (Bnon+Bgel);   
+
         z = sim.z + 0.5*sim.dznom;
         lat = sim.lat;
         lon = sim.lon;
@@ -55,8 +66,14 @@ switch sim.p.nameModel
 end
 N(N<=0) = 1e-8;
 DOC(DOC<=0) = 1e-8;
-
-t = sim.t;
+% Convert nutrient units:
+if options.bMolarUnits
+    N = N/14;
+    DOC = DOC/12;
+    if exist("Si")
+        Si = Si/28;
+    end
+end
 %
 % Make a layer at z = 0 with the same value as in the first grid point:
 %
@@ -66,12 +83,16 @@ if isfield(sim,'Si')
     Si = max(0,[Si(1,:); Si]);
 end
 DOC = [DOC(1,:); DOC];
+%RatioGel = [RatioGel(1,:); RatioGel];
 B(:,2:length(z),:) = B;
 B(:,1,:) = B(:,2,:);
 
+%nTiles = 2+isfield(sim,'Si')+sim.p.nGroups +1;
+nTiles = 2+isfield(sim,'Si')+sim.p.nGroups;
+
 if options.bNewPlot
     clf
-    tiledlayout(2+isfield(sim,'Si')+sim.p.nGroups,1,'tilespacing','tight','padding','tight')
+    tiledlayout(nTiles,1,'tilespacing','tight','padding','tight')
 end
 
 if isempty(options.depthMax)
@@ -90,13 +111,17 @@ nexttile
 %panelField([t t(end)], -z, N');
 %surface(t,-z, N)
 contourf(t,-z,N,logspace(-2,3,options.nLevels),'LineStyle','none')
-title('Nitrogen')
-ylabel('Depth (m)')
+title('Nitrogen','FontWeight','normal','FontSize',10)
+ylabel('  ') % Make space for ylabel at the end
 %set(gca,'ColorScale','log')
 %shading interp
 axis tight
 h = colorbar('ticks',10.^(-2:3));
-h.Label.String = '{\mu}g_N/l';
+if options.bMolarUnits
+    h.Label.String = '{\mu}M_N';
+else
+    h.Label.String = '{\mu}g_N/l';
+end
 %caxis([-1 2])
 ylim(ylimit)
 xlim(xlimit)
@@ -108,13 +133,18 @@ if isfield(sim,'Si')
     %surface(t,-z, Si)
     contourf(t,-z,Si,logspace(-2,3,options.nLevels),'LineStyle','none')
     % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
-    title('Silicate')
-    ylabel('Depth (m)')
+    title('Silicate','FontWeight','normal')
+    %ylabel('Depth (m)')
     %set(gca,'ColorScale','log')
     %shading interp
     axis tight
     h = colorbar('ticks',10.^(-2:3));
-    h.Label.String = '{\mu}g_{Si}/l';
+    if options.bMolarUnits
+        h.Label.String = '{\mu}M_{Si}';
+    else
+        h.Label.String = '{\mu}g_{Si}/l';
+    end
+    
     %caxis([0.1 1000])
     ylim(ylimit)
     xlim(xlimit)
@@ -125,26 +155,31 @@ end
 nexttile
 contourf(t,-z,DOC,logspace(-2,2,options.nLevels),'LineStyle','none')
 %surface(t,-z, DOC)
-title('DOC')
-ylabel('Depth (m)')
+title('DOC','FontWeight','normal')
+%ylabel('Depth (m)')
 axis tight
 h = colorbar('ticks',10.^(-2:2));
-h.Label.String = '{\mu}g_C/l';
+if options.bMolarUnits
+    h.Label.String = '{\mu}M_C';
+else    
+    h.Label.String = '{\mu}g_C/l';
+end
 %caxis([0.1,2])
 ylim(ylimit)
 xlim(xlimit)
 set(gca, 'colorscale','log')
 set(gca,'XTickLabel','')
 
+
 for i = 1:sim.p.nGroups
     nexttile
-    %surface(t,-z, squeeze(B(i,:,:)))
     B(B < 0.01) = 0.01; % Set low biomasses to the lower limit to avoid white space in plot
+    %surface(t,-z, squeeze(B(i,:,:)))
     contourf(t,-z,(squeeze(B(i,:,:))),[logspace(-2,3,options.nLevels)],'LineStyle','none')
-    title( sim.p.nameGroup(i) );
-    ylabel('Depth (m)')
+    title( sim.p.nameGroup(i) ,'FontWeight','normal');
+    %ylabel('Depth (m)')
     axis tight
-    h = colorbar('ticks',10.^(-2:3));
+    h = colorbar('ticks',10.^(-2:2:3));
     h.Label.String = '{\mu}g_C/l';
     set(gca, 'colorscale','log')
     ylim(ylimit)
@@ -156,9 +191,24 @@ for i = 1:sim.p.nGroups
         xlabel('Time (days)')
     end
 end
+% nexttile
+% contourf(t, -z, RatioGel, linspace(0,1,options.nLevels), 'LineStyle','none')
+% title('RatioGel','FontWeight','normal')
+% axis tight
+% h = colorbar;
+% h.Label.String = 'ratio';
+% caxis([0 1])
+% ylim(ylimit)
+% xlim(xlimit)
+% set(gca, 'colorscale','linear')   % important : échelle linéaire
+% set(gca,'XTickLabel','')
+% 
+
 
 if strcmp(sim.p.nameModel, 'watercolumn')
     sgtitle(['Water column at lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
 end
+annotation('textbox', [0.075, 0.5, 0.5, 0.04], 'String', 'Depth (m)', 'FontSize', 10,'rotation',90,...
+    'edgecolor','none','VerticalAlignment','bottom');
 
 end

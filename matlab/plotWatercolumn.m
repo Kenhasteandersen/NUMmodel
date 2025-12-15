@@ -1,12 +1,16 @@
-% θ
+% 
 % Plot a water column from either a global or a water column simulation.
 %
 % Warning: the "setup" function needs to be called before this plot is
 % made. If not matlab may crash or the results be incorrect.
 %
-% All biomasses are normalized to "Sheldon" spectra by dividing biomass
+% Top panels: biomasses. All biomasses are normalized to "Sheldon" spectra by dividing biomass
 % with ln(Delta) (the ratio between the upper and lower mass in each mass
 % bin); see Andersen and Visser (2023) Box V.
+%
+% Bottom panels: Trophic strategy (for unicellulars) or feeding level (for
+% multicellulars). The trophic strategy is a RGB color where the level of R
+% correspond to phagotrophy, G to phototrophy, and B to osmotrophy.
 %
 % In:
 %  sim
@@ -14,7 +18,7 @@
 %  lat, lon - latitude and longitude (only for global simulation)
 %  Optional:
 %  options.bNewplot - whether to clear the figure.
-%  options.depthMax - mx depth for ylimit.
+%  options.depthMax - max depth.
 %
 function plotWatercolumn(sim, time, lat,lon, options)
 
@@ -94,7 +98,7 @@ for i = 1:length(z)-1
             if f(j,i) < fc
                 colFeeding(j,i,:) = [0, 1, f(j,i)/fc]; % Below critical feeding level
             else
-                colFeeding(j,i,:) = [f(j,i), 0, 0]; % Above critical feeding level
+                colFeeding(j,i,:) = [min(1,3*f(j,i)), 0, 0]; % Above critical feeding level
             end
         end
     end
@@ -157,7 +161,7 @@ for iGroup = 1:sim.p.nGroups
 
     caxis([0.01 100])
 
-    title(sim.p.nameGroup(iGroup))
+    title(sim.p.nameGroup(iGroup),'fontweight','normal')
     if (iGroup==1)
         ylabel('Depth (m)')
     else

@@ -1,0 +1,1 @@
+ parameter mortalityHTL not defined for zooplanktons_gelatinous        in ../input/input.h.

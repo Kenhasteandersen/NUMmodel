@@ -10,12 +10,16 @@
 %  sProjection: projection to use. Defaults to 'fast'. Other projections 
 %               requires that the mapping toolbox is installed. 
 %               Good projection is 'eckert4'.
-%  sUnits : The unit to show on the colorbar
+%  sUnits:      The unit to show on the colorbar
+%  coordMarker: vector of [lat,lon] coordinates for the placement of a
+%               marker.  Only works if sProjection ~= 'fast'.
 %
 % Out:
-%  cbar: the color bar object
+%  cbar:        the color bar object
+%  hMarker: handle to the marker object (if coordMarker is given as an
+%               option).
 %
-function cbar = panelGlobal(x,y,z, vContourLevels, options)
+function [cbar, hMarker] = panelGlobal(x,y,z, vContourLevels, options)
 
 arguments
     x,y (:,1);
@@ -24,6 +28,7 @@ arguments
     options.sTitle string = '';
     options.sProjection string = 'fast';
     options.sUnits = '\mug C l^{-1}';
+    options.coordMarker = []; 
 end
 %
 % Check that mapping toolbox is installed
@@ -35,7 +40,7 @@ if ~strcmp(options.sProjection,'fast')
     end
 end
 
-colorLand = [0.3 0.4 0.3];
+colorLand = "#f5eef8";
 
 % Adjust to global plot (close gap at lat 0)
 z = [z;z(1,:)];
@@ -72,6 +77,13 @@ else
     h=patchm(coastlat,coastlon, colorLand); 
     set(h,'linestyle','none')
     gridm('off'); % Remove grid lines
+end
+
+% Place optional marker:
+if ~isempty(options.coordMarker) && ~strcmp(options.sProjection,'fast')
+    hMarker = plotm(options.coordMarker(1),options.coordMarker(2),'rp','markersize',40, 'MarkerFaceColor','red','markeredgecolor','red');
+else
+    hMarker = [];
 end
 
 cbar = colorbar('eastoutside', 'FontSize',14);

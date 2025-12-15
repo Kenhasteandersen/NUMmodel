@@ -1,43 +1,21 @@
-% θ
-% Make a basic run of the chemostat model
-% In:
-%  mAdult is the adult sizes of copepods (can be left empty to simulate only
-%         unicellular organisms) (default = [], ie only generalists).
+% 
+% Make a basic run of the chemostat model using the NUMmodel setup
 %
 % Out:
 %  sim: Structure holding the results of the simulation
-%
-function sim = baserunChemostat(mAdult)
+%Ah 
+function sim = baserunChemostat()
 
-arguments
-    mAdult double = []
-end
-%   
-% Set parameters:
-%
-%     n = 10;
-%     nCopepods = 10;
-%     nPOM = 10;
-%     p = setupNUMmodel(mAdult, n,nCopepods,nPOM);
-%     
-p = setupGeneralistsSimpleOnly;
+p = setupNUMmodelzoo();       % Sets up the model
+p = parametersChemostat(p);% Sets up the chemostat environment
 
-p = parametersChemostat(p);
-p.tEnd = 200;
-p.d = 0.1;
-%
-% Set to "normal" HTL mortality if there are no copepods:
-%
-if isempty(mAdult)
-    setHTL(0.1, 1/500^1.5, false, false);
-else 
-    setHTL(0.1, 1, true, true);
-end
+p.tEnd = 3*365; % Run 500 days
+p.d = 0.05;   % Set the mixing rate to 0.05/day
 %
 % Simulate
 %
 tic
-sim = simulateChemostat(p, 100);
+sim = simulateChemostat(p, 50);
 toc
 %
 % Plot

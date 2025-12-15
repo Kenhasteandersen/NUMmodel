@@ -1,13 +1,24 @@
 %
-% Setup with generalists, diatoms, passive and active copepods, and POM
+% Setup with generalists, diatoms, passive and active copepods, and POM.
+%
+% In:
+%   mAdultPassive - the adult masses of passive copepods (default [0.2 5])
+%   mAdultActive  - the adult masses of active copepods (logspace(0,3,3) )
+%   n             - No. of unicellular size groups (10)
+%   nCopepods     - No. of stages in the copepod groups (6)
+%   nPOM          - No. of POM size groups (1)
+%   bParallel     - whether to prepare a parallel run (FALSE)
+%
+% Out:
+%   p             - The parameter structure
 %
 function p = setupNUMmodelzoo(mAdultGelatinous, mAdultNongelatinous, n, nZooplanktons, nPOM, options)
 
 arguments
-    mAdultGelatinous (1,:) = logspace(0,6,6);  % Adult masses of passive copepods
+    mAdultGelatinous (1,:) = logspace(0,6,6) %  [0.2 5];  % Adult masses of passive copepods
     mAdultNongelatinous (1,:) = logspace(0,6,6);  % 3 log-spaced adult masses of active copepods
     n = 10;  % Number of size groups in generalist and diatom spectra
-    nZooplanktons = 3;  % Number of stages in copepod groups
+    nZooplanktons = 6;  % Number of stages in copepod groups
     nPOM = 1;  % Number of POM size groups
     options.bParallel = false;  % Whether to prepare for parallel runs (for global runs)
 end
@@ -74,7 +85,7 @@ end
 
 % POM:
 p = parametersAddgroup(100, p, nPOM);
-setSinkingPOM(p, 13); 
+setSinkingPOM(p, 19); 
 
 % Initial conditions:
 p = getMass(p);
@@ -86,4 +97,4 @@ p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix) );
 
 p.u0( p.ixStart(end):p.ixEnd(end) ) = 0; % No POM in initial conditions
 
-setHTL(0.005, 0.1 ,true, false); % "Quadratic" mortality; not declining
+setHTL(0.017, 1 ,true, false, false,true); % "Quadratic" mortality; not declining; only affecting copepods

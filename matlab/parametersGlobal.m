@@ -56,7 +56,7 @@ elseif nTMmodel == 2
     p.pathN0    = strcat(path,'/../TMs/MITgcm_ECCO/N0');
     p.pathSi0    = strcat(path,'/../TMs/MITgcm_ECCO/Si0');
     p.pathInit = strcat(sprintf('Transport matrix/globalInitMITgcm_ECCO_%02i',length(p.u0)));
-    p.pathPARday= strcat(path,'/../TMs/MITgcm_ECCO/parday.mat'); % No parday file for high-res runs
+    p.pathPARday= strcat(path,'/../TMs/MITgcm_ECCO/parday.mat'); 
     p.dt = 0.1; % For Euler time stepping
     p.dtTransport = 0.5; % The TM time step (in units of days)
 elseif nTMmodel == 3
@@ -87,7 +87,7 @@ check(p.pathTemp);
 %
 % Numerical parameters:
 %
-p.tEnd = 365; % In days
+p.tEnd = 365*2; % In days
 p.tSave = 365/12; % How often to save results (monthly)
 p.bTransport = true; % Whether to do the transport with the transport matrix
 %
@@ -101,7 +101,7 @@ p.BC_POMclosed = false; % Whether the bottom BC for POM is open or closed
 %
 p.bUse_parday_light = true; % Using the parday file includes changes in cloud cover
                              % but only works with MITgcm_2.8
-p.kw = 0.07; % Damping of light by water; m^-1
+p.kw = 0.06; % Damping of light by water; m^-1
 % Parameters used to calculate light if not using parday:
 p.EinConv = 4.57; % conversion factor from W m^-2 to \mu mol s^-1 m^-2 (Thimijan & Heins 1983)
 p.PARfrac = 0.4; % Fraction of light available as PAR. Source unknown

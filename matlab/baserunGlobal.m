@@ -7,6 +7,7 @@
 % In:
 %  With no arguments it runs the simple generalist model
 %  With a parameter argument it runs the setup specified in the parameters.
+%
 % Out:
 %  A simulation structure
 %
@@ -15,16 +16,13 @@ function sim = baserunGlobal(p)
 % Setup a basic run of the global model with only generalists
 %
 if (nargin==0)
-    mAdult = logspace(log10(0.2), log10(10000), 5);
-    
-    n = 10;
-    nCopepods = 10;
-    nPOM = 10;
-    p = setupGeneralistsSimpleOnly(10, true); % Use 10 size groups and parallel execution
-    %p=setupNUMmodel(true);
+%    mAdult = logspace(log10(0.2), log10(10000), 5);
+%    n = 10;
+%    nZooplanktons = 6;
+%    nPOM = 10;
+   p=setupNUMmodelzoo(bParallel=true);
+    %p = setupGeneralistsOnly(10, true); % Use 10 size groups and parallel execution
     p = parametersGlobal(p); % Use standard low-res model
-    %p = parametersGlobal(10,2); % Use MITgcm_ECCO
-    p.tEnd = 365;
 end
 %
 % Simulate
@@ -45,7 +43,7 @@ sim.B(sim.B<0)=0; % Get rid of negative biomasses
 % Plots:
 %
 % disp('Plotting')
-plotSimulation(sim)
+plotSimulation(sim, sProjection="eckert4")
 
 checkConservation(sim);
 %

@@ -233,18 +233,22 @@ tSave = [];
 if options.bCalcAnnualAverages
     ProdNet = zeros( simtime, nb,1);
     ProdHTL = zeros( simtime, nb,1);
+    mHTL = zeros( simtime, nb,1);
+    BHTL = zeros( nb, p.n );
     ProdGrossAnnual = zeros( nb,1 );
     ProdNetAnnual = zeros( nb,1 );
     ProdHTLAnnual = zeros( nb,1 );
     BpicoAnnualMean = zeros( nb,1 );
     BnanoAnnualMean = zeros( nb,1 );
     BmicroAnnualMean = zeros( nb,1 );
-    mHTLmean = zeros( nb,1 );
+
+    [mortHTL, bQuadratic] = getMortHTL(p);
 end
 
 % ---------------------------------------
 % Run transport matrix simulation
 % ---------------------------------------
+
 if options.bVerbose
     disp('Starting simulation')
 end
@@ -288,6 +292,7 @@ for i=1:simtime
             %
             % Integrate and calculate functions (only last year):
             %
+            nNutrients = p.nNutrients;
             parfor k = 1:nb
                 ProdGross1 = 0;
                 ProdNet1 = 0;
@@ -306,16 +311,15 @@ for i=1:simtime
                
                 ProdNet(i,k) = ProdNet1;
                 ProdHTL(i,k) = ProdHTL1;
+                mHTL(i,k) = mHTL1;
+                BHTL(k,:) = BHTL(k,:) + u(k,:).^(1+bQuadratic) .* [zeros(1,nNutrients), mortHTL];
+
                 ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
                 ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
                 ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;
                 BpicoAnnualMean(k) = BpicoAnnualMean(k) + Bpico1;
                 BnanoAnnualMean(k) = BnanoAnnualMean(k) + Bnano1;
                 BmicroAnnualMean(k) = BmicroAnnualMean(k) + Bmicro1;
-                if mHTL1>0
-                    mHTLmean(k) = mHTLmean(k) + log(mHTL1)*ProdHTL1;
-                end
-                
             end
         else
             %
@@ -418,7 +422,19 @@ if options.bCalcAnnualAverages
         ix = floor((simtime/nSave)*(i-1)+1) : (simtime/nSave*i);
         sim.ProdNet(i,:,:) = integrate_over_depth(squeeze(mean(ProdNet(ix,:),1))');
         sim.ProdHTL(i,:,:) = integrate_over_depth(squeeze(mean(ProdHTL(ix,:),1))');
+        tmp = single(matrixToGrid( squeeze(mHTL(i,:))', [], p.pathBoxes, p.pathGrid));
+        sim.mHTL(i,:,:) = tmp(:,:,1);
     end
+    % Average mHTL
+    mHTLdepthsum = zeros(length(sim.x), length(sim.y));
+    BHTLdepthsum = zeros(length(sim.x), length(sim.y),size(BHTL,2));
+    for i = p.idxB:size(BHTL,2)
+        BHTLdepthsum(:,:,i) = integrate_over_depth( squeeze(BHTL(:,i)));
+        mHTLdepthsum = mHTLdepthsum + log(p.m(i))*BHTLdepthsum(:,:,i);
+    end
+    sim.mHTLAnnualMean = exp( mHTLdepthsum ./ sum(BHTLdepthsum,3) );
+    sim.BHTL = BHTLdepthsum;
+    
     % Average productions:
     sim.ProdGrossAnnual(1,:,:) = integrate_over_depth(ProdGrossAnnual);
     sim.ProdNetAnnual(1,:,:) = integrate_over_depth(ProdNetAnnual);
@@ -427,9 +443,6 @@ if options.bCalcAnnualAverages
     sim.BpicoAnnualMean(1,:,:) = integrate_over_depth(BpicoAnnualMean);
     sim.BnanoAnnualMean(1,:,:) = integrate_over_depth(BnanoAnnualMean);
     sim.BmicroAnnualMean(1,:,:) = integrate_over_depth(BmicroAnnualMean);
-    % Average HTL size:
-    sim.mHTLAnnualMean = exp( matrixToGrid(mHTLmean./ProdNetAnnual, [], p.pathBoxes, p.pathGrid) );
-    sim.mHTLAnnualMean = squeeze(sim.mHTLAnnualMean(:,:,1)); % Only surface layer
 end
 
 %%%%%%%%%%%%%%%%%%%%%%

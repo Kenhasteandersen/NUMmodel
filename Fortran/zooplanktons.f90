@@ -40,6 +40,8 @@ contains
     character(c_char), dimension(*), intent(out) :: errorstr
     real(dp) :: alphaF, q, h, hExponent, AdultOffspring
     real(dp) :: vulnerability
+    real(dp) :: mortalitytest
+
     
     character(len=30)::this_listname
     
@@ -67,7 +69,8 @@ contains
     call read_input(inputfile,this_listname,'h',h,errorio,errorstr)
     call read_input(inputfile,this_listname,'hExponent',hExponent,errorio,errorstr)
     call read_input(inputfile,this_listname,'vulnerability',vulnerability,errorio,errorstr)
-    
+    call read_input(inputfile,this_listname,'mortalitytest', mortalitytest,errorio,errorstr)
+
     call read_input(inputfile,this_listname,'epsilonR',epsilonR,errorio,errorstr)
     call read_input(inputfile,this_listname,'kBasal',kBasal,errorio,errorstr)
     call read_input(inputfile,this_listname,'kSDA',kSDA,errorio,errorstr)
@@ -87,10 +90,11 @@ contains
 
     this%AF = alphaF*this%m**q
     this%JFmax = h*this%m**hExponent
-    this%JrespFactor = this%JFmax/this%JFmax
+    this%JrespFactor = this%epsilonF*this%JFmax
     this%mort2constant = 0.d0 ! No quadratic mortality
     this%mort2 = 0.d0
     this%palatability = vulnerability
+    this%testmort = mortalitytest
 
     this%mPOM = 3.5e-3*this%m ! Size of fecal pellets (Serra-Pompei 2022 approximated)
   end subroutine initZooplankton
@@ -121,7 +125,7 @@ contains
        !
        this%mortHTL(i) = this%mortHTL(i) * fTemp2     
 
-       this%mort(i) = this%mortpred(i) + this%mortStarve(i) + this%mortHTL(i)
+       this%mort(i) = this%mortpred(i) + this%mortStarve(i) + this%mortHTL(i) + this%testmort
        ! Flux:
        if ( this%g(i) .ne. 0.) then
          this%gamma(i) = (this%g(i)-this%mort(i)) / (1 - this%z(i)**(1-this%mort(i)/this%g(i)))

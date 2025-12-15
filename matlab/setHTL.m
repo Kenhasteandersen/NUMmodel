@@ -16,29 +16,35 @@
 %                  "quadratic" mortality
 %  bDecliningHTL - boolean which determines whether the HTL mortality
 %                  declines with size as mass^-0.25.
+%  bCopepodsOnly - Have the mortality only affecting copepods (but still
+%                  with the size selectivity)
 %
 % Out:
 %  Nothing; the function only affects the fortran library.
 %
-function setHTL(mortHTL, mHTL, bQuadraticHTL, bDecliningHTL)
+function setHTL(mortHTL, mHTL, bQuadraticHTL, bDecliningHTL, bCopepodsOnly, bZooplanktonsOnly)
 
 arguments
     mortHTL double {mustBeNonnegative} = 0.2;
     mHTL double = 1/500^1.5; % Suits simulations with only generalists
     bQuadraticHTL logical = false;
     bDecliningHTL logical = false;
+    bCopepodsOnly logical = false;
+    bZooplanktonsOnly logical = false;
 end
 
 
 calllib(loadNUMmodelLibrary(), 'f_sethtl', ...
-    double(mHTL), double(mortHTL), logical(bQuadraticHTL), logical(bDecliningHTL) );
+    double(mHTL), double(mortHTL), logical(bQuadraticHTL), logical(bDecliningHTL), ...
+    logical(bCopepodsOnly), logical(bZooplanktonsOnly));
 
 % Set on parallel cluster as well:
 if exist("gcp")
     if ~isempty(gcp('nocreate'))
         spmd
             calllib(loadNUMmodelLibrary(), 'f_sethtl', ...
-                double(mHTL), double(mortHTL), logical(bQuadraticHTL), logical(bDecliningHTL) );
+                double(mHTL), double(mortHTL), logical(bQuadraticHTL), logical(bDecliningHTL), ...
+                logical(bCopepodsOnly),logical(bZooplanktonsOnly));
         end
     end
 end

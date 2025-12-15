@@ -16,7 +16,6 @@ iGeneralists = 1;
 iCopepods = 10;
 iZooplankton = 10;
 
-
 p = parametersInit();
 p.mAdult = mAdult;
 n = 10; % No of bins in each group

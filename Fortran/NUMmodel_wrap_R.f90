@@ -56,7 +56,7 @@ end subroutine
     real(dp), intent(in):: mHTL, mortHTL
     logical(c_bool), intent(in):: bQuadraticHTL, bDecliningHTL
 
-    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
+    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, logical(.FALSE.,1), logical(.FALSE.,1))
   end subroutine f_setHTL
 
   subroutine f_calcDerivatives(u, L, T, dt, dudt)
