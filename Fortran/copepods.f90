@@ -1,7 +1,7 @@
 !
 ! Module to handle copepods defined by their adult mass.
 ! Follows Serra-Pompei et al (2020) with
-! an update to respiration in Serra-Pompei (2022).
+! the update to respiration from Serra-Pompei (2022).
 !
 module copepods
   use globals
@@ -53,9 +53,6 @@ contains
        print*, 'no feeding mode defined'
        stop
     end if
-    
-    print*, 'Loading parameter for ',this_listname,' from ', inputfile, ':'
-
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
@@ -78,13 +75,11 @@ contains
     call read_input(inputfile,this_listname,'sigma',this%sigma,errorio,errorstr)
     this%DiatomsPreference=DiatomsPreference
     
-
     allocate(this%gamma(n))
     allocate(this%g(n))
     allocate(this%mortStarve(n))
     allocate(this%mort(n))
     allocate(this%JrespFactor(n))
-
 
     this%AF = alphaF*this%m**q
     this%JFmax = h*this%m**hExponent
@@ -157,16 +152,6 @@ contains
 
     dNdt = dNdt + sum( this%Jresptot*u/this%m )/rhoCN  ! All respiration of carbon results in a corresponding
                                                    ! surplus of nutrients. This surplus (pee) is routed to nutrients
-    !
-    ! Check balance: (should be zero)
-    !
-    !write(*,*) 'Copepod N balance:', &
-    !      + sum(this%JF/this%m*u)/rhoCN &  ! Gains from feeding
-    !      - sum(dudt)/rhoCN & ! Accumulation of biomass
-    !      - sum( this%Jresp*u/(this%m*rhoCN) ) & ! Losses from respiration
-    !      - (1-epsilonR)*this%g(this%n)*u(this%n)/rhoCN  & ! Losses from reproduction
-    !      - sum(this%mort*u)/rhoCN  ! Mortality losses
-
   end subroutine calcDerivativesCopepod
 
   subroutine printRatesCopepod(this)
