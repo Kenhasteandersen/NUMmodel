@@ -285,7 +285,7 @@ vulnerability = 10          ! Gelatinous zooplankton has increased risk of preda
 mortalitytest = 0.015             !
 DiatomsPreference = 1       ! Feeding preference on diatoms 
 
-selectionHTL = 40.0           ! Gelatinous zooplankton are more affected by HTL mortality
+selectionHTL = 5.0           ! Gelatinous zooplankton are more affected by HTL mortality
 
 !***********************************************************************
 ! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS

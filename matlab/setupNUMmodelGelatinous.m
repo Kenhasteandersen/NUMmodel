@@ -97,4 +97,4 @@ p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix) );
 
 p.u0( p.ixStart(end):p.ixEnd(end) ) = 0; % No POM in initial conditions
 
-setHTL(0.005, 0.1 ,true, false); % "Quadratic" mortality; not declining
+setHTL(0.005, 0.1 ,true, false, true); % "Quadratic" mortality; not declining
