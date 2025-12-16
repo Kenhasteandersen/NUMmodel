@@ -37,12 +37,9 @@ switch p.typeGroups(p.nGroups)
     case 10
         p.nameGroup{p.nGroups} = sprintf('Active copepod %.1f {\\mu}g',mAdult);
         p.colGroup{p.nGroups} = [0.85 0.0 0];
-    case 12
+    case 20
         p.nameGroup{p.nGroups} = sprintf('Gelatinous %.1f {\\mu}g',mAdult);
         p.colGroup{p.nGroups} = [0.6 1 0.3];
-    case 13
-        p.nameGroup{p.nGroups} = sprintf('Non gelatinous %.1f {\\mu}g',mAdult);
-        p.colGroup{p.nGroups} = [0.3 0.6 1];
     case 100
         p.nameGroup{p.nGroups} = 'POM';
         p.colGroup{p.nGroups} = [165 42 42]/256; % Brown
