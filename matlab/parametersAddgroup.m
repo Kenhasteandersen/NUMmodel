@@ -31,10 +31,10 @@ switch p.typeGroups(p.nGroups)
     case 5
         p.nameGroup{p.nGroups} = 'Generalists';
         p.colGroup{p.nGroups} = [0 0 0.75];
-    case 10
+    case 11
         p.nameGroup{p.nGroups} = sprintf('Passive copepod %.1f {\\mu}g',mAdult);
         p.colGroup{p.nGroups} = [0.6 0.0 0];
-    case 11
+    case 10
         p.nameGroup{p.nGroups} = sprintf('Active copepod %.1f {\\mu}g',mAdult);
         p.colGroup{p.nGroups} = [0.85 0.0 0];
     case 12

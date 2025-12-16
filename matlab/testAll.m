@@ -1,17 +1,17 @@
 
 loadNUMmodelLibrary
 
-testSetup('setupGeneralistsSimpleOnly',  4168);
-testSetup('setupGeneralistsOnly',  3814);
-testSetup('setupGeneralistsDiatoms_simple', 5487);
-testSetup('setupGeneralistsDiatoms', 8409);
-testSetup('setupDiatoms_simpleOnly', 1284);
-testSetup('setupDiatomsOnly', 4623);% ???
-testSetup('setupGeneric', 4545);
-testSetup('setupNUMmodel', 1809);
+testSetup('setupGeneralistsSimpleOnly',  4170);
+testSetup('setupGeneralistsOnly',  3727);
+%testSetup('setupGeneralistsDiatoms_simple', 5487);
+testSetup('setupGeneralistsDiatoms', 11354);
+%testSetup('setupDiatoms_simpleOnly', 1284);
+testSetup('setupDiatomsOnly', 7349);
+testSetup('setupGeneric', 4547);
+testSetup('setupNUMmodel', 1624);
 
-testFunction('testChemostat',96966);
+testFunction('testChemostat',26754);
 testFunction('testChemostatEuler',1);
 %testFunction('testChemostatSeasonal',NaN);
-testFunction('testWatercolumn',833918);
-testFunction('testGlobal',5107910);
+testFunction('testWatercolumn',189315);
+testFunction('testGlobal',3071461);

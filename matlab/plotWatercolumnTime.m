@@ -6,21 +6,24 @@
 % In:
 %  sim - simulation structure either from global or from watercolumn
 %  lat, lon - latitude and longitude (only to extract from global run)
+%
 % Optional named arguments:
 %  bNewplot - boolean that decides whether to setup the plot
-%  depthMax - mx depth for ylimit.
+%  depthMax - max depth.
 %  bOnlyLastYear - boolean deciding whether to only plot the last year
+%  bMolarUnits - boolean deciding whether to show nutrients in molar units.
 %
 function plotWatercolumnTime(sim, lat, lon, options)
 
 arguments
     sim struct;
-    lat double = [];
-    lon double = [];
+    lat double = 60;
+    lon double = -40;
     options.bNewPlot logical = true;
     options.depthMax {mustBePositive} = [];
     options.bOnlyLastYear = false;
     options.nLevels = 20;
+    options.bMolarUnits = true;
 end
 
 switch sim.p.nameModel
@@ -55,6 +58,14 @@ switch sim.p.nameModel
 end
 N(N<=0) = 1e-8;
 DOC(DOC<=0) = 1e-8;
+% Convert nutrient units:
+if options.bMolarUnits
+    N = N/14;
+    DOC = DOC/12;
+    if exist("Si")
+        Si = Si/28;
+    end
+end
 
 t = sim.t;
 %
@@ -69,9 +80,10 @@ DOC = [DOC(1,:); DOC];
 B(:,2:length(z),:) = B;
 B(:,1,:) = B(:,2,:);
 
+nTiles = 2+isfield(sim,'Si')+sim.p.nGroups;
 if options.bNewPlot
     clf
-    tiledlayout(2+isfield(sim,'Si')+sim.p.nGroups,1,'tilespacing','tight','padding','tight')
+    tiledlayout(nTiles,1,'tilespacing','tight','padding','tight')
 end
 
 if isempty(options.depthMax)
@@ -90,13 +102,17 @@ nexttile
 %panelField([t t(end)], -z, N');
 %surface(t,-z, N)
 contourf(t,-z,N,logspace(-2,3,options.nLevels),'LineStyle','none')
-title('Nitrogen')
-ylabel('Depth (m)')
+title('Nitrogen','FontWeight','normal','FontSize',10)
+ylabel('  ') % Make space for ylabel at the end
 %set(gca,'ColorScale','log')
 %shading interp
 axis tight
 h = colorbar('ticks',10.^(-2:3));
-h.Label.String = '{\mu}g_N/l';
+if options.bMolarUnits
+    h.Label.String = '{\mu}M_N';
+else
+    h.Label.String = '{\mu}g_N/l';
+end
 %caxis([-1 2])
 ylim(ylimit)
 xlim(xlimit)
@@ -108,13 +124,18 @@ if isfield(sim,'Si')
     %surface(t,-z, Si)
     contourf(t,-z,Si,logspace(-2,3,options.nLevels),'LineStyle','none')
     % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
-    title('Silicate')
-    ylabel('Depth (m)')
+    title('Silicate','FontWeight','normal')
+    %ylabel('Depth (m)')
     %set(gca,'ColorScale','log')
     %shading interp
     axis tight
     h = colorbar('ticks',10.^(-2:3));
-    h.Label.String = '{\mu}g_{Si}/l';
+    if options.bMolarUnits
+        h.Label.String = '{\mu}M_{Si}';
+    else
+        h.Label.String = '{\mu}g_{Si}/l';
+    end
+    
     %caxis([0.1 1000])
     ylim(ylimit)
     xlim(xlimit)
@@ -125,11 +146,15 @@ end
 nexttile
 contourf(t,-z,DOC,logspace(-2,2,options.nLevels),'LineStyle','none')
 %surface(t,-z, DOC)
-title('DOC')
-ylabel('Depth (m)')
+title('DOC','FontWeight','normal')
+%ylabel('Depth (m)')
 axis tight
 h = colorbar('ticks',10.^(-2:2));
-h.Label.String = '{\mu}g_C/l';
+if options.bMolarUnits
+    h.Label.String = '{\mu}M_C';
+else    
+    h.Label.String = '{\mu}g_C/l';
+end
 %caxis([0.1,2])
 ylim(ylimit)
 xlim(xlimit)
@@ -141,10 +166,10 @@ for i = 1:sim.p.nGroups
     %surface(t,-z, squeeze(B(i,:,:)))
     B(B < 0.01) = 0.01; % Set low biomasses to the lower limit to avoid white space in plot
     contourf(t,-z,(squeeze(B(i,:,:))),[logspace(-2,3,options.nLevels)],'LineStyle','none')
-    title( sim.p.nameGroup(i) );
-    ylabel('Depth (m)')
+    title( sim.p.nameGroup(i) ,'FontWeight','normal');
+    %ylabel('Depth (m)')
     axis tight
-    h = colorbar('ticks',10.^(-2:3));
+    h = colorbar('ticks',10.^(-2:2:3));
     h.Label.String = '{\mu}g_C/l';
     set(gca, 'colorscale','log')
     ylim(ylimit)
@@ -160,5 +185,7 @@ end
 if strcmp(sim.p.nameModel, 'watercolumn')
     sgtitle(['Water column at lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
 end
+annotation('textbox', [0.075, 0.5, 0.5, 0.04], 'String', 'Depth (m)', 'FontSize', 10,'rotation',90,...
+    'edgecolor','none','VerticalAlignment','bottom');
 
 end

@@ -1,11 +1,11 @@
-# NUMmodel
+# NUMmodel 
 Reference implementation of the **Nutrient-Unicellular-Multicellular**
 modelling framework.  The model is described in: 
 * Unicellular plankton: Andersen and Visser: [From cell size and first principles to structure and function of unicellular plankton communities](https://www.biorxiv.org/content/10.1101/2022.05.16.492092v3)
 * Copepods: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities "Researchgate"). 
-* Application to biological pump: Serra-Pompei et al (2022) Progress in Oceanography (189) 102473: [Zooplankton trophic dynamics drive carbon export efficiency](https://www.biorxiv.org/content/10.1101/2021.03.08.434455v1 "BioRxiv").
+* An [introduction to the modelling principles](https://www.youtube.com/watch?v=dHqoCqaLM8w) given by Camila Serra-Pompei. 
 
-The core library is written in Fortran2008 and is interfaced from matlab and with a minimal frontend in  R (see http://oceanlife.dtuaqua.dk/Plankton/R).
+The core library is written in Fortran2008 and is interfaced from matlab (with a minimal frontend in  R; see http://oceanlife.dtuaqua.dk/Plankton/R).
 
 <img width="812" alt="image" src="https://github.com/user-attachments/assets/a0fc29cc-8134-4e93-8d98-4b94dcb82f83">
 
@@ -20,7 +20,7 @@ _The figure above shows a setup with only unicellular generalists run with the M
 ### Installation
 The library requires a recent version of matlab (2021 or later).  Installation and compilation instructions are given in the wiki.
 ### Basic structure
-There are three levels of routines: top-level, medium-level and low-level.  There are two model systems: an upper ocean represented as a chemostat and a global simulation with transport matrices.
+There are three levels of routines: top-level, medium-level and low-level.  There are three model systems: an upper ocean represented as a chemostat, a water column, and a global simulation with transport matrices.
 #### Top-level matlab routines
 These routines run a simulation and returns the results in a `sim` structure:
 

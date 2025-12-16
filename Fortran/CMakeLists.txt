@@ -7,13 +7,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 #endif()
 set(CMAKE_FORTRAN_FLAGS="-O2")
 set(RELEASE_FLAGS "-O2 -DNDEBUG -DBOOST_DISABLE_ASSERTS")
-set(DEBUG_FLAGS "-g3")
+set(DEBUG_FLAGS "-g3 -gline")
 
 add_library(NUMmodel SHARED
 	${CMAKE_CURRENT_LIST_DIR}/read_input.f90
 	${CMAKE_CURRENT_LIST_DIR}/globals.f90
 	${CMAKE_CURRENT_LIST_DIR}/spectrum.f90
-        ${CMAKE_CURRENT_LIST_DIR}/generalists_simple.f90
+    ${CMAKE_CURRENT_LIST_DIR}/generalists_simple.f90
 	${CMAKE_CURRENT_LIST_DIR}/generalists.f90
 	${CMAKE_CURRENT_LIST_DIR}/diatoms_simple.f90
 	${CMAKE_CURRENT_LIST_DIR}/diatoms.f90 

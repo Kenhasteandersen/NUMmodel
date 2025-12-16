@@ -11,13 +11,14 @@
 % Out
 %  Struct with rates in units of 1/day
 %
-function rates = getRates(p, u, L, T, sLibName)
+function rates = getRates(p, u, L, T, sLibName, bCalcDerivative)
 arguments
     p struct;
     u double;
     L double;
     T double;
     sLibName = loadNUMmodelLibrary();
+    bCalcDerivative = true;
 end
 
 if length(u) ~= p.n
@@ -27,8 +28,10 @@ end
 % First make a call to calc a derivative:
 %
 dudt = 0*u';
-calllib(sLibName, 'f_calcderivatives', ...
-            u, L, T, 0.0, dudt);
+if bCalcDerivative
+    calllib(sLibName, 'f_calcderivatives', ...
+        u, L, T, 0.0, dudt);
+end
 %
 % Then extract the rates:
 %

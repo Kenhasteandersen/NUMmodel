@@ -35,14 +35,14 @@ if bParallel
         disp(['Error loading ',errortext{i},'. Execution terminated'])
         return
     else
-        disp('done loading input parameters')
+        %disp('done loading input parameters')
     end
 else
     if errorio
         disp(['Error loading ',errortext,'. Execution terminated'])
         return
     else
-        disp('done loading input parameters')
+        %disp('done loading input parameters')
     end
 end
 
@@ -55,7 +55,7 @@ p = parametersAddgroup(5,p,n);
 
 
 for i = 1:length(mAdult)
-    p = parametersAddgroup(10,p,nCopepods, mAdult(i));
+    p = parametersAddgroup(11,p,nCopepods, mAdult(i));
 end
 
 % POM:

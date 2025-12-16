@@ -34,6 +34,7 @@ for iGroup = 1:p.nGroups
     %
     if ((p.typeGroups(iGroup)==3) || (p.typeGroups(iGroup)==4))
         semilogx(m, rates.jSi(ix), 'color',[181 180 0]/256,'linewidth',2)
+        hold on
         semilogx(m, rates.jN(ix), 'b--','linewidth',2)
         semilogx(m, rates.jLreal(ix), 'g--','linewidth',2)
         semilogx(m, rates.jDOC(ix), 'color',[181 100 30]/256,'linewidth',2)
@@ -61,9 +62,9 @@ ylabel('Gains (day^{-1})')
 if isfield(p, 'ixSi')
     cap={'Feeding','N','Light','Si','DOC','Max. growth rate','Growth rate'};
     legend(cap, ...
-        'location','northwest','box','off')
+        'location','eastoutside','box','off')
 else
     cap={'Feeding','N','Light','DOC','Max. growth rate','Growth rate'};
     legend(cap, ...
-        'location','northwest','box','off')
+        'location','eastoutside','box','off')
 end

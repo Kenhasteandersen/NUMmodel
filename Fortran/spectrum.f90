@@ -13,16 +13,16 @@ module spectrum
      integer:: n  ! Number of size classes
 
      ! Grid:
-     real(dp), dimension(:), allocatable:: m(:)  ! Geometric center mass of size-bin
-     real(dp), dimension(:), allocatable:: mLower(:)  ! Smallest size in the bin
-     real(dp), dimension(:), allocatable:: mDelta(:)   ! Width of the bin
-     real(dp), dimension(:), allocatable:: z(:) ! Ratio btw upper and lower size of bin
+     real(dp), dimension(:), allocatable:: m  ! Geometric center mass of size-bin
+     real(dp), dimension(:), allocatable:: mLower  ! Smallest size in the bin
+     real(dp), dimension(:), allocatable:: mDelta   ! Width of the bin
+     real(dp), dimension(:), allocatable:: z ! Ratio btw lower and upper size of bin
      ! Feeding:
      real(dp):: palatability ! [0:1] Reduction of risk of predation
      real(dp):: beta, sigma ! Pred:prey mass ratio and width
      real(dp):: epsilonF ! Assimilation efficiency
      real(dp):: epsilonL ! Light Assimilation efficiency
-     real(dp), dimension(:), allocatable:: flvl(:), AF(:), JFmax(:), JF(:), f(:)
+     real(dp), dimension(:), allocatable:: flvl, AF, JFmax, JF, f
      ! Growth:
      real(dp), dimension(:), allocatable:: Jtot, JCloss_feeding, JNlossLiebig
      real(dp), dimension(:), allocatable:: JNloss, JCloss, Jresp, Jresptot
@@ -142,6 +142,7 @@ contains
     this%JNlossLiebig = 0.d0
     this%JNloss = 0.d0
     this%jCloss = 0.d0
+    this%mortHTL = 0.d0
   end subroutine initSpectrum
 
   !
@@ -164,7 +165,7 @@ contains
      this%mDelta(i) =  exp(x + 0.5*deltax)-this%mLower(i)
      this%z(i) = this%mLower(i)/(this%mLower(i) + this%mDelta(i))
   end do
-  this%mort2constant = 0.004/log(this%m(2) / this%m(1))
+  this%mort2constant = 0.004/log( (this%mLower(2)+this%mDelta(1)) / this%mLower(1) )
 end subroutine calcGrid
 
 !function getNbalanceSpectrum(this, u, dudt) result(Nbalance)
@@ -287,6 +288,7 @@ end subroutine calcGrid
     write(*,99) "jDOC:", this%JDOCreal / this%m
     write(*,99) "jDOCreal:", this%JDOCreal / this%m
     write(*,99) "jLossPass.", this%JlossPassive / this%m
+    write(*,99) "jNloss:", this%JNloss / this%m
   end subroutine printRatesUnicellular
 
   !function getCbalanceUnicellular(this, u, dudt) result(Cbalance)
@@ -302,7 +304,7 @@ end subroutine calcGrid
   !end function getCbalanceUnicellular
   !
   ! Returns the net primary production calculated as the total amount of carbon fixed
-  ! by photsynthesis minus the respiration. Units: mugC/day/m3
+  ! by photsynthesis minus the respiration. Units: mugC/day/l
   ! (See Andersen and Visser (2023) table 5)
   !
   function getProdNet(this, u) result(ProdNet)
@@ -319,7 +321,7 @@ end subroutine calcGrid
   end function getProdNet
   !
   ! Returns the net bacterial production calculated as the total amount of DOC
-  ! taken up minus the respiration. Units: mugC/day/m3
+  ! taken up minus the respiration. Units: mugC/day/l
   ! (See Andersen and Visser (2023) table 5)
   !
   function getProdBactUnicellular(this, u) result(ProdBact)

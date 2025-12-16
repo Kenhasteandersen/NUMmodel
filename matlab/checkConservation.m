@@ -41,11 +41,12 @@ switch sim.p.nameModel
             rates = getRates(p, u, mean(sim.L), sim.T );
             ixUni = findIxUnicellular(sim.p);
 
+            B = squeeze(0.5*sum(sim.B(iTime:iTime+1,:))); % Interpolate B
             if ~sum(ismember(p.typeGroups,100))
                 %
                 % If pom is not present:
                 %
-                B = squeeze(0.5*sum(sim.B(iTime:iTime+1,:))); % Interpolate B
+                
                 % Losses from HTL:
                 lossHTL = lossHTL + ...
                     sum((1-fracHTL_to_N-fracHTL_to_POM)*rates.mortHTL.*B')/rhoCN*dt(iTime);

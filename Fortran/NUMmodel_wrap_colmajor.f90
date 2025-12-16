@@ -10,7 +10,7 @@ module NUMmodel_wrap
        setupGeneric, setupNUMmodel, setupNUMmodelSimple,  setupGenDiatCope, &
        setupGenDiatZoo, setupNUMmodelZoo, calcderivatives, &
        simulateChemostatEuler, simulateEuler, simulateEulerFunctions, getFunctions, &
-       setHTL, setmortHTL, setSinking, getRates, getBalance, getLost, theta
+       setHTL, setmortHTL, getMortHTL, setSinking, getRates, getBalance, getLost, theta
 
   use globals
 
@@ -186,6 +186,27 @@ contains
     call simulateEulerFunctions(u, L, T, tEnd, dt, &
       ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
   end subroutine f_simulateEulerFunctions
+
+  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, bCopepodsOnly) bind(c)
+    real(c_double), intent(in), value:: mHTL, mortHTL
+    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL, bCopepodsOnly
+
+    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, bCopepodsOnly)
+  end subroutine f_setHTL 
+
+  subroutine f_setMortHTL(mortHTL, pHTL, bQuadratic) bind(c)
+    real(c_double), intent(in), value:: mortHTL
+    real(c_double), intent(in):: pHTL(nGrid-idxB+1)
+    logical(c_bool), intent(in), value:: bQuadratic
+
+    call setMortHTL(mortHTL, pHTL, bQuadratic)
+  end subroutine f_setMortHTL
+
+  subroutine f_getMortHTL( mortalityHTL, bQuadratic) bind(c)
+    real(c_double), dimension (nGrid-idxB+1), intent(inout):: mortalityHTL
+    logical(c_bool), intent(out):: bQuadratic
+    call getMortHTL( mortalityHTL, bQuadratic )
+  end subroutine f_getMortHTL
 
    subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL) bind(c)
     real(c_double), intent(in):: u(nGrid)

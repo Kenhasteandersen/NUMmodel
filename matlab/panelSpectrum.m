@@ -86,11 +86,11 @@ ylim([0.0001,500])
 xlim(calcXlim(sim.p))
 hold off
 
-xlabel('Mass ({\mu}gC)')
-ylabel('Sheldon biomass ({\mu}gC/L)')
+xlabel('Mass ({\mu}g_C)')
+ylabel('Sheldon biomass ({\mu}g_C/L)')
 %legendentries=[dum,legendentries];
 %sLegend=[captionedstrat,sLegend];
 
 lh = legend(legendentries, sLegend, 'box','off');
-lh.Location='northeast';
+lh.Location='eastoutside';
 

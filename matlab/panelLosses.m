@@ -39,6 +39,6 @@ hold off
 xlim(calcXlim(p))
 
 ylabel('Losses (day^{-1})')
-xlabel('Mass ({\mu}gC)')
+xlabel('Mass ({\mu}g_C)')
 legend({'Predation','Respiration','Viral lysis','Passive exudation','HTL'}, ...
-    'location','northwest','box','off')
+    'location','eastoutside','box','off')

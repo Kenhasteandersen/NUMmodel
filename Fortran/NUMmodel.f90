@@ -15,7 +15,7 @@ module NUMmodel
   use generalists_simple
   use diatoms_simple
   use copepods
-  use zooplanktons
+  use gelatinous
   use diatoms
   use POM
   use read_input_module
@@ -248,8 +248,8 @@ contains
    end do
    ! POM with nPOM size classes and max size 1 ugC:
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
-   call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
-
+   call parametersFinalize(0.13d0, logical(.true.,1), logical(.false.,1))
+   call setHTL(1.d0, 0.13d0, logical(.true.,1), logical(.false.,1), logical(.true.,1)) ! Only HTL on copepods
   end subroutine setupNUMmodel
 
   ! -----------------------------------------------
@@ -545,7 +545,7 @@ contains
    ! Calc the mass where HTL mortality is 50%
    mHTL = mHTL/betaHTL**1.5
 
-   call setHTL(mHTL, mortHTL, boolQuadraticHTL, boolDecliningHTL)
+   call setHTL(mHTL, mortHTL, boolQuadraticHTL, boolDecliningHTL, logical(.FALSE.,1))
    !
    ! If there is a POM group then calculate the interactions with other groups
    !
@@ -600,86 +600,7 @@ contains
     end function calcPhi
 
   end subroutine parametersFinalize
-  !
-  ! Set the "HTL" mortality experienced by the largest groups.
-  !
-  ! IN:
-  !  mHTL : The mass where the HTL mortality begins to act
-  !  mortalityHTL : the level of the morality (see below)
-  !  boolQuadraticHTL : whether to use a constant mortality (false) or a mortality
-  !                     that is proportional to the biomass density (true)
-  !  boolDecliningHTL : whether the mortality declines with size as mass^-1/4 (true)
-  !                     or is constant (false)
-  !
-  ! If the mortality is constant (boolQuadraticHTL=false) then the mortality is at a level 
-  ! of mortalityHTL at mHTL. The mortality may decline from there is boolDecliningHTL = true.
-  !
-  ! If the mortality is "quadratic" (boolQuadratic=true) then the mortality is
-  ! at a level mortalityHTL at mHTL if the biomass density is 1 (ugC/l) / ugC.
-  !
-  ! The decline in mortality (boolDecliningHTL=true) is set such that the mortality
-  ! is mortalityHTL at a mass mRef = .1 ugC.
-  !
-  subroutine setHTL(mHTL, mortalityHTL, boolQuadraticHTL, boolDecliningHTL)
-    real(dp), intent(in):: mHTL ! The size where HTL is 50% of max
-    real(dp), intent(in):: mortalityHTL ! The level of HTL mortality (at a reference size of 1 ugC
-                                        ! B/z = 1/l )
-    logical(1), intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
-    logical(1), intent(in):: boolDecliningHTL ! Whether the mortality declines with size
-    real(dp), parameter:: mRef = .1d0 ! Reference mass (in ugC)
-    !real(dp), parameter:: betaHTL = 500.
-    integer:: iGroup
- 
-    !     
-    ! Calc htl mortality
-    !
-
-    pHTL = 0.d0
-    ! Find the selectivity:
-    do iGroup = 1, nGroups
-      if (iGroup .ne. idxPOM) then ! POM is unaffected by HTL mortality
-         pHTL( ixStart(iGroup):ixEnd(iGroup) ) = &
-             (1 / (1+(group(iGroup)%spec%m/mHTL)**(-2))) ! The size selectivity switch around mHTL
-         if (boolDecliningHTL) then
-            pHTL( ixStart(iGroup):ixEnd(iGroup) ) = pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
-                * (group(iGroup)%spec%m/mHTL)**(-0.25)
-         end if
-      end if
-    end do
-
-    if (.not. boolQuadraticHTL) then
-      !
-      ! Standard HTL mortality that is constant over time:
-      !
-      do iGroup = 1, nGroups
-         group(iGroup)%spec%mortHTL = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
-      end do
-    else
-      !
-      ! Linear HTL mortality (commonly referred to as "quadratic")
-      ! The selectivity is now normalized by the width of the size classes
-      !
-      do iGroup = 1, nGroups
-        pHTL( ixStart(iGroup):ixEnd(iGroup) ) = mortalityHTL &
-           * pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
-           / log(1/group(iGroup)%spec%z)
-      end do
-    end if
-
-    bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
-  end subroutine setHTL
-  !
-  ! Routine for the user to override the calculation of HTL mortality done by setHTL:
-  !
-  subroutine setMortHTL(mortHTL)
-   real(dp), intent(in):: mortHTL(nGrid-idxB+1)
-   integer:: iGroup
-
-   do iGroup = 1, nGroups
-      group(iGroup)%spec%mortHTL = mortHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) )
-   end do
-  end subroutine setMortHTL
-
+  
   ! ======================================
   !  Calculate rates and derivatives:
   ! ======================================
@@ -738,6 +659,10 @@ contains
          group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) &
             * upositive(ixStart(iGroup):ixEnd(iGroup))
        end do
+      else
+         do iGroup = 1, nGroups
+            group(iGroup)%spec%mortHTL = pHTL(ixStart(iGroup):ixEnd(iGroup)) 
+          end do
      end if
     !
     ! Calc derivatives of unicellular groups (predictor step)
@@ -1059,6 +984,120 @@ contains
       end do
     end subroutine setSinking
   
+  !
+  ! Set the "HTL" mortality experienced by the largest groups.
+  !
+  ! IN:
+  !  mHTL : The mass where the HTL mortality begins to act
+  !  mortalityHTL : the level of the morality (see below)
+  !  boolQuadraticHTL : whether to use a constant mortality (false) or a mortality
+  !                     that is proportional to the biomass density (true)
+  !  boolDecliningHTL : whether the mortality declines with size as mass^-1/4 (true)
+  !                     or is constant (false)
+  !  boolCopepodsOnly : If true, only copepods are affected (but still with the size selectivity)
+  !
+  ! If the mortality is constant (boolQuadraticHTL=false) then the mortality is at a level 
+  ! of mortalityHTL at mHTL. The mortality may decline with size if boolDecliningHTL = true.
+  !
+  ! If the mortality is "quadratic" (boolQuadratic=true) then the mortality is
+  ! at a level mortalityHTL at mHTL if the biomass density is 1 (ugC/l) / ugC. Further, the mortality
+  ! is corrected for the width of the size groups. 
+  !
+  ! The decline in mortality (boolDecliningHTL=true) is set such that the mortality
+  ! is mortalityHTL at a mass mRef = .1 ugC.
+  !
+  ! If boolCopepodsOnly=true then the HTL mortality affects only copepods.
+  !  
+  subroutine setHTL(mHTL, mortalityHTL, boolQuadraticHTL, boolDecliningHTL, boolCopepodsOnly)
+   real(dp), intent(in):: mHTL ! The size where HTL is 50% of max
+   real(dp), intent(in):: mortalityHTL ! The level of HTL mortality (at a reference size of 1 ugC
+                                       ! B/z = 1/l )
+   logical(1), intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
+   logical(1), intent(in):: boolDecliningHTL ! Whether the mortality declines with size
+   logical(1), intent(in):: boolCopepodsOnly ! Whether the mortality only affects copepods
+   integer:: iGroup
+
+   !     
+   ! Calc htl mortality
+   !
+
+   pHTL = 0.d0
+   ! Find the selectivity:
+   do iGroup = 1, nGroups
+     if (iGroup .ne. idxPOM) then ! POM is unaffected by HTL mortality
+        pHTL( ixStart(iGroup):ixEnd(iGroup) ) = &
+            (1 / (1+(group(iGroup)%spec%m/mHTL)**(-2))) ! The size selectivity switch around mHTL
+        if (boolDecliningHTL) then
+           pHTL( ixStart(iGroup):ixEnd(iGroup) ) = pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
+               * (group(iGroup)%spec%m/mHTL)**(-0.25)
+        end if
+      end if
+      ! Remove selection of unicellulars if boolCopepodsOnly = TRUE
+      if (boolCopepodsOnly) then
+         select type (spec => group(iGroup)%spec) ! Predator group
+         type is (spectrumCopepod)
+            ! Do nothing
+         class default
+            pHTL( ixStart(iGroup):ixEnd(iGroup) ) = 0.d0 ! All other than copepods = 0
+         end select
+      end if
+ 
+   end do
+
+   if (.not. boolQuadraticHTL) then
+     !
+     ! Standard HTL mortality that is constant over time:
+     !
+     do iGroup = 1, nGroups
+        group(iGroup)%spec%mortHTL = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
+        pHTL( ixStart(iGroup):ixEnd(iGroup) ) = mortalityHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) ) ! Needed for some odd reason
+     end do
+   else
+     !
+     ! Linear HTL mortality (commonly referred to as "quadratic")
+     ! The selectivity is now normalized by the width of the size classes
+     !
+     do iGroup = 1, nGroups
+       pHTL( ixStart(iGroup):ixEnd(iGroup) ) = mortalityHTL &
+          * pHTL( ixStart(iGroup):ixEnd(iGroup) ) &
+          / log(1/group(iGroup)%spec%z)
+     end do
+   end if
+
+   bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
+ end subroutine setHTL
+ !
+ ! Routine for the user to override the calculation of HTL mortality done by setHTL:
+ !
+ subroutine setMortHTL(mortHTL, ppHTL, bQuadratic)
+  real(dp), intent(in):: mortHTL, ppHTL(nGrid-idxB+1)
+  logical(1), intent(in):: bQuadratic
+  integer:: iGroup
+
+  bQuadraticHTL = bQuadratic
+
+  do iGroup = 1, nGroups
+      pHTL(ixStart(iGroup):ixEnd(iGroup)) = ppHTL((ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1))
+      group(iGroup)%spec%mortHTL = mortHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
+  end do
+  
+ end subroutine setMortHTL
+ !
+ ! Get the HTL mortality as pHTL * mortHTL. This can be used to calculate the loss either by
+ ! multiplying with u or u^2, as determined by the bQuadratic. The vector does not include the 
+ ! the nutrient pools (length nGrid-idxB+1).
+ !
+ subroutine getMortHTL(mortalityHTL, bQuadratic)
+   real(dp), dimension (nGrid-idxB+1), intent(inout):: mortalityHTL
+   logical(1), intent(out):: bQuadratic
+   integer:: iGroup
+
+   do iGroup = 1, nGroups
+      mortalityHTL( (ixStart(iGroup)-idxB+1):(ixEnd(iGroup)-idxB+1) ) = group(iGroup)%spec%mortHTL
+   end do
+   bQuadratic = bQuadraticHTL
+end subroutine getMortHTL
+
   ! ---------------------------------------------------
   ! Get the ecosystem functions as calculated from the last call
   ! to calcDerivatives
@@ -1304,7 +1343,7 @@ end subroutine getLost
         jSi( i1:i2 ) = spectrum%JSi / spectrum%m
       end select
 
-      mort = 0.d0 ! For odd reasons this gives a segfault when called from R
+      mort = 0.d0
 
    end do
   end subroutine getRates

@@ -61,5 +61,5 @@ hold off
 ylim([0.9 max(lambda)+0.3])
 xlim(calcXlim(p))
 ylabel('Trophic Level')
-xlabel('Mass ({\mu}gC)')
-legend(name,'Location','northwest','box','off')
+xlabel('Mass ({\mu}g_C)')
+legend(name,'Location','eastoutside','box','off')
