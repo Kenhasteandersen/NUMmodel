@@ -532,7 +532,7 @@ contains
                            theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
                             spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
                       end select
-	            end select
+               end select
             end do
          end do
       end do

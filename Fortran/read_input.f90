@@ -23,7 +23,6 @@ module read_input_module
     integer:: ios, n, i
     integer, parameter :: DRK = selected_real_kind (40)
     real(dp):: keyval
-    real(dp):: io
     logical(1) :: strfind 
     
     ! just exit if a previos parameter was missing
@@ -54,7 +53,7 @@ module read_input_module
         read(1, '(A)', iostat=ios) line
         IF (ios /= 0) exit
         
-     !
+    !
     ! Check if we are on a group define statement
     !
           if (line(1:len(str_General)).eq.str_General) then
