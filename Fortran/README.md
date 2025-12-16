@@ -13,4 +13,5 @@ Files:
 - `Diatoms.f90`. Diatoms. Working
 - `Diatoms_simple.f90`. Very simple version of diatoms. Working but not thoroughly tested.
 - `Generalists_simple.f90`. Very simple version of generalists. Tested and working
+- `gelatinous.f90`. Gelatinous zooplankton.
 - `POM.f90`. Particular organic matter spectrum.
