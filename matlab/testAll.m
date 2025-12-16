@@ -9,6 +9,7 @@ testSetup('setupGeneralistsDiatoms', 11354);
 testSetup('setupDiatomsOnly', 7349);
 testSetup('setupGeneric', 4547);
 testSetup('setupNUMmodel', 1624);
+testSetup('setupNUMmodelGelatinous',1393)
 
 testFunction('testChemostat',26754);
 testFunction('testChemostatEuler',1);
