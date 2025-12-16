@@ -10,24 +10,24 @@ S = struct();
 %--------------------------------------------------------------------------
 % Define the parameter headers
 %--------------------------------------------------------------------------
-%load(fullfile('..','input','input_parameter_headers.mat'));
-str_General='! GENERAL PARAMETERS';
-str_Generalists_simple='! GENERALISTS SIMPLE INPUT PARAMETERS';
-str_Generalists='! GENERALISTS INPUT PARAMETERS';
-str_Diatoms_simple='! DIATOMS SIMPLE INPUT PARAMETERS';
-str_Diatoms='! DIATOMS INPUT PARAMETERS';
-str_Copepods_active='! COPEPODS ACTIVE INPUT PARAMETERS';
-str_Copepods_passive='! COPEPODS PASSIVE INPUT PARAMETERS';
-str_Gelatinous='! GELATINOUS ZOOPLANKTON INPUT PARAMETERS';
-str_POM='! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS';
-
-thelists={'input_general';'input_generalists_simple';'input_generalists';...
-    'input_diatoms_simple';'input_diatoms';'input_copepods_active';'input_copepods_passive';...
-    'input_gelatinous';'input_POM'};
-
-thestrings={str_General;str_Generalists_simple;str_Generalists;...
-    str_Diatoms_simple;str_Diatoms;str_Copepods_active;...
-        str_Copepods_passive;str_Gelatinous;str_POM};
+load(fullfile('..','input','input_parameter_headers.mat'));
+% str_General='! GENERAL PARAMETERS';
+% str_Generalists_simple='! GENERALISTS SIMPLE INPUT PARAMETERS';
+% str_Generalists='! GENERALISTS INPUT PARAMETERS';
+% str_Diatoms_simple='! DIATOMS SIMPLE INPUT PARAMETERS';
+% str_Diatoms='! DIATOMS INPUT PARAMETERS';
+% str_Copepods_active='! COPEPODS ACTIVE INPUT PARAMETERS';
+% str_Copepods_passive='! COPEPODS PASSIVE INPUT PARAMETERS';
+% str_Gelatinous='! GELATINOUS ZOOPLANKTON INPUT PARAMETERS';
+% str_POM='! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS';
+% 
+% thelists={'input_general';'input_generalists_simple';'input_generalists';...
+%     'input_diatoms_simple';'input_diatoms';'input_copepods_active';'input_copepods_passive';...
+%     'input_gelatinous';'input_POM'};
+% 
+% thestrings={str_General;str_Generalists_simple;str_Generalists;...
+%     str_Diatoms_simple;str_Diatoms;str_Copepods_active;...
+%         str_Copepods_passive;str_Gelatinous;str_POM};
 
 % thislist='no list defined yet';
 %--------------------------------------------------------------------------

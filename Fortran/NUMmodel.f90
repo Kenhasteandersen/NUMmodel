@@ -1052,6 +1052,13 @@ contains
           / log(1/group(iGroup)%spec%z)
      end do
    end if
+   !
+   ! Include the group-specific selection for HTL mortality:
+   !
+   do iGroup = 1, nGroups
+       pHTL( ixStart(iGroup):ixEnd(iGroup) ) = &
+         group(iGroup)%spec%selectionHTL * pHTL( ixStart(iGroup):ixEnd(iGroup) )
+   end do
 
    bQuadraticHTL = boolQuadraticHTL ! Set the global type of HTL mortality
  end subroutine setHTL

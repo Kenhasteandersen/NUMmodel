@@ -33,6 +33,7 @@ character(len=20)::this_listname
   this_listname = 'gelatinous'
   
   call this%readCopepodInput(this_listname, n, mAdult, errorio, errorstr)
+  call read_input(inputfile,this_listname,'selectionHTL',this%selectionHTL,errorio,errorstr)
 
   this%mPOM = 3.5e-3*this%m ! WHAT IS THE SIZE OF FECAL PELLETS FROM GELATINOUS ZOOPLANKTON?
 end subroutine initGelatinous

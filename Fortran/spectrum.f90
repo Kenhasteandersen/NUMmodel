@@ -30,6 +30,7 @@ module spectrum
      ! Mortality:
      real(dp), dimension(:), allocatable:: mortpred, mortHTL, mort2
      real(dp) :: mort2constant
+     real(dp) :: selectionHTL ! Selection factor for HTL mortality (1 for most groups)
      ! Sinking:
      real(dp), dimension(:), allocatable:: velocity ! sinking velocity m/day
  
@@ -143,6 +144,8 @@ contains
     this%JNloss = 0.d0
     this%jCloss = 0.d0
     this%mortHTL = 0.d0
+    this%selectionHTL = 1.d0 ! By default all groups are fully affected by HTL mortality
+
   end subroutine initSpectrum
 
   !
