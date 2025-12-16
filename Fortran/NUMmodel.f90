@@ -981,7 +981,7 @@ contains
   !                     that is proportional to the biomass density (true)
   !  boolDecliningHTL : whether the mortality declines with size as mass^-1/4 (true)
   !                     or is constant (false)
-  !  boolCopepodsOnly : If true, only copepods are affected (but still with the size selectivity)
+  !  boolMulticellularOnly : If true, only multicellulars are affected (but still with the size selectivity)
   !
   ! If the mortality is constant (boolQuadraticHTL=false) then the mortality is at a level 
   ! of mortalityHTL at mHTL. The mortality may decline with size if boolDecliningHTL = true.
@@ -993,15 +993,15 @@ contains
   ! The decline in mortality (boolDecliningHTL=true) is set such that the mortality
   ! is mortalityHTL at a mass mRef = .1 ugC.
   !
-  ! If boolCopepodsOnly=true then the HTL mortality affects only copepods.
+  ! If boolMulticellularOnly=true then the HTL mortality affects only copepods.
   !  
-  subroutine setHTL(mHTL, mortalityHTL, boolQuadraticHTL, boolDecliningHTL, boolCopepodsOnly)
+  subroutine setHTL(mHTL, mortalityHTL, boolQuadraticHTL, boolDecliningHTL, boolMulticellularOnly)
    real(dp), intent(in):: mHTL ! The size where HTL is 50% of max
    real(dp), intent(in):: mortalityHTL ! The level of HTL mortality (at a reference size of 1 ugC
                                        ! B/z = 1/l )
    logical(1), intent(in):: boolQuadraticHTL ! Whether to use "quadratic" mortality
    logical(1), intent(in):: boolDecliningHTL ! Whether the mortality declines with size
-   logical(1), intent(in):: boolCopepodsOnly ! Whether the mortality only affects copepods
+   logical(1), intent(in):: boolMulticellularOnly ! Whether the mortality only affects copepods
    integer:: iGroup
 
    !     
@@ -1020,10 +1020,12 @@ contains
         end if
       end if
       ! Remove selection of unicellulars if boolCopepodsOnly = TRUE
-      if (boolCopepodsOnly) then
+      if (boolMulticellularOnly) then
          select type (spec => group(iGroup)%spec) ! Predator group
          type is (spectrumCopepod)
             ! Do nothing
+         type is (spectrumGelatinous)
+            ! Do nothing   
          class default
             pHTL( ixStart(iGroup):ixEnd(iGroup) ) = 0.d0 ! All other than copepods = 0
          end select
