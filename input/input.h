@@ -259,31 +259,31 @@
 ! GELATINOUS ZOOLANKTON INPUT PARAMETERS
 !***********************************************************************
 
-   epsilonF = 0.67               ! Assimilation efficiency
-   epsilonR = 0.25               ! Reproductive efficiency
-   beta = 1000000.            ! Preferred predator-prey mass ratio
-   sigma =  3.           ! Preferred predator-prey mass range
-   alphaF = 0.03              ! Clearance rate coefficient
-   q = 0.75                      ! Exponent of clearance rate
-   h = 0.6                      ! Coefficient for maximum ingestion rate
-   hExponent = 0.75              ! Exponent for maximum ingestion rate
+epsilonF = 0.67               ! Assimilation efficiency
+epsilonR = 0.25               ! Reproductive efficiency
+beta = 1000000.                   ! Preferred predator-prey mass ratio
+sigma = 3.                    ! Preferred predator-prey mass range
+alphaF = 0.11               ! Clearance rate coefficient
+q = 0.75                      ! Exponent of clearance rate
+h = 0.29                      ! Coefficient for maximum ingestion rate
+hExponent = 0.75              ! Exponent for maximum ingestion rate
 
 ! kBasal  is a factor for basal metabolism {0.006}. This value represents basal metabolism at
 ! starvation. Following Kiørboe (1985) the starvation metabolism is approximatly
 ! 0.2*0.18=0.036 times the maximum metabolism (kSDA). Increased to 0.01 to avoid
 ! too long transients.
 !---------------------
-  kBasal = 0.1
-       
+kBasal = 0.04
+    
 ! kSDA = Factor for SDA metabolism (Serra-Pompei 2020) {0.16}. This value assumes that the
 ! data in Kiørboe and Hirst (2014) are for fully fed copepods.
 !------------------------------------------------------------
-  kSDA = 0.3
-   
-  AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
-  vulnerability = 8.           ! Gelatinous zooplankton have increased predation risk
-  DiatomsPreference = 1.0       ! Feeding preference on diatoms (lowered feeding on diatoms)
+kSDA = 0.16
 
+AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
+vulnerability = 10          ! Gelatinous zooplankton has increased risk of predation
+mortalitytest = 0.015             !
+DiatomsPreference = 1       ! Feeding preference on diatoms 
 
 !***********************************************************************
 ! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS
