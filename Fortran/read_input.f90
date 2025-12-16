@@ -18,8 +18,7 @@ module read_input_module
     character(len=100) :: str_Diatoms
     character(len=100) :: str_Copepods_passive
     character(len=100) :: str_Copepods_active
-    character(len=100) :: str_Zooplanktons_nongelatinous
-    character(len=100) :: str_Zooplanktons_gelatinous
+    character(len=100) :: str_Gelatinous
     character(len=100) :: str_POM
     integer:: ios, n, i
     integer, parameter :: DRK = selected_real_kind (40)
@@ -45,8 +44,7 @@ module read_input_module
     str_Diatoms='! DIATOMS INPUT PARAMETERS'
     str_Copepods_passive='! COPEPODS PASSIVE INPUT PARAMETERS'
     str_Copepods_active='! COPEPODS ACTIVE INPUT PARAMETERS'
-    str_Zooplanktons_nongelatinous='! ZOOPLANKTONS NON GELATINOUS INPUT PARAMETERS'
-    str_Zooplanktons_gelatinous='! ZOOPLANKTONS GELATINOUS INPUT PARAMETERS'
+    str_Gelatinous='! GELATINOUS ZOOLANKTON INPUT PARAMETERS'
     str_POM='! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS'
     thislist='no list defined yet'
     
@@ -73,10 +71,8 @@ module read_input_module
             thislist='copepods_passive'
           else if (line(1:len(str_Copepods_active)).eq.str_Copepods_active) then
             thislist='copepods_active'
-          else if (line(1:len(str_Zooplanktons_nongelatinous)).eq.str_Zooplanktons_nongelatinous) then
-            thislist='zooplanktons_nongelatinous'
-          else if (line(1:len(str_Zooplanktons_gelatinous)).eq.str_Zooplanktons_gelatinous) then
-            thislist='zooplanktons_gelatinous'
+          else if (line(1:len(str_Gelatinous)).eq.str_Gelatinous) then
+            thislist='gelatinous'
           else if (line(1:len(str_POM)).eq.str_POM) then
             thislist='POM'
           end if   

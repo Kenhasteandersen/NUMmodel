@@ -89,23 +89,31 @@ contains
     call setupGeneric(mAdult,errorio, errorstr)
   end subroutine f_setupGeneric
 
-  subroutine f_setupNUMmodel(n,nCopepod,nPOM, nCopepodsPassive, mAdultPassive, &
-     nCopepodsActive, mAdultActive, errorio, errorstr) bind(c)
-    integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepodsPassive, nCopepodsActive
+  subroutine f_setupNUMmodel(n,nCopepod,nPOM, &
+     nCopepodsPassive, mAdultPassive, &
+     nCopepodsActive, mAdultActive, &
+     errorio, errorstr) bind(c)
+    integer(c_int), intent(in), value:: n,nCopepod,nPOM
+    integer(c_int), intent(in), value:: nCopepodsPassive, nCopepodsActive
     real(c_double), intent(in):: mAdultPassive(nCopepodsPassive), mAdultActive(nCopepodsActive)
     logical(c_bool), intent(out) :: errorio
     character(c_char), dimension(*) :: errorstr
     call setupNUMmodel(n,nCopepod,nPOM, mAdultPassive, mAdultActive,errorio, errorstr)
   end subroutine f_setupNUMmodel
 
-  subroutine f_setupNUMmodelGelatinous(n,nMulticellular,nPOM, mAdultPassive, &
-    mAdultActive, mAdultGelatinous, errorio, errorstr) bind(c)
+  subroutine f_setupNUMmodelGelatinous(n,nMulticellular,nPOM, &
+      nCopepodsPassive, mAdultPassive, &
+      nCopepodsActive, mAdultActive, &
+      nGelatinous, mAdultGelatinous, &
+      errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n,nMulticellular,nPOM
-    real(c_double), intent(in):: mAdultPassive(nMulticellular), mAdultActive(nMulticellular), &
-      mAdultGelatinous(nMulticellular)
+    integer(c_int), intent(in), value:: nCopepodsPassive, nCopepodsActive, nGelatinous
+    real(c_double), intent(in):: mAdultPassive(nCopepodsPassive)
+    real(c_double), intent(in):: mAdultActive(nCopepodsActive)
+    real(c_double), intent(in):: mAdultGelatinous(nGelatinous)
     logical(c_bool), intent(out) :: errorio
     character(c_char), dimension(*) :: errorstr
-    call setupNUMmodelGelatinous(n,nMulticellular,nPOM, mAdultPassive, mAdultActive, mAdultGelatinous, errorio, errorstr)
+    call setupNUMmodelGelatinous(n,nMulticellular,nPOM, mAdultPassive, mAdultActive, mAdultGelatinous, errorio, errorstr) 
   end subroutine f_setupNUMmodelGelatinous
 
     subroutine f_setupNUMmodelSimple(n,nCopepod,nPOM, nCopepods, mAdult, errorio, errorstr) bind(c)

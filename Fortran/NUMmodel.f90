@@ -245,8 +245,11 @@ contains
       call parametersAddGroup(typeCopepodActive, nCopepod, mAdultActive(iCopepod),errorio,errorstr) ! add copepod
         IF ( errorio ) RETURN 
    end do
+
    ! POM with nPOM size classes and max size 1 ugC:
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
+   IF ( errorio ) RETURN 
+
    call parametersFinalize(0.13d0, logical(.true.,1), logical(.false.,1))
    call setHTL(1.d0, 0.13d0, logical(.true.,1), logical(.false.,1), logical(.true.,1)) ! Only HTL on copepods
   end subroutine setupNUMmodel
@@ -263,29 +266,31 @@ contains
  
    call parametersInit(size(mAdultActive)+size(mAdultPassive)+size(mAdultGelatinous)+3, 2*n + nPOM &
            + nMulticellular*(size(mAdultPassive)+size(mAdultActive)+size(mAdultGelatinous)), 3,errorio,errorstr)
-     IF ( errorio ) RETURN 
+   IF ( errorio ) RETURN 
    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
-     IF ( errorio ) RETURN 
+   IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
    IF ( errorio ) RETURN 
 
    do iCopepod = 1, size(mAdultPassive)
       call parametersAddGroup(typeCopepodPassive, nMulticellular, mAdultPassive(iCopepod),errorio,errorstr) ! add copepod
-        IF ( errorio ) RETURN 
+      IF ( errorio ) RETURN 
    end do
    
    do iCopepod = 1, size(mAdultActive)
       call parametersAddGroup(typeCopepodActive, nMulticellular, mAdultActive(iCopepod),errorio,errorstr) ! add copepod
-        IF ( errorio ) RETURN 
+      IF ( errorio ) RETURN 
    end do
   
    do iGelatinous = 1, size(mAdultGelatinous)
       call parametersAddGroup(typeGelatinous, nMulticellular, mAdultGelatinous(iGelatinous),errorio,errorstr) ! add gelatinous zooplankton 
-        IF ( errorio ) RETURN 
+      IF ( errorio ) RETURN 
    end do
 
    ! POM with nPOM size classes and max size 1 ugC:
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
+   IF ( errorio ) RETURN 
+
    call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
 
   end subroutine setupNUMmodelGelatinous

@@ -19,17 +19,20 @@ public spectrumGelatinous, initGelatinous, calcDerivativesGelatinous, printRates
 
 contains
 
-subroutine initGelatinous(this, n, mAdult,errorio,errorstr)
+subroutine initGelatinous(this, n, mAdult, errorio,errorstr)
   use iso_c_binding, only: c_char
   class(spectrumGelatinous), intent(inout):: this
   integer, intent(in):: n
   real(dp), intent(in):: mAdult
   logical(1), intent(out):: errorio 
   character(c_char), dimension(*), intent(out) :: errorstr
-
+character(len=20)::this_listname
   ! Initialize as a copepod with gelatinous feeding mode
   ! Gelatinous zooplankton are considered active feeders
-  call this%initCopepod(active, n, mAdult, errorio, errorstr)
+  this%feedingmode = active
+  this_listname = 'gelatinous'
+  
+  call this%readCopepodInput(this_listname, n, mAdult, errorio, errorstr)
 
   this%mPOM = 3.5e-3*this%m ! WHAT IS THE SIZE OF FECAL PELLETS FROM GELATINOUS ZOOPLANKTON?
 end subroutine initGelatinous

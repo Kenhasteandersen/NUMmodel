@@ -281,7 +281,7 @@
   kSDA = 0.3
    
   AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
-  vulnerability = 8.           ! Passive copepods have reduced risk of predation
+  vulnerability = 8.           ! Gelatinous zooplankton have increased predation risk
   DiatomsPreference = 1.0       ! Feeding preference on diatoms (lowered feeding on diatoms)
 
 

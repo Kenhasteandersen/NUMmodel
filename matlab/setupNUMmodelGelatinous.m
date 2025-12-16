@@ -1,24 +1,15 @@
 %
-% Setup with generalists, diatoms, passive and active copepods, and POM.
+% Setup with generalists, diatoms, passive and active copepods, gelatinous zooplankton, and POM
 %
-% In:
-%   mAdultPassive - the adult masses of passive copepods (default [0.2 5])
-%   mAdultActive  - the adult masses of active copepods (logspace(0,3,3) )
-%   n             - No. of unicellular size groups (10)
-%   nCopepods     - No. of stages in the copepod groups (6)
-%   nPOM          - No. of POM size groups (1)
-%   bParallel     - whether to prepare a parallel run (FALSE)
-%
-% Out:
-%   p             - The parameter structure
-%
-function p = setupNUMmodel(mAdultPassive, mAdultActive, n, nCopepods, nPOM, options)
+function p = setupNUMmodelGelatinous(mAdultPassive, mAdultActive, mAdultGelatinous, ...
+    nUnicellular, nMulticellular, nPOM, options)
 
 arguments
     mAdultPassive (1,:) = [0.2 5];  % Adult masses of passive copepods
-    mAdultActive (1,:) = logspace(0,3,3);  % 3 log-spaced adult masses of active copepods
-    n = 10;  % Number of size groups in generalist and diatom spectra
-    nCopepods = 6;  % Number of stages in copepod groups
+    mAdultActive (1,:) = logspace(0,3,6);  % 6 log-spaced adult masses of active copepods
+    mAdultGelatinous (1,:) = logspace(0,6,3);  % Adult masses of gelatinous zooplanton
+    nUnicellular = 10;  % Number of size groups in generalist and diatom spectra
+    nMulticellular = 6;  % Number of stages in multicellular groups
     nPOM = 1;  % Number of POM size groups
     options.bParallel = false;  % Whether to prepare for parallel runs (for global runs)
 end
@@ -30,10 +21,11 @@ loadNUMmodelLibrary(options.bParallel);
 errortext ='                    ';
 errorio=false;
 
-[~,~,errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
-    int32(n), int32(nCopepods), int32(nPOM), ...
-    length(mAdultPassive), mAdultPassive,...
+[~,~,~, errorio,errortext]=calllib(loadNUMmodelLibrary(), 'f_setupnummodelgelatinous', ...
+    int32(nUnicellular), int32(nMulticellular), int32(nPOM), ...
+    length(mAdultPassive), mAdultPassive, ...
     length(mAdultActive), mAdultActive, ...
+    length(mAdultGelatinous), mAdultGelatinous,  ...
     errorio, errortext);
 if options.bParallel
     h = gcp('nocreate');
@@ -44,9 +36,11 @@ if options.bParallel
 
     parfor i=1:poolsize
         this_errortext ='                    ';
-        [~,~,errorio(i),this_errortext]=calllib(loadNUMmodelLibrary(), 'f_setupnummodel', ...
-            int32(n), int32(nCopepods), int32(nPOM),...
-            length(mAdultPassive), mAdultPassive, length(mAdultActive), mAdultActive ,...
+        [~,~,~,errorio(i),this_errortext]=calllib(loadNUMmodelLibrary(), 'f_setupnummodelgelatinous', ...
+            int32(nUnicellular), int32(nMulticellular), int32(nPOM), ...
+            length(mAdultPassive), mAdultPassive, ...
+            length(mAdultActive), mAdultActive, ...
+            length(mAdultGelatinous), mAdultGelatinous,  ...
             errorio(i), this_errortext);
         errortext(i)={this_errortext}
     end
@@ -71,17 +65,22 @@ end
 p = setupNutrients_N_DOC_Si;
 
 % Generalists:
-p = parametersAddgroup(5,p,n);
+p = parametersAddgroup(5,p,nUnicellular);
 
 % Diatoms
-p = parametersAddgroup(3,p,n);
+p = parametersAddgroup(3,p,nUnicellular);
 
 % Copepods:
 for i = 1:length(mAdultPassive)
-    p = parametersAddgroup(11,p, nCopepods, mAdultPassive(i));
+    p = parametersAddgroup(11,p, nMulticellular, mAdultPassive(i));
 end
 for i = 1:length(mAdultActive)
-    p = parametersAddgroup(10,p, nCopepods, mAdultActive(i));
+    p = parametersAddgroup(10,p, nMulticellular, mAdultActive(i));
+end
+
+% Gelatinous zooplankton:
+for i = 1:length(mAdultGelatinous)
+    p = parametersAddgroup(20,p, nMulticellular, mAdultGelatinous(i));
 end
 
 % POM:
@@ -98,4 +97,4 @@ p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix) );
 
 p.u0( p.ixStart(end):p.ixEnd(end) ) = 0; % No POM in initial conditions
 
-setHTL(0.017, 1 ,true, false, true); % "Quadratic" mortality; not declining; only affecting copepods
+setHTL(0.005, 0.1 ,true, false); % "Quadratic" mortality; not declining

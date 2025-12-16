@@ -22,6 +22,7 @@ module copepods
     real(dp) :: DiatomsPreference ! Feeding preference on diatoms
   contains
     procedure, pass :: initCopepod
+    procedure :: readCopepodInput
     procedure :: calcDerivativesCopepod
     procedure :: printRates => printRatesCopepod
   end type spectrumCopepod
@@ -35,12 +36,9 @@ contains
     class(spectrumCopepod), intent(inout):: this
     integer, intent(in) :: feedingmode ! Whether the copepods is active or passive
     integer, intent(in):: n
-    real(dp), intent(in):: mAdult
-    logical(1), intent(out):: errorio 
-    character(c_char), dimension(*), intent(out) :: errorstr
-    real(dp) :: alphaF, q, h, hExponent, AdultOffspring
-    real(dp) :: vulnerability
-    
+    real(dp), intent(in):: mAdult   
+    logical(1), intent(out):: errorio
+    character(c_char), dimension(*), intent(out) :: errorstr 
     character(len=20)::this_listname
     
     this%feedingmode = feedingmode
@@ -53,6 +51,19 @@ contains
        print*, 'no feeding mode defined'
        stop
     end if
+
+    call readCopepodInput(this, this_listname, n, mAdult, errorio, errorstr)
+
+  end subroutine initCopepod
+
+  subroutine readCopepodInput(this, this_listname, n, mAdult, errorio, errorstr)
+    class(spectrumCopepod), intent(inout):: this
+    character(len=20), intent(in):: this_listname
+    integer, intent(in):: n
+    real(dp), intent(in):: mAdult   
+    logical(1), intent(out):: errorio
+    character(c_char), dimension(*), intent(out) :: errorstr 
+    real(dp) :: alphaF, q, h, hExponent, AdultOffspring, vulnerability
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
@@ -89,7 +100,7 @@ contains
     this%palatability = vulnerability
 
     this%mPOM = 3.5e-3*this%m ! Size of fecal pellets (Serra-Pompei 2022 approximated)
-  end subroutine initCopepod
+  end subroutine readCopepodInput
 
   subroutine calcDerivativesCopepod(this, u, dNdt, dudt)
     class(spectrumCopepod), intent(inout):: this

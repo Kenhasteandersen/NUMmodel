@@ -15,7 +15,7 @@ program NUMmodeltest
   logical(1):: FALSE1
   !real(dp):: myout
   character(len=20) :: errorstr
-  logical(1):: errorio=.false. ! Whether to losses to the deep
+  logical(1):: errorio=.false. 
 
   TRUE1 = .true.
   FALSE1 = .false.
