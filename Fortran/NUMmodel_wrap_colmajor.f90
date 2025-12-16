@@ -8,7 +8,7 @@ module NUMmodel_wrap
        setupGeneralistsDiatoms, &
        setupGeneralistsSimpleCopepod, &
        setupGeneric, setupNUMmodel, setupNUMmodelSimple,  setupGenDiatCope, &
-       setupGenDiatZoo, setupNUMmodelZoo, calcderivatives, &
+       setupNUMmodelGelatinous, calcderivatives, &
        simulateChemostatEuler, simulateEuler, simulateEulerFunctions, getFunctions, &
        setHTL, setmortHTL, getMortHTL, setSinking, getRates, getBalance, getLost, theta
 
@@ -98,14 +98,15 @@ contains
     call setupNUMmodel(n,nCopepod,nPOM, mAdultPassive, mAdultActive,errorio, errorstr)
   end subroutine f_setupNUMmodel
 
-  subroutine f_setupNUMmodelZoo(n,nZooplankton,nPOM, nZooplanktonsGelatinous, mAdultGelatinous, & 
-    nZooplanktonsNongelatinous, mAdultNongelatinous, errorio, errorstr) bind(c)
-    integer(c_int), intent(in), value:: n,nZooplankton,nPOM, nZooplanktonsGelatinous, nZooplanktonsNongelatinous
-    real(c_double), intent(in):: mAdultGelatinous(nZooplanktonsGelatinous), mAdultNongelatinous(nZooplanktonsNongelatinous)
+  subroutine f_setupNUMmodelGelatinous(n,nMulticellular,nPOM, mAdultPassive, &
+    mAdultActive, mAdultGelatinous, errorio, errorstr) bind(c)
+    integer(c_int), intent(in), value:: n,nMulticellular,nPOM
+    real(c_double), intent(in):: mAdultPassive(nMulticellular), mAdultActive(nMulticellular), &
+      mAdultGelatinous(nMulticellular)
     logical(c_bool), intent(out) :: errorio
     character(c_char), dimension(*) :: errorstr
-    call setupNUMmodelZoo(n,nZooplankton,nPOM, mAdultGelatinous, mAdultNongelatinous,errorio, errorstr)
-  end subroutine f_setupNUMmodelZoo
+    call setupNUMmodelGelatinous(n,nMulticellular,nPOM, mAdultPassive, mAdultActive, mAdultGelatinous, errorio, errorstr)
+  end subroutine f_setupNUMmodelGelatinous
 
     subroutine f_setupNUMmodelSimple(n,nCopepod,nPOM, nCopepods, mAdult, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n,nCopepod,nPOM, nCopepods
@@ -122,27 +123,6 @@ contains
     character(c_char), dimension(*) :: errorstr
     call setupGenDiatCope(n,nCopepod,nPOM,mAdult,errorio, errorstr)
   end subroutine f_setupGenDiatCope
-
-  subroutine f_setupGenDiatZoo(n,nZooplankton,nPOM, nZooplanktons, mAdult, errorio, errorstr) bind(c)
-    integer(c_int), intent(in), value:: n,nZooplankton,nPOM, nZooplanktons
-    real(c_double), intent(in):: mAdult(nZooplanktons)
-    logical(c_bool), intent(out) :: errorio
-    character(c_char), dimension(*) :: errorstr
-    call setupGenDiatZoo(n,nZooplankton,nPOM,mAdult,errorio, errorstr)
-  end subroutine f_setupGenDiatZoo
-
-  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL) bind(c)
-    real(c_double), intent(in), value:: mHTL, mortHTL
-    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL
-
-    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL)
-  end subroutine f_setHTL 
-
-  subroutine f_setMortHTL(mortHTL) bind(c)
-    real(c_double), intent(in):: mortHTL(nGrid-idxB+1)
-
-    call setMortHTL(mortHTL)
-  end subroutine f_setMortHTL
 
   subroutine test(x) bind(c)
     integer(c_int), intent(in), value:: x
@@ -187,11 +167,11 @@ contains
       ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
   end subroutine f_simulateEulerFunctions
 
-  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, bCopepodsOnly) bind(c)
+  subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, bMulticellularOnly) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL
-    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL, bCopepodsOnly
+    logical(c_bool), intent(in), value:: bQuadraticHTL, bDecliningHTL, bMulticellularOnly
 
-    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, bCopepodsOnly)
+    call setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, bMulticellularOnly)
   end subroutine f_setHTL 
 
   subroutine f_setMortHTL(mortHTL, pHTL, bQuadratic) bind(c)

@@ -33,8 +33,7 @@ module NUMmodel
   integer, parameter :: typeDiatom_simple = 4
   integer, parameter :: typeCopepodActive = 10
   integer, parameter :: typeCopepodPassive = 11
-  integer, parameter :: typeZooplanktonNongelatinous = 12
-  integer, parameter :: typeZooplanktonGelatinous = 13
+  integer, parameter :: typeGelatinous = 20
   integer, parameter :: typePOM = 100
   !
   ! Variables that contain the size spectrum groups
@@ -75,7 +74,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsSimpleOnly(n,errorio,errorstr)
     integer, intent(in):: n
-    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    logical(1), intent(out):: errorio 
     character(c_char), dimension(*) :: errorstr
     
     call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
@@ -89,7 +88,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsOnly(n,errorio,errorstr)
     integer, intent(in):: n
-    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    logical(1), intent(out):: errorio 
     character(c_char), dimension(*) :: errorstr
     call parametersInit(1, n, 2,errorio,errorstr) ! 1 group, n size classes (excl nutrients and DOC)
       IF ( errorio ) RETURN 
@@ -102,7 +101,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsSimplePOM(n, nPOM,errorio,errorstr)
     integer, intent(in):: n, nPOM
-    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    logical(1), intent(out):: errorio 
     character(c_char), dimension(*) :: errorstr
     call parametersInit(2, n+nPOM, 2,errorio,errorstr) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
       IF ( errorio ) RETURN 
@@ -118,7 +117,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneralistsPOM(n, nPOM,errorio,errorstr)
     integer, intent(in):: n, nPOM
-    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    logical(1), intent(out):: errorio 
     character(c_char), dimension(*) :: errorstr
     call parametersInit(2, n+nPOM, 2,errorio,errorstr) ! 2 groups, n+nPOM size classes (excl nutrients and DOC)
       IF ( errorio ) RETURN 
@@ -133,7 +132,7 @@ contains
   ! -----------------------------------------------
   subroutine setupDiatomsOnly(n,errorio,errorstr)
     integer, intent(in):: n
-    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    logical(1), intent(out):: errorio 
     character(c_char), dimension(*) :: errorstr
     call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
       IF ( errorio ) RETURN 
@@ -146,7 +145,7 @@ contains
   ! -----------------------------------------------
   subroutine setupDiatoms_simpleOnly(n,errorio,errorstr)
    integer, intent(in):: n
-   logical(1), intent(out):: errorio ! Whether to losses to the deep
+   logical(1), intent(out):: errorio 
    character(c_char), dimension(*) :: errorstr
    call parametersInit(1, n, 3,errorio,errorstr) ! 1 group, n size classes (excl nutrients)
      IF ( errorio ) RETURN 
@@ -159,7 +158,7 @@ contains
   ! -----------------------------------------------
    subroutine setupGeneralistsDiatoms(n,errorio,errorstr)
       integer, intent(in):: n
-      logical(1), intent(out):: errorio ! Whether to losses to the deep
+      logical(1), intent(out):: errorio 
       character(c_char), dimension(*) :: errorstr
       call parametersInit(2, 2*n, 3,errorio,errorstr)
         IF ( errorio ) RETURN 
@@ -171,7 +170,7 @@ contains
  
    subroutine setupGeneralistsDiatoms_simple(n,errorio,errorstr)
       integer, intent(in):: n
-      logical(1), intent(out):: errorio ! Whether to losses to the deep
+      logical(1), intent(out):: errorio 
       character(c_char), dimension(*) :: errorstr
       call parametersInit(2, 2*n, 3,errorio,errorstr)
         IF ( errorio ) RETURN 
@@ -185,7 +184,7 @@ contains
   ! A basic setup with generalists and 1 copepod
   ! -----------------------------------------------
   subroutine setupGeneralistsSimpleCopepod(errorio,errorstr)
-    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    logical(1), intent(out):: errorio 
     character(c_char), dimension(*) :: errorstr
     call parametersInit(2, 20, 2,errorio,errorstr)
       IF ( errorio ) RETURN 
@@ -200,7 +199,7 @@ contains
   ! -----------------------------------------------
   subroutine setupGeneric(mAdult,errorio,errorstr)
     real(dp), intent(in):: mAdult(:)
-    logical(1), intent(out):: errorio ! Whether to losses to the deep
+    logical(1), intent(out):: errorio
     character(c_char), dimension(*) :: errorstr
     integer, parameter:: n = 10 ! number of size classes in each group
     integer:: iCopepod
@@ -225,7 +224,7 @@ contains
   subroutine setupNUMmodel(n, nCopepod, nPOM, mAdultPassive, mAdultActive,errorio,errorstr)
    integer, intent(in):: n, nCopepod, nPOM ! number of size classes in each group
    real(dp), intent(in):: mAdultPassive(:), mAdultActive(:)
-   logical(1), intent(out):: errorio ! Whether to losses to the deep
+   logical(1), intent(out):: errorio 
    character(c_char), dimension(*) :: errorstr
    integer:: iCopepod
  
@@ -253,37 +252,43 @@ contains
   end subroutine setupNUMmodel
 
   ! -----------------------------------------------
-  ! Full NUM model setup with generalists, zooplankton, and POM
+  ! Full NUM model setup which also includes gelatinous zooplankton$
   ! -----------------------------------------------
-  subroutine setupNUMmodelZoo(n, nZooplankton, nPOM, mAdultGelatinous, mAdultNongelatinous,errorio,errorstr)
-   integer, intent(in):: n, nZooplankton, nPOM ! number of size classes in each group
-   real(dp), intent(in):: mAdultGelatinous(:), mAdultNongelatinous(:)
-   logical(1), intent(out):: errorio ! Whether to losses to the deep
+  subroutine setupNUMmodelGelatinous(n, nMulticellular, nPOM, mAdultPassive, mAdultActive, mAdultGelatinous,errorio,errorstr)
+   integer, intent(in):: n, nMulticellular, nPOM ! number of size classes in unicellular, multicellular and POM groups, and POM groups
+   real(dp), intent(in):: mAdultPassive(:), mAdultActive(:), mAdultGelatinous(:)
+   logical(1), intent(out):: errorio 
    character(c_char), dimension(*) :: errorstr
-   integer:: iZooplankton
+   integer:: iCopepod, iGelatinous
  
-   call parametersInit(size(mAdultNongelatinous)+size(mAdultGelatinous)+3, 2*n + nPOM &
-           + nZooplankton*(size(mAdultGelatinous)+size(mAdultNongelatinous)), 3,errorio,errorstr)
+   call parametersInit(size(mAdultActive)+size(mAdultPassive)+size(mAdultGelatinous)+3, 2*n + nPOM &
+           + nMulticellular*(size(mAdultPassive)+size(mAdultActive)+size(mAdultGelatinous)), 3,errorio,errorstr)
      IF ( errorio ) RETURN 
    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
      IF ( errorio ) RETURN 
    call parametersAddGroup(typeDiatom, n, 1.0d0,errorio,errorstr)
    IF ( errorio ) RETURN 
 
-   do iZooplankton = 1, size(mAdultGelatinous)
-      call parametersAddGroup(typeZooplanktonGelatinous, nZooplankton, mAdultGelatinous(iZooplankton),errorio,errorstr) ! add zooplankton 
+   do iCopepod = 1, size(mAdultPassive)
+      call parametersAddGroup(typeCopepodPassive, nMulticellular, mAdultPassive(iCopepod),errorio,errorstr) ! add copepod
         IF ( errorio ) RETURN 
    end do
    
-   do iZooplankton = 1, size(mAdultNongelatinous)
-      call parametersAddGroup(typeZooplanktonNongelatinous, nZooplankton, mAdultNongelatinous(iZooplankton),errorio,errorstr) ! add zooplankton 
+   do iCopepod = 1, size(mAdultActive)
+      call parametersAddGroup(typeCopepodActive, nMulticellular, mAdultActive(iCopepod),errorio,errorstr) ! add copepod
         IF ( errorio ) RETURN 
    end do
+  
+   do iGelatinous = 1, size(mAdultGelatinous)
+      call parametersAddGroup(typeGelatinous, nMulticellular, mAdultGelatinous(iGelatinous),errorio,errorstr) ! add gelatinous zooplankton 
+        IF ( errorio ) RETURN 
+   end do
+
    ! POM with nPOM size classes and max size 1 ugC:
    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
    call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
 
-  end subroutine setupNUMmodelZoo
+  end subroutine setupNUMmodelGelatinous
 
   ! -----------------------------------------------
   ! Full NUM model setup with generalistsSImple, copepods, and POM
@@ -339,31 +344,31 @@ contains
   end subroutine setupGenDiatCope
 
   
-  ! -------------------------------------------------------
-  ! A generic setup with generalists, diatoms and zooplankton
-  ! -------------------------------------------------------
-  subroutine setupGenDiatZoo(n, nZooplankton, nPOM, mAdult,errorio,errorstr)
-   integer, intent(in):: n, nZooplankton, nPOM ! number of size classes in each group
-   real(dp), intent(in):: mAdult(:)
-   logical(1), intent(out):: errorio ! Whether to losses to the deep
-   character(c_char), dimension(*) :: errorstr
-   integer:: iZooplankton
+!   ! -------------------------------------------------------
+!   ! A generic setup with generalists, diatoms and zooplankton
+!   ! -------------------------------------------------------
+!   subroutine setupGenDiatZoo(n, nZooplankton, nPOM, mAdult,errorio,errorstr)
+!    integer, intent(in):: n, nZooplankton, nPOM ! number of size classes in each group
+!    real(dp), intent(in):: mAdult(:)
+!    logical(1), intent(out):: errorio ! Whether to losses to the deep
+!    character(c_char), dimension(*) :: errorstr
+!    integer:: iZooplankton
  
-   call parametersInit(size(mAdult)+3, 2*n + nPOM + nZooplankton*size(mAdult), 3,errorio,errorstr)
-     IF ( errorio ) RETURN 
-   call parametersAddGroup(typeDiatom, n, 0.0d0,errorio,errorstr)
-     IF ( errorio ) RETURN 
-   call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
-     IF ( errorio ) RETURN 
+!    call parametersInit(size(mAdult)+3, 2*n + nPOM + nZooplankton*size(mAdult), 3,errorio,errorstr)
+!      IF ( errorio ) RETURN 
+!    call parametersAddGroup(typeDiatom, n, 0.0d0,errorio,errorstr)
+!      IF ( errorio ) RETURN 
+!    call parametersAddGroup(typeGeneralist, n, 0.0d0,errorio,errorstr)
+!      IF ( errorio ) RETURN 
 
-   do iZooplankton = 1, size(mAdult)
-      call parametersAddGroup(typeZooplanktonNongelatinous, nZooplankton, mAdult(iZooplankton),errorio,errorstr) ! add zooplankton
-        IF ( errorio ) RETURN 
-   end do! POM with nPOM size classes and max size 1 ugC:
-   call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
-   call parametersFinalize(0.007d0,logical(.true.,1), logical(.false.,1))
+!    do iZooplankton = 1, size(mAdult)
+!       call parametersAddGroup(typeZooplanktonNongelatinous, nZooplankton, mAdult(iZooplankton),errorio,errorstr) ! add zooplankton
+!         IF ( errorio ) RETURN 
+!    end do! POM with nPOM size classes and max size 1 ugC:
+!    call parametersAddGroup(typePOM, nPOM, maxval(group(nGroups-1)%spec%mPOM),errorio,errorstr) 
+!    call parametersFinalize(0.007d0,logical(.true.,1), logical(.false.,1))
 
-  end subroutine setupGenDiatZoo
+!   end subroutine setupGenDiatZoo
 
   ! ======================================
   !  Model initialization stuff:
@@ -390,7 +395,6 @@ contains
     !
     ! Set groups:
     !
-
     nGroups = nnGroups
     iCurrentGroup = 0
     nNutrients = nnNutrients
@@ -442,7 +446,7 @@ contains
     type(spectrumDiatoms_simple):: specDiatoms_simple
     type(spectrumDiatoms):: specDiatoms
     type(spectrumCopepod):: specCopepod
-    type(spectrumZooplankton):: specZooplankton
+    type(spectrumGelatinous):: specGelatinous
     type(spectrumPOM):: specPOM
     !
     ! Find the group number and grid location:
@@ -477,12 +481,9 @@ contains
    case(typeCopepodActive)
       call initCopepod(specCopepod, active, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specCopepod)
-  case(typeZooplanktonGelatinous)
-      call initZooplankton(specZooplankton, gelatinous, n, mMax, errorio, errorstr)
-      allocate (group( iCurrentGroup )%spec, source=specZooplankton)
-   case(typeZooplanktonNongelatinous)
-      call initZooplankton(specZooplankton, nongelatinous, n, mMax, errorio, errorstr)
-      allocate (group( iCurrentGroup )%spec, source=specZooplankton)
+   case(typeGelatinous)
+      call initGelatinous(specGelatinous, n, mMax, errorio, errorstr)
+      allocate (group( iCurrentGroup )%spec, source=specGelatinous)
    case(typePOM)
       call initPOM(specPOM, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
@@ -518,9 +519,7 @@ contains
                !
                select type (spec => group(iGroup)%spec) ! Predator group
                   type is (spectrumCopepod)
-                 select type (spec => group(iGroup)%spec) ! Predator group
-                   type is (spectrumZooplankton)
-                    select type (specPrey => group(jGroup)%spec) ! Prey group
+                      select type (specPrey => group(jGroup)%spec) ! Prey group
                       type is (spectrumDiatoms)
                           theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
                             spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
@@ -528,8 +527,7 @@ contains
                            theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1) = &
                             spec%DiatomsPreference * theta(i+ixStart(iGroup)-1, j+ixStart(jGroup)-1)
                       end select
-                 end select
-	      end select
+	            end select
             end do
          end do
       end do
@@ -699,13 +697,8 @@ contains
             upositive(ixStart(iGroup):ixEnd(iGroup)), &
             dudt(idxN), &
             dudt(ixStart(iGroup):ixEnd(iGroup)))
-      end select
-    end do
-    !
-   do iGroup = 1, nGroups
-      select type (spec => group(iGroup)%spec)
-      type is (spectrumZooplankton)
-         call calcDerivativesZooplankton(spec, &
+      type is (spectrumGelatinous)
+         call calcDerivativesGelatinous(spec, &
             upositive(ixStart(iGroup):ixEnd(iGroup)), &
             dudt(idxN), &
             dudt(ixStart(iGroup):ixEnd(iGroup)))
@@ -748,16 +741,6 @@ contains
             fracHTL_to_N * sum( upositive(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN
       end if
     end do
-    !
-    ! Check: Should be close to zero
-    !
-    !Nbalance = dudt(idxN) + sum(dudt(idxB:nGrid))/rhoCN
-    !do iGroup = 1, nGroups
-    !  Nbalance = Nbalance  &
-    !    + (1.d0-fracHTL_to_N) * sum( u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%mortHTL )/rhoCN &
-    !    + sum(u(ixStart(iGroup):ixEnd(iGroup)) * group(iGroup)%spec%jPOM) / rhoCN
-    !end do
-    !write(*,*) 'N balance:', Nbalance
 
     contains
 
@@ -876,8 +859,7 @@ contains
          do iGroup = 1, nGroups
              if ( (group(iGroup)%spec%type .ne. typeCopepodActive) .and. &
                  (group(iGroup)%spec%type .ne. typeCopepodPassive) .and. &
-                 (group(iGroup)%spec%type .ne. typeZooplanktonNongelatinous) .and. &
-                 (group(iGroup)%spec%type .ne. typeZooplanktonGelatinous) ) then
+                 (group(iGroup)%spec%type .ne. typeGelatinous) ) then
                dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) + diff*(0.d0 - u(idxB:nGrid))
             end if
          end do

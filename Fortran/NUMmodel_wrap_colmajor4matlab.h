@@ -23,10 +23,11 @@ void f_setupnummodel(const int n, const int nCopepod, const int nPOM,
 					const int nCopepodsActive, const double mAdultActive[], 
 					bool *Clost, char *errorstr);
 
-void f_setupnummodelzoo(const int n, const int nZooplankton, const int nPOM,
-                    const int nZooplanktonsGelatinous, const double mAdultGelatinous[],
-                    const int nZooplanktonsNongelatinous, const double mAdultNongelatinous[],
-                    bool *Clost, char *errorstr);
+void f_setupnummodelgelatinous(const int n, const int nMulticelluar, const int nPOM,
+							   const int nCopepodsPassive, const double mAdultPassive[],
+							   const int nCopepodsActive, const double mAdultActive[],
+							   const int nGelatinous, const double mAdultGelatinous[],
+							   bool *Clost, char *errorstr);
 
 void f_setupnummodelsimple(const int n, const int nCopepod, const int nPOM, const int nCopepods,
                                         const double mAdult[], bool *Clost, char *errorstr);

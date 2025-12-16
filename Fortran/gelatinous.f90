@@ -1,4 +1,4 @@
-module gelatinuos
+module gelatinous
 use globals
 use spectrum
 use copepods
@@ -9,7 +9,11 @@ private
 
 ! The gelatinous zooplankton type inherits everything from copepods
 type, extends(spectrumCopepod) :: spectrumGelatinous
-ends type spectrumGelatinous
+contains
+  procedure, pass :: initGelatinous
+  procedure :: calcDerivativesGelatinous
+  procedure :: printRates => printRatesGelatinous
+end type spectrumGelatinous
 
 public spectrumGelatinous, initGelatinous, calcDerivativesGelatinous, printRatesGelatinous
 
@@ -24,18 +28,16 @@ subroutine initGelatinous(this, n, mAdult,errorio,errorstr)
   character(c_char), dimension(*), intent(out) :: errorstr
 
   ! Initialize as a copepod with gelatinous feeding mode
-  call this%initCopepod(gelatinous, n, mAdult, errorio, errorstr)
+  ! Gelatinous zooplankton are considered active feeders
+  call this%initCopepod(active, n, mAdult, errorio, errorstr)
 
-  this%feedingmode = active ! Gelatinous zooplankton are considered active feeders
-  this_listname = 'gelatinuos'
-
-  this$mPOM = 3.5e-3*this%m ! WHAT IS THE SIZE OF FECAL PELLETS FROM GELATINOUS ZOOPLANKTON?
+  this%mPOM = 3.5e-3*this%m ! WHAT IS THE SIZE OF FECAL PELLETS FROM GELATINOUS ZOOPLANKTON?
 end subroutine initGelatinous
 
 subroutine calcDerivativesGelatinous(this, u, dNdt, dudt)
   class(spectrumGelatinous), intent(inout):: this
   real(dp), intent(in):: u(this%n)
-  real(dp), dimension(:), intent(inout):: dNdt, dudt(this%n)
+  real(dp), intent(inout):: dNdt, dudt(this%n)
 
   call calcDerivativesCopepod(this, u, dNdt, dudt)
 
@@ -54,4 +56,4 @@ subroutine printRatesGelatinous(this)
   write(*,99) "g:", this%g
 end subroutine printRatesGelatinous
 
-end module gelatinuos 
+end module gelatinous 
