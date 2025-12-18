@@ -6,8 +6,8 @@ function p = setupNUMmodelGelatinous(mAdultPassive, mAdultActive, mAdultGelatino
 
 arguments
     mAdultPassive (1,:) = [0.2 5];  % Adult masses of passive copepods
-    mAdultActive (1,:) = logspace(0,3,6);  % 6 log-spaced adult masses of active copepods
-    mAdultGelatinous (1,:) = logspace(0,6,3);  % Adult masses of gelatinous zooplanton
+    mAdultActive (1,:) = logspace(0,4,3);  % 6 log-spaced adult masses of active copepods
+    mAdultGelatinous (1,:) = logspace(0,5,3);  % Adult masses of gelatinous zooplanton
     nUnicellular = 10;  % Number of size groups in generalist and diatom spectra
     nMulticellular = 6;  % Number of stages in multicellular groups
     nPOM = 1;  % Number of POM size groups

@@ -281,11 +281,11 @@ kBasal = 0.04
 kSDA = 0.16
 
 AdultOffspring = 100.         ! Adult:offspring mass ratio [-]
-vulnerability = 10          ! Gelatinous zooplankton has increased risk of predation
+vulnerability = 3          ! Gelatinous zooplankton has increased risk of predation
 mortalitytest = 0.015             !
 DiatomsPreference = 1       ! Feeding preference on diatoms 
 
-selectionHTL = 5.0           ! Gelatinous zooplankton are more affected by HTL mortality
+selectionHTL = 1.           ! Gelatinous zooplankton are more affected by HTL mortality
 
 !***********************************************************************
 ! PARTICULATE ORGANIC MATTER (POM) INPUT PARAMETERS
