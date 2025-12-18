@@ -140,19 +140,21 @@ contains
          else
            this%dN(i) = max( 0.d0, min( 1.d0, (Jnetp(i) - this%JF(i)*(bg+1))/(this%JN(i)*(1+bg+bN)) ) )
          endif
-         this%Jnet(i) = min( (Jnetp(i)-bg*(this%dN(i)*this%JN(i)))/(1+bg) , & ! Carbon limitation
+         this%Jnet(i) = min( (Jnetp(i)-bN*(this%dN(i)*this%JN(i)))/(1+bg) , & ! Carbon limitation
                             this%JF(i) + this%dN(i)*this%JN(i))              ! N limitation
        endif 
        !
        ! Synthesis limitation:
        !
+       f = 0
        if ( this%Jnet(i) .gt. this%JlossPassive(i) ) then ! Apply FR only if net growth is positive
-         this%Jnet(i) = JmaxT * this%Jnet(i) / ( this%Jnet(i) + JmaxT )
+         f = this%Jnet(i) / ( this%Jnet(i) + JmaxT )
+         this%Jnet(i) = JmaxT * f
        endif
        this%Jtot(i) = this%Jnet(i) - this%JlossPassive(i)
 
        ! Take up N only to the degree that is is not supplied by feeding:
-       this%JNreal(i) = this%dN(i) * this%JN(i)
+       this%JNreal(i) = max( 0.d0, this%Jnet(i) - this%jF(i) )
        !
        ! Regulate carbon uptakes for growth + respiration towards lowered jNet.
        !
@@ -160,13 +162,19 @@ contains
        ! First carbon from F assuming no uptakes from DOC and L:
        this%JFreal(i) = min( this%JF(i), &
            (this%Jnet(i) + bg*max(0.d0, this%Jnet(i)) + ftemp2*this%Jresp(i) + bN*this%Jnreal(i) )/(1-bF)) 
-       ! Then prioritize DOC:
-       tmp = this%Jnet(i) + bg*max(0.d0, this%Jnet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - this%JFreal(i)*(1-bF)
-       this%jDOCreal(i) = min( this%JDOC(i), tmp/(1-bDOC) )
-       ! And finally light:
-       this%JLreal(i) = min( this%JL(i), (tmp - this%jDOCreal(i)*(1-bDOC))/(1-bL) )
+       ! Then divide evenly btw DOC and L:
+       tmp = ( (1 - bDOC)*this%jDOC(i) + (1 - bL)*this%jL(i)  )
+       if (tmp .eq. 0.0d0) then
+         this%jDOCreal(i) = 0.0d0
+         this%jLreal(i) = 0.0d0
+       else
+         tmp = ( this%Jnet(i) + bg*max(0.d0, this%JNet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - &
+                this%JFreal(i)*(1 - bF) ) / tmp
+         this%jDOCreal(i) = tmp * this%jDOC(i)
+         this%jLreal(i) = tmp * this%jL(i)
+       endif       
       
-       ! Exude surplus N:
+      ! Exude surplus N:
        this%JNlossLiebig(i) = max( 0.d0, this%Jnreal(i) + this%Jfreal(i) - this%JlossPassive(i) - this%Jtot(i) )
        this%JClossLiebig(i) = 0.d0 ! There are never surplus C uptakes
       !        
