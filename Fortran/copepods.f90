@@ -11,14 +11,14 @@ module copepods
 
   integer, parameter :: passive = 1
   integer, parameter :: active = 2
-  real(dp) :: epsilonR, kBasal, kSDA
-  real(dp) :: DiatomsPreference
-
+ 
   private
 
   type, extends(spectrumMulticellular) :: spectrumCopepod
     integer :: feedingmode ! Active=1; Passive=2
     real(dp), allocatable :: gamma(:), g(:), mortStarve(:), mort(:), JrespFactor(:)
+    real(dp) :: epsilonR ! Reproductive efficiency
+    real(dp) :: kBasal, kSDA ! Respiration parameters
     real(dp) :: DiatomsPreference ! Feeding preference on diatoms
   contains
     procedure, pass :: initCopepod
@@ -60,10 +60,10 @@ contains
     class(spectrumCopepod), intent(inout):: this
     character(len=20), intent(in):: this_listname
     integer, intent(in):: n
-    real(dp), intent(in):: mAdult   
+    real(dp), intent(in):: mAdult
     logical(1), intent(out):: errorio
     character(c_char), dimension(*), intent(out) :: errorstr 
-    real(dp) :: alphaF, q, h, hExponent, AdultOffspring, vulnerability
+    real(dp) :: alphaF, q, h, hExponent, AdultOffspring, vulnerability, DiatomsPreference
     !
     ! Calc grid. Grid runs from mLower(1) = offspring size to m(n) = adult size
     !
@@ -76,9 +76,9 @@ contains
     call read_input(inputfile,this_listname,'hExponent',hExponent,errorio,errorstr)
     call read_input(inputfile,this_listname,'vulnerability',vulnerability,errorio,errorstr)
     
-    call read_input(inputfile,this_listname,'epsilonR',epsilonR,errorio,errorstr)
-    call read_input(inputfile,this_listname,'kBasal',kBasal,errorio,errorstr)
-    call read_input(inputfile,this_listname,'kSDA',kSDA,errorio,errorstr)
+    call read_input(inputfile,this_listname,'epsilonR',this%epsilonR,errorio,errorstr)
+    call read_input(inputfile,this_listname,'kBasal',this%kBasal,errorio,errorstr)
+    call read_input(inputfile,this_listname,'kSDA',this%kSDA,errorio,errorstr)
     call read_input(inputfile,this_listname,'DiatomsPreference',DiatomsPreference,errorio,errorstr)
     
     call read_input(inputfile,this_listname,'epsilonF',this%epsilonF,errorio,errorstr)
@@ -115,7 +115,7 @@ contains
        !
 
        ! Basal and SDA respiration:
-       this%Jresptot(i) = this%JrespFactor(i) * kBasal * fTemp2 + kSDA * this%JF(i) ! Note: we might respire more than we have available. This is accounted for in the starvation later
+       this%Jresptot(i) = this%JrespFactor(i)*this%kBasal*fTemp2 + this%kSDA*this%JF(i) ! Note: we might respire more than we have available. This is accounted for in the starvation later
        ! Available energy:
        nu = this%JF(i) - this%Jresptot(i)
        !this%Jresptot(i) = this%Jresptot(i) - min(0.d0, nu) ! Limit respiration to the energy available
@@ -137,13 +137,13 @@ contains
        end if
        this%Jtot(i) = nu
     end do
-    b = epsilonR * this%g(this%n) ! Birth rate
+    b = this%epsilonR * this%g(this%n) ! Birth rate
     ! Production of POM:
     this%jPOM = &
           (1-this%epsilonF)*this%JF/(this%m * this%epsilonF) !& ! Unassimilated food (fecal pellets)
        ! + this%mortStarve                            ! Copepods dead from starvation are not counted here, because
                                                       ! the starvation is already respired
-    this%jPOM(this%n) = this%jPOM(this%n) + (1.d0-epsilonR)*this%g(this%n) ! Lost reproductive flux
+    this%jPOM(this%n) = this%jPOM(this%n) + (1.d0-this%epsilonR)*this%g(this%n) ! Lost reproductive flux
     !
     ! Assemble derivatives:
     !
