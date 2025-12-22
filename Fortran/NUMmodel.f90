@@ -292,6 +292,7 @@ contains
    IF ( errorio ) RETURN 
 
    call parametersFinalize(0.07d0, logical(.true.,1), logical(.false.,1))
+   call setHTL(1.d0, 0.13d0, logical(.true.,1), logical(.false.,1), logical(.true.,1)) ! Only HTL on copepods
 
   end subroutine setupNUMmodelGelatinous
 
