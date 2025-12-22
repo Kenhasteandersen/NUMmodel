@@ -29,7 +29,7 @@ end
 %
 dudt = 0*u';
 if bCalcDerivative
-    calllib(sLibName, 'f_calcderivatives', ...
+    [u, dudt] = calllib(sLibName, 'f_calcderivatives', ...
         u, L, T, 0.0, dudt);
 end
 %
