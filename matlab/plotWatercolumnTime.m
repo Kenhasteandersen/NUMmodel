@@ -57,7 +57,6 @@ switch sim.p.nameModel
         fprintf('Model type %s not supported.\n', sim.p.nameModel)
 end
 N(N<=0) = 1e-8;
-DOC(DOC<=0) = 1e-8;
 % Convert nutrient units:
 if options.bMolarUnits
     N = N/14;
@@ -66,6 +65,7 @@ if options.bMolarUnits
         Si = Si/28;
     end
 end
+DOC(DOC<=0.01) = 0.01;
 
 t = sim.t;
 %
