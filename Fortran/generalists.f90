@@ -49,7 +49,6 @@ contains
     ! no errors to begin with
     errorio=.false.
     
-    print*, 'Loading parameter for generalist from ', inputfile, ':'
     call read_input(inputfile,'generalists','mMinGeneralist',mMinGeneralist,errorio,errorstr)
     call read_input(inputfile,'generalists','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
