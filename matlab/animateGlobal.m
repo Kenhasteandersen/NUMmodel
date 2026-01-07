@@ -14,6 +14,13 @@
 %  field = calcIntegrateGlobal(sim, sim.B);
 %  animateGlobal(sim, log10(field), vContourLevels=[0 2], sProjection='ortho',bSpin=true, color=[0 0 0], bColorbar=false, time=20);
 %
+% More complex example:
+%  field = calcIntegrateGlobal(sim, sim.B);
+%  animateGlobal(sim, log10(field), vContourLevels=[0 2], sProjection='ortho',...
+%       bSpin=true, color=[0 0 0], bColorbar=false, time=20, ...
+%       bIncludeSpetrum=true,lat=60,lon=-40);
+
+
 function F = animateGlobal(sim, field, options)
 
 arguments
@@ -31,13 +38,17 @@ arguments
     options.bColorbar logical = true; % Whether to make the colorbar
     options.width double = -1; % The size of the video (If "-1" then use current window size)
     options.height double = -1;
-    options.bIncludeWatercolumn logical = false; % Make an inset with "plotGlobalWatercolumn" 
+    options.bIncludeWatercolumn logical = false; % Make an inset with "plotGlobalWatercolumn"
+    % Only work if there is
+    % just one group
+    options.bIncludeSpectrum logical = false;    % Use a sizespectrum for the inset
     options.lat double = 60; % The latitude to select for inset
     options.lon double = -15; % The longitude to select for inset
 end
 
 n = length(sim.t);
 F(n) = struct('cdata',[],'colormap',[]);
+p = sim.p;
 
 figure(1)
 
@@ -56,7 +67,7 @@ for iTime = 1:n
     c = panelGlobal(sim.x,sim.y, field(iTime,:,:), options.vContourLevels, ...
         sTitle=options.sTitle, sProjection=options.sProjection);
     c.Label.String  = options.sUnits;
-    
+
     % Set background color
     set(gcf,'color',options.color);
     set(gca,'color',options.color);
@@ -64,17 +75,17 @@ for iTime = 1:n
         gridm('off'); % Remove grid lines
         framem('off'); % Remove lines around map
     end
-    
+
     % Possibly delete the colorbar:
     if ~options.bColorbar
         colorbar off
     end
-    
+
     % Do spin:
     if options.bSpin
         setm(gca,'Origin',[20 -iTime/n*360 0])
     end
-    
+
     % Indicate time:
     x = 0.875;
     r = 0.075;
@@ -83,7 +94,7 @@ for iTime = 1:n
     annotation('line',[x, x+r*sin(t)],[x, x+r*cos(t)],'color','r','linewidth',3)
     annotation('textbox',[x-0.01,x,r,0.1],'linestyle','none','string',...
         strcat("\color{white}",month(datetime(1,floor(sim.t(iTime)/365*12)+1,1),'shortname')))
-    
+
     % add watercolumns:
     if options.bIncludeWatercolumn
         time = iTime/n*sim.t(end);
@@ -98,7 +109,38 @@ for iTime = 1:n
         nexttile(t,2)
         title('Trophic strategy: {\color{red}phago-}, {\color{green}photo-}, {\color{blue}osmo}trophy', 'fontweight','normal','fontsize',10)
     end
-    
+
+    % Add size spectrum
+    if options.bIncludeSpectrum
+        plotm(options.lat,options.lon,'rp','markersize',40, 'MarkerFaceColor','red','markeredgecolor','red')
+        h = uipanel('position',[0.5 0.02 0.48 0.28]);
+        t = tiledlayout(h,1,1);
+        nexttile(t)
+        idx = calcGlobalWatercolumn(options.lat,options.lon,sim);
+        dz = sim.dznom( squeeze(~isnan(sim.B(1,idx.x,idx.y,:,1))));
+        %B = squeeze(sim.B(:, idx.x, idx.y, :, :));
+        B = squeeze(sum( sim.B(:, idx.x, idx.y, length(dz), :) .* reshape(dz,1,1,1,[],1), 4 )); % Integrate over depth
+        %
+        % Group spectra:
+        %
+        for iGroup = 1:p.nGroups
+            ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+            m = p.m(ix);
+            Delta = p.mUpper(ix)./p.mLower(ix);
+            ixB = ix-p.idxB+1;
+            loglog(m, B(iTime, ixB)./log(Delta), 'linewidth',2,...
+                'color',p.colGroup{iGroup});
+            hold on
+        end
+        hold off
+        ylim([0.0001,500])
+        xlim(calcXlim(sim.p))
+        set(gca,'xtick',10.^(-8:4))
+        set(gca,'ytick',10.^(-4:4))
+        xlabel('Mass ({\mu}g_C)')
+        ylabel('Sheldon ({\mu}g_C/m^2)')
+    end
+
     % Get the frame.
     drawnow
     F(iTime) = getframe(figure(1));
