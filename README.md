@@ -7,13 +7,9 @@ modelling framework.  The model is described in:
 
 The core library is written in Fortran2008 and is interfaced from matlab (with a minimal frontend in  R; see http://oceanlife.dtuaqua.dk/Plankton/R).
 
-<img width="812" alt="image" src="https://github.com/user-attachments/assets/2ed0c324-5ada-4f91-bfa1-ef90e8e5f5f7
-">
-
-
 https://github.com/user-attachments/assets/2ed0c324-5ada-4f91-bfa1-ef90e8e5f5f7
 
-_The figure above shows a setup with only unicellular generalists run with the MIT ECCO transport matrices. The inset shows a high latitude water column at 60N, 15E, with the lower panel illustrating the trophic strategies: blue for DOC uptake (osmotrophy/bacteria), green for phototrophy, and red for phagotrophy._
+_The figure above shows a run of the full NUMmodel. The inset shows the Sheldon size spectrum of generalists (blue), diatoms (green), passive feeding copepods (drak red) and active copepods (red)._
 
 ### Papers using the NUM model:
 * Application to the biological carbon pump: C. Serra-Pompei, B.A Ward, J. Pinti, A.W Visser, T. Kiørboe, K.H Andersen (2022): Linking plankton size spectra and community composition to carbon export and its efficiency. [Global Biogeochemical Cycles 36(5), e2021GB007275](https://agupubs.onlinelibrary.wiley.com/doi/epdf/10.1029/2021GB007275).
