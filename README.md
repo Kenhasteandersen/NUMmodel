@@ -1,6 +1,7 @@
 # NUMmodel 
 Reference implementation of the **Nutrient-Unicellular-Multicellular**
 modelling framework.  The model is described in: 
+* Full model, incl. calibration: [Computational library for the Nutrient-Unicellular-Multicellular plankton modeling framework v. 1.0](https://egusphere.copernicus.org/preprints/2025/egusphere-2025-755/)
 * Unicellular plankton: Andersen and Visser: [From cell size and first principles to structure and function of unicellular plankton communities](https://www.biorxiv.org/content/10.1101/2022.05.16.492092v3)
 * Copepods: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities "Researchgate"). 
 * An [introduction to the modelling principles](https://www.youtube.com/watch?v=dHqoCqaLM8w) given by Camila Serra-Pompei. 
