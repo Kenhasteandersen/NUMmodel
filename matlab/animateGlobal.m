@@ -7,8 +7,7 @@
 % Options:
 %  plenty -- see the file for details
 % Output:
-%  F: the frames, which are also written to the file Global.avi (linux) or
-%     Global.mp4 (windows and mac).
+%  F: the frames, which are also written to the file Global.avi.
 %
 % Example:
 %  field = calcIntegrateGlobal(sim, sim.B);
@@ -150,7 +149,7 @@ end
 % Write the animation:
 %
 if (ismac || ispc)
-    v = VideoWriter(options.sFilename, 'MPEG-4');
+    v = VideoWriter(options.sFilename);%, 'MPEG-4');
 else
     v = VideoWriter(options.sFilename, 'Motion JPEG AVI');
 end
