@@ -132,7 +132,7 @@ for iTime = 1:n
             hold on
         end
         hold off
-        ylim([0.0001,500])
+        ylim([0.1,500])
         xlim(calcXlim(sim.p))
         set(gca,'xtick',10.^(-8:4))
         set(gca,'ytick',10.^(-4:4))
