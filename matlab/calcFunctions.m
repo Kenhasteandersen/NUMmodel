@@ -234,7 +234,7 @@ switch sim.p.nameModel
                                 rates = getRates(p, u, L(iTime,i,j,k), T(iTime,i,j,k), sLibName);
                                 tmp =  calcChl( squeeze(B(iTime,i,j,k,:)), rates, L(iTime,i,j,k)) ;%/ 1000; % Convert to mg
                                 if ~isnan(tmp)
-                                    %ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k);
+                                    ChlArea(i,j) = ChlArea(i,j) + tmp * dz(i,j,k); % mg/m2
                                     ChlVolume(iTime,i,j,k) = ChlVolume(iTime,i,j,k) + tmp; %mgChl/m^3
                                 end
                             end
@@ -258,8 +258,8 @@ switch sim.p.nameModel
             sim.Bmicro = Bmicro;
             sim.eHTL = sim.ProdHTL./sim.ProdNet;
             sim.ePP = sim.ProdNet./sim.ProdGross;
-            sim.ChlArea = ChlArea/length(sim.t);
-            sim.ChlVolume = ChlVolume/length(sim.t);
+            sim.ChlArea = ChlArea/length(ixTime);
+            sim.ChlVolume = ChlVolume/length(ixTime);
             %
             % Global totals over the last year
             %
