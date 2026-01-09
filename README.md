@@ -9,7 +9,9 @@ modelling framework.  The model is described in:
 The core library is written in Fortran2008 and is interfaced from matlab (with a minimal frontend in  R; see http://oceanlife.dtuaqua.dk/Plankton/R).
 
 <img width="812" alt="image" src="https://github.com/user-attachments/assets/a0fc29cc-8134-4e93-8d98-4b94dcb82f83">
+
 _NUM is based on cell and body size and resolves three functional groups: "generalists" (blue) which is all non-diatom plankton, including hetereo- and autotrophic bacteria, mixotrophic flagellates, dinoflagellates, ciliates, etc., "diatoms" (green), and copepods (red) feeding passively through ambushing (dark red) and through active feeding (red)._
+
 https://github.com/user-attachments/assets/2ed0c324-5ada-4f91-bfa1-ef90e8e5f5f7
 
 _The figure above shows a run of the full NUMmodel. The inset shows the Sheldon size spectrum from the position maked with the red star of generalists (blue), diatoms (green), passive feeding copepods (dark red) and active copepods (red)._
