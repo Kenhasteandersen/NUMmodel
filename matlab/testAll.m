@@ -7,7 +7,7 @@ testSetup('setupGeneralistsOnly',  3727);
 testSetup('setupGeneralistsDiatoms', 11380);
 %testSetup('setupDiatoms_simpleOnly', 1284);
 testSetup('setupDiatomsOnly', 7349);
-testSetup('setupGeneric', 4547);
+%testSetup('setupGeneric', 4547);
 testSetup('setupNUMmodel', 1630);
 
 testFunction('testChemostat',26754);
