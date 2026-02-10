@@ -3,10 +3,10 @@
 % a spherical particle with constant density.
 %
 % In:
-%  m: mass in microgram carbon
+%  The parameter structure p
 %
 % Out:
-%  r: radius in micrometer
+%  A vector with the radius of all size groups given in micrometer
 %
 function r = calcRadius(p)
 
