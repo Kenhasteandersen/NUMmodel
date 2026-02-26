@@ -24,7 +24,7 @@ module globals
   ! CN mass ratio:
   real(dp) :: rhoCN 
   
-  character(len=16) :: inputfile='../input/input.h'
+  character(len=19) :: inputfile='../input/input.yaml'
   
  
 

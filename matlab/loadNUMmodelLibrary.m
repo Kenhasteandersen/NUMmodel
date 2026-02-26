@@ -23,8 +23,8 @@ end
 %
 % Check that input files are available:
 %
-if ~exist('../input/input.h','file')
-    error('The input file ../input/input.h is not available.');
+if ~exist('../input/input.yaml','file')
+    error('The input file ../input/input.yaml is not available.');
 end
 %
 % Find the correct library for the OS:

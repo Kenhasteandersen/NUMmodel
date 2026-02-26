@@ -1,63 +1,61 @@
 
-% Search for a parameter value in a namelist file
+% Search for a parameter value in a YAML input file
 %
-function [parval] = search_namelist(filename,namelist,parameter)
-load(fullfile('..','input','input_parameter_headers.mat'));
+% Inputs:
+%   filename  - path to the YAML input file
+%   namelist  - section name (e.g. 'general', 'generalists_simple')
+%   parameter - parameter name to look up
+%
+function [parval] = search_namelist(filename, namelist, parameter)
 
-headernumber=find(strcmp(lower(namelist),erase(thelists,"input_"))==1);
-if isempty(headernumber)
-    disp('No namelist by that name. Please check again')
-    return
-elseif length(headernumber)>1
-        disp('There are several namelists like that in the file')
-        return
-end
-thislist='no list defined yet';
+thislist = '';
+parval = [];
 
-fid = fopen(filename,'r');
-parval=[];
+fid = fopen(filename, 'r');
 while ~feof(fid)
     line = fgetl(fid);
+    if ~ischar(line)
+        continue
+    end
+    trimline = strtrim(line);
     %----------------------------------------------------------------------
-    % Check if this line is a parameter header. If, then update "thislist"
+    % Skip empty lines and comment lines
     %----------------------------------------------------------------------
-    io=find(strcmp(line,thestrings)==1);
-    if ~isempty(io)
-        thislist=string(thelists(io,1));
+    if isempty(trimline) || trimline(1) == '#'
+        continue
     end
     %----------------------------------------------------------------------
-    % Check the parameter header is correct, check if the parameter exist
+    % Detect section headers: no leading whitespace, ends with ':'
     %----------------------------------------------------------------------
-    if strcmp(thislist,thelists(headernumber))
-        %------------------------------------------------------------------
-        % Remove leading and trailing white spaces
-        %------------------------------------------------------------------
-        line=strtrim(line);
-        %------------------------------------------------------------------
-        % If the line is not blank or a comment: extract the keyword 
-        %------------------------------------------------------------------
-        if ~isempty(line) && ~strcmp(line(1),'!')
-            %--------------------------------------------------------------
-            % Find the "=" and check if it is the parameter we search for
-            %--------------------------------------------------------------
-            idx = find(line == '=');
-            keyword=strtrim(line(1:idx-1));
-            %--------------------------------------------------------------
-            % Find it is the right parameter, then extract the value
-            %--------------------------------------------------------------
-            if strcmp(keyword,parameter)
-                idx_comment = find(line == '!');
-                %----------------------------------------------------------
-                % If there is no comment, use the length of the line 
-                %----------------------------------------------------------
-                idx_comment = min([idx_comment-1,length(line)]);
-                value=strtrim(line(idx+1:idx_comment));
-                value = strrep(value,'d','e');
-                parval=str2double(value);
-            end
+    if line(1) ~= ' '
+        if trimline(end) == ':'
+            thislist = trimline(1:end-1);
+        end
+        continue
+    end
+    %----------------------------------------------------------------------
+    % Key-value pair: only process in the matching section
+    %----------------------------------------------------------------------
+    if strcmp(thislist, namelist)
+        % Remove inline comments
+        idx_comment = find(trimline == '#', 1);
+        if ~isempty(idx_comment)
+            trimline = strtrim(trimline(1:idx_comment-1));
+        end
+        % Find the first colon (key:value separator)
+        idx = find(trimline == ':', 1);
+        if isempty(idx)
+            continue
+        end
+        keyword = strtrim(trimline(1:idx-1));
+        if strcmp(keyword, parameter)
+            value = strtrim(trimline(idx+1:end));
+            parval = str2double(value);
         end
     end
 end
+fclose(fid);
+
 if isempty(parval)
-    disp(['Did not locate parameter: ',parameter])
+    disp(['Did not locate parameter: ', parameter])
 end

@@ -75,7 +75,7 @@ else
     u0=p.u0;
 end
 
-rhoCN = search_namelist('../input/input.h','general','rhoCN');
+rhoCN = search_namelist('../input/input.yaml','general','rhoCN');
 [t,u] = ode23s(@fDeriv, [0 p.tEnd], u0); 
 
 if options.bCalculateNgain
@@ -133,7 +133,7 @@ if options.bVerbose
     ixDiatoms = find(p.typeGroups==3);
     if ~isempty(ixDiatoms)
         ixDiatoms = (p.ixStart(ixDiatoms):p.ixEnd(ixDiatoms))-p.idxSi;
-        rhoCSi = search_namelist('../input/input.h','diatoms','rhoCSi');
+        rhoCSi = search_namelist('../input/input.yaml','diatoms','rhoCSi');
         Sirate=sim.Sibalance/(sim.Si(end)+sum(sim.B(end,ixDiatoms))/rhoCSi)*100;
         fprintf("Rate of gain of Si: %8.3f %% per day \n", Sirate);
     end

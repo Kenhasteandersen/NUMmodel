@@ -53,8 +53,8 @@ end
 ixB = p.idxB:p.n;
 
 S = inputRead;
-reminHTL = S.input_general.fracHTL_to_N;
-rhoCN = S.input_general.rhoCN;
+reminHTL = S.general.fracHTL_to_N;
+rhoCN = S.general.rhoCN;
 %
 % Set path:
 %

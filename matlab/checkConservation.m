@@ -16,10 +16,10 @@ end
 % Constants:
 %
 S = inputRead;
-fracHTL_to_N = S.input_general.fracHTL_to_N;
-fracHTL_to_POM = S.input_general.fracHTL_to_POM;
-rhoCN = S.input_general.rhoCN;
-remin2 = S.input_generalists.remin2; % NOTE: only valid for generalists
+fracHTL_to_N = S.general.fracHTL_to_N;
+fracHTL_to_POM = S.general.fracHTL_to_POM;
+rhoCN = S.general.rhoCN;
+remin2 = S.generalists.remin2; % NOTE: only valid for generalists
 
 p = sim.p;
 gains = 0;
