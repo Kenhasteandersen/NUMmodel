@@ -9,9 +9,10 @@
 % mortality, and not the mortality itself.
 %
 % In:
-%  mortHTL - the HTL mortality (or the constant if bQuadratic=true)
+%  mortHTL - the HTL mortality (or the constant if bQuadratic=true) in
+%  units of (mu gC/m3 * yr)^-1)
 %  mHTL - the size where the HTL starts (usually set to the maximum size
-%         divided by 500^1.5)
+%         divided by 500^1.5) (units of mugC)
 %  bQuadraticHTL - boolean which determines whether to use a fixed or
 %                  "quadratic" mortality
 %  bDecliningHTL - boolean which determines whether the HTL mortality
