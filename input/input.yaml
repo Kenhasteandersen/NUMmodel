@@ -20,7 +20,6 @@ general:
   rhoCN: 5.68                  # C:N mass ratio of cell [gC/gN]
   # Variables for HTL mortalities:
   fracHTL_to_N: 0.5            # Half becomes urine that is routed back to N
-  fracHTL_to_POM: 0.5          # Another half is fecal pellets that are routed back to the largest POM size class
 
 # ***********************************************************************
 # GENERALISTS SIMPLE INPUT PARAMETERS

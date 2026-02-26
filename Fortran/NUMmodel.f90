@@ -322,7 +322,6 @@ contains
     errorio=.false.
     call read_input(inputfile,'general','rhoCN',rhoCN,errorio,errorstr)
     call read_input(inputfile,'general','fracHTL_to_N',fracHTL_to_N,errorio,errorstr)
-    call read_input(inputfile,'general','fracHTL_to_POM',fracHTL_to_POM,errorio,errorstr)
     !call read_input(inputfile,'general')
     !
     ! Set groups:

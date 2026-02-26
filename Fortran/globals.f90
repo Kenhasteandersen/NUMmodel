@@ -19,7 +19,6 @@ module globals
   ! Specification of what to do with HTL losses:
   !
   real(dp) :: fracHTL_to_N ! Half becomes urine that is routed back to N
-  real(dp) :: fracHTL_to_POM ! Another half is fecal pellets that are routed back to the largest POM size class
   
   ! CN mass ratio:
   real(dp) :: rhoCN 

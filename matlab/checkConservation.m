@@ -17,7 +17,6 @@ end
 %
 S = inputRead;
 fracHTL_to_N = S.general.fracHTL_to_N;
-fracHTL_to_POM = S.general.fracHTL_to_POM;
 rhoCN = S.general.rhoCN;
 remin2 = S.generalists.remin2; % NOTE: only valid for generalists
 
@@ -49,7 +48,7 @@ switch sim.p.nameModel
                 
                 % Losses from HTL:
                 lossHTL = lossHTL + ...
-                    sum((1-fracHTL_to_N-fracHTL_to_POM)*rates.mortHTL.*B')/rhoCN*dt(iTime);
+                    sum((1-fracHTL_to_N)*rates.mortHTL.*B')/rhoCN*dt(iTime);
                 % Losses to POM:
                 loss = loss + sum(rates.jPOM.*B')/rhoCN*dt(iTime);%sum(rates.mort2*(1-remin2).*B')/rhoCN*dt(iTime);
             else
