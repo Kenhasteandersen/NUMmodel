@@ -18,6 +18,12 @@ module NUMmodel_wrap
 
 contains
 
+  subroutine f_getnumgrid(n, idxBout) bind(c)
+    integer(c_int), intent(out) :: n, idxBout
+    n = nGrid
+    idxBout = idxB
+  end subroutine f_getnumgrid
+
   subroutine f_setupGeneralistsOnly(n, errorio, errorstr) bind(c)
     integer(c_int), intent(in), value:: n
     logical(c_bool), intent(out) :: errorio

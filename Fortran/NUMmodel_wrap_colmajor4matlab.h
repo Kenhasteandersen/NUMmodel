@@ -1,3 +1,5 @@
+void f_getnumgrid(int *n, int *idxB);
+
 void f_setupgeneralistsonly(const int n, bool *Clost, char *errorstr);
 
 void f_setupgeneralistssimplepom(const int n, const int nPOM, bool *Clost, char *errorstr);
