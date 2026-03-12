@@ -17,8 +17,9 @@ https://github.com/user-attachments/assets/2ed0c324-5ada-4f91-bfa1-ef90e8e5f5f7
 _The figure above shows a run of the full NUMmodel. The inset shows the Sheldon size spectrum from the position maked with the red star of generalists (blue), diatoms (green), passive feeding copepods (dark red) and active copepods (red)._
 
 ### Papers using the NUM model:
-* Grigoratou, Maria, Camila Serra-Pompei, Adam Kemberling, and Andrew J. Pershing. Hot and hungry: [A mechanistic approach to the direct and indirect effects of marine heatwaves on plankton communities](https://assets-eu.researchsquare.com/files/rs-4194638/v1/09fb2960-27da-42ac-a1d7-3ba3ea1004fc.pdf?c=1712816635). (2024).
+* Grigoratou, Maria, Camila Serra-Pompei, Adam Kemberling, and Andrew J. Pershing. Hot and hungry: [A mechanistic approach to the direct and indirect effects of marine heatwaves on plankton communities](https://www.authorea.com/doi/full/10.22541/au.171474857.76024736). (2024).
 * Application to the biological carbon pump: C. Serra-Pompei, B.A Ward, J. Pinti, A.W Visser, T. Kiørboe, K.H Andersen (2022): Linking plankton size spectra and community composition to carbon export and its efficiency. [Global Biogeochemical Cycles 36(5), e2021GB007275](https://agupubs.onlinelibrary.wiley.com/doi/epdf/10.1029/2021GB007275).
+* T.F. Hansen, D.E. Canfield, K.H. Andersen, and C.J. Bjerrum: The unicellular NUM v.0.91 (2025): A trait-based plankton model evaluated in two contrasting biogeographic provinces. [Geoscientific Model Development 18, 1895–1916](https://gmd.copernicus.org/articles/18/1895/2025/).
 
 
 ### Installation
