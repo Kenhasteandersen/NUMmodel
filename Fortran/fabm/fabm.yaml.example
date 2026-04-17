@@ -1,0 +1,57 @@
+# Example fabm.yaml for the NUMmodel FABM coupling.
+#
+# Reference this file as your host model's FABM configuration (e.g. fabm.yaml
+# in GOTM, or the equivalent in ROMS/SCHISM/etc.).
+#
+# The model identifier is "num/num_model" (institute = num, model = num_model).
+#
+# State variables registered (flat name as used by the host model):
+#
+#   num_model_N       -- dissolved inorganic nitrogen   [µgN/L]
+#   num_model_DOC     -- dissolved organic carbon        [µgC/L]
+#   num_model_Si      -- dissolved silicate              [µgSi/L]
+#   num_model_Gen1..n -- generalist biomass size classes [µgC/L]
+#   num_model_Dia1..n -- diatom biomass size classes     [µgC/L]
+#   num_model_PCop1..n-- passive copepod size classes    [µgC/L]
+#   num_model_ACop1..n-- active copepod size classes     [µgC/L]
+#   num_model_POM1..n -- POM size classes                [µgC/L]
+#
+# Diagnostics:
+#   num_model_ProdGross -- gross primary production    [mgC/d/m³]
+#   num_model_ProdNet   -- net primary production      [mgC/d/m³]
+#   num_model_ProdHTL   -- higher-trophic-level losses [mgC/d/m³]
+#   num_model_Bpico     -- pico-plankton biomass        [mgC/m³]
+#   num_model_Bnano     -- nano-plankton biomass        [mgC/m³]
+#   num_model_Bmicro    -- micro-plankton biomass       [mgC/m³]
+#
+# Environmental dependencies (automatically coupled from host model):
+#   temperature                              [°C]
+#   downwelling_photosynthetic_radiative_flux [W/m²]
+
+instances:
+  num_model:
+    model: num/num_model
+    parameters:
+      # Size classes per generalist / diatom group (default: 10)
+      n_size:    10
+      # Size classes per copepod group (default: 10)
+      n_copepod: 10
+      # POM size classes (default: 1)
+      n_pom:     1
+      # Number of passive-feeding copepod groups (default: 2)
+      n_passive: 2
+      # Number of active-feeding copepod groups (default: 2)
+      n_active:  2
+      # Adult masses of passive copepods [µgC] (default: 10, 1000)
+      mAdultPassive1: 10.0
+      mAdultPassive2: 1000.0
+      # Adult masses of active copepods [µgC] (default: 10, 1000)
+      mAdultActive1:  10.0
+      mAdultActive2:  1000.0
+    initialization:
+      # Initial conditions override the defaults below if desired.
+      # Defaults are set in fabm_NUMmodel.F90 (initialize subroutine).
+      N:    14.0    # µgN/L  (~1 µmol N/L, oligotrophic)
+      DOC:   0.0    # µgC/L
+      Si:  150.0    # µgSi/L (~5 µmol Si/L)
+      # Biomass size classes default to 1e-4 µgC/L; override here if needed.

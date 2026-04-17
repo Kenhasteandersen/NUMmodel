@@ -1,0 +1,62 @@
+# ============================================================
+# FABM configuration for NUMmodel (NUM plankton model)
+# Model identifier: num/num_model
+#
+# This configuration uses the full setupNUMmodel setup:
+#   - Generalists (unicellular mixotrophs)
+#   - Diatoms (silicified phytoplankton)
+#   - 2 groups of passive-feeding copepods
+#   - 2 groups of active-feeding copepods
+#   - Particulate organic matter (POM)
+#
+# State variable naming convention (GOTM output variable names):
+#   num_model_N        dissolved inorganic nitrogen   [µgN/L]
+#   num_model_DOC      dissolved organic carbon        [µgC/L]
+#   num_model_Si       dissolved silicate              [µgSi/L]
+#   num_model_Gen1..n  generalist biomass classes      [µgC/L]
+#   num_model_Dia1..n  diatom biomass classes          [µgC/L]
+#   num_model_PCop1..n passive copepod classes         [µgC/L]
+#   num_model_ACop1..n active copepod classes          [µgC/L]
+#   num_model_POM1     POM                             [µgC/L]
+#
+# Diagnostics:
+#   num_model_ProdGross  gross primary production      [mgC/d/m³]
+#   num_model_ProdNet    net primary production        [mgC/d/m³]
+#   num_model_ProdHTL    higher-trophic-level removal  [mgC/d/m³]
+#   num_model_Bpico      pico-plankton biomass (<2µm)  [mgC/m³]
+#   num_model_Bnano      nano-plankton biomass (2-20)  [mgC/m³]
+#   num_model_Bmicro     micro-plankton biomass (>20)  [mgC/m³]
+# ============================================================
+
+instances:
+  num_model:
+    model: num/num_model
+    parameters:
+      # Size classes per generalist / diatom group
+      n_size: 10
+      # Size classes per copepod group
+      n_copepod: 10
+      # POM size classes
+      n_pom: 1
+      # Number of passive-feeding copepod groups
+      n_passive: 2
+      # Number of active-feeding copepod groups
+      n_active: 2
+      # Adult masses of passive copepods [µgC]
+      # Group 1: small (~1 mm, 10 µgC); Group 2: large (~5 mm, 1000 µgC)
+      mAdultPassive1: 10.0
+      mAdultPassive2: 1000.0
+      # Adult masses of active copepods [µgC]
+      mAdultActive1:  10.0
+      mAdultActive2:  1000.0
+    initialization:
+      # Initial nutrient conditions for a winter North Sea mixed layer
+      # Nitrate: 5 µmol/L = 70 µgN/L  (Nmolm3 × 14)
+      N:   70.0
+      # DOC: low background
+      DOC:  1.0
+      # Silicate: 10 µmol/L = 281 µgSi/L  (µmol × 28.1)
+      Si:  150.0
+      # Biomass size classes: very small seed population
+      # All generalist, diatom, copepod and POM classes start at 1e-4 µgC/L
+      # (The default set in fabm_NUMmodel.F90 is 1e-4; override here if needed)

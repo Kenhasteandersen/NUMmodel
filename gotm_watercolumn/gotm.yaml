@@ -1,0 +1,144 @@
+title: NUMmodel GOTM water column
+---
+
+# ============================================================
+# Location: Central North Sea (59°N, 0°E), 100 m water column
+# ============================================================
+location:
+  name: NorthSea
+  latitude: 59.0
+  longitude:  0.0
+  depth: 100.0
+
+# ============================================================
+# Simulation period and timestep
+# ============================================================
+time:
+  start: 2000-01-01 00:00:00
+  stop:  2001-01-01 00:00:00
+  step: 3600   # 1-hour timestep (seconds)
+
+# ============================================================
+# Vertical grid: 50 uniform layers over 100 m
+# ============================================================
+grid:
+  nlev: 50
+  method: 0         # 0 = uniform spacing
+  ddu: 0.0          # no surface refinement
+  ddl: 0.0          # no bottom refinement
+
+# ============================================================
+# Initial temperature profile (read from file)
+# Format: depth[m]  temperature[°C]   (two columns)
+# ============================================================
+temperature:
+  ode_method: 1
+  cnpar: 1.0
+  initial:
+    method: 2           # 2 = from file
+    file: init_temp.dat
+    column: 1
+
+# ============================================================
+# Salinity: constant at 34.5 PSU
+# ============================================================
+salinity:
+  ode_method: 1
+  cnpar: 1.0
+  initial:
+    method: 0           # 0 = constant
+    constant_value: 34.5
+
+# ============================================================
+# Turbulence: standard k-epsilon model
+# ============================================================
+turbulence:
+  turb_method: 3         # 3 = second-order (k-eps)
+  tke_method: 2          # 2 = k-eps
+  len_scale_method: 8    # 8 = generic
+  stab_method: 3         # 3 = Schumann-Gerz
+
+# ============================================================
+# Surface forcing
+# The file meteo.dat must be generated first by running:
+#   python generate_forcing.py
+# Format: YYYY-MM-DD HH:MM:SS  u10  v10  airt  hum  cloud  swr
+# ============================================================
+surface:
+  fluxes:
+    method: fairall      # Fairall et al. 1996 bulk formula
+    u10:
+      method: 2          # 2 = from file
+      file: meteo.dat
+      column: 1
+    v10:
+      method: 2
+      file: meteo.dat
+      column: 2
+    airt:
+      method: 2
+      file: meteo.dat
+      column: 3
+    hum:
+      method: 2
+      file: meteo.dat
+      column: 4
+    precip:
+      method: 0          # no precipitation
+      constant_value: 0.0
+  swr:
+    method: 2            # 2 = from file
+    file: meteo.dat
+    column: 6
+  longwave_radiation:
+    method: 4            # 4 = Berliand (computed from airt + cloud)
+    cloud:
+      method: 2
+      file: meteo.dat
+      column: 5
+
+# ============================================================
+# Bottom boundary
+# ============================================================
+bottom:
+  roughness:
+    z0b_min: 0.002
+
+# ============================================================
+# Light extinction: double-exponential (Jerlov type II, coastal)
+# Coefficients: A=0.6 (IR fraction), g1=0.35 m (IR e-folding),
+#               g2=23 m (visible e-folding)
+# ============================================================
+light_extinction:
+  method: 1      # 1 = Jerlov double-exponential
+  A:   0.6
+  g1:  0.35
+  g2:  23.0
+
+# ============================================================
+# FABM biogeochemistry
+# ============================================================
+fabm:
+  use: true
+  freshwater_impact: false   # ignore freshwater dilution of biogeochem
+  repair_state: true         # clamp negative state variables to 0
+
+# ============================================================
+# Output controlled by output.yaml
+# ============================================================
+output:
+  gotm_out:
+    use: true
+    format: netcdf
+    file: NUMmodel_watercolumn
+    time_unit: hour
+    time_step: 24        # daily output
+    time_start: 2000-01-01 00:00:00
+    time_stop:  2001-01-01 00:00:00
+    variables:
+      - source: temp
+        name: temp
+      - source: salt
+        name: salt
+      - source: num_model_*/
+        name: num_model_*
