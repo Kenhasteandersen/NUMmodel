@@ -1,5 +1,5 @@
 
-% Plots the profile of nutrients and all groups from a water column 
+% Plots the profile of nutrients and all groups from a water column
 % simulation.
 %
 % Averages over the last year.
@@ -7,6 +7,7 @@
 function plotWatercolumnProfile(sim, options)
 arguments
     sim struct;
+    options.tDay = []; % Time of profile. Defaults to average over last year
     %time double;
     %lat double = [];
     %lon double = [];
@@ -17,14 +18,18 @@ end
 p = sim.p;
 z = sim.z;
 
-%
-% Average over the last year:
-%
-ixStart = find(sim.t==sim.t(end)-365,1);
-if isempty(ixStart)
-    ixStart=1;
+if isempty(options.tDay)
+    %
+    % Average over the last year:
+    %
+    ixStart = find(sim.t==sim.t(end)-365,1);
+    if isempty(ixStart)
+        ixStart=1;
+    end
+    ixTime = ixStart:length(sim.t); %
+else
+    ixTime = find(sim.t==options.tDay,1);
 end
-ixTime = ixStart:length(sim.t); % 
 %
 % Make the plot
 %
