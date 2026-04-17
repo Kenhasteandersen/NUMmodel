@@ -82,6 +82,7 @@ variables = [
     ('num_model_BPCop2',   'Passive copepods grp 2',   'µg C L⁻¹',    'BuPu'),
     ('num_model_BACop1',   'Active copepods grp 1',    'µg C L⁻¹',    'OrRd'),
     ('num_model_BACop2',   'Active copepods grp 2',    'µg C L⁻¹',    'OrRd'),
+    ('num_model_BACop3',   'Active copepods grp 3',    'µg C L⁻¹',    'OrRd'),
     ('num_model_BPOM1',    'POM',                      'µg C L⁻¹',    'YlOrBr'),
 ]
 

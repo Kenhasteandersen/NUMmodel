@@ -123,4 +123,5 @@ output:
     - source: num_model_BPCop2
     - source: num_model_BACop1
     - source: num_model_BACop2
+    - source: num_model_BACop3
     - source: num_model_BPOM1
