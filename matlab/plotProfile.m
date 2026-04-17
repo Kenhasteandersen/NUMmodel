@@ -2,6 +2,8 @@
 % Plots the profile of nutrients and all groups from a water column 
 % simulation.
 %
+% Averages over the last year.
+%
 function plotProfile(sim, options)
 arguments
     sim struct;
@@ -15,17 +17,28 @@ end
 p = sim.p;
 z = sim.z;
 
+%
+% Average over the last year:
+%
+ixStart = find(sim.t==sim.t(end)-365,1);
+if isempty(ixStart)
+    ixStart=1;
+end
+ixTime = ixStart:length(sim.t); % 
+%
+% Make the plot
+%
 if options.bNewplot
     clf
 end
 
-ixTime = floor(length(sim.t)/2):length(sim.t); % 
-
+% Nutrients:
 plot(mean(sim.N(ixTime,:),1), -z, linewidth=2, color=p.colNutrients{1})
 hold on
 plot(mean(sim.DOC(ixTime,:),1), -z,linewidth=2, color=p.colNutrients{2});
 plot(mean(sim.Si(ixTime,:),1), -z,linewidth=2, color=p.colNutrients{3});
 
+% Biomass groups:
 for iGroup = 1:p.nGroups
     ix = (p.ixStart(iGroup):p.ixEnd(iGroup)) - p.idxB+1;
     plot(mean(sum(sim.B(:,:,ix),3),1), -z, Color=p.colGroup{iGroup}, linewidth=2);
