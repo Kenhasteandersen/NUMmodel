@@ -121,10 +121,49 @@ for idx, (varname, title, units, cmap) in enumerate(variables):
 for idx in range(len(variables), nrows * ncols):
     axes.flat[idx].set_visible(False)
 
-fig.suptitle('NUMmodel / GOTM — 59°N, year 2000', fontsize=12, y=1.01)
+fig.suptitle('NUMmodel / GOTM — 59°N, 2000–2001', fontsize=12, y=1.01)
 plt.tight_layout()
 
 outfile = 'all_variables.png'
 plt.savefig(outfile, dpi=150, bbox_inches='tight')
 print(f'==> Saved {outfile}')
+
+# ---------------------------------------------------------------------------
+# Plot 2: depth-integrated time series — all state variables in one panel
+# ---------------------------------------------------------------------------
+# z is negative (surface ~ 0, bottom ~ -100 m); trapz with negative z gives
+# a negative integral, so negate to get positive column totals.
+_skip_integrated = {
+    'num_model_ProdGross', 'num_model_ProdNet', 'num_model_ProdHTL',
+    'num_model_Bpico', 'num_model_Bnano', 'num_model_Bmicro',
+}
+integrated_vars = [(v, t, u, c) for v, t, u, c in variables if v not in _skip_integrated]
+
+integrated = {}
+for varname, *_ in integrated_vars:
+    arr = data[varname]                          # (time, z)
+    integrated[varname] = -np.trapezoid(arr, z, axis=1)
+
+colors = plt.get_cmap('tab20').colors
+
+fig2, ax2 = plt.subplots(figsize=(14, 5))
+
+for idx, (varname, title, units, cmap) in enumerate(integrated_vars):
+    ax2.plot(t_num, integrated[varname], label=title,
+             color=colors[idx % len(colors)], linewidth=1.4)
+
+ax2.set_yscale('symlog', linthresh=1.0)
+ax2.xaxis_date()
+ax2.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
+ax2.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
+ax2.tick_params(labelsize=8)
+ax2.set_ylabel('Depth-integrated value (unit × m)', fontsize=9)
+ax2.set_title('NUMmodel / GOTM — depth-integrated state variables', fontsize=10)
+ax2.legend(fontsize=7, ncol=2, loc='upper right', framealpha=0.7)
+plt.tight_layout()
+
+outfile2 = 'integrated_variables.png'
+fig2.savefig(outfile2, dpi=150, bbox_inches='tight')
+print(f'==> Saved {outfile2}')
+
 plt.show()

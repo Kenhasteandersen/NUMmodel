@@ -2,7 +2,7 @@
 """
 Generate synthetic meteorological forcing for the GOTM+NUMmodel North Sea example.
 
-Produces meteo.dat with daily values for year 2000.
+Produces meteo.dat with daily values for years 2000-2001.
 Uses only the Python standard library (no NumPy required).
 
 Output columns (space-separated, GOTM format):
@@ -20,14 +20,19 @@ from datetime import datetime, timedelta
 # Site and simulation parameters
 # --------------------------------------------------------------------------
 LAT = 59.0           # degrees N
-YEAR = 2000
+YEAR_START = 2000
+YEAR_END   = 2001    # inclusive last year
 CLOUD_MEAN = 0.65    # mean cloud fraction (typical North Sea)
 SOLAR_CONST = 1368.0 # W/m²
 
 lat_rad = math.radians(LAT)
 
-ndays = (367 if (YEAR % 4 == 0 and (YEAR % 100 != 0 or YEAR % 400 == 0)) else 366)
-start = datetime(YEAR, 1, 1, 0, 0, 0)
+def is_leap(y):
+    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)
+
+start = datetime(YEAR_START, 1, 1, 0, 0, 0)
+stop  = datetime(YEAR_END + 1, 1, 1, 0, 0, 0)
+total_days = (stop - start).days + 1   # +1 to cover the stop date
 
 rng = random.Random(42)   # fixed seed for reproducibility
 
@@ -45,19 +50,21 @@ swr_vals = []
 airt_vals = []
 
 with open(out_file, "w") as fh:
-    fh.write("! Synthetic meteorological forcing — North Sea 59°N, year 2000\n")
+    fh.write("! Synthetic meteorological forcing — North Sea 59°N, 2000-2001\n")
     fh.write("! Columns: datetime  u10[m/s]  v10[m/s]  airt[°C]  "
              "hum[%]  cloud[-]  swr[W/m²]\n")
 
-    for i in range(ndays):
-        doy = i + 1   # 1-based day of year
+    for i in range(total_days):
         t   = start + timedelta(days=i)
+        # day-of-year within the current year for seasonal cycle
+        doy = t.timetuple().tm_yday
+        days_in_year = 366 if is_leap(t.year) else 365
         phi = 2.0 * math.pi
 
         # ------------------------------------------------------------------
         # Solar declination (radians)
         # ------------------------------------------------------------------
-        decl = math.radians(23.45 * math.sin(phi * (doy - 81.0) / 365.0))
+        decl = math.radians(23.45 * math.sin(phi * (doy - 81.0) / days_in_year))
 
         # ------------------------------------------------------------------
         # Daily mean extra-terrestrial radiation (W/m²)
@@ -74,7 +81,7 @@ with open(out_file, "w") as fh:
         # ------------------------------------------------------------------
         # Cloud cover: larger in winter (North Sea)
         # ------------------------------------------------------------------
-        cloud = CLOUD_MEAN + 0.15 * math.sin(phi * (doy - 180.0) / 365.0)
+        cloud = CLOUD_MEAN + 0.15 * math.sin(phi * (doy - 180.0) / days_in_year)
         cloud = clamp(cloud, 0.0, 1.0)
 
         # Cloud transmission (Atwater & Ball 1981)
@@ -84,7 +91,7 @@ with open(out_file, "w") as fh:
         # ------------------------------------------------------------------
         # Wind: westerly, slightly stronger in winter
         # ------------------------------------------------------------------
-        u10 = 5.0 + 3.0 * math.cos(phi * (doy - 10.0) / 365.0)
+        u10 = 5.0 + 3.0 * math.cos(phi * (doy - 10.0) / days_in_year)
         u10 += rng.gauss(0, 0.5)
 
         v10 = 0.5 * math.sin(phi * doy / 80.0)
@@ -93,12 +100,12 @@ with open(out_file, "w") as fh:
         # ------------------------------------------------------------------
         # Air temperature: sinusoidal seasonal cycle (~4–17 °C)
         # ------------------------------------------------------------------
-        airt = 10.5 + 6.5 * math.sin(phi * (doy - 55.0) / 365.0)
+        airt = 10.5 + 6.5 * math.sin(phi * (doy - 55.0) / days_in_year)
 
         # ------------------------------------------------------------------
         # Relative humidity (~76–88 %, higher in winter)
         # ------------------------------------------------------------------
-        hum = 82.0 - 6.0 * math.sin(phi * (doy - 100.0) / 365.0)
+        hum = 82.0 - 6.0 * math.sin(phi * (doy - 100.0) / days_in_year)
 
         fh.write(
             f"{t.strftime('%Y-%m-%d %H:%M:%S')}  "
@@ -110,6 +117,6 @@ with open(out_file, "w") as fh:
         swr_vals.append(swr)
         airt_vals.append(airt)
 
-print(f"Written {ndays} daily records to '{out_file}'")
+print(f"Written {total_days} daily records to '{out_file}'")
 print(f"  SWR range : {min(swr_vals):.1f} – {max(swr_vals):.1f} W/m²")
 print(f"  Airt range: {min(airt_vals):.1f} – {max(airt_vals):.1f} °C")
