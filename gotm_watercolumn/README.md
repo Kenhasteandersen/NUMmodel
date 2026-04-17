@@ -25,10 +25,10 @@ Clone the required external models:
 
 ```bash
 # GOTM
-git clone https://github.com/gotm-model/gotm.git  ~/src/gotm
+git clone https://github.com/gotm-model/gotm.git  ~/Documents/Source/gotm
 
 # FABM
-git clone https://github.com/fabm-model/fabm.git  ~/src/fabm
+git clone https://github.com/fabm-model/fabm.git  ~/Documents/Source/fabm
 ```
 
 ## Build
@@ -48,9 +48,9 @@ The `CMakeLists.txt` in this directory handles this automatically by setting
 cd NUMmodel/gotm_watercolumn
 mkdir build && cd build
 
-cmake ..                              \
-  -DGOTM_BASE=~/src/gotm             \
-  -DFABM_BASE=~/src/fabm             \
+cmake ..                                          \
+  -DGOTM_BASE=~/Documents/Source/gotm           \
+  -DFABM_BASE=~/Documents/Source/fabm           \
   -DCMAKE_BUILD_TYPE=Release
 
 make -j$(nproc)
