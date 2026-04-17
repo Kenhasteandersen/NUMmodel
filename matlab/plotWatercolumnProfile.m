@@ -1,37 +1,52 @@
-%
-% Plots a profile of the watercolumn at "day"
-% 
-function plotWatercolumnProfile(sim, day)
 
+% Plots the profile of nutrients and all groups from a water column 
+% simulation.
+%
+% Averages over the last year.
+%
+function plotWatercolumnProfile(sim, options)
 arguments
     sim struct;
-    day double = sim.t(end);
+    %time double;
+    %lat double = [];
+    %lon double = [];
+    options.bNewplot  = true;
+    options.depthMax {mustBePositive} = 300;
 end
 
-clf
-%
-% Extract fields:
-%
-iTime = find(sim.t >= day, 1);
-N = sim.N(:,iTime);
-L = sim.L(:,iTime);
-DOC = sim.DOC(:,iTime);
-B = sum(sim.B(:,:,iTime),2);
-T = sim.T(:,iTime);
+p = sim.p;
 z = sim.z;
+
 %
-% Make panel:
+% Average over the last year:
 %
-plot(N, -z,'b','linewidth',2)
+ixStart = find(sim.t==sim.t(end)-365,1);
+if isempty(ixStart)
+    ixStart=1;
+end
+ixTime = ixStart:length(sim.t); % 
+%
+% Make the plot
+%
+if options.bNewplot
+    clf
+end
+
+% Nutrients:
+plot(mean(sim.N(ixTime,:),1), -z, linewidth=2, color=p.colNutrients{1})
 hold on
-plot(L, -z, 'y','linewidth',2)
-plot(DOC,-z,'color',[165 42 42]/256,'linewidth',2)
-plot(B,-z,'linewidth',2)
-plot(T,-z,'r','linewidth',2)
+plot(mean(sim.DOC(ixTime,:),1), -z,linewidth=2, color=p.colNutrients{2});
+plot(mean(sim.Si(ixTime,:),1), -z,linewidth=2, color=p.colNutrients{3});
+
+% Biomass groups:
+for iGroup = 1:p.nGroups
+    ix = (p.ixStart(iGroup):p.ixEnd(iGroup)) - p.idxB+1;
+    plot(mean(sum(sim.B(:,:,ix),3),1), -z, Color=p.colGroup{iGroup}, linewidth=1);
+end
+
+ylim([-options.depthMax,0])
 set(gca,'xscale','log')
-
+xlim([0.1,500])
+legend([{'N'},{'DOC'},{'Si'},p.nameGroup], Location='southeast')
+xlabel('Concentration ({\mu}g/l)')
 ylabel('Depth (m)')
-xlim([0.01 1000])
-
-legend({'N ()','Light ()','DOC','Biomass ({\mu}g_C/l)','T'}, ...
-    'location','southoutside')
