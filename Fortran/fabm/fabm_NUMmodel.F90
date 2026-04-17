@@ -19,7 +19,10 @@ module fabm_num_model
   use NUMmodel, only: &
       setupNUMmodel, calcDerivatives, getSinking, getFunctions, &
       nGrid, nNutrients, nGroups, ixStart, ixEnd, &
-      idxN, idxDOC, idxSi, idxB, idxPOM, group
+      idxN, idxDOC, idxSi, idxB, idxPOM, group, &
+      typeGeneralist, typeGeneralistSimple, &
+      typeDiatom, typeDiatom_simple, &
+      typeCopepodActive, typeCopepodPassive, typePOM
   use globals, only: dp
 
   implicit none
@@ -46,6 +49,9 @@ module fabm_num_model
     type(type_diagnostic_variable_id) :: id_ProdGross, id_ProdNet, id_ProdHTL
     type(type_diagnostic_variable_id) :: id_Bpico, id_Bnano, id_Bmicro
 
+    ! Per-group total biomass diagnostics (one entry per group)
+    type(type_diagnostic_variable_id), allocatable :: id_Bgroup(:)
+
   contains
     procedure :: initialize
     procedure :: do
@@ -59,11 +65,12 @@ contains
     integer,               intent(in)            :: configunit
 
     integer  :: i, iGroup, ig, n_biomass
+    integer  :: nGen, nDia, nACop, nPCop, nPOM_count
     real(rk) :: mAdult_tmp
     real(dp), allocatable :: mAdultPassive(:), mAdultActive(:), velocity(:)
     logical(1)                             :: errorio
     character(kind=c_char), dimension(256) :: errorstr
-    character(len=32) :: varname, longname
+    character(len=64) :: varname, longname
     character(len=8)  :: prefix
 
     call self%get_parameter(self%n_size,    'n_size',    '-', &
@@ -127,14 +134,14 @@ contains
     ig = 0
     do iGroup = 1, nGroups
       select case (group(iGroup)%spec%type)
-      case (5)     ; prefix = 'Gen'
-      case (1)     ; prefix = 'GenS'
-      case (3)     ; prefix = 'Dia'
-      case (4)     ; prefix = 'DiaS'
-      case (10)    ; prefix = 'ACop'
-      case (11)    ; prefix = 'PCop'
-      case (100)   ; prefix = 'POM'
-      case default ; prefix = 'B'
+      case (typeGeneralist)        ; prefix = 'Gen'
+      case (typeGeneralistSimple)  ; prefix = 'GenS'
+      case (typeDiatom)            ; prefix = 'Dia'
+      case (typeDiatom_simple)     ; prefix = 'DiaS'
+      case (typeCopepodActive)     ; prefix = 'ACop'
+      case (typeCopepodPassive)    ; prefix = 'PCop'
+      case (typePOM)               ; prefix = 'POM'
+      case default                 ; prefix = 'B'
       end select
       do i = 1, group(iGroup)%spec%n
         ig = ig + 1
@@ -153,7 +160,7 @@ contains
     call self%register_dependency(self%id_PAR, &
         standard_variables%downwelling_photosynthetic_radiative_flux)
 
-    ! Diagnostics
+    ! Ecosystem function diagnostics
     call self%register_diagnostic_variable(self%id_ProdGross, &
         'ProdGross', 'mg C d-1 m-3', 'gross primary production')
     call self%register_diagnostic_variable(self%id_ProdNet, &
@@ -167,6 +174,39 @@ contains
     call self%register_diagnostic_variable(self%id_Bmicro, &
         'Bmicro', 'mg C m-3', 'micro-plankton biomass (ESD > 20 um)')
 
+    ! Per-group total biomass diagnostics
+    allocate(self%id_Bgroup(nGroups))
+    nGen = 0; nDia = 0; nACop = 0; nPCop = 0; nPOM_count = 0
+    do iGroup = 1, nGroups
+      select case (group(iGroup)%spec%type)
+      case (typeGeneralist, typeGeneralistSimple)
+        nGen = nGen + 1
+        write(varname,  '(a,i0)') 'BGen',  nGen
+        write(longname, '(a,i0)') 'total generalist biomass group ', nGen
+      case (typeDiatom, typeDiatom_simple)
+        nDia = nDia + 1
+        write(varname,  '(a,i0)') 'BDia',  nDia
+        write(longname, '(a,i0)') 'total diatom biomass group ', nDia
+      case (typeCopepodActive)
+        nACop = nACop + 1
+        write(varname,  '(a,i0)') 'BACop', nACop
+        write(longname, '(a,i0)') 'total active copepod biomass group ', nACop
+      case (typeCopepodPassive)
+        nPCop = nPCop + 1
+        write(varname,  '(a,i0)') 'BPCop', nPCop
+        write(longname, '(a,i0)') 'total passive copepod biomass group ', nPCop
+      case (typePOM)
+        nPOM_count = nPOM_count + 1
+        write(varname,  '(a,i0)') 'BPOM',  nPOM_count
+        write(longname, '(a,i0)') 'total POM group ', nPOM_count
+      case default
+        write(varname,  '(a,i0)') 'Bgroup', iGroup
+        write(longname, '(a,i0)') 'total biomass group ', iGroup
+      end select
+      call self%register_diagnostic_variable(self%id_Bgroup(iGroup), &
+          trim(varname), 'ug C L-1', trim(longname))
+    end do
+
   end subroutine initialize
 
   ! Compute source/sink rates for all state variables.
@@ -176,11 +216,11 @@ contains
     class(type_num_model), intent(in) :: self
     _DECLARE_ARGUMENTS_DO_
 
-    real(rk) :: T_rk, PAR_rk, B_tmp, rate_rk
-    real(dp) :: u(nGrid), dudt(nGrid)
+    real(rk) :: T_rk, PAR_rk, B_tmp, rate_rk, grp_sum_rk
+    real(dp) :: u(nGrid), dudt(nGrid), grp_sum
     real(dp) :: ProdGross, ProdNet, ProdHTL, ProdBact, eHTL
     real(dp) :: Bpico, Bnano, Bmicro, mHTL
-    integer  :: i
+    integer  :: i, iGroup, ix
 
     _LOOP_BEGIN_
 
@@ -221,6 +261,16 @@ contains
       _SET_DIAGNOSTIC_(self%id_Bpico,     real(Bpico,     rk))
       _SET_DIAGNOSTIC_(self%id_Bnano,     real(Bnano,     rk))
       _SET_DIAGNOSTIC_(self%id_Bmicro,    real(Bmicro,    rk))
+
+      ! Per-group total biomass
+      do iGroup = 1, nGroups
+        grp_sum = 0._dp
+        do ix = ixStart(iGroup), ixEnd(iGroup)
+          grp_sum = grp_sum + u(ix)
+        end do
+        grp_sum_rk = real(grp_sum, rk)
+        _SET_DIAGNOSTIC_(self%id_Bgroup(iGroup), grp_sum_rk)
+      end do
 
     _LOOP_END_
 

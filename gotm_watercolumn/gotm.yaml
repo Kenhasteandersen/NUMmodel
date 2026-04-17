@@ -117,3 +117,10 @@ output:
     - source: num_model_Bpico
     - source: num_model_Bnano
     - source: num_model_Bmicro
+    - source: num_model_BGen1
+    - source: num_model_BDia1
+    - source: num_model_BPCop1
+    - source: num_model_BPCop2
+    - source: num_model_BACop1
+    - source: num_model_BACop2
+    - source: num_model_BPOM1

@@ -417,6 +417,7 @@ contains
       allocate (group( iCurrentGroup )%spec, source=specPOM)
       idxPOM = iCurrentGroup 
    end select
+   group(iCurrentGroup)%spec%type = typeGroup
 
   end subroutine parametersAddGroup
   ! -----------------------------------------------
