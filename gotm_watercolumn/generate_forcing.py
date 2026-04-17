@@ -26,8 +26,8 @@ SOLAR_CONST = 1368.0 # W/m²
 
 lat_rad = math.radians(LAT)
 
-ndays = 366 if (YEAR % 4 == 0 and (YEAR % 100 != 0 or YEAR % 400 == 0)) else 365
-start = datetime(YEAR, 1, 1, 12, 0, 0)
+ndays = (367 if (YEAR % 4 == 0 and (YEAR % 100 != 0 or YEAR % 400 == 0)) else 366)
+start = datetime(YEAR, 1, 1, 0, 0, 0)
 
 rng = random.Random(42)   # fixed seed for reproducibility
 

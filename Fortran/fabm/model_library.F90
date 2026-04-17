@@ -18,7 +18,6 @@ module num_model_library
   implicit none
 
   private
-  public :: type_factory
 
   type, extends(type_base_model_factory) :: type_factory
   contains

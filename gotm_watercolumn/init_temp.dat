@@ -1,15 +1,16 @@
-! Initial temperature profile for the North Sea water column (winter, 59°N)
-! Format: depth [m]  temperature [°C]
-! Well-mixed winter column ~7°C with slight warming at surface
-  0.0    7.5
-  5.0    7.4
- 10.0    7.3
- 20.0    7.2
- 30.0    7.1
- 40.0    7.0
- 50.0    6.9
- 60.0    6.8
- 70.0    6.8
- 80.0    6.7
- 90.0    6.7
-100.0    6.6
+! Initial temperature profile: winter North Sea (59°N), well-mixed ~7°C
+! Format: YYYY-MM-DD HH:MM:SS  N  up_down
+!         depth [m]  temperature [°C]  (positive depths, surface=0, up_down=1)
+1999-01-01 00:00:00  12  1
+   0.0    7.5
+   5.0    7.4
+  10.0    7.3
+  20.0    7.2
+  30.0    7.1
+  40.0    7.0
+  50.0    6.9
+  60.0    6.8
+  70.0    6.8
+  80.0    6.7
+  90.0    6.7
+ 100.0    6.6
