@@ -26,21 +26,20 @@ parser = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('--gotm', default='../gotm_build/gotm',
                     help='path to GOTM executable (default: ../gotm_build/gotm)')
+parser.add_argument('--plot-only', action='store_true',
+                    help='skip running GOTM and just replot existing output')
 args = parser.parse_args()
 
 here = Path(__file__).parent.resolve()
 os.chdir(here)
 
-gotm_exe = Path(args.gotm)
-if not gotm_exe.exists():
-    sys.exit(f'ERROR: GOTM executable not found at {gotm_exe}\n'
-             f'Build it first — see README.md.')
-
-# ---------------------------------------------------------------------------
-# Run GOTM
-# ---------------------------------------------------------------------------
-print('==> Running GOTM ...')
-subprocess.run([str(gotm_exe)], check=True)
+if not args.plot_only:
+    gotm_exe = Path(args.gotm)
+    if not gotm_exe.exists():
+        sys.exit(f'ERROR: GOTM executable not found at {gotm_exe}\n'
+                 f'Build it first — see README.md.')
+    print('==> Running GOTM ...')
+    subprocess.run([str(gotm_exe)], check=True)
 
 # ---------------------------------------------------------------------------
 # Load output
