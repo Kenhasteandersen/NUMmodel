@@ -41,8 +41,9 @@ surface:
   fluxes:
     method: fairall
     heat:
-      method: constant
-      constant_value: 0.0
+      method: file
+      file: heat_flux.dat
+      column: 1
     tx:
       method: constant
       constant_value: 0.0

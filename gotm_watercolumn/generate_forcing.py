@@ -45,14 +45,18 @@ def clamp(x, lo, hi):
 # --------------------------------------------------------------------------
 # Main loop: compute forcing for each day
 # --------------------------------------------------------------------------
-out_file = "meteo.dat"
-swr_vals = []
+out_file  = "meteo.dat"
+heat_file = "heat_flux.dat"
+swr_vals  = []
 airt_vals = []
+heat_vals = []
 
-with open(out_file, "w") as fh:
+with open(out_file, "w") as fh, open(heat_file, "w") as fh2:
     fh.write("! Synthetic meteorological forcing — North Sea 59°N, 2000-2001\n")
     fh.write("! Columns: datetime  u10[m/s]  v10[m/s]  airt[°C]  "
              "hum[%]  cloud[-]  swr[W/m²]\n")
+    fh2.write("! Non-solar turbulent heat flux (sensible+latent) — North Sea 59°N\n")
+    fh2.write("! Positive = into ocean [W/m²]\n")
 
     for i in range(total_days):
         t   = start + timedelta(days=i)
@@ -107,16 +111,26 @@ with open(out_file, "w") as fh:
         # ------------------------------------------------------------------
         hum = 82.0 - 6.0 * math.sin(phi * (doy - 100.0) / days_in_year)
 
+        # ------------------------------------------------------------------
+        # Non-solar turbulent heat flux (sensible + latent) [W/m²]
+        # Annual mean ~-40 W/m² (ocean loses heat), amplitude 60 W/m²,
+        # maximum cooling in mid-January (doy~15).
+        # ------------------------------------------------------------------
+        heat = -40.0 - 60.0 * math.cos(phi * (doy - 15.0) / days_in_year)
+
         fh.write(
             f"{t.strftime('%Y-%m-%d %H:%M:%S')}  "
             f"{u10:7.3f}  {v10:7.3f}  "
             f"{airt:6.2f}  {hum:5.1f}  "
             f"{cloud:.3f}  {swr:7.2f}\n"
         )
+        fh2.write(f"{t.strftime('%Y-%m-%d %H:%M:%S')}  {heat:8.2f}\n")
 
         swr_vals.append(swr)
         airt_vals.append(airt)
+        heat_vals.append(heat)
 
-print(f"Written {total_days} daily records to '{out_file}'")
-print(f"  SWR range : {min(swr_vals):.1f} – {max(swr_vals):.1f} W/m²")
-print(f"  Airt range: {min(airt_vals):.1f} – {max(airt_vals):.1f} °C")
+print(f"Written {total_days} daily records to '{out_file}' and '{heat_file}'")
+print(f"  SWR range  : {min(swr_vals):.1f} – {max(swr_vals):.1f} W/m²")
+print(f"  Airt range : {min(airt_vals):.1f} – {max(airt_vals):.1f} °C")
+print(f"  Heat range : {min(heat_vals):.1f} – {max(heat_vals):.1f} W/m²")
