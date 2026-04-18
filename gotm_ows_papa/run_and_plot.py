@@ -88,7 +88,7 @@ ds.close()
 # Shared log colour scale for all biology panels
 bio_all = np.concatenate([data[v].ravel() for v in bio_names])
 bio_pos = bio_all[bio_all > 0]
-bio_norm = mcolors.LogNorm(vmin=np.nanpercentile(bio_pos, 2),
+bio_norm = mcolors.LogNorm(vmin=1e-5,
                            vmax=np.nanpercentile(bio_pos, 98))
 
 CMAP  = 'viridis'
