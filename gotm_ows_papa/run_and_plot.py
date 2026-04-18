@@ -200,14 +200,21 @@ prod_labels = {
     'num_model_ProdHTL':   'HTL production',
 }
 
-colors = plt.get_cmap('tab10').colors
+# Colors from parametersAddgroup.m
+COL_GEN  = (0,    0,    0.75)   # blue   — generalists
+COL_DIA  = (0,    0.5,  0)      # green  — diatoms
+COL_PCOP = (0.6,  0,    0)      # dark red — passive copepods
+COL_ACOP = (0.85, 0,    0)      # red    — active copepods
+
+bio_colors   = [COL_GEN, COL_DIA, COL_PCOP, COL_PCOP, COL_ACOP, COL_ACOP, COL_ACOP]
+bio_lstyles  = ['-',     '-',     '-',       '--',     '-',      '--',     ':' ]
 
 fig2, (ax2, ax3) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 
-for idx, (varname, label) in enumerate(bio_labels.items()):
+for (varname, label), color, ls in zip(bio_labels.items(), bio_colors, bio_lstyles):
     integrated = np.trapezoid(data[varname], z, axis=1)
     ax2.plot(t_num, integrated, label=label,
-             color=colors[idx % len(colors)], linewidth=1.6)
+             color=color, linestyle=ls, linewidth=1.6)
 
 ax2.set_yscale('symlog', linthresh=1.0)
 ax2.tick_params(labelsize=TICK_FS + 1)
@@ -216,11 +223,12 @@ ax2.set_title('NUMmodel / GOTM OWS Papa — depth-integrated biomass',
               fontsize=TITLE_FS + 1)
 ax2.legend(fontsize=TICK_FS + 1, ncol=2, loc='upper left', framealpha=0.7)
 
+prod_colors = plt.get_cmap('tab10').colors
 for idx, (varname, label) in enumerate(prod_labels.items()):
     # Production is in mg C m⁻³ d⁻¹; integrate over depth → mg C m⁻² d⁻¹
     integrated = np.trapezoid(data[varname], z, axis=1)
     ax3.plot(t_num, integrated, label=label,
-             color=colors[idx % len(colors)], linewidth=1.6)
+             color=prod_colors[idx], linewidth=1.6)
 
 ax3.set_yscale('symlog', linthresh=0.1)
 ax3.xaxis_date()
