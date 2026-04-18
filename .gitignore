@@ -143,3 +143,4 @@ lib/libNUMmodel_matlab.so
 lib/libNUMmodel_R.so
 *.so
 gotm_build/
+*.png
