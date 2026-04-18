@@ -82,8 +82,9 @@ col2 = [
 
 bio_names  = [v for v, *_ in col2] + ['num_model_BPOM1']
 phys_names = [v for v, *_ in col1 if v not in ('nuh', 'num_model_BPOM1')]
+prod_names = ['num_model_ProdGross', 'num_model_ProdNet', 'num_model_ProdHTL']
 data = {v: np.array(ds.variables[v][:, :, 0, 0])
-        for v in bio_names + phys_names}
+        for v in bio_names + phys_names + prod_names}
 ds.close()
 
 # Shared log colour scale for all biology panels
@@ -194,9 +195,15 @@ bio_labels = {
     'num_model_BACop3': 'Active copepods 3',
 }
 
+prod_labels = {
+    'num_model_ProdGross': 'Gross production',
+    'num_model_ProdNet':   'Net production',
+    'num_model_ProdHTL':   'HTL production',
+}
+
 colors = plt.get_cmap('tab10').colors
 
-fig2, ax2 = plt.subplots(figsize=(12, 4))
+fig2, (ax2, ax3) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 
 for idx, (varname, label) in enumerate(bio_labels.items()):
     integrated = -np.trapezoid(data[varname], z, axis=1)
@@ -204,14 +211,26 @@ for idx, (varname, label) in enumerate(bio_labels.items()):
              color=colors[idx % len(colors)], linewidth=1.6)
 
 ax2.set_yscale('symlog', linthresh=1.0)
-ax2.xaxis_date()
-ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
-ax2.xaxis.set_major_locator(mdates.YearLocator())
 ax2.tick_params(labelsize=TICK_FS + 1)
-ax2.set_ylabel('Depth-integrated biomass (µg C L⁻¹ × m)', fontsize=LABEL_FS + 1)
+ax2.set_ylabel('Depth-integrated biomass\n(µg C L⁻¹ × m)', fontsize=LABEL_FS + 1)
 ax2.set_title('NUMmodel / GOTM OWS Papa — depth-integrated biomass',
               fontsize=TITLE_FS + 1)
 ax2.legend(fontsize=TICK_FS + 1, ncol=2, loc='upper left', framealpha=0.7)
+
+for idx, (varname, label) in enumerate(prod_labels.items()):
+    # Production is in mg C m⁻³ d⁻¹; integrate over depth → mg C m⁻² d⁻¹
+    integrated = -np.trapezoid(data[varname], z, axis=1)
+    ax3.plot(t_num, integrated, label=label,
+             color=colors[idx % len(colors)], linewidth=1.6)
+
+ax3.xaxis_date()
+ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+ax3.xaxis.set_major_locator(mdates.YearLocator())
+ax3.tick_params(labelsize=TICK_FS + 1)
+ax3.set_ylabel('Depth-integrated production\n(mg C m⁻² d⁻¹)', fontsize=LABEL_FS + 1)
+ax3.set_title('Depth-integrated production rates', fontsize=TITLE_FS + 1)
+ax3.legend(fontsize=TICK_FS + 1, loc='upper left', framealpha=0.7)
+
 plt.tight_layout()
 
 outfile2 = 'integrated_biomass.png'
