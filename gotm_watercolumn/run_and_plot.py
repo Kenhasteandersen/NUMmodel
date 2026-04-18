@@ -29,7 +29,7 @@ from datetime import datetime, timedelta
 # ---------------------------------------------------------------------------
 parser = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-parser.add_argument('--gotm', default='build/gotm',
+parser.add_argument('--gotm', default='../gotm_build/gotm',
                     help='path to GOTM executable (default: build/gotm)')
 args = parser.parse_args()
 

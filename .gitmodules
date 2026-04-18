@@ -1,0 +1,6 @@
+[submodule "extern/gotm"]
+	path = extern/gotm
+	url = https://github.com/gotm-model/code.git
+[submodule "extern/fabm"]
+	path = extern/fabm
+	url = https://github.com/fabm-model/fabm.git
