@@ -130,18 +130,30 @@ contains
     call getSinking(velocity)
 
     ! Biomass state variables
+    ! Include per-type group index in the name to avoid collisions when
+    ! multiple groups of the same type are registered (e.g. 2 PCop groups).
     allocate(self%id_B(n_biomass))
     ig = 0
+    nGen = 0; nDia = 0; nACop = 0; nPCop = 0; nPOM_count = 0
     do iGroup = 1, nGroups
       select case (group(iGroup)%spec%type)
-      case (typeGeneralist)        ; prefix = 'Gen'
-      case (typeGeneralistSimple)  ; prefix = 'GenS'
-      case (typeDiatom)            ; prefix = 'Dia'
-      case (typeDiatom_simple)     ; prefix = 'DiaS'
-      case (typeCopepodActive)     ; prefix = 'ACop'
-      case (typeCopepodPassive)    ; prefix = 'PCop'
-      case (typePOM)               ; prefix = 'POM'
-      case default                 ; prefix = 'B'
+      case (typeGeneralist, typeGeneralistSimple)
+        nGen = nGen + 1
+        write(prefix, '(a,i0,a)') 'Gen',  nGen,       '_'
+      case (typeDiatom, typeDiatom_simple)
+        nDia = nDia + 1
+        write(prefix, '(a,i0,a)') 'Dia',  nDia,       '_'
+      case (typeCopepodActive)
+        nACop = nACop + 1
+        write(prefix, '(a,i0,a)') 'ACop', nACop,      '_'
+      case (typeCopepodPassive)
+        nPCop = nPCop + 1
+        write(prefix, '(a,i0,a)') 'PCop', nPCop,      '_'
+      case (typePOM)
+        nPOM_count = nPOM_count + 1
+        write(prefix, '(a,i0,a)') 'POM',  nPOM_count, '_'
+      case default
+        write(prefix, '(a,i0,a)') 'B',    iGroup,     '_'
       end select
       do i = 1, group(iGroup)%spec%n
         ig = ig + 1
