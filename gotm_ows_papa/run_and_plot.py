@@ -63,9 +63,10 @@ col1 = [
     ('temp',          'Temperature',   '°C'),
     ('nuh',           'Diffusivity',   'm² s⁻¹'),
     ('salt',          'Salinity',      'PSU'),
-    ('num_model_N',   'DIN',           'µg N L⁻¹'),
-    ('num_model_Si',  'Silicate',      'µg Si L⁻¹'),
-    ('num_model_DOC', 'DOC',           'µg C L⁻¹'),
+    ('num_model_N',    'DIN',           'µg N L⁻¹'),
+    ('num_model_Si',   'Silicate',      'µg Si L⁻¹'),
+    ('num_model_DOC',  'DOC',           'µg C L⁻¹'),
+    ('num_model_BPOM1','POM',           'µg C L⁻¹'),
 ]
 
 # Column 2: biology (shared colour scale)
@@ -79,8 +80,8 @@ col2 = [
     ('num_model_BACop3', 'Active copepods 3',  'µg C L⁻¹'),
 ]
 
-bio_names  = [v for v, *_ in col2]
-phys_names = [v for v, *_ in col1 if v != 'nuh']
+bio_names  = [v for v, *_ in col2] + ['num_model_BPOM1']
+phys_names = [v for v, *_ in col1 if v not in ('nuh', 'num_model_BPOM1')]
 data = {v: np.array(ds.variables[v][:, :, 0, 0])
         for v in bio_names + phys_names}
 ds.close()
@@ -121,6 +122,9 @@ for row, (varname, title, units) in enumerate(col1):
     if varname == 'nuh':
         arr, zc = nuh, z_i
         norm = mcolors.LogNorm(vmin=1e-5, vmax=nuh.max())
+    elif varname == 'num_model_BPOM1':
+        arr, zc = data[varname], z
+        norm = bio_norm   # shared scale with biology column
     else:
         arr, zc = data[varname], z
         vmin = np.nanpercentile(arr, 2)
@@ -131,15 +135,16 @@ for row, (varname, title, units) in enumerate(col1):
 
     pcm = ax.pcolormesh(t_num, zc, arr.T, shading='nearest',
                         cmap=CMAP, norm=norm)
-    cbar = fig.colorbar(pcm, ax=ax, pad=0.03, fraction=0.05)
-    cbar.set_label(units, fontsize=LABEL_FS)
-    cbar.ax.tick_params(labelsize=TICK_FS)
+    if varname != 'num_model_BPOM1':
+        cbar = fig.colorbar(pcm, ax=ax, pad=0.03, fraction=0.05)
+        cbar.set_label(units, fontsize=LABEL_FS)
+        cbar.ax.tick_params(labelsize=TICK_FS)
     ax.set_title(title, fontsize=TITLE_FS, fontweight='bold')
     ax.set_ylabel('Depth (m)', fontsize=LABEL_FS)
     ax.tick_params(axis='y', labelsize=TICK_FS)
 
 # x-axis labels only on last visible row of col 1 (DOC) and bottom of col 2
-add_xlabels(axes[len(col1) - 1, 0])   # DOC panel
+add_xlabels(axes[len(col1) - 1, 0])   # POM panel (last in col 1)
 
 # Hide unused rows in column 1
 for row in range(len(col1), nrows):
