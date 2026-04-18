@@ -92,9 +92,9 @@ bio_norm = mcolors.LogNorm(vmin=np.nanpercentile(bio_pos, 2),
                            vmax=np.nanpercentile(bio_pos, 98))
 
 CMAP  = 'viridis'
-TITLE_FS = 11
-LABEL_FS = 10
-TICK_FS  = 9
+TITLE_FS = 14
+LABEL_FS = 13
+TICK_FS  = 11
 
 # ---------------------------------------------------------------------------
 # Plot 1: two-column space-time panels
@@ -120,8 +120,7 @@ for row, (varname, title, units) in enumerate(col1):
 
     if varname == 'nuh':
         arr, zc = nuh, z_i
-        norm = mcolors.LogNorm(vmin=max(nuh[nuh > 0].min(), 1e-5),
-                               vmax=nuh.max())
+        norm = mcolors.LogNorm(vmin=1e-5, vmax=nuh.max())
     else:
         arr, zc = data[varname], z
         vmin = np.nanpercentile(arr, 2)
