@@ -1,0 +1,143 @@
+title: OWS Papa — NUMmodel/FABM
+version: 7
+
+location:
+  name: Ocean Weather Station Papa
+  latitude: 50.0
+  longitude: -145.0
+  depth: 150.0
+
+time:
+  start: 2011-03-21 00:00:00
+  stop:  2020-03-21 00:00:00
+  dt: 3600.0
+
+grid:
+  nlev: 150
+  method: analytical
+  ddu: 0.0
+  ddl: 0.0
+
+temperature:
+  method: file
+  file: tprof_papa_hourly.dat
+  column: 1
+  type: in-situ
+  relax:
+    tau: 1.0e+15
+
+salinity:
+  method: file
+  file: sprof_papa_hourly.dat
+  column: 1
+  type: practical
+  relax:
+    tau: 86400.0
+    tau_s: 86400.0
+    tau_b: 86400.0
+
+turbulence:
+  turb_method: second_order
+  tke_method: tke
+  len_scale_method: dissipation
+  stab_method: constant
+  scnd:
+    method: quasi_eq
+    scnd_coeff: canuto-a
+  iw:
+    method: large
+
+surface:
+  fluxes:
+    method: fairall
+    heat:
+      method: file
+      file: heat_flux_papa.dat
+      column: 1
+    tx:
+      method: file
+      file: momentum_flux_papa.dat
+      column: 1
+    ty:
+      method: file
+      file: momentum_flux_papa.dat
+      column: 2
+  u10:
+    method: file
+    file: u10.dat
+    column: 1
+  v10:
+    method: file
+    file: u10.dat
+    column: 2
+  airp:
+    method: file
+    file: airp.dat
+    column: 1
+  airt:
+    method: file
+    file: airt.dat
+    column: 1
+  hum:
+    method: file
+    file: hum.dat
+    column: 1
+    type: specific
+  cloud:
+    method: constant
+    constant_value: 0.0
+  swr:
+    method: file
+    file: swr_papa.dat
+    column: 1
+  longwave_radiation:
+    method: file
+    file: lwr.dat
+    column: 1
+  sst:
+    method: file
+    file: sst_hourly.dat
+  sss:
+    method: file
+    file: sss_hourly.dat
+  precip:
+    method: constant
+    constant_value: 0.0
+
+light_extinction:
+  method: jerlov-ib
+
+bottom:
+  h0b: 0.05
+
+fabm:
+  use: true
+  freshwater_impact: false
+  repair_state: true
+
+output:
+  ows_papa_NUMmodel:
+    format: netcdf
+    time_unit: hour
+    time_step: 24
+    variables:
+    - source: temp
+    - source: salt
+    - source: nuh
+    - source: num_model_N
+    - source: num_model_DOC
+    - source: num_model_Si
+    - source: num_model_ProdGross
+    - source: num_model_ProdNet
+    - source: num_model_ProdHTL
+    - source: num_model_Bpico
+    - source: num_model_Bnano
+    - source: num_model_Bmicro
+    - source: num_model_BGen1
+    - source: num_model_BDia1
+    - source: num_model_BPCop1
+    - source: num_model_BPCop2
+    - source: num_model_BACop1
+    - source: num_model_BACop2
+    - source: num_model_BACop3
+    - source: num_model_BPOM1
