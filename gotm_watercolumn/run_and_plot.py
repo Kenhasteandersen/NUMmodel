@@ -20,6 +20,7 @@ from pathlib import Path
 import numpy as np
 import netCDF4 as nc
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 
@@ -87,7 +88,11 @@ variables = [
 ]
 
 data = {v[0]: np.array(ds.variables[v[0]][:, :, 0, 0]) for v in variables}
+nuh  = np.array(ds.variables['nuh'][:, :, 0, 0])   # (time, 51) — on interfaces
 ds.close()
+
+# Interface depths for nuh (51 values)
+z_i = np.concatenate([[0.0], 0.5*(z[:-1] + z[1:]), [z[-1]]])
 
 ncols = 3
 nrows = -(-len(variables) // ncols)
@@ -165,5 +170,25 @@ plt.tight_layout()
 outfile2 = 'integrated_variables.png'
 fig2.savefig(outfile2, dpi=150, bbox_inches='tight')
 print(f'==> Saved {outfile2}')
+
+# ---------------------------------------------------------------------------
+# Plot 3: turbulent diffusivity space-time
+# ---------------------------------------------------------------------------
+fig3, ax3 = plt.subplots(figsize=(12, 5))
+pcm3 = ax3.pcolormesh(t_num, z_i, nuh.T,
+                      norm=mcolors.LogNorm(vmin=1e-5, vmax=nuh.max()),
+                      cmap='plasma', shading='nearest')
+cbar3 = fig3.colorbar(pcm3, ax=ax3, pad=0.02)
+cbar3.set_label('Turbulent diffusivity $K_h$ (m² s⁻¹)', fontsize=9)
+ax3.xaxis_date()
+ax3.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
+ax3.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
+ax3.set_ylabel('Depth (m)', fontsize=9)
+ax3.set_title('NUMmodel / GOTM — Turbulent diffusivity $K_h$, 59°N 2000–2001', fontsize=10)
+plt.tight_layout()
+
+outfile3 = 'diffusivity.png'
+fig3.savefig(outfile3, dpi=150, bbox_inches='tight')
+print(f'==> Saved {outfile3}')
 
 plt.show()
