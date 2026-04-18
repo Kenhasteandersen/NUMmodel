@@ -223,6 +223,7 @@ for idx, (varname, label) in enumerate(prod_labels.items()):
     ax3.plot(t_num, integrated, label=label,
              color=colors[idx % len(colors)], linewidth=1.6)
 
+ax3.set_yscale('symlog', linthresh=0.1)
 ax3.xaxis_date()
 ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
 ax3.xaxis.set_major_locator(mdates.YearLocator())
