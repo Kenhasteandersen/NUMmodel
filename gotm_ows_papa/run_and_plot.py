@@ -206,7 +206,7 @@ colors = plt.get_cmap('tab10').colors
 fig2, (ax2, ax3) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 
 for idx, (varname, label) in enumerate(bio_labels.items()):
-    integrated = -np.trapezoid(data[varname], z, axis=1)
+    integrated = np.trapezoid(data[varname], z, axis=1)
     ax2.plot(t_num, integrated, label=label,
              color=colors[idx % len(colors)], linewidth=1.6)
 
@@ -219,7 +219,7 @@ ax2.legend(fontsize=TICK_FS + 1, ncol=2, loc='upper left', framealpha=0.7)
 
 for idx, (varname, label) in enumerate(prod_labels.items()):
     # Production is in mg C m⁻³ d⁻¹; integrate over depth → mg C m⁻² d⁻¹
-    integrated = -np.trapezoid(data[varname], z, axis=1)
+    integrated = np.trapezoid(data[varname], z, axis=1)
     ax3.plot(t_num, integrated, label=label,
              color=colors[idx % len(colors)], linewidth=1.6)
 
