@@ -58,7 +58,7 @@ nuh   = np.array(ds.variables['nuh'][:, :, 0, 0])        # interfaces  (time, 15
 # Interface depths for nuh
 z_i = np.concatenate([[0.0], 0.5*(z[:-1] + z[1:]), [z[-1]]])
 
-# Column 1: physics and nutrients  (individual colour scales)
+# Column 1: physics and nutrients (individual colour scales)
 col1 = [
     ('temp',          'Temperature',   '°C'),
     ('nuh',           'Diffusivity',   'm² s⁻¹'),
@@ -79,7 +79,6 @@ col2 = [
     ('num_model_BACop3', 'Active copepods 3',  'µg C L⁻¹'),
 ]
 
-# Load all needed variables
 bio_names  = [v for v, *_ in col2]
 phys_names = [v for v, *_ in col1 if v != 'nuh']
 data = {v: np.array(ds.variables[v][:, :, 0, 0])
@@ -92,25 +91,30 @@ bio_pos = bio_all[bio_all > 0]
 bio_norm = mcolors.LogNorm(vmin=np.nanpercentile(bio_pos, 2),
                            vmax=np.nanpercentile(bio_pos, 98))
 
-CMAP = 'viridis'
+CMAP  = 'viridis'
+TITLE_FS = 11
+LABEL_FS = 10
+TICK_FS  = 9
 
 # ---------------------------------------------------------------------------
 # Plot 1: two-column space-time panels
 # ---------------------------------------------------------------------------
 nrows = max(len(col1), len(col2))   # 7
 
-fig, axes = plt.subplots(nrows, 2, figsize=(11, 2.8 * nrows),
+fig, axes = plt.subplots(nrows, 2, figsize=(12, 3.0 * nrows),
                          sharex=True, sharey=True)
 
-def fmt_axes(ax, row, col):
+# Reserve space on the right for the shared col-2 colorbar
+fig.subplots_adjust(left=0.07, right=0.86, top=0.96, bottom=0.04,
+                    hspace=0.32, wspace=0.08)
+
+def add_xlabels(ax):
     ax.xaxis_date()
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     ax.xaxis.set_major_locator(mdates.YearLocator())
-    ax.tick_params(labelsize=7)
-    if col == 0:
-        ax.set_ylabel('Depth (m)', fontsize=8)
+    ax.tick_params(axis='x', labelsize=TICK_FS, labelbottom=True)
 
-# --- Column 1 ---
+# --- Column 1: individual colour scales ---
 for row, (varname, title, units) in enumerate(col1):
     ax = axes[row, 0]
 
@@ -128,35 +132,49 @@ for row, (varname, title, units) in enumerate(col1):
 
     pcm = ax.pcolormesh(t_num, zc, arr.T, shading='nearest',
                         cmap=CMAP, norm=norm)
-    cbar = fig.colorbar(pcm, ax=ax, pad=0.02, fraction=0.046)
-    cbar.set_label(units, fontsize=7)
-    cbar.ax.tick_params(labelsize=6)
-    ax.set_title(title, fontsize=9, fontweight='bold')
-    fmt_axes(ax, row, 0)
+    cbar = fig.colorbar(pcm, ax=ax, pad=0.03, fraction=0.05)
+    cbar.set_label(units, fontsize=LABEL_FS)
+    cbar.ax.tick_params(labelsize=TICK_FS)
+    ax.set_title(title, fontsize=TITLE_FS, fontweight='bold')
+    ax.set_ylabel('Depth (m)', fontsize=LABEL_FS)
+    ax.tick_params(axis='y', labelsize=TICK_FS)
 
-# hide unused rows in column 1
+# x-axis labels only on last visible row of col 1 (DOC) and bottom of col 2
+add_xlabels(axes[len(col1) - 1, 0])   # DOC panel
+
+# Hide unused rows in column 1
 for row in range(len(col1), nrows):
     axes[row, 0].set_visible(False)
 
 # --- Column 2: shared colour scale ---
-for row, (varname, title, units) in enumerate(col2):
+for row, (varname, title, _) in enumerate(col2):
     ax = axes[row, 1]
-    arr = data[varname]
-    pcm = ax.pcolormesh(t_num, z, arr.T, shading='nearest',
-                        cmap=CMAP, norm=bio_norm)
-    ax.set_title(title, fontsize=9, fontweight='bold')
-    fmt_axes(ax, row, 1)
+    pcm2 = ax.pcolormesh(t_num, z, data[varname].T, shading='nearest',
+                         cmap=CMAP, norm=bio_norm)
+    ax.set_title(title, fontsize=TITLE_FS, fontweight='bold')
+    ax.tick_params(axis='y', labelsize=TICK_FS)
 
-# Single shared colorbar for column 2, spanning all its rows
-cbar2 = fig.colorbar(pcm, ax=axes[:len(col2), 1], pad=0.02, fraction=0.046)
-cbar2.set_label('µg C L⁻¹', fontsize=7)
-cbar2.ax.tick_params(labelsize=6)
+add_xlabels(axes[len(col2) - 1, 1])   # Active copepods 3 panel
 
-fig.suptitle('NUMmodel / GOTM — OWS Papa (50°N, 145°W)', fontsize=11)
-plt.tight_layout()
+# Single shared colorbar for column 2, placed to the right of the figure
+fig.canvas.draw()                       # fix axes positions before reading them
+pos_top = axes[0, 1].get_position()
+pos_bot = axes[len(col2) - 1, 1].get_position()
+cbar_ax = fig.add_axes([0.88, pos_bot.y0, 0.02,
+                         pos_top.y1 - pos_bot.y0])
+sm = plt.cm.ScalarMappable(cmap=CMAP, norm=bio_norm)
+cbar2 = fig.colorbar(sm, cax=cbar_ax)
+cbar2.set_label('µg C L⁻¹', fontsize=LABEL_FS)
+cbar2.ax.tick_params(labelsize=TICK_FS)
+
+# Y-axis: surface at top (0 m), bottom at depth
+axes[0, 0].set_ylim(z.min(), 0)
+
+fig.suptitle('NUMmodel / GOTM — OWS Papa (50°N, 145°W)',
+             fontsize=TITLE_FS + 2, y=0.99)
 
 outfile = 'spacetime.png'
-plt.savefig(outfile, dpi=150, bbox_inches='tight')
+fig.savefig(outfile, dpi=150, bbox_inches='tight')
 print(f'==> Saved {outfile}')
 
 # ---------------------------------------------------------------------------
@@ -179,16 +197,17 @@ fig2, ax2 = plt.subplots(figsize=(12, 4))
 for idx, (varname, label) in enumerate(bio_labels.items()):
     integrated = -np.trapezoid(data[varname], z, axis=1)
     ax2.plot(t_num, integrated, label=label,
-             color=colors[idx % len(colors)], linewidth=1.4)
+             color=colors[idx % len(colors)], linewidth=1.6)
 
 ax2.set_yscale('symlog', linthresh=1.0)
 ax2.xaxis_date()
 ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
 ax2.xaxis.set_major_locator(mdates.YearLocator())
-ax2.tick_params(labelsize=8)
-ax2.set_ylabel('Depth-integrated biomass (µg C L⁻¹ × m)', fontsize=9)
-ax2.set_title('NUMmodel / GOTM OWS Papa — depth-integrated biomass', fontsize=10)
-ax2.legend(fontsize=8, ncol=2, loc='upper left', framealpha=0.7)
+ax2.tick_params(labelsize=TICK_FS + 1)
+ax2.set_ylabel('Depth-integrated biomass (µg C L⁻¹ × m)', fontsize=LABEL_FS + 1)
+ax2.set_title('NUMmodel / GOTM OWS Papa — depth-integrated biomass',
+              fontsize=TITLE_FS + 1)
+ax2.legend(fontsize=TICK_FS + 1, ncol=2, loc='upper left', framealpha=0.7)
 plt.tight_layout()
 
 outfile2 = 'integrated_biomass.png'
