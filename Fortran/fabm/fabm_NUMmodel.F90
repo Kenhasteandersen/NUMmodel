@@ -228,6 +228,8 @@ contains
     class(type_num_model), intent(in) :: self
     _DECLARE_ARGUMENTS_DO_
 
+    ! W/m² → µmol photons/m²/s (Thimijan & Heins 1983, valid for PAR 400-700 nm)
+    real(rk), parameter :: W_to_uEin = 4.57_rk
     real(rk) :: T_rk, PAR_rk, B_tmp, rate_rk, grp_sum_rk
     real(dp) :: u(nGrid), dudt(nGrid), grp_sum
     real(dp) :: ProdGross, ProdNet, ProdHTL, ProdBact, eHTL
@@ -251,7 +253,7 @@ contains
         u(idxB + i - 1) = real(B_tmp, dp)
       end do
 
-      call calcDerivatives(u, real(PAR_rk, dp), real(T_rk, dp), dt_nominal, dudt)
+      call calcDerivatives(u, real(PAR_rk * W_to_uEin, dp), real(T_rk, dp), dt_nominal, dudt)
 
       rate_rk = real(dudt(idxN), rk) / secs_per_day
       _ADD_SOURCE_(self%id_N, rate_rk)

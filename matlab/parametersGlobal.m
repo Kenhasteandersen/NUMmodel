@@ -20,7 +20,7 @@ end
 
     function check(sFilename)
        if ~exist(sFilename, 'file')
-           error('  Did not find the file:\n  p.TMname%s.\n  Check that transport matrices are downloaded and placed in ../TMs/%s.\nDownload TMs from \n  http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/',...
+           error('  Did not find the file:\n  p.TMname%s.\n  Check that transport matrices are downloaded and placed in ../TMs/%s.\nDownload TMs from \n  https://sites.google.com/view/samarkhatiwala-research-tmm',...
                sFilename,p.TMname);
        end
     end
@@ -77,7 +77,7 @@ end
 %
 sTest = strcat(path,'/../TMs/',p.TMname);
 if ~exist( sTest )
-    error('Transport matrix directory %s does not exist.\nDownload TMs from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/',...
+    error('Transport matrix directory %s does not exist.\nDownload TMs from https://sites.google.com/view/samarkhatiwala-research-tmm',...
     sTest);
 end
 check(p.pathBoxes);
@@ -94,7 +94,7 @@ p.bTransport = true; % Whether to do the transport with the transport matrix
 % Bottom BC for nutrients:
 %
 p.BCmixing = [1, 0, 1]/365; % Rate of mixing nutrients into the bottom cell (1/day)
-p.BCvalue = 0*p.u0 - 1; % Use the initial value concentration of the bottom concentration
+p.BCvalue = 0*p.u0 - 1; % Use the initial value concentration as the bottom concentration
 p.BC_POMclosed = false; % Whether the bottom BC for POM is open or closed
 %
 % Light environment:
