@@ -2,7 +2,7 @@
 % Simulate a single water column from the global transport matrix.
 % Conservation is enforced rather crudely.
 %
-% Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
+% Tranport matrices must be downloaded from https://sites.google.com/view/samarkhatiwala-research-tmm
 % (choose MITgcm_ECCO), and put it into the location 'NUMmodel/TMs/'
 %
 % Input:

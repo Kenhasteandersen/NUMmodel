@@ -1,7 +1,7 @@
 %
 % Global run using transport matrices
 %
-% Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
+% Tranport matrices must be downloaded from https://sites.google.com/view/samarkhatiwala-research-tmm
 % and be put into the location 'NUMmodel/TMs'
 % Simulations currently works with:
 %  - MITgcm_2.8deg (low resolution; runs on a laptop)

@@ -1,7 +1,7 @@
 %
 % Make a basic run of the global transport-matrix model.
 %
-% Tranport matrices must be downloaded from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/
+% Tranport matrices must be downloaded from https://sites.google.com/view/samarkhatiwala-research-tmm
 % (choose MITgcm_2.8deg), and put into the location '../TMs'
 %
 % In:

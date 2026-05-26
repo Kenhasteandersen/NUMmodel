@@ -20,7 +20,7 @@ end
 
     function check(sFilename)
        if ~exist(sFilename, 'file')
-           error('  Did not find the file:\n  p.TMname%s.\n  Check that transport matrices are downloaded and placed in ../TMs/%s.\nDownload TMs from \n  http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/',...
+           error('  Did not find the file:\n  p.TMname%s.\n  Check that transport matrices are downloaded and placed in ../TMs/%s.\nDownload TMs from \n  https://sites.google.com/view/samarkhatiwala-research-tmm',...
                sFilename,p.TMname);
        end
     end
@@ -77,7 +77,7 @@ end
 %
 sTest = strcat(path,'/../TMs/',p.TMname);
 if ~exist( sTest )
-    error('Transport matrix directory %s does not exist.\nDownload TMs from http://kelvin.earth.ox.ac.uk/spk/Research/TMM/TransportMatrixConfigs/',...
+    error('Transport matrix directory %s does not exist.\nDownload TMs from https://sites.google.com/view/samarkhatiwala-research-tmm',...
     sTest);
 end
 check(p.pathBoxes);
