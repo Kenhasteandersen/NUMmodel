@@ -1,9 +1,9 @@
 # NUMmodel 
 Reference implementation of the **Nutrient-Unicellular-Multicellular**
 modelling framework.  The model is described in: 
-* Full model, incl. calibration: [Computational library for the Nutrient-Unicellular-Multicellular plankton modeling framework v. 1.0](https://egusphere.copernicus.org/preprints/2025/egusphere-2025-755/)
-* Unicellular plankton: Andersen and Visser: [From cell size and first principles to structure and function of unicellular plankton communities](https://www.biorxiv.org/content/10.1101/2022.05.16.492092v3)
-* Copepods: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities "Researchgate"). 
+* **Full model, incl. diatoms and calibration**: [Computational library for the Nutrient-Unicellular-Multicellular plankton modeling framework v. 1.0](https://gmd.copernicus.org/articles/19/6627/2026/)
+* The unicellular plankton component: Andersen and Visser: [From cell size and first principles to structure and function of unicellular plankton communities](https://www.biorxiv.org/content/10.1101/2022.05.16.492092v3)
+* The copepod component: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities "Researchgate"). 
 * An [introduction to the modelling principles](https://www.youtube.com/watch?v=dHqoCqaLM8w) given by Camila Serra-Pompei. 
 
 The core library is written in Fortran2008 and is interfaced from matlab (with a minimal frontend in  R; see http://oceanlife.dtuaqua.dk/Plankton/R).
@@ -17,15 +17,18 @@ https://github.com/user-attachments/assets/2ed0c324-5ada-4f91-bfa1-ef90e8e5f5f7
 _The figure above shows a run of the full NUMmodel. The inset shows the Sheldon size spectrum from the position maked with the red star of generalists (blue), diatoms (green), passive feeding copepods (dark red) and active copepods (red)._
 
 ### Papers using the NUM model:
+* T.F. Hansen, D.E. Canfield, K.H. Andersen, and C.J. Bjerrum: The unicellular NUM v.0.91 (2025): A trait-based plankton model evaluated in two contrasting biogeographic provinces. [Geoscientific Model Development 18, 1895–1916](https://gmd.copernicus.org/articles/18/1895/2025/).
 * Grigoratou, Maria, Camila Serra-Pompei, Adam Kemberling, and Andrew J. Pershing. Hot and hungry: [A mechanistic approach to the direct and indirect effects of marine heatwaves on plankton communities](https://www.authorea.com/doi/full/10.22541/au.171474857.76024736). (2024).
 * Application to the biological carbon pump: C. Serra-Pompei, B.A Ward, J. Pinti, A.W Visser, T. Kiørboe, K.H Andersen (2022): Linking plankton size spectra and community composition to carbon export and its efficiency. [Global Biogeochemical Cycles 36(5), e2021GB007275](https://agupubs.onlinelibrary.wiley.com/doi/epdf/10.1029/2021GB007275).
-* T.F. Hansen, D.E. Canfield, K.H. Andersen, and C.J. Bjerrum: The unicellular NUM v.0.91 (2025): A trait-based plankton model evaluated in two contrasting biogeographic provinces. [Geoscientific Model Development 18, 1895–1916](https://gmd.copernicus.org/articles/18/1895/2025/).
+
 
 
 ### Installation
 The library requires a recent version of matlab (2021 or later).  Installation and compilation instructions are given in the wiki.
-### Basic structure
-There are three levels of routines: top-level, medium-level and low-level.  There are three model systems: an upper ocean represented as a chemostat, a water column, and a global simulation with transport matrices.
+
+
+### Using the NUM model with Matlab
+The library can be called interactively from matlab and all functions are documented on their respective help pages.  There are three levels of routines: top-level, medium-level and low-level.  There are three model systems: an upper ocean represented as a chemostat, a water column, and a global simulation with transport matrices.
 #### Top-level matlab routines
 These routines run a simulation and returns the results in a `sim` structure:
 
@@ -43,3 +46,12 @@ The routines operates with two basic structures: a *parameter* structure and a *
 *Simulations* are performed with calls to a simulation routine: `sim = simulationChemostat(p)`, `sim = simulationWatercolumn(p, latitude, longitude)`, or `sim = simulationGlobal(p)`, where `p` is the parameter structure (see the wiki for a description of the simulation structure).
 
 *Plots* are made with calls to the plot routines. `plotSimulation(sim)` makes a series of basic plots of a simulation.
+
+The simplest way of running the NUM model, besides just calling one of the `baserun` function is:
+
+```matlab
+p = setupNUMmodel;              % Select the NUM model setup with generalists, diatoms, copepods, and POM
+p = parametersChemostat( p );   % Setup op the parameters for a chemostat run
+sim = simulateChemostat( p );   % Run the chemostat
+plotSimulation( sim );          % Plot the results
+```
