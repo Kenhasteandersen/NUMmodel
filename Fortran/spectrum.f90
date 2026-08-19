@@ -304,8 +304,13 @@ end subroutine calcGrid
   !end function getCbalanceUnicellular
   !
   ! Returns the net primary production calculated as the total amount of carbon fixed
-  ! by photsynthesis minus the respiration. Units: mugC/day/l
-  ! (See Andersen and Visser (2023) table 5)
+  ! by photsynthesis minus the respiration. Units: mugC/day/l.
+  ! The calculation uses both the direct uptake of carbon by photosynthesis 
+  ! and the indirect uptake of carbon by DOC exudation (this is what the division by epsilonL is for).
+  ! Note that this procedure is updated with respect to version 1.0 which was
+  ! used in Papapostolou et al (2026). This new procedure was noted and discussed in that
+  ! article, but it has been adopted here because we realized that the previous version was 
+  ! commonly resulted in prodNPP < prodHTL, which is obviously not possible (except in transients).
   !
   function getProdNet(this, u) result(ProdNet)
     real(dp):: ProdNet
@@ -316,7 +321,7 @@ end subroutine calcGrid
     ProdNet = 0.d0
     do i = 1, this%n
        ProdNet = ProdNet + max( 0.d0, &
-                   (this%JLreal(i)-this%Jresptot(i))*u(i)/this%m(i) )
+                   (this%JLreal(i)/this%epsilonL - this%Jresptot(i))*u(i)/this%m(i) )
     end do
   end function getProdNet
   !
