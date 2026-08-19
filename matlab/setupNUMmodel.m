@@ -85,7 +85,7 @@ end
 
 % POM:
 p = parametersAddgroup(100, p, nPOM);
-setSinkingPOM(p, 19); 
+setSinkingPOM(p, 19*ones(nPOM,1)); 
 
 % Initial conditions:
 p = getMass(p);

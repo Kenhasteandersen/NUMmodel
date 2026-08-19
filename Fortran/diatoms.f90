@@ -45,7 +45,6 @@ contains
     ! no errors to begin with
     errorio=.false.
     
-    print*, 'Loading parameter for diatoms from ', inputfile, ':'
     call read_input(inputfile,'diatoms','mMinDiatom',mMinDiatom,errorio,errorstr)
     call read_input(inputfile,'diatoms','mMaxDiatom',mMaxDiatom,errorio,errorstr)
     call this%initUnicellular(n, mMinDiatom, mMaxDiatom)

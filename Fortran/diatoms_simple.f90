@@ -44,7 +44,6 @@ module diatoms_simple
       ! no errors to begin with
        errorio=.false.
        
-       print*, 'Loading parameter for diatoms simple from ', inputfile, ':'
        call read_input(inputfile,'diatoms_simple','mMin',mMin,errorio,errorstr)
        call this%initUnicellular(n, mMin, mMax)
        call read_input(inputfile,'diatoms_simple','rhoCSi',rhoCSi,errorio,errorstr)

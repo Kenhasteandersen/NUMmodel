@@ -8,7 +8,7 @@
 function N = calcGlobalN(sim)
 
 S = inputRead;
-rhoCN = S.input_general.rhoCN;
+rhoCN = S.general.rhoCN;
 
 N = 0*sim.t;
 N_BC = N;

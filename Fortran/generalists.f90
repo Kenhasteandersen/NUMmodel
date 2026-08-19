@@ -49,7 +49,6 @@ contains
     ! no errors to begin with
     errorio=.false.
     
-    print*, 'Loading parameter for generalist from ', inputfile, ':'
     call read_input(inputfile,'generalists','mMinGeneralist',mMinGeneralist,errorio,errorstr)
     call read_input(inputfile,'generalists','mMaxGeneralist',mMaxGeneralist,errorio,errorstr)
     call this%initUnicellular(n, mMinGeneralist, mMaxGeneralist)
@@ -99,7 +98,7 @@ contains
     this%JlossPassive = cLeakage/this%r * this%m ! in units of C
 
     this%Jmax = alphaJ * this%m * (1.d0-this%nu) ! mugC/day
-    this%Jresp =cR*alphaJ*this%m ! decrease basal resp. according to Ken
+    this%Jresp =cR*alphaJ*this%m 
 
     allocate(this%dL(n))
     allocate(this%dN(n))
@@ -148,14 +147,13 @@ contains
        !
        f = 0
        if ( this%Jnet(i) .gt. this%JlossPassive(i) ) then ! Apply FR only if net growth is positive
-        f = this%Jnet(i) / ( this%Jnet(i) + JmaxT )
+         f = this%Jnet(i) / ( this%Jnet(i) + JmaxT )
          this%Jnet(i) = JmaxT * f
        endif
        this%Jtot(i) = this%Jnet(i) - this%JlossPassive(i)
 
-       ! Take up N only to the degree that is is not supplied by feeding (ie priotize feeding):
+       ! Take up N only to the degree that is is not supplied by feeding:
        this%JNreal(i) = max( 0.d0, this%Jnet(i) - this%jF(i) )
-       
        !
        ! Regulate carbon uptakes for growth + respiration towards lowered jNet.
        !
@@ -166,25 +164,16 @@ contains
        ! Then divide evenly btw DOC and L:
        tmp = ( (1 - bDOC)*this%jDOC(i) + (1 - bL)*this%jL(i)  )
        if (tmp .eq. 0.0d0) then
-          this%jDOCreal(i) = 0.0d0
-          this%jLreal(i) = 0.0d0
+         this%jDOCreal(i) = 0.0d0
+         this%jLreal(i) = 0.0d0
        else
          tmp = ( this%Jnet(i) + bg*max(0.d0, this%JNet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - &
                 this%JFreal(i)*(1 - bF) ) / tmp
-         !if (tmp .lt. 0.d0) then
-         ! tmp = this%Jnet(i) + bg*max(0.d0, this%Jnet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - this%JFreal(i)*(1-bF)
-         ! this%jDOCreal(i) = min( this%JDOC(i), tmp/(1-bDOC) )
-          !And finally light:
-         ! this%JLreal(i) = min( this%JL(i), (tmp - this%jDOCreal(i)*(1-bDOC))/(1-bL) )
-        !else
-          this%jDOCreal(i) = tmp * this%jDOC(i)
-          this%jLreal(i) = tmp * this%jL(i)
-        !endif
-      endif
-       
-       
+         this%jDOCreal(i) = tmp * this%jDOC(i)
+         this%jLreal(i) = tmp * this%jL(i)
+       endif       
       
-       ! Exude surplus N:
+      ! Exude surplus N:
        this%JNlossLiebig(i) = max( 0.d0, this%Jnreal(i) + this%Jfreal(i) - this%JlossPassive(i) - this%Jtot(i) )
        this%JClossLiebig(i) = 0.d0 ! There are never surplus C uptakes
       !        

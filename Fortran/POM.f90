@@ -40,7 +40,6 @@ module POM
 
     call this%initSpectrum(n)
 
-    print*, 'Loading parameter for POM from ', inputfile, ':'
     call read_input(inputfile,'POM','mMin',mMin,errorio,errorstr)
     call read_input(inputfile,'POM','remin',this%remin,errorio,errorstr)
     call read_input(inputfile,'POM','palatability',this%palatability,errorio,errorstr)
