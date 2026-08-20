@@ -10,7 +10,7 @@ module diatoms
   implicit none
 
   private
-  real(dp) :: bN, bL, bDOC, bSi, bg, epsilonL
+  real(dp) :: bN, bL, bDOC, bSi, bg
   real(dp) :: rhoCSi, remin2
   
   type, extends(spectrumUnicellular) :: spectrumDiatoms
@@ -50,7 +50,7 @@ contains
     call this%initUnicellular(n, mMinDiatom, mMaxDiatom)
     call read_input(inputfile,'diatoms','rhoCSi',rhoCSi,errorio,errorstr)
     call read_input(inputfile,'diatoms','v',v,errorio,errorstr)
-    call read_input(inputfile,'diatoms','epsilonL',epsilonL,errorio,errorstr)
+    call read_input(inputfile,'diatoms','epsilonL',this%epsilonL,errorio,errorstr)
     call read_input(inputfile,'diatoms','alphaL',alphaL,errorio,errorstr)
     call read_input(inputfile,'diatoms','rLstar',rLstar,errorio,errorstr)
     call read_input(inputfile,'diatoms','bL',bL,errorio,errorstr)
@@ -112,7 +112,7 @@ contains
        this%JN(i) =  ftemp15* gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
        this%JDOC(i) = ftemp15*gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
        this%JSi(i) = ftemp15* gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
-       this%JL(i) =  epsilonL * this%AL(i)*L  ! Photoharvesting
+       this%JL(i) =  this%epsilonL * this%AL(i)*L  ! Photoharvesting
        JmaxT = fTemp2*this%Jmax(i)
        ! 
        ! Calculate downregulation of nutrient uptakes:
@@ -184,7 +184,7 @@ contains
        !
        this%JNlossLiebig(i) = max( 0.d0, -Jnet(i) )  ! Exude surplus N and Si
        this%JClossLiebig(i) = 0.d0 ! There are never surplus C uptakes
-       this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
+       this%JCloss_photouptake(i) = (1.-this%epsilonL)/this%epsilonL * this%JLreal(i)
        this%Jresptot(i)= &
          fTemp2*this%Jresp(i) + &
          bDOC*this%JDOCreal(i) + &
@@ -270,31 +270,31 @@ contains
 ! photosynthesis, nutrint uptake, and growth. Units: mugC/day/m3
 ! (See Andersen and Visser (2023) table 5)
 !
- function getProdNetDiatoms(this, u) result(ProdNet)
-   real(dp):: ProdNet
-   class(spectrumDiatoms), intent(in):: this
-   real(dp), intent(in):: u(this%n)
-   integer:: i
-   real(dp):: resp, tmp
+!  function getProdNetDiatoms(this, u) result(ProdNet)
+!    real(dp):: ProdNet
+!    class(spectrumDiatoms), intent(in):: this
+!    real(dp), intent(in):: u(this%n)
+!    integer:: i
+!    real(dp):: resp, tmp
  
-   ProdNet = 0.d0
+!    ProdNet = 0.d0
 
-   do i = 1, this%n
-     if ( (this%JLreal(i) + this%JDOCreal(i)) .ne. 0.d0 ) then
-       tmp = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i))
-     else
-       tmp = 0.d0
-     endif
+!    do i = 1, this%n
+!      if ( (this%JLreal(i) + this%JDOCreal(i)) .ne. 0.d0 ) then
+!        tmp = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i))
+!      else
+!        tmp = 0.d0
+!      endif
 
-     resp = &
-       fTemp2*this%Jresp(i) + & ! Basal metabolism
-       bL*this%JLreal(i) + &    ! Light uptake metabolism
-       bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is not associated to DOC uptake  
-       bg*this%Jnet(i) * tmp ! The fraction of growth not associated with DOC
-     ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
+!      resp = &
+!        fTemp2*this%Jresp(i) + & ! Basal metabolism
+!        bL*this%JLreal(i) + &    ! Light uptake metabolism
+!        bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is not associated to DOC uptake  
+!        bg*this%Jnet(i) * tmp ! The fraction of growth not associated with DOC
+!      ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
 
-   end do
- end function getProdNetDiatoms
+!    end do
+!  end function getProdNetDiatoms
 
  function getProdBactDiatoms(this, u) result(ProdBact)
    real(dp):: ProdBact

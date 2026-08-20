@@ -14,7 +14,7 @@ module diatoms_simple
     implicit none
 
     private
-    real(dp) :: rhoCSi, epsilonL, bN, bSi, remin2
+    real(dp) :: rhoCSi, bN, bSi, remin2
 
     type, extends(spectrumUnicellular) :: spectrumDiatoms_simple
       real(dp), dimension(:), allocatable:: JSi
@@ -48,7 +48,7 @@ module diatoms_simple
        call this%initUnicellular(n, mMin, mMax)
        call read_input(inputfile,'diatoms_simple','rhoCSi',rhoCSi,errorio,errorstr)
        call read_input(inputfile,'diatoms_simple','v',v,errorio,errorstr)
-       call read_input(inputfile,'diatoms_simple','epsilonL',epsilonL,errorio,errorstr)
+       call read_input(inputfile,'diatoms_simple','epsilonL',this%epsilonL,errorio,errorstr)
        call read_input(inputfile,'diatoms_simple','alphaL',alphaL,errorio,errorstr)
        call read_input(inputfile,'diatoms_simple','rLstar',rLstar,errorio,errorstr)
        call read_input(inputfile,'diatoms_simple','alphaN',alphaN,errorio,errorstr)
@@ -101,7 +101,7 @@ module diatoms_simple
          this%JN(i) =   fTemp15 * gammaN * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
          !this%JDOC(i) = gammaDOC * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
          this%JSi(i) = fTemp15 * gammaSi * this%AN(i)*Si*rhoCSi! Diffusive Si uptake, units of C/time
-         this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
+         this%JL(i) =   this%epsilonL * this%AL(i)*L  ! Photoharvesting
          !
          ! Estimate the limiting growth nutrient (Liebig):
          !

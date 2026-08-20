@@ -9,7 +9,7 @@ module generalists_simple
 
   private 
   
-  real(dp) :: epsilonL, remin2, reminF
+  real(dp) :: remin2, reminF
 
   type, extends(spectrumUnicellular) :: spectrumGeneralistsSimple
     real(dp), allocatable :: JFreal(:)
@@ -57,7 +57,7 @@ contains
     call read_input(inputfile,'generalists_simple','cR',cR,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','rLstar',rLstar,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','delta',delta,errorio,errorstr)
-    call read_input(inputfile,'generalists_simple','epsilonL',epsilonL,errorio,errorstr)
+    call read_input(inputfile,'generalists_simple','epsilonL',this%epsilonL,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','remin2',remin2,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','reminF',reminF,errorio,errorstr)
     call read_input(inputfile,'generalists_simple','beta',this%beta,errorio,errorstr)
@@ -99,7 +99,7 @@ contains
        !
        this%JN(i) =   gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
        this%JDOC(i) = gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
-       this%JL(i) =   epsilonL * this%AL(i)*L  ! Photoharvesting
+       this%JL(i) =   this%epsilonL * this%AL(i)*L  ! Photoharvesting
        ! Total nitrogen uptake:
        this%JNtot(i) = this%JN(i)+this%JF(i)-this%Jlosspassive(i) ! In units of C
        ! Total carbon uptake
@@ -138,7 +138,7 @@ contains
       ! Losses:
       !
       this%JCloss_feeding(i) = (1.-this%epsilonF)/this%epsilonF*this%JFreal(i) ! Incomplete feeding (units of carbon per time)
-      this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
+      this%JCloss_photouptake(i) = (1.-this%epsilonL)/this%epsilonL * this%JLreal(i)
       this%JNlossLiebig(i) = max( 0.d0, this%JNtot(i)-this%Jtot(i))  ! In units of C
       this%JClossLiebig(i) = max( 0.d0, this%JCtot(i)-this%Jtot(i)) ! C losses from Liebig, not counting losses from photoharvesting
 
