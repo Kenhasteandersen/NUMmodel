@@ -9,7 +9,7 @@ module generalists
 
   private 
   
-  real(dp) :: epsilonL,bL,bN,bDOC,bF,bg,remin2,reminF
+  real(dp) :: bL,bN,bDOC,bF,bg,remin2,reminF
 
   type, extends(spectrumUnicellular) :: spectrumGeneralists
     real(dp), allocatable :: JFreal(:)
@@ -63,7 +63,7 @@ contains
     call read_input(inputfile,'generalists','delta',delta,errorio,errorstr)
     call read_input(inputfile,'generalists','alphaJ',alphaJ,errorio,errorstr)
     call read_input(inputfile,'generalists','cR',cR,errorio,errorstr)
-    call read_input(inputfile,'generalists','epsilonL',epsilonL,errorio,errorstr)
+    call read_input(inputfile,'generalists','epsilonL',this%epsilonL,errorio,errorstr)
     call read_input(inputfile,'generalists','bL',bL,errorio,errorstr)
     call read_input(inputfile,'generalists','bN',bN,errorio,errorstr)
     call read_input(inputfile,'generalists','bDOC',bDOC,errorio,errorstr)
@@ -121,7 +121,7 @@ contains
        !
        this%JN(i)   = gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
        this%JDOC(i) = gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
-       this%JL(i)   = epsilonL * this%AL(i)*L  ! Photoharvesting
+       this%JL(i)   = this%epsilonL * this%AL(i)*L  ! Photoharvesting
        JmaxT = fTemp2*this%Jmax(i)
        !
        ! Potential net uptake
@@ -184,7 +184,7 @@ contains
       ! Losses:
       !
       this%JCloss_feeding(i)     = (1.-this%epsilonF)/this%epsilonF * this%JFreal(i) ! Incomplete feeding (units of carbon per time)
-      this%JCloss_photouptake(i) = (1.-epsilonL)/epsilonL * this%JLreal(i)
+      this%JCloss_photouptake(i) = (1.-this%epsilonL)/this%epsilonL * this%JLreal(i)
       this%Jresptot(i)= &
             fTemp2*this%Jresp(i) + &
             bDOC*this%JDOCreal(i) + &
@@ -273,36 +273,36 @@ end subroutine printRatesGeneralists
   ! photosynthesis, nutrint uptake, and growth. Units: mugC/day/m3
   ! (See Andersen and Visser (2023) table 5)
   !
-function getProdNetGeneralists(this, u) result(ProdNet)
-  real(dp):: ProdNet
-  class(spectrumGeneralists), intent(in):: this
-  real(dp), intent(in):: u(this%n)
-  integer:: i
-  real(dp):: resp, tmp, tmp2
+! function getProdNetGeneralists(this, u) result(ProdNet)
+!   real(dp):: ProdNet
+!   class(spectrumGeneralists), intent(in):: this
+!   real(dp), intent(in):: u(this%n)
+!   integer:: i
+!   real(dp):: resp, tmp, tmp2
 
-  ProdNet = 0.d0
-  do i = 1, this%n
-    if ( (this%JLreal(i) + this%JDOCreal(i)) .ne. 0.d0 ) then
-      tmp = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i))
-    else
-      tmp = 0.d0
-    endif
+!   ProdNet = 0.d0
+!   do i = 1, this%n
+!     if ( (this%JLreal(i) + this%JDOCreal(i)) .ne. 0.d0 ) then
+!       tmp = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i))
+!     else
+!       tmp = 0.d0
+!     endif
 
-    if ( (this%JLreal(i) + this%JDOCreal(i)+ this%JFreal(i)) .ne. 0.d0 ) then
-      tmp2 = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i) + this%JFreal(i))
-    else
-      tmp2 = 0.d0
-    endif
+!     if ( (this%JLreal(i) + this%JDOCreal(i)+ this%JFreal(i)) .ne. 0.d0 ) then
+!       tmp2 = this%JLreal(i) / (this%JLreal(i) + this%JDOCreal(i) + this%JFreal(i))
+!     else
+!       tmp2 = 0.d0
+!     endif
 
-    resp = &
-      fTemp2*this%Jresp(i) + & ! Basal metabolism
-      bL*this%JLreal(i) + &    ! Light uptake metabolism
-      bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is not associated to DOC uptake  
-      bg*this%Jnet(i) * tmp2 ! The fraction of growth not associated with DOC or feeding
-    ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
+!     resp = &
+!       fTemp2*this%Jresp(i) + & ! Basal metabolism
+!       bL*this%JLreal(i) + &    ! Light uptake metabolism
+!       bN*this%JNreal(i) * tmp + &  ! The fraction of N uptake that is not associated to DOC uptake  
+!       bg*this%Jnet(i) * tmp2 ! The fraction of growth not associated with DOC or feeding
+!     ProdNet = ProdNet + max( 0.d0, (this%JLreal(i) - resp) * u(i)/this%m(i) )
 
-  end do
-end function getProdNetGeneralists
+!   end do
+! end function getProdNetGeneralists
 
   function getProdBactGeneralists(this, u) result(ProdBact)
     real(dp):: ProdBact
