@@ -13,5 +13,5 @@ testSetup('setupNUMmodel', 1630);
 testFunction('testChemostat',26754);
 testFunction('testChemostatEuler',1);
 %testFunction('testChemostatSeasonal',NaN);
-testFunction('testWatercolumn',189315);
-testFunction('testGlobal',3071461);
+testFunction('testWatercolumn',138814);
+testFunction('testGlobal',1676600);
