@@ -85,7 +85,7 @@ end
 
 % POM:
 p = parametersAddgroup(100, p, nPOM);
-setSinkingPOM(p, 19*ones(nPOM,1)); 
+setSinkingPOM(p, 20*ones(nPOM,1)); 
 
 % Initial conditions:
 p = getMass(p);
@@ -97,4 +97,4 @@ p.u0(ix) = 0.1*log( p.mUpper(ix)./p.mLower(ix) );
 
 p.u0( p.ixStart(end):p.ixEnd(end) ) = 0; % No POM in initial conditions
 
-setHTL(0.017, 1 ,true, false, true); % "Quadratic" mortality; not declining; only affecting copepods
+setHTL(0.006, 1 ,true, false, true); % "Quadratic" mortality; not declining; only affecting copepods
