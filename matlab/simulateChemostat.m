@@ -11,13 +11,15 @@
 % Options:
 %  bUnicellularloss - determines whether unicellular groups are subject to
 %      mixing losses
-%  bCalculateNgain - determines whether to calculate the variation of Nitrogen per day in the Chemostat layer
-%                    Adds to the output : Ngain - N gained from the deep throughout the simulation minus the losses in µg/L
-%                                         deltaNdt - Variation of N per day in the Chemostat layer in µg/L/day
 %  bVerbose - displays the nutrients balances
 %
 % Out:
-%  sim - simulation object
+%  sim - simulation object. The N budget of the layer is integrated along
+%        with the state (units mugN/l, cumulative from t=0):
+%          Nprod    - N mixed in from the deep layer
+%          Nloss    - N lost from the layer: mixing of unicellulars, sinking
+%                     of POM, and (without a POM group) HTL and POM export
+%          NlossHTL - the HTL/POM-export part of Nloss (zero with POM)
 %
 function sim = simulateChemostat(p, L, T, options)
 
@@ -26,7 +28,6 @@ arguments
     L double = 100;
     T double = 10;
     options.bUnicellularloss logical = true;
-    options.bCalculateNgain logical = false;
     options.bVerbose logical = false;
 end
 %
@@ -50,8 +51,10 @@ if options.bUnicellularloss
 else
     ix = 1:(p.idxB-1); % Nutrients
 end
+ixUniB = ix(ix>=p.idxB); % The biomass part of what is mixed
 uDeep = p.uDeep;
 uDeep(p.idxB:length(p.u0)) = 0;
+bSeasonal = ~isnan(p.seasonalOptions.lat_lon) | p.seasonalOptions.seasonalAmplitude~=0;
 %
 % Check if there is POM:
 %
@@ -68,20 +71,13 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 %
 sLibname = loadNUMmodelLibrary();
 
-% Initial conditions
-if options.bCalculateNgain
-    u0=[p.u0 0];
-else 
-    u0=p.u0;
-end
-
 rhoCN = search_namelist('../input/input.yaml','general','rhoCN');
-[t,u] = ode23s(@fDeriv, [0 p.tEnd], u0); 
-
-if options.bCalculateNgain
-    sim.Ngain=u(:,end); % N gained from the deep minus the losses
-    u=u(:,1:p.n);
-end
+% The state is augmented with the three cumulative N-budget terms:
+[t,y] = ode23s(@fDeriv, [0 p.tEnd], [p.u0 0 0 0]);
+u = y(:,1:p.n);
+sim.Nprod = y(:,p.n+1);
+sim.Nloss = y(:,p.n+2);
+sim.NlossHTL = y(:,p.n+3);
 
 %
 % Assemble result:
@@ -107,14 +103,6 @@ sim.bUnicellularloss = options.bUnicellularloss;
 %sim.Bmicro = Bpnm(3);
 
 %
-% Calculate N variations
-%
-if options.bCalculateNgain
-    sim.deltaNdt = (sim.N(end)+sum(sim.B(end,:))/rhoCN - ...
-        (p.u0(p.idxN)+sum(p.u0(p.idxB:end))/rhoCN + ...
-        sim.Ngain(end)))/ t(end); % Variation of Nitrogen per day in the Chemostat layer
-end
-%
 % Get the balance of the derivative:
 %
 [sim.Cbalance,sim.Nbalance,sim.Sibalance] = getBalance(sim.u(end,:), mean(sim.L), sim.T); % in units per day
@@ -137,12 +125,9 @@ if options.bVerbose
         Sirate=sim.Sibalance/(sim.Si(end)+sum(sim.B(end,ixDiatoms))/rhoCSi)*100;
         fprintf("Rate of gain of Si: %8.3f %% per day \n", Sirate);
     end
-    %N losses
-    if options.bCalculateNgain
-        changes=sim.deltaNdt/(sim.N(end)+sum(sim.B(end,:))/5.68)*100;
-        fprintf("Total gain of N throughout the simulation: %8.3f µg/L \n", sim.Ngain(end));
-        fprintf("Average rate of N change over the entire simulation: %8.3f %% per day \n", changes)
-    end
+    %N budget over the simulation:
+    fprintf("N mixed in from the deep: %8.3f mugN/l; N lost from the layer: %8.3f mugN/l\n", ...
+        sim.Nprod(end), sim.Nloss(end));
     fprintf("----------------------------------------------\n")
 end
 
@@ -150,53 +135,38 @@ end
     % -------------------------------------------------------------------------
     % Function to assemble derivative for chemostat:
     %
-    function dudt = fDeriv(t,u)
+    function dydt = fDeriv(t,y)
 
-        u = u(1:p.n);
-        dudt = 0*u';
-        if (isnan(p.seasonalOptions.lat_lon) & p.seasonalOptions.seasonalAmplitude==0)
-            [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
-                u, L, T, 0.0, dudt);
-            %
-            % Chemostat dynamics for nutrients and unicellulars:
-            %
-            dudt(ix) = dudt(ix) + p.d*(uDeep(ix)-u(ix)');
-
-        else % Incorporate the time dependency if necessary
-            t_int = floor(mod(t,365))+1;
-            if t_int>365
-                t_int = 365;
-            end
-            [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
-                u, L(t_int), T, 0.0, dudt);
-            %
-            % Chemostat dynamics for nutrients and unicellulars:
-            %
-            dudt(ix) = dudt(ix) + p.d(t_int)*(uDeep(ix)-u(ix)');
+        u = y(1:p.n)';
+        if bSeasonal
+            t_int = min(floor(mod(t,365))+1, 365);
+            Lnow = L(t_int);
+            dnow = p.d(t_int);
+        else
+            Lnow = L;
+            dnow = p.d;
         end
+        dudt = 0*u;
+        [u, dudt] = calllib(sLibname, 'f_calcderivatives', ...
+            u, Lnow, T, 0.0, dudt);
         %
-        % Calculate N gain from the deep
+        % Chemostat dynamics for nutrients and unicellulars:
         %
-        if options.bCalculateNgain
-            
-            % Extract the losses
-            Clost=0;
-            Nlost = 0;
-            SiLost=0;
-
-            [~,~, Nlost, ~] = calllib(sLibname, 'f_getlost', ...
-                u, Clost, Nlost, SiLost);
-       
-            dudt(end+1) = (uDeep(1)-u(1))*p.d-Nlost;
-        
-            if options.bUnicellularloss 
-                dudt(end)=dudt(end)-p.d*sum(u(p.idxB:end))/rhoCN; %takes B's losses to the deep into account
-            end
-        end
+        dudt(ix) = dudt(ix) + dnow*(uDeep(ix)-u(ix));
         %
         % Sinking of POM:
         %
-        dudt(ixPOM) = dudt(ixPOM) - p.velocity(ixPOM).*u(ixPOM)'/p.widthProductiveLayer;
-        dudt = dudt';
+        sinkPOM = p.velocity(ixPOM).*u(ixPOM)/p.widthProductiveLayer;
+        dudt(ixPOM) = dudt(ixPOM) - sinkPOM;
+        %
+        % N budget of the layer. The export via HTL and POM comes from the
+        % library (zero when a POM group is present):
+        %
+        Nlost = 0;
+        [~,~,Nlost,~] = calllib(sLibname, 'f_getlost', u, 0, Nlost, 0);
+        Nprod = dnow*(uDeep(p.idxN)-u(p.idxN));
+        Nloss = dnow*sum(u(ixUniB))/rhoCN + sum(sinkPOM)/rhoCN + Nlost;
+
+        dydt = [dudt, Nprod, Nloss, Nlost]';
     end
 end

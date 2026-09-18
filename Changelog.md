@@ -16,4 +16,5 @@ _Comparison of old v1.0 NPP (top), new, and difference (bottom) (units are mgC/m
 
 * Fixed the calculation of N balance in the water column and global simulations. Nothing in the model has been changed; it was only the balance calculations which were incorrect.
 
-* 
+* Fixed the conservation of mass in the explict part of the transport
+matrix.
