@@ -1,8 +1,10 @@
 %
 % Calculates the nitrogen balance of the course of the simulation.
 %
-% Note: the 'global' case evaluates the HTL mortality once at p.u0 and is
-% therefore ONLY VALID WITH CONSTANT HTL MORTALITY (NOT "QUADRATIC").
+% Note: in the 'global' case all losses and the bottom-BC input are measured
+% directly in simulateGlobal, so the residual is the non-conservation of the
+% transport step. "Loss to HTL" is then the export from the biogeochemistry,
+% i.e. HTL and POM losses when there is no POM group, and zero with POM.
 %
 % Note: for a watercolumn WITHOUT POM the balance is only accurate to about
 % 0.1 %/yr. The HTL and POM losses leave the system directly in that case,
@@ -27,7 +29,6 @@ end
 S = inputRead;
 fracHTL_to_N = S.general.fracHTL_to_N;
 rhoCN = S.general.rhoCN;
-remin2 = S.generalists.remin2; % NOTE: only valid for generalists
 
 p = sim.p;
 gains = 0;
@@ -104,59 +105,25 @@ switch sim.p.nameModel
         lossHTL_per_N = lossHTL/sim.Ntot(end);
 
     case 'global'
-        losses = 0*sim.t;
-        lossHTL = losses;
-        rates = getRates(p, p.u0, 100, 10 ); % Assume that HTL mortality does not vary!!
-        load(sim.p.pathGrid,'dv');
-        for iTime = 1:length(sim.t)
-            for iDepth = 1:length(sim.z)
-                for j = 1:length(sim.x)
-                    for k = 1:length(sim.y)
-                        if ~isnan(sim.N(iTime,j,k,iDepth))
-                            %u = [sim.N(j,k,iDepth,iTime), sim.DOC(j,k,iDepth,iTime), ...
-                            %    squeeze(sim.B(j,k,iDepth,:,iTime))' ];
-                            %rates = getRates(p, u, sim.L(j,k,iDepth,iTime), sim.T(j,k,iDepth,iTime) );
-                            if isfield(p,'ixPOM')
-                                lossHTL(iTime) = 0;
-                                losses(iTime) = 0;
-                            else
-                                % Losses from HTL:
-                                lossHTL(iTime) = lossHTL(iTime) + ...
-                                    sum((1-fracHTL_to_N)*rates.mortHTL.*squeeze(sim.B(iTime,j,k,iDepth,:)))/rhoCN ...
-                                    * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
-                                % Quadratic losses:
-                                losses(iTime) = losses(iTime) + ...
-                                    (1-remin2)*sum(rates.mort2.*squeeze(sim.B(iTime,j,k,iDepth,:)))/rhoCN ...
-                                    * dv(j,k,iDepth)/1000 * dt(iTime); %  gN/day
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        losses = sum(losses);
-        lossHTL = sum(lossHTL);
         %
-        % Calculate total budget:
+        % All terms are totals over the ocean (gN) measured in simulateGlobal
+        % over each save interval. The fluxes recorded at the first save cover
+        % the interval from t=0 and are dropped, so that the budget runs from
+        % the first to the last saved state. Any residual is what the
+        % transport step fails to conserve.
         %
-        totN_0 = 0;
-        totN_end = 0;
-        for iDepth = 1:length(sim.z)
-            for j = 1:length(sim.x)
-                for k = 1:length(sim.y)
-                    if ~isnan(sim.N(iTime,j,k,iDepth))
-                        totN_0 = totN_0 + (sim.N(1,j,k,iDepth)  +sum(sim.B(1,j,k,iDepth,:),5)/rhoCN) * dv(j,k,iDepth)/1000;
-                        totN_end = totN_end + (sim.N(end,j,k,iDepth) + sum(sim.B(end,j,k,iDepth,:),5)/rhoCN) * dv(j,k,iDepth)/1000;
-                    end
-                end
-            end
+        if length(sim.t) < 2
+            error('checkConservation needs at least two saved time points (decrease p.tSave).');
         end
-        accumulation = sum( totN_end - totN_0 );
+        areaOcean = 3.6e14; % m2
+        T = sim.t(end) - sim.t(1); % days
+        accumulation = (sim.Ntot(end)-sim.Ntot(1)) ...
+            - sum(sim.Nprod(2:end)) + sum(sim.Nloss(2:end));
 
-        dNdt = (accumulation + losses + lossHTL)/3.6e14/sim.t(end)*365; %gN/m2/yr
-        dNdt_per_N = (accumulation + losses + lossHTL) / totN_end;
-        lossHTL = lossHTL/3.6e14/sim.t(end)*365; %gN/m2/yr
-        lossHTL_per_N = lossHTL/sim.Ntot(end);
+        dNdt = accumulation/areaOcean/T*365; %gN/m2/yr
+        dNdt_per_N = accumulation/sim.Ntot(end)/T*365; % 1/yr
+        lossHTL = sum(sim.NlossHTL(2:end))/areaOcean/T*365; %gN/m2/yr
+        lossHTL_per_N = sum(sim.NlossHTL(2:end))/sim.Ntot(end)/T*365; % 1/yr
 
 end
 %

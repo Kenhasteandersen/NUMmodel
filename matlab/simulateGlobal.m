@@ -228,6 +228,22 @@ sim.L = sim.N;
 sim.T = sim.N;
 tSave = [];
 %
+% N budget (gN over the whole ocean, double precision). The losses and the
+% bottom-BC input are measured as the change in total N over the respective
+% sub-steps, accumulated between saves. Whatever is not captured by these is
+% the non-conservation of the transport step.
+%
+S = inputRead;
+rhoCN = S.general.rhoCN;
+gridDV = load(p.pathGrid,'dv');
+dvBox = reshape(gridToMatrix(gridDV.dv, [], p.pathBoxes, p.pathGrid), [], 1); % m3
+fNtot = @(uu) ( reshape(uu(:,ixN),1,[]) + reshape(sum(uu(:,ixB),2),1,[])/rhoCN ) * dvBox/1000; % gN
+sim.Ntot = zeros(nSave,1);
+sim.Nloss = zeros(nSave,1);     % N leaving the ocean by sinking and (without POM) HTL/POM export
+sim.NlossHTL = zeros(nSave,1);  % The HTL/POM-export part of Nloss (zero when POM is present)
+sim.Nprod = zeros(nSave,1);     % N entering through the bottom BC
+NlossBio = 0; NlossSink = 0; Nbc = 0;
+%
 % Matrices for annual averages:
 %
 if options.bCalcAnnualAverages
@@ -285,7 +301,7 @@ for i=1:simtime
     L = L0(:,mod(i,365/p.dtTransport)+1);
     dt = p.dt;
 
-    %N = calc_tot_n(p,u);
+    Nbefore = fNtot(u);
 
     if ~isempty(gcp('nocreate'))
         if options.bCalcAnnualAverages && i > simtime - 365/p.dtTransport
@@ -337,8 +353,9 @@ for i=1:simtime
         end
     end
 
-    %calc_tot_n(p,u)/N - 1
-    %N = calc_tot_n(p,u);
+    Nafter = fNtot(u);
+    NlossBio = NlossBio + (Nbefore - Nafter);
+    Nbefore = Nafter;
     %
     % Sinking:
     %
@@ -347,8 +364,9 @@ for i=1:simtime
             u(:,idxSinking(l)) = Asink{l}*u(:,idxSinking(l));
         end
     end
-    %calc_tot_n(p,u)/N - 1
-    %N = calc_tot_n(p,u);
+    Nafter = fNtot(u);
+    NlossSink = NlossSink + (Nbefore - Nafter);
+    Nbefore = Nafter;
     %
     % Bottom BC for nutrient fields. The boundary allows diffusion from the
     % bottom into the cell. The diffusivity is controlled by p.BCdiffusion
@@ -359,17 +377,13 @@ for i=1:simtime
         u(ixBottom, k) = u(ixBottom, k) +  p.dtTransport* ...
             p.BCmixing(k)./dzBottom'.*(BCvalue(:,k)-u(ixBottom,k));
     end
-    %calc_tot_n(p,u)/N - 1
-    %N = calc_tot_n(p,u);
+    Nbc = Nbc + (fNtot(u) - Nbefore);
     %
     % Transport
     %
     if p.bTransport
         u =  Aimp*(Aexp*u);
     end
-    %calc_tot_n(p,u)/N - 1
-    %N = calc_tot_n(p,u);
-    %fprintf('---\n')
     %
     % Save timeseries in grid format
     %
@@ -395,6 +409,11 @@ for i=1:simtime
         sim.L(iSave,:,:,:) = single(matrixToGrid(L, [], p.pathBoxes, p.pathGrid));
         sim.T(iSave,:,:,:) = single(matrixToGrid(T, [], p.pathBoxes, p.pathGrid));
         tSave = [tSave, i*p.dtTransport];
+        sim.Ntot(iSave) = fNtot(u);
+        sim.Nloss(iSave) = NlossBio + NlossSink;
+        sim.NlossHTL(iSave) = NlossBio;
+        sim.Nprod(iSave) = Nbc;
+        NlossBio = 0; NlossSink = 0; Nbc = 0;
         if options.bVerbose
             fprintf('.\n');
         end
@@ -411,7 +430,6 @@ end
 % ---------------------------------------
 sim.t = tSave; % days where solution was saved
 sim.p = p;
-sim.Ntot = calcGlobalN(sim);
 sim.B(sim.B<0) = 0.;
 sim.DOC(sim.DOC<0) = 0.;
 
