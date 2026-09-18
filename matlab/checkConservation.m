@@ -14,8 +14,8 @@
 % 0.1 %/yr. The HTL and POM losses leave the system directly in that case,
 % and they are reconstructed from getRates once per save, whereas the model
 % integrates them at the internal time step p.dt. That quadrature error is
-% a few percent of the loss terms. With POM present the losses are measured
-% directly and the balance closes to ~1e-6 /yr.
+% a few percent of the loss terms. With POM present all terms are measured
+% directly and the balance closes to ~1e-7 /yr.
 %
 % In:
 %  sim: simulation structure

@@ -199,7 +199,7 @@ for i = 1:length(BCvalue)
         BCvalue(i) = u(end,i)';
     end
 end
-% Keep the resolved values in p; sim.Nprod and the N budget are calculated from them:
+% Keep the resolved values in p so that sim.p reflects what was used:
 p.BCvalue = BCvalue;
 %
 % Matrices for saving the solution:
@@ -236,12 +236,15 @@ sLibName = loadNUMmodelLibrary();
 disp('Starting simulation')
 %
 % Total N in the column (gN/m2). Used to measure the N that sinks out
-% through the bottom, which is accumulated between saves:
+% through the bottom and the N entering through the bottom BC, both
+% accumulated between saves:
 %
 dzColumn = reshape(sim.dznom(1:nGrid), nGrid, 1);
 fNcolumn = @(uu) ( reshape(uu(:,ixN),1,nGrid)*dzColumn + ...
     reshape(sum(uu(:,ixB),2),1,nGrid)*dzColumn/rhoCN )/1000;
 NlossSinking = 0;
+Nbc = 0;
+sim.Nprod = zeros(nSave,1);
 tic
 for i = 1:simtime
     %
@@ -300,9 +303,11 @@ for i = 1:simtime
     end
     NlossSinking = NlossSinking + (Nbeforesinking - fNcolumn(u)); % gN/m2 out through the bottom
     % Bottom BC for nutrients:
+    NbeforeBC = fNcolumn(u);
     u(end, 1:p.nNutrients) = u(end, 1:p.nNutrients) +  ...
         p.BCmixing(1:p.nNutrients)*p.dtTransport .* ...
         ( BCvalue(1:p.nNutrients) - u(end,1:p.nNutrients) );
+    Nbc = Nbc + (fNcolumn(u) - NbeforeBC); % gN/m2 in through the bottom
 
     %u(end, p.idxN) = u(end, p.idxN) +  p.dtTransport* ...
     %    p.DiffBottom/sim.dznom(nGrid)*(p.u0(p.idxN)-u(end,p.idxN));
@@ -350,7 +355,9 @@ for i = 1:simtime
             end
         end
         sim.Nloss(iSave) = sim.Nloss(iSave) + NlossSinking/p.tSave; % gN/m2/day
+        sim.Nprod(iSave) = Nbc/p.tSave; % gN/m2/day
         NlossSinking = 0;
+        Nbc = 0;
 
         tSave = [tSave, i*p.dtTransport];
     end
@@ -389,7 +396,6 @@ sim.lon = lon;
 
 sim.Ntot = (sum(sim.N'.*(sim.dznom*ones(1,length(sim.t)))) + ... % gN/m2 in dissolved phase
     sum(squeeze(sum(sim.B,3))'.*(sim.dznom*ones(1,length(sim.t))))/rhoCN)/1000; % gN/m2 in biomass
-sim.Nprod = p.BCmixing(p.idxN)*(p.BCvalue(p.idxN)-sim.N(:,end))*sim.dznom(end)/1000; % Diffusion in from the bottom; gN/m2/day
 % if bCalcAnnualAverages
 %     tmp = single(matrixToGrid(sim.ProdGrossAnnual, [], p.pathBoxes, p.pathGrid));
 %     sim.ProdGrossAnnual = squeeze(tmp(:,:,1));
