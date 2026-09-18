@@ -9,3 +9,7 @@ The new scheme generally increased the NPP; see below.
 _Comparison of old v1.0 NPP (top), new, and difference (bottom) (units are mgC/m2/d)_
 
 * Re-calibrated to fit with the new NPP scheme: kw=0.10/m, u=20 m/d, mortHTL=0.006.
+
+# Minor fixes and changes:
+
+* Fixed the calculation of N balance in the water column and global simulations. Nothing in the model has been changed; it was only the balance calculations which were incorrect.
