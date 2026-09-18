@@ -51,6 +51,7 @@ if isfield(p,'idxSi')
     bSilicate = true;
 end
 ixB = p.idxB:p.n;
+bPOM = any(p.typeGroups==100);
 
 S = inputRead;
 reminHTL = S.general.fracHTL_to_N;
@@ -195,6 +196,8 @@ for i = 1:length(BCvalue)
         BCvalue(i) = u(end,i)';
     end
 end
+% Keep the resolved values in p; sim.Nprod and the N budget are calculated from them:
+p.BCvalue = BCvalue;
 %
 % Matrices for saving the solution:
 %
@@ -228,6 +231,14 @@ sLibName = loadNUMmodelLibrary();
 % Run transport matrix simulation
 % ---------------------------------------
 disp('Starting simulation')
+%
+% Total N in the column (gN/m2). Used to measure the N that sinks out
+% through the bottom, which is accumulated between saves:
+%
+dzColumn = reshape(sim.dznom(1:nGrid), nGrid, 1);
+fNcolumn = @(uu) ( reshape(uu(:,ixN),1,nGrid)*dzColumn + ...
+    reshape(sum(uu(:,ixB),2),1,nGrid)*dzColumn/rhoCN )/1000;
+NlossSinking = 0;
 tic
 for i = 1:simtime
     %
@@ -280,9 +291,11 @@ for i = 1:simtime
     %
     u =  squeeze(AimpM(month,:,:)) * u; % Vertical diffusion
     % Sinking:
+    Nbeforesinking = fNcolumn(u);
     for j = p.idxSinking
         u(:,j) = squeeze(Asink(j,:,:)) * u(:,j);
     end
+    NlossSinking = NlossSinking + (Nbeforesinking - fNcolumn(u)); % gN/m2 out through the bottom
     % Bottom BC for nutrients:
     u(end, 1:p.nNutrients) = u(end, 1:p.nNutrients) +  ...
         p.BCmixing(1:p.nNutrients)*p.dtTransport .* ...
@@ -317,19 +330,24 @@ for i = 1:simtime
         end
         sim.L(iSave,:) = L;
         sim.T(iSave,:) = T;
-        % Loss to HTL and POM:
-        for j = 1:nGrid
-            rates = getRates(p,u(j,:),L(j),T(j));
-            % Note: half of the HTL loss is routed directly back to N if we
-            % don't have POM:
-            if ~sum(ismember(p.typeGroups,100))
+        %
+        % Losses of N out of the water column. Without POM the HTL losses and
+        % the flux towards POM both leave the system directly. With POM present
+        % both are retained (the library routes HTL mortality into the largest
+        % POM group and into N), and the only export is what sinks out
+        % through the bottom.
+        %
+        if ~bPOM
+            for j = 1:nGrid
+                rates = getRates(p,u(j,:),L(j),T(j));
                 sim.NlossHTL(iSave) = sim.NlossHTL(iSave) + ...
                     (1-reminHTL)*sum(rates.mortHTL.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % % HTL losses:gN/m2/day
                 sim.Nloss(iSave) = sim.Nloss(iSave) + ...
                     sum(rates.jPOM.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN;
-                %remin2*sum(rates.mort2.*u(j,p.idxB:end)')/1000*sim.dznom(j)/rhoCN; % remin2 losses
             end
         end
+        sim.Nloss(iSave) = sim.Nloss(iSave) + NlossSinking/p.tSave; % gN/m2/day
+        NlossSinking = 0;
 
         tSave = [tSave, i*p.dtTransport];
     end

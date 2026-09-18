@@ -1,6 +1,15 @@
 %
 % Calculates the nitrogen balance of the course of the simulation.
-% Note: ONLY WORKS WITH CONSTANT HTL MORTALITY (NOT "QUADRATIC")
+%
+% Note: the 'global' case evaluates the HTL mortality once at p.u0 and is
+% therefore ONLY VALID WITH CONSTANT HTL MORTALITY (NOT "QUADRATIC").
+%
+% Note: for a watercolumn WITHOUT POM the balance is only accurate to about
+% 0.1 %/yr. The HTL and POM losses leave the system directly in that case,
+% and they are reconstructed from getRates once per save, whereas the model
+% integrates them at the internal time step p.dt. That quadrature error is
+% a few percent of the loss terms. With POM present the losses are measured
+% directly and the balance closes to ~1e-6 /yr.
 %
 % In:
 %  sim: simulation structure
@@ -82,11 +91,15 @@ switch sim.p.nameModel
         %
         % Calculate total budget:
         %
-        accumulation = sim.Ntot-sim.Ntot(1) - cumsum(sim.Nprod) + cumsum(sim.NlossHTL) + cumsum(sim.Nloss);
+        % The loss and production terms are rates (gN/m2/day), so they are
+        % weighted by the time between saves:
+        Ntot = reshape(sim.Ntot, [], 1);
+        accumulation = Ntot-Ntot(1) + p.tSave*( ...
+            -cumsum(sim.Nprod) + cumsum(sim.NlossHTL) + cumsum(sim.Nloss) );
 
         dNdt = (accumulation(end)-accumulation(1))/sim.t(end)*365; %gN/m2/yr
         dNdt_per_N = dNdt/sim.Ntot(end);
-        lossHTL = cumsum(sim.NlossHTL)/sim.t(end)*365; %gN/m2/yr
+        lossHTL = p.tSave*cumsum(sim.NlossHTL)/sim.t(end)*365; %gN/m2/yr
         lossHTL = lossHTL(end);
         lossHTL_per_N = lossHTL/sim.Ntot(end);
 
