@@ -152,10 +152,14 @@ else
         if ~exist(p.pathBoxes,'file')
             error( 'Error: Cannot find transport matrix file: %s', p.pathBoxes);
         end
+        % Volumes of the boxes in the column:
+        gridDV = load(p.pathGrid,'dv');
+        dvBox = gridToMatrix(gridDV.dv, [], p.pathBoxes, p.pathGrid);
+        dvColumn = dvBox(idxGrid);
         % Load TMs
         parfor month=1:12
             matrix = load(strcat(p.pathMatrix, sprintf('%02i.mat',month)),'Aimp');
-            AimpM(month,:,:) = full(function_convert_TM_positive(matrix.Aimp(idxGrid,idxGrid)));
+            AimpM(month,:,:) = full(function_convert_TM_positive(matrix.Aimp(idxGrid,idxGrid), dvColumn));
             temp = load(p.pathGrid,'deltaT');
             AimpM(month,:,:) = squeeze(AimpM(month,:,:))^(p.dtTransport*24*60*60/temp.deltaT);
             fprintf('.');

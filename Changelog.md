@@ -15,3 +15,5 @@ _Comparison of old v1.0 NPP (top), new, and difference (bottom) (units are mgC/m
 # Minor fixes and changes:
 
 * Fixed the calculation of N balance in the water column and global simulations. Nothing in the model has been changed; it was only the balance calculations which were incorrect.
+
+* 
