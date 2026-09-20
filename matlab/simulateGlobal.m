@@ -9,7 +9,9 @@
 %
 % Input:
 %  p: parameter structure from parametersGlobal
-%  sim: (optional) simulation to use for initial conditions
+%  sim: (optional) simulation to use for initial conditions. Note the 
+%            file with initial conditions for NUMmodel setup in the TM 
+%            directory.
 %  options.bCalcAnnualAverages: This option calculates ecosystem functions
 %            (sim.ProdNet, sim.ProdNetAnnual etc) during the simulation, 
 %            thus making them more accurate. It increases the simulation 
