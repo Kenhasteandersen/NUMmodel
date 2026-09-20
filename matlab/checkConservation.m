@@ -1,6 +1,10 @@
 %
 % Calculates the nitrogen balance of the course of the simulation.
 %
+% Note: in the 'chemostat' case the budget terms are integrated by the ODE
+% solver together with the state, so the balance closes to the solver
+% tolerance (~1e-8 /yr with the default tolerances).
+%
 % Note: in the 'global' case all losses and the bottom-BC input are measured
 % directly in simulateGlobal, so the residual is the non-conservation of the
 % transport step. "Loss to HTL" is then the export from the biogeochemistry,
@@ -10,8 +14,8 @@
 % 0.1 %/yr. The HTL and POM losses leave the system directly in that case,
 % and they are reconstructed from getRates once per save, whereas the model
 % integrates them at the internal time step p.dt. That quadrature error is
-% a few percent of the loss terms. With POM present the losses are measured
-% directly and the balance closes to ~1e-6 /yr.
+% a few percent of the loss terms. With POM present all terms are measured
+% directly and the balance closes to ~1e-7 /yr.
 %
 % In:
 %  sim: simulation structure
@@ -27,66 +31,26 @@ end
 % Constants:
 %
 S = inputRead;
-fracHTL_to_N = S.general.fracHTL_to_N;
 rhoCN = S.general.rhoCN;
 
 p = sim.p;
-gains = 0;
-lossHTL = 0;
-dt = diff(sim.t);
-dt = reshape(dt, length(dt),1);
-dt = [dt; dt(end)];
 
 switch sim.p.nameModel
 
     case 'chemostat'
-        loss = 0;
-        for iTime = 1:(length(sim.t)-1)
-            if ~isfield(sim.p,'idxSi')
-                u = [ sim.N(iTime) sim.DOC(iTime), sim.B(iTime,:) ];
-            else
-                u = [ sim.N(iTime) sim.DOC(iTime), sim.Si(end), sim.B(iTime,:) ];
-            end
-            rates = getRates(p, u, mean(sim.L), sim.T );
-            ixUni = findIxUnicellular(sim.p);
-
-            B = squeeze(0.5*sum(sim.B(iTime:iTime+1,:))); % Interpolate B
-            if ~sum(ismember(p.typeGroups,100))
-                %
-                % If pom is not present:
-                %
-                
-                % Losses from HTL:
-                lossHTL = lossHTL + ...
-                    sum((1-fracHTL_to_N)*rates.mortHTL.*B')/rhoCN*dt(iTime);
-                % Losses to POM:
-                loss = loss + sum(rates.jPOM.*B')/rhoCN*dt(iTime);%sum(rates.mort2*(1-remin2).*B')/rhoCN*dt(iTime);
-            else
-                %
-                % If POM is present:
-                %
-                ixPOM = p.ixStart(p.ixPOM):p.ixEnd(p.ixPOM);
-                loss = loss + p.velocity(ixPOM).*u(ixPOM)/p.widthProductiveLayer /rhoCN*dt(iTime);
-                %ixPOM = p.ixStart(ixGroupPOM):p.ixEnd(ixGroupPOM);
-                %           loss = loss + sim(p.velocity(ixPOM).*u(ixPOM))/rhoCN*dt(iTime);
-            end
-
-            % Losses from diffusion:
-            loss = loss + sim.bUnicellularloss*p.d*sum(B(ixUni))/rhoCN * dt(iTime);
-
-            % Gains from diffusion:
-            gains = gains + p.d*(p.uDeep(p.idxN)-0.5*(sim.N(iTime)+sim.N(iTime+1))) * dt(iTime);
-        end
         %
-        % Calculate total budget:
+        % Nprod, Nloss and NlossHTL are integrated along with the state in
+        % simulateChemostat (cumulative from t=0, mugN/l), so the budget
+        % closes to the tolerance of the ODE solver.
         %
-        accumulation = (sim.N(end)+sum(sim.B(end,:)/rhoCN)) - ...
-            (sim.N(1)+sum(sim.B(1,:)/rhoCN));
+        Ntot = sim.N + sum(sim.B,2)/rhoCN;
+        accumulation = (Ntot(end)-Ntot(1)) - sim.Nprod(end) + sim.Nloss(end);
+        T = sim.t(end);
 
-        dNdt = (accumulation - gains + lossHTL + loss)/1000*p.widthProductiveLayer/sim.t(end)*365; %gN/m2/yr
-        dNdt_per_N = (accumulation - gains + lossHTL+loss) / sim.N(end)/sim.t(end)*365; % Fraction per year
-        lossHTL = lossHTL/1000*p.widthProductiveLayer/sim.t(end)*365;
-        lossHTL_per_N = lossHTL/sim.N(end);
+        dNdt = accumulation/1000*p.widthProductiveLayer/T*365; %gN/m2/yr
+        dNdt_per_N = accumulation/Ntot(end)/T*365; % 1/yr
+        lossHTL = sim.NlossHTL(end)/1000*p.widthProductiveLayer/T*365; %gN/m2/yr
+        lossHTL_per_N = sim.NlossHTL(end)/Ntot(end)/T*365; % 1/yr
 
     case 'watercolumn'
         %
