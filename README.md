@@ -1,6 +1,14 @@
 # NUMmodel 
-Reference implementation of the **Nutrient-Unicellular-Multicellular**
-modelling framework.  The model is described in: 
+The **Nutrient-Unicellular-Multicellular** is a validated plankton community model designed for global plankton ecology on a laptop. It is unique in two ways: 1) it does away with the “phytoplankton-zooplankton” dichotomy and replaces it with a modern description of mixotrophs and diatoms, and 2) it has a full life-cycle model of multicellular plankton. 
+
+With a user-friendly Matlab interface the model can run global simulations on a laptop. It simulates all plankton from picogram-sized bacteria to milligram-sized copepods, and is validated with observations of nutrients, primary production, and unicellular plankton and copepods.Reference implementation of the **Nutrient-Unicellular-Multicellular**
+modelling framework.  
+
+<img width="812" alt="NUM model sketch" src="NUM model sketch.jpg">
+
+_NUM is based on cell and body size and resolves three functional groups: "generalist mixotrophs" (blue) which is all non-diatom plankton, including hetereo- and autotrophic bacteria, mixotrophic flagellates, dinoflagellates, ciliates, etc., "diatoms" (green), and copepods (red) feeding passively through ambushing (dark red) and through active feeding (red)._
+
+The model is described in: 
 * Full model, incl. calibration: [Computational library for the Nutrient-Unicellular-Multicellular plankton modeling framework v. 1.0](https://egusphere.copernicus.org/preprints/2025/egusphere-2025-755/)
 * Unicellular plankton: Andersen and Visser: [From cell size and first principles to structure and function of unicellular plankton communities](https://www.biorxiv.org/content/10.1101/2022.05.16.492092v3)
 * Copepods: Serra-Pompei et al (2020): [A general size- and trait-based model of plankton communities](https://www.researchgate.net/publication/346939727_A_general_size-_and_trait-based_model_of_plankton_communities "Researchgate"). 
@@ -8,9 +16,6 @@ modelling framework.  The model is described in:
 
 The core library is written in Fortran2008 and is interfaced from matlab (with a minimal frontend in  R; see http://oceanlife.dtuaqua.dk/Plankton/R).
 
-<img width="812" alt="image" src="https://github.com/user-attachments/assets/a0fc29cc-8134-4e93-8d98-4b94dcb82f83">
-
-_NUM is based on cell and body size and resolves three functional groups: "generalists" (blue) which is all non-diatom plankton, including hetereo- and autotrophic bacteria, mixotrophic flagellates, dinoflagellates, ciliates, etc., "diatoms" (green), and copepods (red) feeding passively through ambushing (dark red) and through active feeding (red)._
 
 https://github.com/user-attachments/assets/2ed0c324-5ada-4f91-bfa1-ef90e8e5f5f7
 
