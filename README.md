@@ -1,8 +1,7 @@
 # NUMmodel 
 The **Nutrient-Unicellular-Multicellular** is a validated plankton community model designed for global plankton ecology on a laptop. It is unique in two ways: 1) it does away with the “phytoplankton-zooplankton” dichotomy and replaces it with a modern description of mixotrophs and diatoms, and 2) it has a full life-cycle model of multicellular plankton. 
 
-With a user-friendly Matlab interface the model can run global simulations on a laptop. It simulates all plankton from picogram-sized bacteria to milligram-sized copepods, and is validated with observations of nutrients, primary production, and unicellular plankton and copepods.Reference implementation of the **Nutrient-Unicellular-Multicellular**
-modelling framework.  
+With a user-friendly Matlab interface the model can run global simulations on a laptop. It simulates all plankton from picogram-sized bacteria to milligram-sized copepods, and is validated with observations of nutrients, primary production, and unicellular plankton and copepods.
 
 <img width="812" alt="NUM model sketch" src="NUM model sketch.jpg">
 
