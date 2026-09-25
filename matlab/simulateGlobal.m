@@ -18,6 +18,12 @@
 %            time of the last year.
 %  options.bVerbose: Write out progress on the terminal
 %  options.bNinit: Use only nutrient fields for initialization
+%  options.bOpenMP: Integrate all grid cells in one call to the fortran
+%            library, which distributes the cells over OpenMP threads. Set the
+%            number of threads with the environment variable OMP_NUM_THREADS
+%            before starting matlab. Replaces the parfor loop, so do not
+%            combine it with a parallel pool. Not used for the last year when
+%            bCalcAnnualAverages is true.
 %
 % Output:
 %  sim: structure with simulation results
@@ -30,6 +36,7 @@ arguments
     options.bCalcAnnualAverages = false; % Whether to calculate annual averages
     options.bVerbose = true; % Whether to write output on the terminal
     options.bNinit = false;
+    options.bOpenMP = false; % Thread over grid cells inside the library
 end
 %
 % Get the global parameters if they are not already set:
@@ -305,8 +312,15 @@ for i=1:simtime
 
     Nbefore = fNtot(u);
 
-    if ~isempty(gcp('nocreate'))
-        if options.bCalcAnnualAverages && i > simtime - 365/p.dtTransport
+    bLastYearFunctions = options.bCalcAnnualAverages && i > simtime - 365/p.dtTransport;
+    if options.bOpenMP && ~bLastYearFunctions
+        %
+        % Integrate all cells in one call; the library threads over the cells:
+        %
+        u = calllib(sLibname, 'f_simulateeulercells', ...
+            int32(nb), u, L, T, dtTransport, dt);
+    elseif ~isempty(gcp('nocreate'))
+        if bLastYearFunctions
             %
             % Integrate and calculate functions (only last year):
             %

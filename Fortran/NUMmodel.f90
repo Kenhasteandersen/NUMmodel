@@ -9,6 +9,7 @@
 !
 module NUMmodel
   use iso_c_binding, only: c_char, c_null_char
+  !$ use omp_lib, only: omp_get_thread_num
   use globals
   use spectrum
   use generalists
@@ -47,6 +48,16 @@ module NUMmodel
   real(dp), dimension(:,:), allocatable:: theta ! Interaction matrix
   real(dp), dimension(:), allocatable:: upositive ! State variable constrained to be positive
   real(dp), dimension(:), allocatable:: F ! Available food
+  !
+  ! The group objects hold both the parameters and the rates of the grid cell
+  ! currently being calculated, so they cannot be shared between threads. Each
+  ! OpenMP thread gets its own copy, synchronized from the master thread at the
+  ! start of each parallel region via groupShared (see simulateEulerCells).
+  ! The same applies to the work arrays upositive and F, and to the temperature
+  ! corrections in globals.f90.
+  !
+  !$omp threadprivate(group, upositive, F)
+  type(spectrumContainer), allocatable :: groupShared(:) ! Snapshot of the master's group
   !
   ! Variables for HTL mortalities:
   !
@@ -825,6 +836,47 @@ contains
        u = u + dudt*dt ! Euler update
     end do
   end subroutine simulateChemostatEuler
+
+  ! -----------------------------------------------
+  ! Simulate many independent grid cells with Euler integration.
+  ! The cells are distributed over OpenMP threads (if compiled with OpenMP).
+  ! In:
+  !   u(nCells, nGrid): state of each cell (same layout as in matlab's simulateGlobal)
+  !   L(nCells), T(nCells): light and temperature in each cell
+  !   tEnd, dt: time to simulate and Euler time step
+  ! -----------------------------------------------
+  subroutine simulateEulerCells(nCells, u, L, T, tEnd, dt)
+    integer, intent(in):: nCells
+    real(dp), intent(inout):: u(nCells, nGrid)
+    real(dp), intent(in):: L(nCells), T(nCells)
+    real(dp), intent(in):: tEnd, dt
+    real(dp):: ucell(nGrid)
+    integer:: k
+    !
+    ! Snapshot the master thread's objects (the parameters may have been
+    ! changed by setHTL etc. since the last call):
+    !
+    groupShared = group
+
+    !$omp parallel default(shared) private(k, ucell)
+    !
+    ! Give each thread a deep copy of the objects and its own work arrays:
+    !
+    !$ if (omp_get_thread_num() .ne. 0) then
+    !$    group = groupShared
+    !$    if (allocated(upositive)) deallocate(upositive)
+    !$    if (allocated(F)) deallocate(F)
+    !$    allocate(upositive(nGrid), F(nGrid))
+    !$ end if
+    !$omp do schedule(static)
+    do k = 1, nCells
+       ucell = u(k,:)
+       call simulateEuler(ucell, L(k), T(k), tEnd, dt)
+       u(k,:) = ucell
+    end do
+    !$omp end do
+    !$omp end parallel
+  end subroutine simulateEulerCells
 
   ! -----------------------------------------------
   ! Simulate with Euler integration
