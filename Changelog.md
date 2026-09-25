@@ -20,12 +20,6 @@ _Comparison of old v1.0 NPP (top), new, and difference (bottom) (units are mgC/m
 
 * Fixed a bug in the predictor-corrector scheme for DOC
 
-* Fixed the Euler chemostat (`simulateChemostatEuler`), which disagreed with the
-ode23s chemostat for setups with more than one group. The two now agree to
-within 4e-3 on the final state, so `testChemostatEuler` cross-checks the two
-implementations. Note that `simulateChemostatEuler` takes `widthProductiveLayer`
-as a new argument..
-
 * Fixed the calculation of N balance in the water column, chemostat, and global simulations. Nothing in the model has been changed; it was only the balance calculations which were incorrect.
 
 * Fixed the conservation of mass in the explict part of the transport matrix.
