@@ -25,39 +25,22 @@ if ~isfield(p,'nameModel')
     p = parametersChemostat(p);
 end
 %
-% Concentrations in the deep layer:
-%
-if options.bUnicellularloss
-    ix = 1:p.ixEnd(1); % Nutrients and first field (unicellulars) are lost to the deep layer
-else
-    ix = 1:(p.idxB-1); % Nutrients
-end
-uDeep = p.uDeep;
-uDeep(p.idxB:length(p.u0)) = 0;
-%
-% Simulate:
+% Simulate. The mixing with the deep layer is handled inside the library:
 %
 u = p.u0;
-dudt = 0*u;
 
 u = calllib(loadNUMmodelLibrary(), 'f_simulatechemostateuler', u, ...
     L, T, ...
     int32(p.idxB-1), ...
-    p.u0(1:(p.idxB-1)), p.d, p.tEnd, 0.01, options.bUnicellularloss);
-
-ProdGross = 0;
-ProdNet = 0;
-ProdHTL = 0;
-ProdBact = 0;
-eHTL = 0;
-Bpico = 0;
-Bnano = 0;
-Bmicro = 0;
-mHTL = 0;
-[u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL] = ...
-    calllib(loadNUMmodelLibrary(), 'f_simulateeulerfunctions', u, ...
-    L, T, p.tEnd, 0.01,  ...
-    ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL);
+    p.uDeep(1:(p.idxB-1)), p.d, p.widthProductiveLayer, ...
+    p.tEnd, 0.01, options.bUnicellularloss);
+%
+% Functions of the solution. Note that f_simulateeulerfunctions must not be
+% used here: it integrates u for a further tEnd days without the chemostat
+% dynamics before evaluating the functions.
+%
+[sim.ProdGross, sim.ProdNet, sim.ProdHTL, sim.ProdBact, sim.eHTL, ...
+    sim.Bpico, sim.Bnano, sim.Bmicro, sim.mHTL] = getFunctions(u, L, T);
 
 
 %

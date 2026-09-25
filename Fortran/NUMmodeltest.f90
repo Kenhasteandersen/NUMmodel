@@ -61,11 +61,11 @@ program NUMmodeltest
   !u00(8:12) = 5.d0
 
   !call simulateEuler(u00, 60.d0, 100.d0, 10.d0, 0.1d0)
-  !                          ( u ,   L   ,   T  ,   Ndeep  , diff ,  tEnd  ,   dt , bLosses    )
-  !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 1000.d0, 0.1d0, logical(.true.,1))
+  !                          ( u ,   L   ,   T  ,   Ndeep  , diff , width,  tEnd  ,   dt , bLosses    )
+  !call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.5d0, 20.d0, 1000.d0, 0.1d0, logical(.true.,1))
   !                      u  ,  L  ,   T  ,   dt , dudt
   
-  call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 1000.d0, 0.1d0, logical(.false.,1))
+  call simulateChemostatEuler(u00, 100.d0, 10.d0, u00(1:2), 0.1d0, 20.d0, 1000.d0, 0.1d0, logical(.false.,1))
   !call calcDerivatives(u00, 20.d0, 20.d0, 0.0000001d0, dudt)
   !call printRates()
 

@@ -764,12 +764,14 @@ contains
   ! Ndeep is a vector with the concentrations of
   ! nutrients in the deep layer.
   ! -----------------------------------------------
-  subroutine simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt, bLosses)
+  subroutine simulateChemostatEuler(u, L, T, Ndeep, diff, widthProductiveLayer, tEnd, dt, bLosses)
     real(dp), intent(inout):: u(:) ! Initial conditions and result after integration
     real(dp), intent(in):: L      ! Light level
     real(dp), intent(in):: T ! Temperature
     real(dp), intent(in):: Ndeep(nNutrients) ! Nutrients in the deep layer
     real(dp), intent(in):: diff      ! Diffusivity
+    real(dp), intent(in):: widthProductiveLayer ! Depth of the layer (m); sinking is a
+                                                ! loss rate velocity/widthProductiveLayer
     real(dp), intent(in):: tEnd ! Time to simulate
     real(dp), intent(in):: dt    ! time step
     logical(1), intent(in):: bLosses ! Whether to losses to the deep
@@ -790,9 +792,12 @@ contains
        !
        if (bLosses) then
          do iGroup = 1, nGroups
-            if ( (group(iGroup)%spec%type .ne. typeCopepodActive) .and. (group(iGroup)%spec%type .ne. typeCopepodPassive) ) then
-               dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) + diff*(0.d0 - u(idxB:nGrid))
-            end if
+            ! Only the unicellular groups are mixed out; copepods and POM are not:
+            select type (spec => group(iGroup)%spec)
+            class is (spectrumUnicellular)
+               dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) &
+                  - diff*u( ixStart(iGroup):ixEnd(iGroup) )
+            end select
          end do
        end if
        !
@@ -800,7 +805,7 @@ contains
        !
        do iGroup = 1, nGroups
          dudt( ixStart(iGroup):ixEnd(iGroup) ) = dudt( ixStart(iGroup):ixEnd(iGroup) ) - &
-            group(iGroup)%spec%velocity*u( ixStart(iGroup):ixEnd(iGroup) )
+            group(iGroup)%spec%velocity/widthProductiveLayer*u( ixStart(iGroup):ixEnd(iGroup) )
        end do
 
        u = u + dudt*dt ! Euler update

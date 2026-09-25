@@ -11,7 +11,7 @@ testSetup('setupDiatomsOnly', 7349);
 testSetup('setupNUMmodel', 1630);
 
 testFunction('testChemostat',363300);
-testFunction('testChemostatEuler',1);
+testFunction('testChemostatEuler',1031.7);
 %testFunction('testChemostatSeasonal',NaN);
 testFunction('testWatercolumn',140121);
 testFunction('testGlobal',1671930);

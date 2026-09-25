@@ -58,6 +58,7 @@ void f_simulatechemostateuler(
 				  const int nNutrients,
 			      const double Ndeep[],
 			      const double diff,
+			      const double widthProductiveLayer,
 			      const double tEnd,
 			      const double dt,
 				  const bool bLosses);

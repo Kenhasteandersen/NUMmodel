@@ -135,15 +135,16 @@ contains
     
   end subroutine f_calcDerivatives
 
-  subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, tEnd, dt, bLosses) bind(c)
+  subroutine f_simulateChemostatEuler(u, L, T, nNutrients, Ndeep, diff, &
+      widthProductiveLayer, tEnd, dt, bLosses) bind(c)
     !integer(c_int), intent(in), value:: nGrid
     real(c_double), intent(inout):: u(nGrid)
     integer(c_int), intent(in), value:: nNutrients
     real(c_double), intent(in):: Ndeep(nNutrients)
-    real(c_double), intent(in), value:: L, T, diff, tEnd, dt
+    real(c_double), intent(in), value:: L, T, diff, widthProductiveLayer, tEnd, dt
     logical(c_bool), intent(in), value:: bLosses
 
-    call simulateChemostatEuler(u, L, T, Ndeep, diff, tEnd, dt, bLosses)
+    call simulateChemostatEuler(u, L, T, Ndeep, diff, widthProductiveLayer, tEnd, dt, bLosses)
   end subroutine f_simulateChemostatEuler
 
   subroutine f_simulateEuler(u, L, T, tEnd, dt) bind(c)
