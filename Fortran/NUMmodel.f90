@@ -379,6 +379,8 @@ contains
     type(spectrumDiatoms):: specDiatoms
     type(spectrumCopepod):: specCopepod
     type(spectrumPOM):: specPOM
+    integer:: i
+    character(len=*), parameter:: sErrGroupType = 'unknown group type'
     !
     ! Find the group number and grid location:
     !
@@ -415,8 +417,20 @@ contains
    case(typePOM)
       call initPOM(specPOM, n, mMax, errorio, errorstr)
       allocate (group( iCurrentGroup )%spec, source=specPOM)
-      idxPOM = iCurrentGroup 
+      idxPOM = iCurrentGroup
+   case default
+      write(*,*) 'Error: unknown group type ', typeGroup, ' in parametersAddGroup.'
+      errorio = .true.
+      do i = 1, len(sErrGroupType)
+         errorstr(i) = sErrGroupType(i:i)
+      end do
+      errorstr(len(sErrGroupType)+1) = c_null_char
+      return
    end select
+   !
+   ! Tag the group with its type, so that it can be identified later:
+   !
+   group( iCurrentGroup )%spec%type = typeGroup
 
   end subroutine parametersAddGroup
   ! -----------------------------------------------

@@ -132,6 +132,8 @@ contains
     this%f = 0.d0
     this%epsilonF = 1.d0 ! Probably overridden by the specific group, but must be >0.
     this%palatability = 1.d0 ! set to default
+    this%beta = 0.d0 ! beta = 0 means no feeding; overridden by the feeding groups
+    this%sigma = 1.d0 ! Only used when beta /= 0, but must not be left undefined
     this%mPOM = 0.d0
     this%jPOM = 0.d0
     this%velocity = 0.d0 ! Probably overridden by the specific group (POM at least)
