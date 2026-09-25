@@ -8,6 +8,10 @@
 PETSC_DIR ?= $(shell python -c "from petsc import get_petsc_dir; print(get_petsc_dir())")
 TMM_DIR   ?= $(shell python -c "from tmmlib import get_tmm_dir; print(get_tmm_dir())")
 
+# Clone of the TMM source repo; only needed for insolation.F, which is not
+# shipped in libtmm.
+TMM_SRC_REPO ?= $(HOME)/Documents/tmm
+
 # NUM's f_* entry points live in the matlab wrapper library, not the core one.
 NUM_BUILD ?= $(CURDIR)/../build/Fortran
 NUM_LIB   := NUMmodel_matlab
