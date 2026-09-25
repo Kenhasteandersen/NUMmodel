@@ -10,7 +10,7 @@ testSetup('setupDiatomsOnly', 7349);
 %testSetup('setupGeneric', 4547);
 testSetup('setupNUMmodel', 1630);
 
-testFunction('testChemostat',26754);
+testFunction('testChemostat',363300);
 testFunction('testChemostatEuler',1);
 %testFunction('testChemostatSeasonal',NaN);
 testFunction('testWatercolumn',140121);

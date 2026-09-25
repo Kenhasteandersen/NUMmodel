@@ -2,7 +2,7 @@ function bSuccess = testChemostat(value)
 
 p = setupNUMmodel();       % Sets up the model
 p = parametersChemostat(p);% Sets up the chemostat environment
-sim = simulateChemostat();
+sim = simulateChemostat(p);
 
 bSuccess = true;
 
