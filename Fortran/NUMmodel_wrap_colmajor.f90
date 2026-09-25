@@ -9,10 +9,11 @@ module NUMmodel_wrap
        setupGeneralistsSimpleCopepod, &
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
-       simulateChemostatEuler, simulateEuler, simulateEulerFunctions, getFunctions, &
+       simulateChemostatEuler, simulateEuler, simulateEulerCells, simulateEulerFunctions, getFunctions, &
        setHTL, setmortHTL, getMortHTL, setSinking, getRates, getBalance, getLost, theta
 
   use globals
+  use NUMmodel_offload, only: simulateEulerCellsGeneralists
 
   implicit none
 
@@ -152,6 +153,24 @@ contains
 
     call simulateEuler(u, L, T, tEnd, dt)
   end subroutine f_simulateEuler
+
+  subroutine f_simulateEulerCells(nCells, u, L, T, tEnd, dt) bind(c)
+    integer(c_int), intent(in), value:: nCells
+    real(c_double), intent(inout):: u(nCells, nGrid)
+    real(c_double), intent(in):: L(nCells), T(nCells)
+    real(c_double), intent(in), value:: tEnd, dt
+
+    call simulateEulerCells(int(nCells), u, L, T, tEnd, dt)
+  end subroutine f_simulateEulerCells
+
+  subroutine f_simulateEulerCellsGeneralists(nCells, u, L, T, tEnd, dt) bind(c)
+    integer(c_int), intent(in), value:: nCells
+    real(c_double), intent(inout):: u(nCells, nGrid)
+    real(c_double), intent(in):: L(nCells), T(nCells)
+    real(c_double), intent(in), value:: tEnd, dt
+
+    call simulateEulerCellsGeneralists(int(nCells), nGrid, u, L, T, tEnd, dt)
+  end subroutine f_simulateEulerCellsGeneralists
 
   subroutine f_simulateEulerFunctions(u, L, T, tEnd, dt, &
     ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL) bind(c)

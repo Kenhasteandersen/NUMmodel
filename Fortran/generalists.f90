@@ -29,6 +29,7 @@ module generalists
  
   public initGeneralists, spectrumGeneralists, calcRatesGeneralists, calcDerivativesGeneralists
   public printRatesGeneralists
+  public ratesGeneralistsCore, derivativesGeneralistsCore, getParametersGeneralists
 
 contains
   
@@ -111,90 +112,14 @@ contains
     class(spectrumGeneralists), intent(inout):: this
     real(dp), intent(in):: gammaN, gammaDOC
     real(dp), intent(in):: L, N, DOC
-    real(dp):: f, JmaxT, tmp
-    real(dp):: Jnetp(this%n)
-    integer:: i
 
-    do i = 1, this%n
-       !
-       ! Encounters:
-       !
-       this%JN(i)   = gammaN * fTemp15 * this%AN(i)*N*rhoCN ! Diffusive nutrient uptake in units of C/time
-       this%JDOC(i) = gammaDOC * fTemp15 * this%AN(i)*DOC ! Diffusive DOC uptake, units of C/time
-       this%JL(i)   = this%epsilonL * this%AL(i)*L  ! Photoharvesting
-       JmaxT = fTemp2*this%Jmax(i)
-       !
-       ! Potential net uptake
-       !
-       Jnetp(i) = this%JL(i)*(1-bL) + this%JDOC(i)*(1-bDOC) + this%JF(i)*(1-bF) - ftemp2*this%Jresp(i)
-       !
-       ! Calculation of down-regulation factors for N-uptake and the net uptake:
-       !
-       if (Jnetp(i) .lt. 0) then
-         this%Jnet(i) = Jnetp(i)  ! Severe carbon limitations => negative growth
-         this%dN(i) = 0.d0
-       else
-         if (this%JN(i) .eq. 0) then
-           this%dN(i) = 1.d0
-         else
-           this%dN(i) = max( 0.d0, min( 1.d0, (Jnetp(i) - this%JF(i)*(bg+1))/(this%JN(i)*(1+bg+bN)) ) )
-         endif
-         this%Jnet(i) = min( (Jnetp(i)-bN*(this%dN(i)*this%JN(i)))/(1+bg) , & ! Carbon limitation
-                            this%JF(i) + this%dN(i)*this%JN(i))              ! N limitation
-       endif 
-       !
-       ! Synthesis limitation:
-       !
-       f = 0
-       if ( this%Jnet(i) .gt. this%JlossPassive(i) ) then ! Apply FR only if net growth is positive
-         f = this%Jnet(i) / ( this%Jnet(i) + JmaxT )
-         this%Jnet(i) = JmaxT * f
-       endif
-       this%Jtot(i) = this%Jnet(i) - this%JlossPassive(i)
-
-       ! Take up N only to the degree that is is not supplied by feeding:
-       this%JNreal(i) = max( 0.d0, this%Jnet(i) - this%jF(i) )
-       !
-       ! Regulate carbon uptakes for growth + respiration towards lowered jNet.
-       !
-
-       ! First carbon from F assuming no uptakes from DOC and L:
-       this%JFreal(i) = min( this%JF(i), &
-           (this%Jnet(i) + bg*max(0.d0, this%Jnet(i)) + ftemp2*this%Jresp(i) + bN*this%Jnreal(i) )/(1-bF)) 
-       ! Then divide evenly btw DOC and L:
-       tmp = ( (1 - bDOC)*this%jDOC(i) + (1 - bL)*this%jL(i)  )
-       if (tmp .eq. 0.0d0) then
-         this%jDOCreal(i) = 0.0d0
-         this%jLreal(i) = 0.0d0
-       else
-         tmp = ( this%Jnet(i) + bg*max(0.d0, this%JNet(i)) + bN*this%JNreal(i) + ftemp2*this%Jresp(i) - &
-                this%JFreal(i)*(1 - bF) ) / tmp
-         this%jDOCreal(i) = tmp * this%jDOC(i)
-         this%jLreal(i) = tmp * this%jL(i)
-       endif       
-      
-      ! Exude surplus N:
-       this%JNlossLiebig(i) = max( 0.d0, this%Jnreal(i) + this%Jfreal(i) - this%JlossPassive(i) - this%Jtot(i) )
-       this%JClossLiebig(i) = 0.d0 ! There are never surplus C uptakes
-      !        
-      ! Actual uptakes:
-      !
-      this%JNtot(i) = this%JNreal(i) + this%JFreal(i)
-      !
-      ! Losses:
-      !
-      this%JCloss_feeding(i)     = (1.-this%epsilonF)/this%epsilonF * this%JFreal(i) ! Incomplete feeding (units of carbon per time)
-      this%JCloss_photouptake(i) = (1.-this%epsilonL)/this%epsilonL * this%JLreal(i)
-      this%Jresptot(i)= &
-            fTemp2*this%Jresp(i) + &
-            bDOC*this%JDOCreal(i) + &
-            bL*this%JLreal(i) + &
-            bN*this%JNreal(i) + &
-            bF*this%JFreal(i) + &
-            max(0.d0,bg*this%Jnet(i))
- 
-      this%f(i) = f   
-    end do
+    call ratesGeneralistsCore(L, N, DOC, gammaN, gammaDOC, fTemp2, fTemp15, rhoCN, &
+         bL, bN, bDOC, bF, bg, this%epsilonL, this%epsilonF, &
+         this%AN, this%AL, this%Jmax, this%Jresp, this%JlossPassive, this%JF, &
+         this%JN, this%JDOC, this%JL, this%Jnet, this%dN, this%f, this%Jtot, &
+         this%JNreal, this%JFreal, this%JDOCreal, this%JLreal, &
+         this%JNlossLiebig, this%JClossLiebig, this%JNtot, &
+         this%JCloss_feeding, this%JCloss_photouptake, this%Jresptot)
 
     ! Needed to get the right rates with getRates:
     this%jN = this%jNreal  
@@ -208,49 +133,172 @@ contains
     !  -this%JNlossLiebig-this%JlossPassive)/this%m           ! Losses
     !write(*,*) 'C budget:',(this%JLreal+this%JDOCreal+this%JFreal & ! Gains
     !  -this%Jtot-this%Jresptot - this%JClossLiebig - this%JlossPassive)/this%m   ! Losses
-end subroutine calcRatesGeneralists
+  end subroutine calcRatesGeneralists
+
+  ! -----------------------------------------------
+  ! Rates of one size class of generalists.
+  ! The physiology is here, separated from the object, so that the same code
+  ! is used by the object-oriented library (called with arrays over size
+  ! classes) and by the flat GPU kernel in NUMmodel_offload (called with scalars).
+  ! -----------------------------------------------
+  elemental subroutine ratesGeneralistsCore(L, N, DOC, gammaN, gammaDOC, fTemp2, fTemp15, rhoCN, &
+       bL, bN, bDOC, bF, bg, epsilonL, epsilonF, &
+       AN, AL, Jmax, Jresp, JlossPassive, JF, &
+       JN, JDOC, JL, Jnet, dN, f, Jtot, JNreal, JFreal, JDOCreal, JLreal, &
+       JNlossLiebig, JClossLiebig, JNtot, JCloss_feeding, JCloss_photouptake, Jresptot)
+    !$omp declare target
+    real(dp), intent(in):: L, N, DOC, gammaN, gammaDOC, fTemp2, fTemp15, rhoCN
+    real(dp), intent(in):: bL, bN, bDOC, bF, bg, epsilonL, epsilonF
+    real(dp), intent(in):: AN, AL, Jmax, Jresp, JlossPassive
+    real(dp), intent(in):: JF ! Available food (from calcFeeding)
+    real(dp), intent(out):: JN, JDOC, JL, Jnet, dN, f, Jtot, JNreal, JFreal, JDOCreal, JLreal
+    real(dp), intent(out):: JNlossLiebig, JClossLiebig, JNtot, JCloss_feeding, JCloss_photouptake, Jresptot
+    real(dp):: JmaxT, Jnetp, tmp
+    !
+    ! Encounters:
+    !
+    JN   = gammaN * fTemp15 * AN*N*rhoCN ! Diffusive nutrient uptake in units of C/time
+    JDOC = gammaDOC * fTemp15 * AN*DOC ! Diffusive DOC uptake, units of C/time
+    JL   = epsilonL * AL*L  ! Photoharvesting
+    JmaxT = fTemp2*Jmax
+    !
+    ! Potential net uptake
+    !
+    Jnetp = JL*(1-bL) + JDOC*(1-bDOC) + JF*(1-bF) - ftemp2*Jresp
+    !
+    ! Calculation of down-regulation factors for N-uptake and the net uptake:
+    !
+    if (Jnetp .lt. 0) then
+      Jnet = Jnetp  ! Severe carbon limitations => negative growth
+      dN = 0.d0
+    else
+      if (JN .eq. 0) then
+        dN = 1.d0
+      else
+        dN = max( 0.d0, min( 1.d0, (Jnetp - JF*(bg+1))/(JN*(1+bg+bN)) ) )
+      endif
+      Jnet = min( (Jnetp-bN*(dN*JN))/(1+bg) , & ! Carbon limitation
+                  JF + dN*JN)                   ! N limitation
+    endif 
+    !
+    ! Synthesis limitation:
+    !
+    f = 0
+    if ( Jnet .gt. JlossPassive ) then ! Apply FR only if net growth is positive
+      f = Jnet / ( Jnet + JmaxT )
+      Jnet = JmaxT * f
+    endif
+    Jtot = Jnet - JlossPassive
+
+    ! Take up N only to the degree that is is not supplied by feeding:
+    JNreal = max( 0.d0, Jnet - JF )
+    !
+    ! Regulate carbon uptakes for growth + respiration towards lowered jNet.
+    !
+
+    ! First carbon from F assuming no uptakes from DOC and L:
+    JFreal = min( JF, &
+        (Jnet + bg*max(0.d0, Jnet) + ftemp2*Jresp + bN*JNreal )/(1-bF)) 
+    ! Then divide evenly btw DOC and L:
+    tmp = ( (1 - bDOC)*JDOC + (1 - bL)*JL  )
+    if (tmp .eq. 0.0d0) then
+      JDOCreal = 0.0d0
+      JLreal = 0.0d0
+    else
+      tmp = ( Jnet + bg*max(0.d0, Jnet) + bN*JNreal + ftemp2*Jresp - &
+             JFreal*(1 - bF) ) / tmp
+      JDOCreal = tmp * JDOC
+      JLreal = tmp * JL
+    endif       
+    ! Exude surplus N:
+    JNlossLiebig = max( 0.d0, JNreal + JFreal - JlossPassive - Jtot )
+    JClossLiebig = 0.d0 ! There are never surplus C uptakes
+    !        
+    ! Actual uptakes:
+    !
+    JNtot = JNreal + JFreal
+    !
+    ! Losses:
+    !
+    JCloss_feeding     = (1.-epsilonF)/epsilonF * JFreal ! Incomplete feeding (units of carbon per time)
+    JCloss_photouptake = (1.-epsilonL)/epsilonL * JLreal
+    Jresptot = &
+         fTemp2*Jresp + &
+         bDOC*JDOCreal + &
+         bL*JLreal + &
+         bN*JNreal + &
+         bF*JFreal + &
+         max(0.d0,bg*Jnet)
+  end subroutine ratesGeneralistsCore
 
   subroutine calcDerivativesGeneralists(this, u, dNdt, dDOCdt, dudt)
     class(spectrumGeneralists), intent(inout):: this
     real(dp), intent(in):: u(this%n)
     real(dp), intent(inout) :: dNdt, dDOCdt, dudt(this%n)
-    !real(dp):: mortloss
+    real(dp):: dNcontrib(this%n), dDOCcontrib(this%n)
     integer:: i
 
-    this%mort2 = this%mort2constant*u ! "quadratic" mortality
-    this%jPOM = (1-remin2)*this%mort2  &! non-remineralized mort2 => POM
-              + (1-reminF)*this%JCloss_feeding/this%m ! Feeding losses
-
+    call derivativesGeneralistsCore(u, this%m, this%mort2constant, remin2, reminF, rhoCN, &
+         this%JNreal, this%JlossPassive, this%JNlossLiebig, this%JCloss_feeding, &
+         this%JDOCreal, this%JCloss_photouptake, this%Jtot, this%mortpred, this%mortHTL, &
+         this%mort2, this%jPOM, dNcontrib, dDOCcontrib, dudt)
     do i = 1, this%n
-      !
-      ! Update nitrogen:
-      !
-      dNdt = dNdt  &
-           + ((-this%JNreal(i) &
-           +  this%JlossPassive(i) &
-           +  this%JNlossLiebig(i) &     ! N leakage due to excess food
-           +  reminF*this%JCloss_feeding(i))/this%m(i) & ! Remineralized feeding losses
-           +  remin2*this%mort2(i) & ! Remineralized viral lysis
-           ) * u(i)/rhoCN
-      !
-      ! Update DOC:
-      !
-      dDOCdt = dDOCdt &
-           + ((-this%JDOCreal(i) &
-           +   this%JlossPassive(i) &
-           +   this%JCloss_photouptake(i) &
-           +   reminF*this%JCloss_feeding(i))/this%m(i) & ! Remineralized feeding losses
-           +   remin2*this%mort2(i) & ! Remineralized viral lysis
-           ) * u(i)
-      !
-      ! Update the generalists:
-      !
-      dudt(i) = (this%Jtot(i)/this%m(i)  &
-           - this%mortpred(i) &
-           - this%mort2(i) &
-           - this%mortHTL(i))*u(i)
-   end do
- end subroutine calcDerivativesGeneralists
+      dNdt = dNdt + dNcontrib(i)
+      dDOCdt = dDOCdt + dDOCcontrib(i)
+    end do
+  end subroutine calcDerivativesGeneralists
+
+  ! -----------------------------------------------
+  ! Derivatives of one size class of generalists and its contributions
+  ! to the derivatives of N and DOC (shared with the flat GPU kernel).
+  ! -----------------------------------------------
+  elemental subroutine derivativesGeneralistsCore(u, m, mort2constant, remin2, reminF, rhoCN, &
+       JNreal, JlossPassive, JNlossLiebig, JCloss_feeding, JDOCreal, JCloss_photouptake, &
+       Jtot, mortpred, mortHTL, mort2, jPOM, dNcontrib, dDOCcontrib, dudt)
+    !$omp declare target
+    real(dp), intent(in):: u, m, mort2constant, remin2, reminF, rhoCN
+    real(dp), intent(in):: JNreal, JlossPassive, JNlossLiebig, JCloss_feeding
+    real(dp), intent(in):: JDOCreal, JCloss_photouptake, Jtot, mortpred, mortHTL
+    real(dp), intent(out):: mort2, jPOM, dNcontrib, dDOCcontrib, dudt
+
+    mort2 = mort2constant*u ! "quadratic" mortality
+    jPOM = (1-remin2)*mort2  &! non-remineralized mort2 => POM
+         + (1-reminF)*JCloss_feeding/m ! Feeding losses
+    !
+    ! Nitrogen:
+    !
+    dNcontrib = ((-JNreal &
+         +  JlossPassive &
+         +  JNlossLiebig &     ! N leakage due to excess food
+         +  reminF*JCloss_feeding)/m & ! Remineralized feeding losses
+         +  remin2*mort2 & ! Remineralized viral lysis
+         ) * u/rhoCN
+    !
+    ! DOC:
+    !
+    dDOCcontrib = ((-JDOCreal &
+         +   JlossPassive &
+         +   JCloss_photouptake &
+         +   reminF*JCloss_feeding)/m & ! Remineralized feeding losses
+         +   remin2*mort2 & ! Remineralized viral lysis
+         ) * u
+    !
+    ! The generalists:
+    !
+    dudt = (Jtot/m  &
+         - mortpred &
+         - mort2 &
+         - mortHTL)*u
+  end subroutine derivativesGeneralistsCore
+
+  ! -----------------------------------------------
+  ! Access to the module parameters (used by NUMmodel_offload)
+  ! -----------------------------------------------
+  subroutine getParametersGeneralists(bL_, bN_, bDOC_, bF_, bg_, remin2_, reminF_)
+    real(dp), intent(out):: bL_, bN_, bDOC_, bF_, bg_, remin2_, reminF_
+    bL_ = bL; bN_ = bN; bDOC_ = bDOC; bF_ = bF; bg_ = bg
+    remin2_ = remin2; reminF_ = reminF
+  end subroutine getParametersGeneralists
 
 subroutine printRatesGeneralists(this)
   class(spectrumGeneralists), intent(in):: this

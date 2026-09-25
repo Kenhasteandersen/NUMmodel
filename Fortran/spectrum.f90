@@ -192,10 +192,19 @@ end subroutine calcGrid
     class (typeSpectrum), intent(inout):: this
     real(dp), intent(in):: F(this%n)
 
-    this%flvl = this%epsilonF * this%AF*F / & ! Note: adding a small number in the
-      ((this%AF*F+eps) + fTemp2*this%JFmax)   ! demonominator to avoid negative values if F = JFmax = 0.
-    this%JF = this%flvl * fTemp2*this%JFmax
+    call feedingCore(this%epsilonF, this%AF, this%JFmax, fTemp2, F, this%flvl, this%JF)
   end subroutine calcFeeding
+
+  ! Feeding of one size class (shared with the flat GPU kernel in NUMmodel_offload):
+  elemental subroutine feedingCore(epsilonF, AF, JFmax, fTemp2, F, flvl, JF)
+    !$omp declare target
+    real(dp), intent(in):: epsilonF, AF, JFmax, fTemp2, F
+    real(dp), intent(out):: flvl, JF
+
+    flvl = epsilonF * AF*F / & ! Note: adding a small number in the
+      ((AF*F+eps) + fTemp2*JFmax)   ! demonominator to avoid negative values if F = JFmax = 0.
+    JF = flvl * fTemp2*JFmax
+  end subroutine feedingCore
 
   !
   ! Returns the carbon that is lost from the system (by default only respiration, but 

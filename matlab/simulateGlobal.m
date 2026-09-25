@@ -18,6 +18,14 @@
 %            time of the last year.
 %  options.bVerbose: Write out progress on the terminal
 %  options.bNinit: Use only nutrient fields for initialization
+%  options.bOpenMP: Integrate all grid cells in one call to the Fortran
+%            library, which distributes the cells over OpenMP threads
+%            (set the number of threads with the environment variable
+%            OMP_NUM_THREADS before starting matlab). Replaces the parfor
+%            loop; do not combine with a parallel pool.
+%            Not used for the last year if bCalcAnnualAverages is true.
+%  options.bOffload: As bOpenMP, but uses the flat kernel that can run on a
+%            GPU (prototype; generalists only setup).
 %
 % Output:
 %  sim: structure with simulation results
@@ -30,6 +38,8 @@ arguments
     options.bCalcAnnualAverages = false; % Whether to calculate annual averages
     options.bVerbose = true; % Whether to write output on the terminal
     options.bNinit = false;
+    options.bOpenMP = false; % Use the OpenMP-threaded library call over all cells
+    options.bOffload = false; % Use the flat (GPU) kernel (generalists only)
 end
 %
 % Get the global parameters if they are not already set:
@@ -305,8 +315,21 @@ for i=1:simtime
 
     Nbefore = fNtot(u);
 
-    if ~isempty(gcp('nocreate'))
-        if options.bCalcAnnualAverages && i > simtime - 365/p.dtTransport
+    bLastYearFunctions = options.bCalcAnnualAverages && i > simtime - 365/p.dtTransport;
+    if options.bOffload && ~bLastYearFunctions
+        %
+        % Integrate all cells in one call with the flat kernel (GPU or host threads):
+        %
+        u = calllib(sLibname, 'f_simulateeulercellsgeneralists', ...
+            int32(nb), u, L, T, dtTransport, dt);
+    elseif options.bOpenMP && ~bLastYearFunctions
+        %
+        % Integrate all cells in one call; threads are over cells:
+        %
+        u = calllib(sLibname, 'f_simulateeulercells', ...
+            int32(nb), u, L, T, dtTransport, dt);
+    elseif ~isempty(gcp('nocreate'))
+        if bLastYearFunctions
             %
             % Integrate and calculate functions (only last year):
             %

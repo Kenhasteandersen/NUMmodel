@@ -13,6 +13,7 @@ module globals
 
   ! Temperature scalings parameters:
   real(dp) :: fTemp2, fTemp15 ! Temperature Q10 corrections (for Q10=2 and Q10=1.5)
+  !$omp threadprivate(fTemp2, fTemp15) ! Each thread works on its own grid cell
   real(dp), parameter:: Tref = 10.d0 ! Reference temperature
   
   !
@@ -33,6 +34,7 @@ module globals
   ! Temperature Q10 function
   ! -----------------------------------------------
   function fTemp(Q10, T) result(f)
+    !$omp declare target
     real(dp), intent(in):: Q10, T
     real(dp):: f
 
@@ -45,6 +47,7 @@ module globals
   subroutine updateTemperature(T)
     real(dp), intent(in) :: T
     real(dp), save :: Told = -1000.
+    !$omp threadprivate(Told)
 
     if (T .ne. Told) then
       Told = T
