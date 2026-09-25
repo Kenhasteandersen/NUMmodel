@@ -605,7 +605,7 @@ contains
        gammaN = max(0.d0, min(1.d0, -u(idxN)/(dudt(idxN)*dt)))
     end if
     if ((u(idxDOC) + dudt(idxDOC)*dt) .lt. 0) then
-       gammaDOC = max(0.d0, min(1.d0, u(idxDOC)/(dudt(idxDOC)*dt)))
+       gammaDOC = max(0.d0, min(1.d0, -u(idxDOC)/(dudt(idxDOC)*dt)))
     end if
     if (nNutrients .gt. 2) then
       if ((u(idxSi) + dudt(idxSi)*dt) .lt. 0) then
