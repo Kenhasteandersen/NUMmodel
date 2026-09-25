@@ -12,6 +12,8 @@ _Comparison of old v1.0 NPP (top), new, and difference (bottom) (units are mgC/m
 
 * Re-calibrated to fit with the new NPP scheme: kw=0.10/m, u=20 m/d, mortHTL=0.006.
 
+* Fixed a bug in the compilation that meant that optimization flags were ignored. This has led to a factor 3-4 speed increase!
+
 # Minor fixes and changes:
 
 * Fixed simulateChemostatEuler to give similar results as simulateChemostat
