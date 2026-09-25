@@ -16,6 +16,8 @@ _Comparison of old v1.0 NPP (top), new, and difference (bottom) (units are mgC/m
 
 # Minor fixes and changes:
 
+* The compiled libraries are no longer part of the repository; compile them with cmake (see lib/README.md).
+
 * Fixed simulateChemostatEuler to give similar results as simulateChemostat
 
 * Fixed a bug in the predictor-corrector scheme for DOC
