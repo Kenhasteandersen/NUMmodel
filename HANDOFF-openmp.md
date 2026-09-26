@@ -98,29 +98,26 @@ directives are then comments and everything runs serially.
 
 ## Setting the number of threads
 
-Pass the count as `bOpenMP`. It is either a logical or a number of threads, and it
-works at any point in the session:
-
-```matlab
-sim = simulateGlobal(p, bOpenMP=true);   % defaultNumThreads(): all physical cores
-sim = simulateGlobal(p, bOpenMP=16);     % 16 threads
-sim = simulateGlobal(p, bOpenMP=false);  % off; parfor or the serial loop instead
-```
-
-This calls `omp_set_num_threads` in the library through `f_setnumthreads`, and
-`f_getmaxthreads` reports what was actually granted. Note that `bOpenMP=true` is
-treated as a logical, not as the number 1.
-
-The environment variable still works, but only **before the first threaded call**:
-libgomp reads `OMP_NUM_THREADS` when the first parallel region runs and latches it for
-the life of the process, so setting it later in the same matlab session does nothing.
-It is the only route for `testOpenMPCells`, which calls the library directly.
+Use `OMP_NUM_THREADS`. Either form works, but only **before the first threaded call**:
+libgomp reads it when the first parallel region runs and latches it for the life of the
+process, so setting it later in the same matlab session does nothing.
 
 ```sh
-OMP_NUM_THREADS=16 matlab
+OMP_NUM_THREADS=16 matlab        # from the shell
 ```
 
-If neither is used, OpenMP uses all logical cores.
+```matlab
+setenv('OMP_NUM_THREADS','16');  % or from inside matlab, before the first call
+```
+
+If it is unset, OpenMP uses all logical cores. `simulateGlobal` warns when that is the
+case and prints the two lines above, because all logical cores is rarely the right
+choice: `schedule(static)` gives every thread an equal share of the grid cells, so on a
+machine with efficiency cores the slow threads hold up the fast ones.
+
+`f_getmaxthreads` reports the count that is actually in force; `simulateGlobal` prints
+it when `bVerbose` is set, and warns separately if it is 1, which means the library was
+built without OpenMP.
 
 **On the M2 Ultra use 16, not 24.** Measured with `testOpenMPCells(4000, 10)`,
 before Develop was merged in. The merge roughly halved the work per cell, so the

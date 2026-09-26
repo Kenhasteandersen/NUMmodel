@@ -19,12 +19,11 @@
 %  options.bVerbose: Write out progress on the terminal
 %  options.bNinit: Use only nutrient fields for initialization
 %  options.bOpenMP: Integrate all grid cells in one call to the fortran
-%            library, which distributes the cells over OpenMP threads. Either a
-%            logical, or the number of threads to use: false switches it off,
-%            true uses defaultNumThreads() (all physical cores), and a number
-%            uses that many threads. Replaces the parfor loop, so do not
-%            combine it with a parallel pool. Not used for the last year when
-%            bCalcAnnualAverages is true.
+%            library, which distributes the cells over OpenMP threads. Set the
+%            number of threads with the environment variable OMP_NUM_THREADS
+%            before starting matlab; a warning is written if it is unset.
+%            Replaces the parfor loop, so do not combine it with a parallel
+%            pool. Not used for the last year when bCalcAnnualAverages is true.
 %
 % Output:
 %  sim: structure with simulation results
@@ -37,7 +36,7 @@ arguments
     options.bCalcAnnualAverages = false; % Whether to calculate annual averages
     options.bVerbose = true; % Whether to write output on the terminal
     options.bNinit = false;
-    options.bOpenMP = false; % Thread over grid cells inside the library; see above
+    options.bOpenMP = false; % Thread over grid cells inside the library
 end
 %
 % Get the global parameters if they are not already set:
@@ -280,25 +279,27 @@ if options.bVerbose
 end
 sLibname = loadNUMmodelLibrary();
 %
-% bOpenMP is either a logical or a number of threads. Note that "true" has to be
-% treated as a logical and not as the number 1, or bOpenMP=true would run on a
-% single thread:
+% Check that the number of threads has been chosen. OpenMP otherwise uses all
+% logical cores, which is rarely what is wanted: on a machine with efficiency
+% cores they are much slower than the performance ones, and the threads are
+% given an equal share of the grid cells:
 %
-if islogical(options.bOpenMP)
-    nThreads = 0;
-    if options.bOpenMP
-        nThreads = defaultNumThreads();
-    end
-else
-    nThreads = options.bOpenMP; % 0 switches the threading off
-end
-bOpenMP = nThreads > 0;
-if bOpenMP
-    calllib(sLibname, 'f_setnumthreads', int32(nThreads));
-    nThreads = calllib(sLibname, 'f_getmaxthreads', int32(0)); % What we actually got
+if options.bOpenMP
+    nThreads = calllib(sLibname, 'f_getmaxthreads', int32(0));
     if nThreads == 1
-        warning(['The library runs on one thread. It is probably compiled ' ...
+        warning(['The library runs on a single thread. It is probably compiled ' ...
                  'without OpenMP; see lib/README.md.'])
+    elseif isempty(getenv('OMP_NUM_THREADS'))
+        fprintf(2, ['\nOMP_NUM_THREADS is not set, so OpenMP defaults to %d threads.\n' ...
+            'Set it explicitly before starting matlab, e.g.\n\n' ...
+            '    OMP_NUM_THREADS=%d matlab\n\n' ...
+            'or from inside matlab, before the first call to the library:\n\n' ...
+            '    setenv(''OMP_NUM_THREADS'',''%d'')\n\n' ...
+            'It has to be set before the first threaded call: libgomp reads it when\n' ...
+            'the first parallel region runs and keeps it for the rest of the session.\n' ...
+            'Use testOpenMPCells to find the best number for this machine; it is not\n' ...
+            'always all of the cores.\n\n'], ...
+            nThreads, feature('numcores'), feature('numcores'));
     end
     if options.bVerbose
         fprintf('Threading over grid cells on %d threads\n', nThreads);
@@ -339,7 +340,7 @@ for i=1:simtime
     Nbefore = fNtot(u);
 
     bLastYearFunctions = options.bCalcAnnualAverages && i > simtime - 365/p.dtTransport;
-    if bOpenMP && ~bLastYearFunctions
+    if options.bOpenMP && ~bLastYearFunctions
         %
         % Integrate all cells in one call; the library threads over the cells:
         %

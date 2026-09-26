@@ -10,7 +10,7 @@ module NUMmodel_wrap
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
        simulateChemostatEuler, simulateEuler, simulateEulerCells, simulateEulerFunctions, getFunctions, &
-       setNumThreads, getMaxThreads, &
+       getMaxThreads, &
        setHTL, setmortHTL, getMortHTL, setSinking, getRates, getBalance, getLost, theta
 
   use globals
@@ -18,11 +18,6 @@ module NUMmodel_wrap
   implicit none
 
 contains
-
-  subroutine f_setnumthreads(nThreads) bind(c)
-    integer(c_int), intent(in), value:: nThreads
-    call setNumThreads( int(nThreads) )
-  end subroutine f_setnumthreads
 
   subroutine f_getmaxthreads(nThreads) bind(c)
     integer(c_int), intent(out):: nThreads
