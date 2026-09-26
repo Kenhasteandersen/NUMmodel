@@ -7,7 +7,7 @@
 .claude/settings.local.json
 
 # Build output (cmake out-of-source and legacy in-source builds).
-# Note: lib/ holds the *distributed* prebuilt libraries and is tracked.
+# The libraries in lib/ are built by "cmake --install build" and not tracked.
 build/
 gotm_build/
 CMakeFiles/
@@ -17,9 +17,9 @@ install_manifest.txt
 Makefile
 *.o
 *.mod
-Fortran/*.so
-Fortran/*.dylib
-Fortran/*.dll
+*.so
+*.dylib
+*.dll
 Fortran/NUMmodel
 Fortran/NUMmodeltest
 Fortran/a.out
