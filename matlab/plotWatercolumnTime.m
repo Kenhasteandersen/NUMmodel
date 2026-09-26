@@ -65,8 +65,6 @@ if options.bMolarUnits
         Si = Si/28;
     end
 end
-DOC(DOC<=0.01) = 0.01;
-
 t = sim.t;
 %
 % Make a layer at z = 0 with the same value as in the first grid point:
@@ -101,7 +99,8 @@ nexttile
 %z = [sim.z-0.5*sim.dznom; sim.z(end)+0.5*sim.dznom(end)];
 %panelField([t t(end)], -z, N');
 %surface(t,-z, N)
-contourf(t,-z,N,logspace(-2,3,options.nLevels),'LineStyle','none')
+levels = logspace(-2,3,options.nLevels);
+contourf(t,-z,clampToLevels(N,levels),levels,'LineStyle','none')
 title('Nitrogen','FontWeight','normal','FontSize',10)
 ylabel('  ') % Make space for ylabel at the end
 %set(gca,'ColorScale','log')
@@ -122,7 +121,8 @@ set(gca,'XTickLabel','')
 if isfield(sim,'Si')
     nexttile
     %surface(t,-z, Si)
-    contourf(t,-z,Si,logspace(-2,3,options.nLevels),'LineStyle','none')
+    levels = logspace(-2,3,options.nLevels);
+    contourf(t,-z,clampToLevels(Si,levels),levels,'LineStyle','none')
     % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
     title('Silicate','FontWeight','normal')
     %ylabel('Depth (m)')
@@ -144,7 +144,8 @@ if isfield(sim,'Si')
 end
 
 nexttile
-contourf(t,-z,DOC,logspace(-2,2,options.nLevels),'LineStyle','none')
+levels = logspace(-2,2,options.nLevels);
+contourf(t,-z,clampToLevels(DOC,levels),levels,'LineStyle','none')
 %surface(t,-z, DOC)
 title('DOC','FontWeight','normal')
 %ylabel('Depth (m)')
@@ -164,8 +165,8 @@ set(gca,'XTickLabel','')
 for i = 1:sim.p.nGroups
     nexttile
     %surface(t,-z, squeeze(B(i,:,:)))
-    B(B < 0.01) = 0.01; % Set low biomasses to the lower limit to avoid white space in plot
-    contourf(t,-z,(squeeze(B(i,:,:))),[logspace(-2,3,options.nLevels)],'LineStyle','none')
+    levels = logspace(-2,3,options.nLevels);
+    contourf(t,-z,clampToLevels(squeeze(B(i,:,:)),levels),levels,'LineStyle','none')
     title( sim.p.nameGroup(i) ,'FontWeight','normal');
     %ylabel('Depth (m)')
     axis tight
@@ -187,5 +188,16 @@ if strcmp(sim.p.nameModel, 'watercolumn')
 end
 annotation('textbox', [0.075, 0.5, 0.5, 0.04], 'String', 'Depth (m)', 'FontSize', 10,'rotation',90,...
     'edgecolor','none','VerticalAlignment','bottom');
+
+end
+
+%
+% contourf leaves the areas where the field is below the lowest contour level
+% unfilled, which shows up as white patches. Clamping the field to the range of
+% the levels gives those areas the colour of the nearest limit instead.
+%
+function Z = clampToLevels(Z, levels)
+
+Z = min( max(Z, levels(1)), levels(end) );
 
 end
