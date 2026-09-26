@@ -47,6 +47,7 @@ module NUMmodel
   real(dp), dimension(:,:), allocatable:: theta ! Interaction matrix
   real(dp), dimension(:), allocatable:: upositive ! State variable constrained to be positive
   real(dp), dimension(:), allocatable:: F ! Available food
+  real(dp), dimension(:), allocatable:: predFactor ! Predator-dependent factor in the predation mortality
   !
   ! Variables for HTL mortalities:
   !
@@ -341,6 +342,7 @@ contains
        deallocate(ixEnd)
        deallocate(upositive)
        deallocate(F)
+       deallocate(predFactor)
        deallocate(theta)
        deallocate(pHTL)
        if (allocated(thetaPOM)) then
@@ -354,6 +356,7 @@ contains
     allocate(ixEnd(nGroups))
     allocate(upositive(nGrid))
     allocate(F(nGrid))
+    allocate(predFactor(nGrid))
     allocate(pHTL(nGrid))
     allocate(theta(nGrid,nGrid))     ! Interaction matrix:
   end subroutine parametersInit
@@ -699,6 +702,7 @@ contains
   !   This correction procedure is needed for correct Euler integration.
   subroutine calcDerivativesUnicellulars()
    integer :: jGroup, ixj, ixi
+   real(dp):: mortsum
    !
    ! Calc uptakes of all unicellular groups:
    !
@@ -721,20 +725,31 @@ contains
    !
    ! Calc predation mortality
    !
+   ! The part that depends only on the predator size class j is the same for all
+   ! prey classes i, so it is calculated once here rather than inside the loop
+   ! over prey. That takes a division and a lookup in the group objects out of
+   ! each of the nGrid*nGrid predator-prey pairs:
+   !
+   do jGroup = 1, nGroups
+      do j = ixStart(jGroup), ixEnd(jGroup)
+         ixj = j-ixStart(jGroup)+1
+         if (F(j) .gt. 0.d0) then
+            predFactor(j) = group(jGroup)%spec%JF(ixj)*upositive(j) &
+               / (group(jGroup)%spec%epsilonF*group(jGroup)%spec%m(ixj)*F(j))
+         else
+            predFactor(j) = 0.d0
+         end if
+      end do
+   end do
+
    do iGroup = 1, nGroups
-      group(iGroup)%spec%mortpred = 0.d0
       do i = ixStart(iGroup), ixEnd(iGroup)
          ixi = i-ixStart(iGroup)+1
-         do jGroup = 1, nGroups
-            do j = ixStart(jGroup), ixEnd(jGroup)
-               ixj = j-ixStart(jGroup)+1
-               if (F(j) .gt. 0.d0) then
-                 group(iGroup)%spec%mortpred(ixi) = group(iGroup)%spec%mortpred(ixi) &
-                    + theta(j,i) * group(jGroup)%spec%JF(ixj)*upositive(j) &
-                    / (group(jGroup)%spec%epsilonF*group(jGroup)%spec%m(ixj)*F(j))
-               end if
-            end do
+         mortsum = 0.d0
+         do j = idxB, nGrid
+            mortsum = mortsum + theta(j,i)*predFactor(j)
          end do
+         group(iGroup)%spec%mortpred(ixi) = mortsum
       end do
    end do 
    !
