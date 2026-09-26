@@ -81,7 +81,7 @@ B(:,1,:) = B(:,2,:);
 nTiles = 2+isfield(sim,'Si')+sim.p.nGroups;
 if options.bNewPlot
     clf
-    tiledlayout(nTiles,1,'tilespacing','tight','padding','tight')
+    tiledlayout(nTiles,1,'tilespacing','none','padding','tight')
 end
 
 if isempty(options.depthMax)
@@ -101,12 +101,13 @@ nexttile
 %surface(t,-z, N)
 levels = logspace(-2,3,options.nLevels);
 contourf(t,-z,clampToLevels(N,levels),levels,'LineStyle','none')
-title('Nitrogen','FontWeight','normal','FontSize',10)
+panelTitle('Nitrogen','k')
 ylabel('  ') % Make space for ylabel at the end
 %set(gca,'ColorScale','log')
 %shading interp
 axis tight
-h = colorbar('ticks',10.^(-2:3));
+h = colorbar('ticks',10.^(-2:2:2));
+h.FontSize = 7;
 if options.bMolarUnits
     h.Label.String = '{\mu}M_N';
 else
@@ -124,12 +125,13 @@ if isfield(sim,'Si')
     levels = logspace(-2,3,options.nLevels);
     contourf(t,-z,clampToLevels(Si,levels),levels,'LineStyle','none')
     % title(['Silicate, lat ', num2str(lat),', lon ', num2str(lon)])
-    title('Silicate','FontWeight','normal')
+    panelTitle('Silicate','k')
     %ylabel('Depth (m)')
     %set(gca,'ColorScale','log')
     %shading interp
     axis tight
-    h = colorbar('ticks',10.^(-2:3));
+    h = colorbar('ticks',10.^(-2:2:2));
+    h.FontSize = 7;
     if options.bMolarUnits
         h.Label.String = '{\mu}M_{Si}';
     else
@@ -147,10 +149,11 @@ nexttile
 levels = logspace(-2,2,options.nLevels);
 contourf(t,-z,clampToLevels(DOC,levels),levels,'LineStyle','none')
 %surface(t,-z, DOC)
-title('DOC','FontWeight','normal')
+panelTitle('DOC')
 %ylabel('Depth (m)')
 axis tight
-h = colorbar('ticks',10.^(-2:2));
+h = colorbar('ticks',10.^(-2:2:2));
+h.FontSize = 7;
 if options.bMolarUnits
     h.Label.String = '{\mu}M_C';
 else    
@@ -167,10 +170,11 @@ for i = 1:sim.p.nGroups
     %surface(t,-z, squeeze(B(i,:,:)))
     levels = logspace(-2,3,options.nLevels);
     contourf(t,-z,clampToLevels(squeeze(B(i,:,:)),levels),levels,'LineStyle','none')
-    title( sim.p.nameGroup(i) ,'FontWeight','normal');
+    panelTitle( sim.p.nameGroup(i) );
     %ylabel('Depth (m)')
     axis tight
-    h = colorbar('ticks',10.^(-2:2:3));
+    h = colorbar('ticks',10.^(-2:2:2));
+    h.FontSize = 7;
     h.Label.String = '{\mu}g_C/l';
     set(gca, 'colorscale','log')
     ylim(ylimit)
@@ -186,8 +190,7 @@ end
 if strcmp(sim.p.nameModel, 'watercolumn')
     sgtitle(['Water column at lat = ', num2str(lat), char(176), ', lon = ', num2str(lon), char(176)])
 end
-annotation('textbox', [0.075, 0.5, 0.5, 0.04], 'String', 'Depth (m)', 'FontSize', 10,'rotation',90,...
-    'edgecolor','none','VerticalAlignment','bottom');
+ylabel(gca().Parent, 'Depth (m)', 'FontSize', 10); % One label for the whole layout
 
 end
 
@@ -199,5 +202,20 @@ end
 function Z = clampToLevels(Z, levels)
 
 Z = min( max(Z, levels(1)), levels(end) );
+
+end
+
+%
+% Panel title, written inside the panel in the top left corner:
+%
+function panelTitle(sTitle, sColor)
+
+arguments
+    sTitle
+    sColor = 'w'; % White reads on the dark panels; the nutrient panels are light
+end
+
+text(0.01, 0.95, sTitle, 'Units','normalized', 'Color',sColor, 'FontSize',8, ...
+    'VerticalAlignment','top', 'HorizontalAlignment','left');
 
 end
