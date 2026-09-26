@@ -70,6 +70,12 @@ void f_simulateeuler(
 			      const double tEnd,
 			      const double dt);
 
+void f_setnumthreads(
+			      const int nThreads);
+
+void f_getmaxthreads(
+			      int *nThreads);
+
 void f_simulateeulercells(
 			      const int nCells,
 			      double u[],

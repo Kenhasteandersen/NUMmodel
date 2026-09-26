@@ -98,21 +98,33 @@ directives are then comments and everything runs serially.
 
 ## Setting the number of threads
 
-Either works, but only **before the first threaded call**: libgomp reads
-`OMP_NUM_THREADS` when the first parallel region runs and latches it for the life of
-the process. Setting it later in the same matlab session does nothing.
+Pass the count as `bOpenMP`. It is either a logical or a number of threads, and it
+works at any point in the session:
 
 ```matlab
-setenv('OMP_NUM_THREADS','16');   % from inside matlab, before the first call
+sim = simulateGlobal(p, bOpenMP=true);   % defaultNumThreads(): all physical cores
+sim = simulateGlobal(p, bOpenMP=16);     % 16 threads
+sim = simulateGlobal(p, bOpenMP=false);  % off; parfor or the serial loop instead
 ```
+
+This calls `omp_set_num_threads` in the library through `f_setnumthreads`, and
+`f_getmaxthreads` reports what was actually granted. Note that `bOpenMP=true` is
+treated as a logical, not as the number 1.
+
+The environment variable still works, but only **before the first threaded call**:
+libgomp reads `OMP_NUM_THREADS` when the first parallel region runs and latches it for
+the life of the process, so setting it later in the same matlab session does nothing.
+It is the only route for `testOpenMPCells`, which calls the library directly.
 
 ```sh
-OMP_NUM_THREADS=16 matlab        # or from the shell
+OMP_NUM_THREADS=16 matlab
 ```
 
-If it is unset, OpenMP uses all logical cores.
+If neither is used, OpenMP uses all logical cores.
 
-**On the M2 Ultra use 16, not 24.** Measured with `testOpenMPCells(4000, 10)`:
+**On the M2 Ultra use 16, not 24.** Measured with `testOpenMPCells(4000, 10)`,
+before Develop was merged in. The merge roughly halved the work per cell, so the
+best thread count and every timing below are worth re-measuring:
 
 | threads | setupGeneralistsOnly | setupGeneralistsPOM | setupNUMmodel |
 |---|---|---|---|

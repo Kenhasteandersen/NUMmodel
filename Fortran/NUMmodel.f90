@@ -9,7 +9,7 @@
 !
 module NUMmodel
   use iso_c_binding, only: c_char, c_null_char
-  !$ use omp_lib, only: omp_get_thread_num
+  !$ use omp_lib, only: omp_get_thread_num, omp_set_num_threads, omp_get_max_threads
   use globals
   use spectrum
   use generalists
@@ -860,6 +860,24 @@ contains
   !   L(nCells), T(nCells): light and temperature in each cell
   !   tEnd, dt: time to simulate and Euler time step
   ! -----------------------------------------------
+  ! -----------------------------------------------
+  ! Set the number of threads that simulateEulerCells runs over the grid cells
+  ! with. Without OpenMP this does nothing, and getMaxThreads returns 1.
+  ! -----------------------------------------------
+  subroutine setNumThreads(nThreads)
+    integer, intent(in):: nThreads
+    !$ call omp_set_num_threads(nThreads)
+  end subroutine setNumThreads
+
+  ! -----------------------------------------------
+  ! The number of threads that will be used
+  ! -----------------------------------------------
+  function getMaxThreads() result(nThreads)
+    integer:: nThreads
+    nThreads = 1
+    !$ nThreads = omp_get_max_threads()
+  end function getMaxThreads
+
   subroutine simulateEulerCells(nCells, u, L, T, tEnd, dt)
     integer, intent(in):: nCells
     real(dp), intent(inout):: u(nCells, nGrid)
