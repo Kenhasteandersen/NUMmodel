@@ -23,6 +23,7 @@ Makefile
 Fortran/NUMmodel
 Fortran/NUMmodeltest
 Fortran/a.out
+spmmbench
 Fortran/debug.out
 Fortran/*__genmod.f90
 Fortran/server.csr
