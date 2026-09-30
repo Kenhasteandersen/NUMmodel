@@ -64,10 +64,42 @@ if ~exist(p.pathBoxes,'file')
     error( sprintf('Error: Cannot find transport matrix file: %s',...
         p.pathBoxes));
 end
+%
+% Check that the time steps fit together. Everything below counts whole steps,
+% and a step that does not divide evenly is caught nowhere else: it simply gives
+% a run that is wrong. This is checked here rather than in parametersGlobal so
+% that it also catches p.dtTransport or p.dt being overridden afterwards.
+%
+bWhole = @(x) abs(x-round(x)) < 1e-9;
+
+if ~bWhole(p.dtTransport/p.dt)
+    error(['p.dtTransport (%g days) must be a whole number of euler steps p.dt ' ...
+           '(%g days), but it is %g of them. The library integrates ' ...
+           'floor(dtTransport/dt) steps, so the biology would lag the transport.'], ...
+           p.dtTransport, p.dt, p.dtTransport/p.dt);
+end
+if ~bWhole(365/p.dtTransport)
+    error(['A year has to be a whole number of transport steps, but 365 days is ' ...
+           '%g steps of p.dtTransport = %g days.'], 365/p.dtTransport, p.dtTransport);
+end
+%
+% The implicit matrix is raised to the power dtTransport/deltaT below, and a
+% sparse matrix can only be raised to a whole power:
+%
+gridDeltaT = load(p.pathGrid, 'deltaT');
+if isfield(gridDeltaT,'deltaT')
+    nPower = p.dtTransport*24*60*60/gridDeltaT.deltaT;
+    if ~bWhole(nPower) || nPower < 1
+        error(['p.dtTransport (%g days) is %g times the %g s time step of the ' ...
+               '%s matrices. It has to be a whole multiple of it, because the ' ...
+               'implicit matrix is raised to that power.'], ...
+               p.dtTransport, nPower, gridDeltaT.deltaT, p.TMname);
+    end
+end
 % ---------------------------------------
 % Initialize run:
 % ---------------------------------------
-simtime = p.tEnd/p.dtTransport; %simulation time in half days
+simtime = p.tEnd/p.dtTransport; % simulation time in transport steps
 load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
 
 % Preparing timestepping
@@ -138,8 +170,9 @@ for i = 1:365/p.dtTransport
     if p.bUse_parday_light
         L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox);
     else
-        % Calculate light:
-        L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox,i/2,1).*exp(-p.kw*Zbox);
+        % Calculate light. i*p.dtTransport is the day of the year; it was written
+        % as i/2, which is only the same thing when dtTransport is half a day:
+        L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox,i*p.dtTransport,1).*exp(-p.kw*Zbox);
     end
 end
 %
@@ -391,7 +424,7 @@ for i=1:simtime
     %
     if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
         if options.bVerbose
-            fprintf('t = %u days',floor(i/2))
+            fprintf('t = %u days',floor(i*p.dtTransport))
         end
 
         if any(isnan(u))
