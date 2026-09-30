@@ -188,37 +188,51 @@ if ~isempty(idxSinking)
     if options.bVerbose
         disp('Allocating sinking matrices')
     end
-    % Allocate sinking matrices:
-    Asink = {};
-    for l = 1:length(idxSinking)
-        Asink{l} = sparse(1,1,0,nb,nb,nb*2);
-    end
     % Find the indices into the grid
     xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid);
-    % Run through all latitudes and longitudes:
-    for i = 1:size(xx,1)
-        for j = 1:size(xx,2)
-            % Find the watercolumn indices:
-            idxGrid = squeeze(xx(i, j, :));
-            idxGrid = idxGrid( ~isnan(idxGrid));
-            if ~isempty(idxGrid)
-                % Run through all sinking state variables
-                for l = 1:length(idxSinking)
-                    for k = 1:length(idxGrid)
-                        flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(k));
-                        % Loss of mass ...
-                        Asink{l}(idxGrid(k),idxGrid(k)) = 1-flx;
-                        % Gain from above
-                        if (k > 1)
-                            Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
-                        end
-                    end
-                    if p.BC_POMclosed
-                        Asink{l}(idxGrid(k),idxGrid(k)) = 1; % Closed BC; no loss of mass at the bottom
-                    end
-                end
-            end
+    %
+    % Every box loses a fraction flx of its mass to the box below and gains the
+    % same fraction of the mass of the box above. flx depends only on how deep
+    % the box is in its own water column, so the only thing needed per box is
+    % that depth and the index of the box above it.
+    %
+    % The matrices are assembled in one call to sparse() at the end. Writing the
+    % elements one at a time into a sparse matrix rebuilds the whole thing on
+    % every write, which for the ECCO grid takes minutes rather than a moment.
+    %
+    [nx, ny, nz] = size(xx);
+    X = reshape(xx, nx*ny, nz);
+    bValid = ~isnan(X); % The wet boxes
+    kDepth = cumsum(bValid, 2); % Depth of each box counted down its own column
+    %
+    % The box above, which is the previous wet one in the same column:
+    %
+    iAbove = NaN(size(X));
+    iLast = NaN(size(X,1),1);
+    for k = 1:nz
+        iAbove(:,k) = iLast;
+        iLast(bValid(:,k)) = X(bValid(:,k), k);
+    end
+    bBottom = bValid & (kDepth == kDepth(:,end)); % Deepest box of each column
+
+    ixBox = X(bValid);
+    kBox = kDepth(bValid);
+    ixAbove = iAbove(bValid);
+    bBottomBox = bBottom(bValid);
+    bHasAbove = kBox > 1;
+
+    Asink = cell(1,length(idxSinking));
+    for l = 1:length(idxSinking)
+        flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(kBox));
+        % Loss of mass ...
+        vDiagonal = 1 - flx;
+        if p.BC_POMclosed
+            vDiagonal(bBottomBox) = 1; % Closed BC; no loss of mass at the bottom
         end
+        % ... and gain from above
+        Asink{l} = sparse( [ixBox; ixBox(bHasAbove)], ...
+                           [ixBox; ixAbove(bHasAbove)], ...
+                           [vDiagonal; flx(bHasAbove)], nb, nb );
     end
 end
 %%
