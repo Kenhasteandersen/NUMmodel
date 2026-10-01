@@ -901,7 +901,11 @@ contains
 
     !$omp parallel default(shared) private(k, ucell)
     call prepareThread()
-    !$omp do schedule(static)
+    ! guided, not static: an even split of the cells leaves every thread
+    ! waiting at the barrier for the slowest one. Worth about 5% on ECCO, and
+    ! more where the region is short enough for one slow thread to dominate it
+    ! (setupGeneralistsOnly in testOpenMPCells goes from 10.2x to 13.5x).
+    !$omp do schedule(guided)
     do k = 1, nCells
        ucell = u(k,:)
        call simulateEuler(ucell, L(k), T(k), tEnd, dt)
@@ -932,7 +936,11 @@ contains
 
     !$omp parallel default(shared) private(k, ucell)
     call prepareThread()
-    !$omp do schedule(static)
+    ! guided, not static: an even split of the cells leaves every thread
+    ! waiting at the barrier for the slowest one. Worth about 5% on ECCO, and
+    ! more where the region is short enough for one slow thread to dominate it
+    ! (setupGeneralistsOnly in testOpenMPCells goes from 10.2x to 13.5x).
+    !$omp do schedule(guided)
     do k = 1, nCells
        ucell = u(k,:)
        call simulateEulerFunctions(ucell, L(k), T(k), tEnd, dt, &
