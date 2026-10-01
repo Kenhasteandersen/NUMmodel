@@ -9,7 +9,8 @@ module NUMmodel_wrap
        setupGeneralistsSimpleCopepod, &
        setupGeneric, setupNUMmodel, setupNUMmodelSimple, setupGenDiatCope, &
        calcderivatives, &
-       simulateChemostatEuler, simulateEuler, simulateEulerCells, simulateEulerFunctions, getFunctions, &
+       simulateChemostatEuler, simulateEuler, simulateEulerCells, simulateEulerFunctions, &
+       simulateEulerCellsFunctions, getFunctions, &
        getMaxThreads, &
        setHTL, setmortHTL, getMortHTL, setSinking, getRates, getBalance, getLost, theta
 
@@ -178,6 +179,20 @@ contains
     call simulateEulerFunctions(u, L, T, tEnd, dt, &
       ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
   end subroutine f_simulateEulerFunctions
+
+  subroutine f_simulateEulerCellsFunctions(nCells, u, L, T, tEnd, dt, &
+    ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL) bind(c)
+    integer(c_int), intent(in), value:: nCells
+    real(c_double), intent(inout):: u(nCells, nGrid)
+    real(c_double), intent(in):: L(nCells), T(nCells)
+    real(c_double), intent(in), value:: tEnd, dt
+    real(c_double), intent(out):: ProdGross(nCells), ProdNet(nCells), ProdHTL(nCells), &
+      ProdBact(nCells), eHTL(nCells), Bpico(nCells), Bnano(nCells), &
+      Bmicro(nCells), mHTL(nCells)
+
+    call simulateEulerCellsFunctions(int(nCells), u, L, T, tEnd, dt, &
+      ProdGross, ProdNet,ProdHTL,prodBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
+  end subroutine f_simulateEulerCellsFunctions
 
   subroutine f_setHTL(mHTL, mortHTL, bQuadraticHTL, bDecliningHTL, bCopepodsOnly) bind(c)
     real(c_double), intent(in), value:: mHTL, mortHTL

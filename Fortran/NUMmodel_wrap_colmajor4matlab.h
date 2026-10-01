@@ -97,6 +97,23 @@ void f_simulateeulerfunctions(
 				  double *Bmicro,
 				  double *mHTL);
 
+void f_simulateeulercellsfunctions(
+			      const int nCells,
+			      double u[],
+			      const double L[],
+			      const double T[],
+			      const double tEnd,
+			      const double dt,
+				  double ProdGross[],
+				  double ProdNet[],
+				  double ProdHTL[],
+				  double ProdBact[],
+				  double eHTL[],
+				  double Bpico[],
+				  double Bnano[],
+				  double Bmicro[],
+				  double mHTL[]);
+
 void f_getmass(
 				double *m,
 				double *mDelta);

@@ -10,6 +10,10 @@ _Comparison of old v1.0 NPP (top), new, and difference (bottom) (units are mgC/m
 
 * Several fixed resulted in factor 3 or more speed increases.
 
+* Added support for UVic transport matrix
+
+* Global runs parellel by default using openMP. This does away with the clunky matlab parallelizing.  `simulateGlobal` does this by default (`bOpenMP=true`). The number of threads must be set with the environment variable `OMP_NUM_THREADS` before matlab starts.
+
 # Minor fixes and changes:
 
 * Fixed simulateChemostatEuler to give similar results as simulateChemostat

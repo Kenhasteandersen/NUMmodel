@@ -19,11 +19,13 @@
 %  options.bVerbose: Write out progress on the terminal
 %  options.bNinit: Use only nutrient fields for initialization
 %  options.bOpenMP: Integrate all grid cells in one call to the fortran
-%            library, which distributes the cells over OpenMP threads. Set the
-%            number of threads with the environment variable OMP_NUM_THREADS
-%            before starting matlab; a warning is written if it is unset.
-%            Replaces the parfor loop, so do not combine it with a parallel
-%            pool. Not used for the last year when bCalcAnnualAverages is true.
+%            library, which distributes the cells over OpenMP threads (TRUE).
+%            This replaces the old parfor loop over the cells, which needed the
+%            parallel computing toolbox and a copy of the model in every
+%            worker. Set the number of threads with the environment variable
+%            OMP_NUM_THREADS before starting matlab; a warning is written if it
+%            is unset. Set bOpenMP=false to run the cells one at a time, or
+%            over a parallel pool if one has been started with bParallel.
 %
 % Output:
 %  sim: structure with simulation results
@@ -36,7 +38,7 @@ arguments
     options.bCalcAnnualAverages = false; % Whether to calculate annual averages
     options.bVerbose = true; % Whether to write output on the terminal
     options.bNinit = false;
-    options.bOpenMP = false; % Thread over grid cells inside the library
+    options.bOpenMP = true; % Thread over grid cells inside the library
 end
 %
 % Get the global parameters if they are not already set:
@@ -315,6 +317,7 @@ if options.bCalcAnnualAverages
     BmicroAnnualMean = zeros( nb,1 );
 
     [mortHTL, bQuadratic] = getMortHTL(p);
+    zeroCells = zeros(nb,1); % Passed in for each of the function outputs
 end
 
 % ---------------------------------------
@@ -393,6 +396,34 @@ for i=1:simtime
         %
         u = calllib(sLibname, 'f_simulateeulercells', ...
             int32(nb), u, L, T, dtTransport, dt);
+    elseif options.bOpenMP
+        %
+        % Integrate all cells in one call and also get the ecosystem functions
+        % of each cell (only the last year); the library threads over the
+        % cells:
+        %
+        % calllib hands back every pointer argument, so the two discarded
+        % outputs after u are L and T, and ProdBact and eHTL are discarded
+        % further down the list:
+        %
+        [u, ~, ~, ProdGross1, ProdNet1, ProdHTL1, ~, ~, ...
+            Bpico1, Bnano1, Bmicro1, mHTL1] = ...
+            calllib(sLibname, 'f_simulateeulercellsfunctions', ...
+            int32(nb), u, L, T, dtTransport, dt, ...
+            zeroCells, zeroCells, zeroCells, zeroCells, zeroCells, ...
+            zeroCells, zeroCells, zeroCells, zeroCells);
+
+        ProdNet(i,:) = reshape(ProdNet1,1,[]);
+        ProdHTL(i,:) = reshape(ProdHTL1,1,[]);
+        mHTL(i,:) = reshape(mHTL1,1,[]);
+        BHTL = BHTL + u.^(1+bQuadratic) .* [zeros(1,p.nNutrients), mortHTL];
+
+        ProdGrossAnnual = ProdGrossAnnual + reshape(ProdGross1,[],1);
+        ProdNetAnnual = ProdNetAnnual + reshape(ProdNet1,[],1);
+        ProdHTLAnnual = ProdHTLAnnual + reshape(ProdHTL1,[],1);
+        BpicoAnnualMean = BpicoAnnualMean + reshape(Bpico1,[],1);
+        BnanoAnnualMean = BnanoAnnualMean + reshape(Bnano1,[],1);
+        BmicroAnnualMean = BmicroAnnualMean + reshape(Bmicro1,[],1);
     elseif ~isempty(gcp('nocreate'))
         if bLastYearFunctions
             %
@@ -414,7 +445,7 @@ for i=1:simtime
                     calllib(sLibname, 'f_simulateeulerfunctions', ...
                     u(k,:), L(k), T(k), dtTransport, dt, ...
                     ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1,mHTL1);
-               
+
                 ProdNet(i,k) = ProdNet1;
                 ProdHTL(i,k) = ProdHTL1;
                 mHTL(i,k) = mHTL1;
@@ -435,6 +466,39 @@ for i=1:simtime
                 u(k,:) = calllib(sLibname, 'f_simulateeuler', ...
                     u(k,:), L(k), T(k), dtTransport, dt);
             end
+        end
+    elseif bLastYearFunctions
+        %
+        % Serial version of the above:
+        %
+        nNutrients = p.nNutrients;
+        for k = 1:nb
+            ProdGross1 = 0;
+            ProdNet1 = 0;
+            ProdHTL1 = 0;
+            ProdBact1 = 0;
+            eHTL1 = 0;
+            Bpico1 = 0;
+            Bnano1 = 0;
+            Bmicro1 = 0;
+            mHTL1 = 0;
+
+            [u(k,:), ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1,mHTL1] = ...
+                calllib(sLibname, 'f_simulateeulerfunctions', ...
+                u(k,:), L(k), T(k), dtTransport, dt, ...
+                ProdGross1, ProdNet1,ProdHTL1,ProdBact1, eHTL1,Bpico1,Bnano1,Bmicro1,mHTL1);
+
+            ProdNet(i,k) = ProdNet1;
+            ProdHTL(i,k) = ProdHTL1;
+            mHTL(i,k) = mHTL1;
+            BHTL(k,:) = BHTL(k,:) + u(k,:).^(1+bQuadratic) .* [zeros(1,nNutrients), mortHTL];
+
+            ProdGrossAnnual(k) = ProdGrossAnnual(k) + ProdGross1;
+            ProdNetAnnual(k) = ProdNetAnnual(k) + ProdNet1;
+            ProdHTLAnnual(k) = ProdHTLAnnual(k) + ProdHTL1;
+            BpicoAnnualMean(k) = BpicoAnnualMean(k) + Bpico1;
+            BnanoAnnualMean(k) = BnanoAnnualMean(k) + Bnano1;
+            BmicroAnnualMean(k) = BmicroAnnualMean(k) + Bmicro1;
         end
     else
         for k = 1:nb

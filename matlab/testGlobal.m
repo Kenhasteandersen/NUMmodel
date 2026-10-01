@@ -1,6 +1,6 @@
 function bSuccess = testGlobal(value)
 
-p = setupGeneralistsPOM(5,1, true); % Fast setup with POM
+p = setupGeneralistsPOM(5,1); % Fast setup with POM
 p = parametersGlobal(p); % Use standard low-res model
 p.tEnd = 30;
 p.tSave = 10;

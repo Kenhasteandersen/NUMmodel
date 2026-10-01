@@ -19,7 +19,7 @@ arguments
     value double = 3727901;
 end
 
-p = setupGeneralistsPOM(5,1, true); % Fast setup with POM
+p = setupGeneralistsPOM(5,1); % Fast setup with POM
 p = parametersGlobal(p, 3); % UVic transport matrices
 p.tEnd = 30;
 p.tSave = 10;
