@@ -49,6 +49,8 @@ TMs/*/grid.mat
 TMs/*/config_data.mat
 
 # Matlab: caches, autosaves and animations
+# Cached simulation output for the notebooks: regenerable, about 1 GB
+Notebooks/cache/
 matlab/Watercolumn_*.mat
 *.asv
 matlab/*.avi

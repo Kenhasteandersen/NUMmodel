@@ -71,10 +71,42 @@ if ~exist(p.pathBoxes,'file')
     error( sprintf('Error: Cannot find transport matrix file: %s',...
         p.pathBoxes));
 end
+%
+% Check that the time steps fit together. Everything below counts whole steps,
+% and a step that does not divide evenly is caught nowhere else: it simply gives
+% a run that is wrong. This is checked here rather than in parametersGlobal so
+% that it also catches p.dtTransport or p.dt being overridden afterwards.
+%
+bWhole = @(x) abs(x-round(x)) < 1e-9;
+
+if ~bWhole(p.dtTransport/p.dt)
+    error(['p.dtTransport (%g days) must be a whole number of euler steps p.dt ' ...
+           '(%g days), but it is %g of them. The library integrates ' ...
+           'floor(dtTransport/dt) steps, so the biology would lag the transport.'], ...
+           p.dtTransport, p.dt, p.dtTransport/p.dt);
+end
+if ~bWhole(365/p.dtTransport)
+    error(['A year has to be a whole number of transport steps, but 365 days is ' ...
+           '%g steps of p.dtTransport = %g days.'], 365/p.dtTransport, p.dtTransport);
+end
+%
+% The implicit matrix is raised to the power dtTransport/deltaT below, and a
+% sparse matrix can only be raised to a whole power:
+%
+gridDeltaT = load(p.pathGrid, 'deltaT');
+if isfield(gridDeltaT,'deltaT')
+    nPower = p.dtTransport*24*60*60/gridDeltaT.deltaT;
+    if ~bWhole(nPower) || nPower < 1
+        error(['p.dtTransport (%g days) is %g times the %g s time step of the ' ...
+               '%s matrices. It has to be a whole multiple of it, because the ' ...
+               'implicit matrix is raised to that power.'], ...
+               p.dtTransport, nPower, gridDeltaT.deltaT, p.TMname);
+    end
+end
 % ---------------------------------------
 % Initialize run:
 % ---------------------------------------
-simtime = p.tEnd/p.dtTransport; %simulation time in half days
+simtime = p.tEnd/p.dtTransport; % simulation time in transport steps
 load(p.pathBoxes, 'nb', 'Ybox', 'Zbox');
 
 % Preparing timestepping
@@ -145,8 +177,9 @@ for i = 1:365/p.dtTransport
     if p.bUse_parday_light
         L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox);
     else
-        % Calculate light:
-        L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox,i/2,1).*exp(-p.kw*Zbox);
+        % Calculate light. i*p.dtTransport is the day of the year; it was written
+        % as i/2, which is only the same thing when dtTransport is half a day:
+        L0(:,i) = p.EinConv*p.PARfrac*daily_insolation(0,Ybox,i*p.dtTransport,1).*exp(-p.kw*Zbox);
     end
 end
 %
@@ -162,37 +195,51 @@ if ~isempty(idxSinking)
     if options.bVerbose
         disp('Allocating sinking matrices')
     end
-    % Allocate sinking matrices:
-    Asink = {};
-    for l = 1:length(idxSinking)
-        Asink{l} = sparse(1,1,0,nb,nb,nb*2);
-    end
     % Find the indices into the grid
     xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid);
-    % Run through all latitudes and longitudes:
-    for i = 1:size(xx,1)
-        for j = 1:size(xx,2)
-            % Find the watercolumn indices:
-            idxGrid = squeeze(xx(i, j, :));
-            idxGrid = idxGrid( ~isnan(idxGrid));
-            if ~isempty(idxGrid)
-                % Run through all sinking state variables
-                for l = 1:length(idxSinking)
-                    for k = 1:length(idxGrid)
-                        flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(k));
-                        % Loss of mass ...
-                        Asink{l}(idxGrid(k),idxGrid(k)) = 1-flx;
-                        % Gain from above
-                        if (k > 1)
-                            Asink{l}(idxGrid(k),idxGrid(k-1)) = flx;
-                        end
-                    end
-                    if p.BC_POMclosed
-                        Asink{l}(idxGrid(k),idxGrid(k)) = 1; % Closed BC; no loss of mass at the bottom
-                    end
-                end
-            end
+    %
+    % Every box loses a fraction flx of its mass to the box below and gains the
+    % same fraction of the mass of the box above. flx depends only on how deep
+    % the box is in its own water column, so the only thing needed per box is
+    % that depth and the index of the box above it.
+    %
+    % The matrices are assembled in one call to sparse() at the end. Writing the
+    % elements one at a time into a sparse matrix rebuilds the whole thing on
+    % every write, which for the ECCO grid takes minutes rather than a moment.
+    %
+    [nx, ny, nz] = size(xx);
+    X = reshape(xx, nx*ny, nz);
+    bValid = ~isnan(X); % The wet boxes
+    kDepth = cumsum(bValid, 2); % Depth of each box counted down its own column
+    %
+    % The box above, which is the previous wet one in the same column:
+    %
+    iAbove = NaN(size(X));
+    iLast = NaN(size(X,1),1);
+    for k = 1:nz
+        iAbove(:,k) = iLast;
+        iLast(bValid(:,k)) = X(bValid(:,k), k);
+    end
+    bBottom = bValid & (kDepth == kDepth(:,end)); % Deepest box of each column
+
+    ixBox = X(bValid);
+    kBox = kDepth(bValid);
+    ixAbove = iAbove(bValid);
+    bBottomBox = bBottom(bValid);
+    bHasAbove = kBox > 1;
+
+    Asink = cell(1,length(idxSinking));
+    for l = 1:length(idxSinking)
+        flx = min(1, p.velocity(idxSinking(l))*p.dtTransport./sim.dznom(kBox));
+        % Loss of mass ...
+        vDiagonal = 1 - flx;
+        if p.BC_POMclosed
+            vDiagonal(bBottomBox) = 1; % Closed BC; no loss of mass at the bottom
         end
+        % ... and gain from above
+        Asink{l} = sparse( [ixBox; ixBox(bHasAbove)], ...
+                           [ixBox; ixAbove(bHasAbove)], ...
+                           [vDiagonal; flx(bHasAbove)], nb, nb );
     end
 end
 %%
@@ -432,7 +479,7 @@ for i=1:simtime
     %
     if ((floor(i*(p.dtTransport/p.tSave)) > floor((i-1)*(p.dtTransport/p.tSave))) || (i==simtime))
         if options.bVerbose
-            fprintf('t = %u days',floor(i/2))
+            fprintf('t = %u days',floor(i*p.dtTransport))
         end
 
         if any(isnan(u))
