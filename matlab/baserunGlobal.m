@@ -16,7 +16,7 @@ function sim = baserunGlobal(p)
 % Setup a basic run of the global model with only generalists
 %
 if (nargin==0)
-    p = setupGeneralistsOnly(10, true); % Use 10 size groups and parallel execution
+    p = setupGeneralistsOnly(10); % Use 10 size groups
     p = parametersGlobal(p); % Use standard low-res model
 end
 %

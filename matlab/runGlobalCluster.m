@@ -8,13 +8,13 @@
 %c.AdditionalProperties.WallTime = '4:00';
 %c.saveProfile
 %
-clust = parcluster('dcc R2019a');
-numW=8;    % Exactly the number of nodes times the number of processors per cores requested
-parpool(clust, numW);
-
+% The cells are threaded inside the library with OpenMP, so no parallel pool is
+% needed. Set OMP_NUM_THREADS to the number of cores requested from the queue
+% before matlab starts.
+%
 %load('tmpparameters');
 %p = parametersGlobal(parameters([]),2);
-p = parametersGlobal( setupNUMmodel(bParallel=true) );
+p = parametersGlobal( setupNUMmodel );
 
 sim = simulateGlobal(p);
 

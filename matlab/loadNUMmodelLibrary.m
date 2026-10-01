@@ -3,8 +3,12 @@
 % name.
 %
 % In:
-%  bParallel: whether to prepare the library for parallel processing
-%             (default to false).
+%  bParallel: whether to prepare the library for parallel processing with a
+%             pool of matlab workers (default to false). This is used by the
+%             routines that parallelise at the matlab level, such as
+%             runBifurcation and plotGlobalPhytoplankton. Global runs no
+%             longer need it: simulateGlobal threads over the grid cells
+%             inside the library with OpenMP, see simulateGlobal.
 %
 % Out:
 %  The library name and the path of the NUMmodel library

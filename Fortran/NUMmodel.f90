@@ -870,6 +870,22 @@ contains
     !$ nThreads = omp_get_max_threads()
   end function getMaxThreads
 
+  ! -----------------------------------------------
+  ! Give the calling thread a deep copy of the group objects and its own work
+  ! arrays. Called from inside a parallel region, where group, upositive, F and
+  ! predFactor are threadprivate; thread 0 keeps the objects it already has.
+  ! groupShared has to be set by the master thread before the region starts.
+  ! -----------------------------------------------
+  subroutine prepareThread()
+    !$ if (omp_get_thread_num() .ne. 0) then
+    !$    group = groupShared
+    !$    if (allocated(upositive)) deallocate(upositive)
+    !$    if (allocated(F)) deallocate(F)
+    !$    if (allocated(predFactor)) deallocate(predFactor)
+    !$    allocate(upositive(nGrid), F(nGrid), predFactor(nGrid))
+    !$ end if
+  end subroutine prepareThread
+
   subroutine simulateEulerCells(nCells, u, L, T, tEnd, dt)
     integer, intent(in):: nCells
     real(dp), intent(inout):: u(nCells, nGrid)
@@ -884,16 +900,7 @@ contains
     groupShared = group
 
     !$omp parallel default(shared) private(k, ucell)
-    !
-    ! Give each thread a deep copy of the objects and its own work arrays:
-    !
-    !$ if (omp_get_thread_num() .ne. 0) then
-    !$    group = groupShared
-    !$    if (allocated(upositive)) deallocate(upositive)
-    !$    if (allocated(F)) deallocate(F)
-    !$    if (allocated(predFactor)) deallocate(predFactor)
-    !$    allocate(upositive(nGrid), F(nGrid), predFactor(nGrid))
-    !$ end if
+    call prepareThread()
     !$omp do schedule(static)
     do k = 1, nCells
        ucell = u(k,:)
@@ -903,6 +910,39 @@ contains
     !$omp end do
     !$omp end parallel
   end subroutine simulateEulerCells
+
+  ! -----------------------------------------------
+  ! As simulateEulerCells, but also returns the ecosystem functions of each
+  ! cell. This is what simulateGlobal uses for the last year when it is asked
+  ! for annual averages.
+  ! -----------------------------------------------
+  subroutine simulateEulerCellsFunctions(nCells, u, L, T, tEnd, dt, &
+       ProdGross, ProdNet, ProdHTL, ProdBact, eHTL, Bpico, Bnano, Bmicro, mHTL)
+    integer, intent(in):: nCells
+    real(dp), intent(inout):: u(nCells, nGrid)
+    real(dp), intent(in):: L(nCells), T(nCells)
+    real(dp), intent(in):: tEnd, dt
+    real(dp), intent(out):: ProdGross(nCells), ProdNet(nCells), ProdHTL(nCells), &
+         ProdBact(nCells), eHTL(nCells), Bpico(nCells), Bnano(nCells), &
+         Bmicro(nCells), mHTL(nCells)
+    real(dp):: ucell(nGrid)
+    integer:: k
+
+    groupShared = group
+
+    !$omp parallel default(shared) private(k, ucell)
+    call prepareThread()
+    !$omp do schedule(static)
+    do k = 1, nCells
+       ucell = u(k,:)
+       call simulateEulerFunctions(ucell, L(k), T(k), tEnd, dt, &
+            ProdGross(k), ProdNet(k), ProdHTL(k), ProdBact(k), eHTL(k), &
+            Bpico(k), Bnano(k), Bmicro(k), mHTL(k))
+       u(k,:) = ucell
+    end do
+    !$omp end do
+    !$omp end parallel
+  end subroutine simulateEulerCellsFunctions
 
   ! -----------------------------------------------
   ! Simulate with Euler integration

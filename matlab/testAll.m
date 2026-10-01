@@ -1,5 +1,5 @@
 
-loadNUMmodelLibrary
+loadNUMmodelLibrary;
 
 testSetup('setupGeneralistsSimpleOnly',  4170);
 testSetup('setupGeneralistsOnly',  3727);
@@ -14,7 +14,7 @@ testFunction('testChemostat',363300);
 testFunction('testChemostatEuler',1031.7);
 %testFunction('testChemostatSeasonal',NaN);
 testFunction('testWatercolumn',140121);
-testFunction('testGlobal',1671930);
+testFunction('testGlobal',1671939);
 % Only runs if the UVic transport matrices have been downloaded, so it is not
 % part of the standard suite:
 %testFunction('testGlobalUVic',3727901);
