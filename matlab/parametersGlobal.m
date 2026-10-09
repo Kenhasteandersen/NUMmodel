@@ -114,6 +114,8 @@ p.bClipNegative = true; % Use the raw transport matrices and remove negative con
                         % after each transport step by taking the mass from the nearest boxes
                         % above/below in the water column (function_clip_negative). false: make
                         % the matrices non-negative with function_convert_TM_positive (old behaviour).
+p.bClipDOC = false; % Whether DOC is also clipped. false: negative DOC is left; the biology
+                   % treats it as zero, so it only relaxes towards zero by exudation.
 %
 % Bottom BC for nutrients:
 %

@@ -265,6 +265,10 @@ end
 % column from the surface down:
 %
 bClip = isfield(p,'bClipNegative') && p.bClipNegative;
+ixClip = 1:p.n; % The state variables that are clipped
+if isfield(p,'bClipDOC') && ~p.bClipDOC
+    ixClip = setdiff(ixClip, ixDOC);
+end
 if bClip
     [nx, ny, nz] = size(xx);
     Xt = reshape(xx, nx*ny, nz)'; % One column per water column
@@ -311,6 +315,7 @@ sim.Nloss = zeros(nSave,1);     % N leaving the ocean by sinking and (without PO
 sim.NlossHTL = zeros(nSave,1);  % The HTL/POM-export part of Nloss (zero when POM is present)
 sim.Nprod = zeros(nSave,1);     % N entering through the bottom BC
 sim.Nclip = zeros(nSave,1);     % N added when removing negative concentrations after transport
+sim.DOCnegative = zeros(nSave,1); % Mass of negative DOC (PgC), when DOC is not clipped
 NlossBio = 0; NlossSink = 0; Nbc = 0; Nclip = 0;
 clipStats = zeros(3, p.n); % Totals from function_clip_negative over the run
 %
@@ -458,7 +463,8 @@ for i=1:simtime
     if p.bTransport
         u =  Aimp*(Aexp*u);
         if bClip
-            [u, st] = function_clip_negative(u, dvBox, clipCols);
+            st = zeros(3, p.n);
+            [u(:,ixClip), st(:,ixClip)] = function_clip_negative(u(:,ixClip), dvBox, clipCols);
             clipStats = clipStats + st;
             Nclip = Nclip + (st(2,ixN) + sum(st(2,ixB))/rhoCN)/1000; % gN
         end
@@ -493,6 +499,7 @@ for i=1:simtime
         sim.NlossHTL(iSave) = NlossBio;
         sim.Nprod(iSave) = Nbc;
         sim.Nclip(iSave) = Nclip;
+        sim.DOCnegative(iSave) = -dvBox'*min(0, u(:,ixDOC))*1e-18; % Negative DOC mass (PgC)
         NlossBio = 0; NlossSink = 0; Nbc = 0; Nclip = 0;
         if options.bVerbose
             fprintf('.\n');
@@ -519,7 +526,9 @@ if bClip && options.bVerbose
     fPrint = @(name, added, pool, scale, unit) fprintf('  %-28s %9.2e %-4s %14.2e\n', ...
         name, added/years*scale, unit, 100*added/years/pool);
     fPrint('N', clipStats(2,ixN), massFinal(ixN), 1e-15, 'TgN');
-    fPrint('DOC', clipStats(2,ixDOC), massFinal(ixDOC), 1e-18, 'PgC');
+    if ismember(ixDOC, ixClip)
+        fPrint('DOC', clipStats(2,ixDOC), massFinal(ixDOC), 1e-18, 'PgC');
+    end
     if bSilicate
         fPrint('Si', clipStats(2,ixSi), massFinal(ixSi), 1e-15, 'TgSi');
     end
