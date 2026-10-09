@@ -110,6 +110,10 @@ check(p.pathTemp);
 p.tEnd = 365; % In days
 p.tSave = 365/12; % How often to save results (monthly)
 p.bTransport = true; % Whether to do the transport with the transport matrix
+p.bClipNegative = true; % Use the raw transport matrices and remove negative concentrations
+                        % after each transport step by taking the mass from the nearest boxes
+                        % above/below in the water column (function_clip_negative). false: make
+                        % the matrices non-negative with function_convert_TM_positive (old behaviour).
 %
 % Bottom BC for nutrients:
 %

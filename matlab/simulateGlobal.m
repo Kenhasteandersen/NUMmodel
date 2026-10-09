@@ -185,9 +185,6 @@ p.velocity = calllib(loadNUMmodelLibrary(), 'f_getsinking', p.velocity);
 idxSinking = find(p.velocity ~= 0);
 
 if ~isempty(idxSinking)
-    if options.bVerbose
-        disp('Allocating sinking matrices')
-    end
     % Find the indices into the grid
     xx = matrixToGrid((1:nb)', [], p.pathBoxes, p.pathGrid);
     %
@@ -263,6 +260,28 @@ for i = 1:size(BCvalue,2)
     end
 end
 %%
+% Water columns for removing negative concentrations after transport
+% (function_clip_negative). All boxes are listed column by column, each
+% column from the surface down:
+%
+bClip = isfield(p,'bClipNegative') && p.bClipNegative;
+if bClip
+    [nx, ny, nz] = size(xx);
+    Xt = reshape(xx, nx*ny, nz)'; % One column per water column
+    bWet = ~isnan(Xt);
+    clipCols.order = Xt(bWet);
+    [~, c] = find(bWet); % Water column of each box
+    iCol = cumsum([1; diff(c) ~= 0]);
+    firstPos = find([true; diff(c) ~= 0]);
+    lastPos = [firstPos(2:end) - 1; numel(c)];
+    clipCols.pos = zeros(nb,1);
+    clipCols.pos(clipCols.order) = 1:nb;
+    clipCols.first = zeros(nb,1);
+    clipCols.first(clipCols.order) = firstPos(iCol);
+    clipCols.last = zeros(nb,1);
+    clipCols.last(clipCols.order) = lastPos(iCol);
+end
+%%
 % Matrices for saving the solution:
 %
 iSave = 0;
@@ -291,7 +310,9 @@ sim.Ntot = zeros(nSave,1);
 sim.Nloss = zeros(nSave,1);     % N leaving the ocean by sinking and (without POM) HTL/POM export
 sim.NlossHTL = zeros(nSave,1);  % The HTL/POM-export part of Nloss (zero when POM is present)
 sim.Nprod = zeros(nSave,1);     % N entering through the bottom BC
-NlossBio = 0; NlossSink = 0; Nbc = 0;
+sim.Nclip = zeros(nSave,1);     % N added when removing negative concentrations after transport
+NlossBio = 0; NlossSink = 0; Nbc = 0; Nclip = 0;
+clipStats = zeros(3, p.n); % Totals from function_clip_negative over the run
 %
 % Matrices for annual averages:
 %
@@ -331,8 +352,12 @@ for i=1:simtime
         load(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
         %disp(strcat(p.pathMatrix, sprintf('%02i.mat',month+1)));
 
-        Aexp = function_convert_TM_positive(Aexp, dvBox);
-        Aimp = function_convert_TM_positive(Aimp, dvBox);
+        % With bClip the raw matrices are used and the negative values
+        % they create are removed after each transport step:
+        if ~bClip
+            Aexp = function_convert_TM_positive(Aexp, dvBox);
+            Aimp = function_convert_TM_positive(Aimp, dvBox);
+        end
 
         % Preparing for timestepping. 43200s.
         load(p.pathGrid,'deltaT')
@@ -432,6 +457,11 @@ for i=1:simtime
     %
     if p.bTransport
         u =  Aimp*(Aexp*u);
+        if bClip
+            [u, st] = function_clip_negative(u, dvBox, clipCols);
+            clipStats = clipStats + st;
+            Nclip = Nclip + (st(2,ixN) + sum(st(2,ixB))/rhoCN)/1000; % gN
+        end
     end
     %
     % Save timeseries in grid format
@@ -462,7 +492,8 @@ for i=1:simtime
         sim.Nloss(iSave) = NlossBio + NlossSink;
         sim.NlossHTL(iSave) = NlossBio;
         sim.Nprod(iSave) = Nbc;
-        NlossBio = 0; NlossSink = 0; Nbc = 0;
+        sim.Nclip(iSave) = Nclip;
+        NlossBio = 0; NlossSink = 0; Nbc = 0; Nclip = 0;
         if options.bVerbose
             fprintf('.\n');
         end
@@ -472,6 +503,32 @@ time = toc;
 if options.bVerbose
     fprintf('Solving time: %2u:%02u:%02u\n', ...
         [floor(time/3600), mod(floor(time/60),60), floor(mod(time,60))]);
+end
+sim.clipStats = clipStats;
+if bClip && options.bVerbose
+    %
+    % Mass gained by each pool because negative concentrations could not
+    % be covered from within the water column. Masses are in mg (u*dv is
+    % ugX/l * m3); 1 Tg = 1e15 mg and 1 Pg = 1e18 mg. The percentage is
+    % relative to the pool at the end of the run.
+    %
+    massFinal = dvBox'*u;
+    years = p.tEnd/365;
+    fprintf('Mass gained from negative concentrations that could not be filled within the water column:\n');
+    fprintf('  %-28s %14s %14s\n', 'Pool', 'Gain per year', '% of pool/yr');
+    fPrint = @(name, added, pool, scale, unit) fprintf('  %-28s %9.2e %-4s %14.2e\n', ...
+        name, added/years*scale, unit, 100*added/years/pool);
+    fPrint('N', clipStats(2,ixN), massFinal(ixN), 1e-15, 'TgN');
+    fPrint('DOC', clipStats(2,ixDOC), massFinal(ixDOC), 1e-18, 'PgC');
+    if bSilicate
+        fPrint('Si', clipStats(2,ixSi), massFinal(ixSi), 1e-15, 'TgSi');
+    end
+    for iGroup = 1:p.nGroups
+        ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+        fPrint(p.nameGroup{iGroup}, sum(clipStats(2,ix)), sum(massFinal(ix)), 1e-18, 'PgC');
+    end
+    NtotFinal = fNtot(u); % gN
+    fPrint('Total N (nutrient + biomass)', sum(sim.Nclip), NtotFinal, 1e-12, 'TgN');
 end
 
 % ---------------------------------------

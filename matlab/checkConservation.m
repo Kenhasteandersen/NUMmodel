@@ -7,7 +7,8 @@
 %
 % Note: in the 'global' case all losses and the bottom-BC input are measured
 % directly in simulateGlobal, so the residual is the non-conservation of the
-% transport step. "Loss to HTL" is then the export from the biogeochemistry,
+% transport step. The N added when removing negative concentrations after
+% transport (sim.Nclip) is counted as an input. "Loss to HTL" is then the export from the biogeochemistry,
 % i.e. HTL and POM losses when there is no POM group, and zero with POM.
 %
 % Note: for a watercolumn WITHOUT POM the balance is only accurate to about
@@ -83,6 +84,10 @@ switch sim.p.nameModel
         T = sim.t(end) - sim.t(1); % days
         accumulation = (sim.Ntot(end)-sim.Ntot(1)) ...
             - sum(sim.Nprod(2:end)) + sum(sim.Nloss(2:end));
+        % N added when removing negative concentrations after transport:
+        if isfield(sim, 'Nclip')
+            accumulation = accumulation - sum(sim.Nclip(2:end));
+        end
 
         dNdt = accumulation/areaOcean/T*365; %gN/m2/yr
         dNdt_per_N = accumulation/sim.Ntot(end)/T*365; % 1/yr
