@@ -12,7 +12,7 @@ _Comparison of old v1.0 NPP (top), new, and difference (bottom) (units are mgC/m
 
 * Added support for UVic transport matrix
 
-* Fixed loss of N in the transport matrices. The global model now uses the raw transport matrices and removes the negative concentrations they create after each transport step, by taking the missing mass from the nearest boxes above and below in the same water column (function_clip_negative; p.bClipNegative = true). The previous conversion of the matrices to non-negative ones conserved mass but did not keep a uniform field uniform, and it moved tracer from small to large boxes (downwards). Mass that a water column cannot cover is added and reported in sim.Nclip and sim.clipStats. Set p.bClipNegative = false for the old behaviour.
+* Fixed loss of N in the transport matrices. The global model now uses the raw transport matrices and removes the negative concentrations they create after each transport step, by taking the missing mass from the nearest boxes above and below in the same water column (function_clip_negative; p.bClipNegative = true). The previous conversion of the matrices to non-negative ones conserved mass but did not keep a uniform field uniform, and it moved tracer from small to large boxes (downwards). Mass that a water column cannot cover is added and reported in sim.Nclip and sim.clipStats. Set p.bClipNegative = false for the old behaviour.  Note: this is not done for DOC because the integration handles small negative DOC values gracefully.
 
 # Minor fixes and changes:
 
