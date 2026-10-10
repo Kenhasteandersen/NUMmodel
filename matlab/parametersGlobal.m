@@ -114,8 +114,14 @@ p.bClipNegative = true; % Use the raw transport matrices and remove negative con
                         % after each transport step by taking the mass from the nearest boxes
                         % above/below in the water column (function_clip_negative). false: make
                         % the matrices non-negative with function_convert_TM_positive (old behaviour).
-p.bClipDOC = false; % Whether DOC is also clipped. false: negative DOC is left; the biology
-                   % treats it as zero, so it only relaxes towards zero by exudation.
+p.bClipNutrients = false; % Whether the nutrients (N, DOC, Si) are also clipped. false: negative
+                          % nutrients are left; the biology treats them as zero (no uptake), so
+                          % they only relax towards zero by remineralisation and exudation.
+p.bClipBiomass = true; % Whether the biomasses are clipped. false: negative biomass is left; the
+                       % biology treats it as zero, so it only recovers by growth from the size
+                       % class below and by transport.
+p.bClipSizeClasses = true;  % Whether a deficit in a unicellular group that the water column
+                            % cannot cover is taken from the neighbouring size classes in the box.
 %
 % Bottom BC for nutrients:
 %

@@ -168,7 +168,10 @@ end
 L0 = zeros(nb,365/p.dtTransport );
 for i = 1:365/p.dtTransport
     if p.bUse_parday_light
-        L0(:,i) = 1e6*parday(:,i)/(24*60*60).*exp(-p.kw*Zbox);
+        % parday has its own time resolution (half days for MITgcm), so pick
+        % the column that covers day i*dtTransport:
+        iPar = ceil(i*p.dtTransport*size(parday,2)/365);
+        L0(:,i) = 1e6*parday(:,iPar)/(24*60*60).*exp(-p.kw*Zbox);
     else
         % Calculate light. i*p.dtTransport is the day of the year; it was written
         % as i/2, which is only the same thing when dtTransport is half a day:
@@ -265,9 +268,23 @@ end
 % column from the surface down:
 %
 bClip = isfield(p,'bClipNegative') && p.bClipNegative;
-ixClip = 1:p.n; % The state variables that are clipped
-if isfield(p,'bClipDOC') && ~p.bClipDOC
-    ixClip = setdiff(ixClip, ixDOC);
+ixClip = []; % The state variables that are clipped
+if isfield(p,'bClipNutrients') && p.bClipNutrients
+    ixClip = 1:p.nNutrients;
+end
+if ~isfield(p,'bClipBiomass') || p.bClipBiomass
+    ixClip = [ixClip, ixB];
+end
+%
+% The unicellular groups whose deficits may also be taken from neighbouring
+% size classes (first and last column within u(:,ixClip)):
+%
+sizeGroup = zeros(length(ixClip), 2);
+if isfield(p,'bClipSizeClasses') && p.bClipSizeClasses
+    for iGroup = find(ismember(p.typeGroups, [1 3 4 5])) % Generalists and diatoms
+        ix = find(ismember(ixClip, p.ixStart(iGroup):p.ixEnd(iGroup)));
+        sizeGroup(ix,:) = repmat([ix(1) ix(end)], length(ix), 1);
+    end
 end
 if bClip
     [nx, ny, nz] = size(xx);
@@ -315,9 +332,11 @@ sim.Nloss = zeros(nSave,1);     % N leaving the ocean by sinking and (without PO
 sim.NlossHTL = zeros(nSave,1);  % The HTL/POM-export part of Nloss (zero when POM is present)
 sim.Nprod = zeros(nSave,1);     % N entering through the bottom BC
 sim.Nclip = zeros(nSave,1);     % N added when removing negative concentrations after transport
-sim.DOCnegative = zeros(nSave,1); % Mass of negative DOC (PgC), when DOC is not clipped
+sim.nutrientsNegative = zeros(nSave,p.nNutrients); % Mass of negative nutrients (gN, gC, gSi), when they are not clipped
+sim.Bnegative = zeros(nSave,p.nGroups); % Mass of negative biomass in each group (gC), when it is not clipped
+sim.fracBnegative = zeros(nSave,1);     % Fraction of the biomass entries that are negative
 NlossBio = 0; NlossSink = 0; Nbc = 0; Nclip = 0;
-clipStats = zeros(3, p.n); % Totals from function_clip_negative over the run
+clipStats = zeros(4, p.n); % Totals from function_clip_negative over the run
 %
 % Matrices for annual averages:
 %
@@ -344,6 +363,14 @@ if options.bVerbose
     disp('Starting simulation')
 end
 sLibname = loadNUMmodelLibrary();
+%
+% The biology is run on the workers if a parallel pool is open. A setup made
+% without bParallel=true is only made in this session, and the workers then
+% keep simulating whatever setup they had before, so check that they agree:
+%
+if ~isempty(gcp('nocreate'))
+    checkWorkerSetup(p);
+end
 dtTransport = p.dtTransport;
 n = p.n;
 
@@ -462,9 +489,9 @@ for i=1:simtime
     %
     if p.bTransport
         u =  Aimp*(Aexp*u);
-        if bClip
-            st = zeros(3, p.n);
-            [u(:,ixClip), st(:,ixClip)] = function_clip_negative(u(:,ixClip), dvBox, clipCols);
+        if bClip && ~isempty(ixClip)
+            st = zeros(4, p.n);
+            [u(:,ixClip), st(:,ixClip)] = function_clip_negative(u(:,ixClip), dvBox, clipCols, sizeGroup);
             clipStats = clipStats + st;
             Nclip = Nclip + (st(2,ixN) + sum(st(2,ixB))/rhoCN)/1000; % gN
         end
@@ -499,7 +526,11 @@ for i=1:simtime
         sim.NlossHTL(iSave) = NlossBio;
         sim.Nprod(iSave) = Nbc;
         sim.Nclip(iSave) = Nclip;
-        sim.DOCnegative(iSave) = -dvBox'*min(0, u(:,ixDOC))*1e-18; % Negative DOC mass (PgC)
+        sim.nutrientsNegative(iSave,:) = -dvBox'*min(0, u(:,1:p.nNutrients))/1000; % gN, gC, gSi
+        for iGroup = 1:p.nGroups
+            sim.Bnegative(iSave,iGroup) = -sum(dvBox'*min(0, u(:,p.ixStart(iGroup):p.ixEnd(iGroup))))/1000; % gC
+        end
+        sim.fracBnegative(iSave) = nnz(u(:,ixB) < 0)/numel(u(:,ixB));
         NlossBio = 0; NlossSink = 0; Nbc = 0; Nclip = 0;
         if options.bVerbose
             fprintf('.\n');
@@ -521,23 +552,46 @@ if bClip && options.bVerbose
     %
     massFinal = dvBox'*u;
     years = p.tEnd/365;
-    fprintf('Mass gained from negative concentrations that could not be filled within the water column:\n');
+    fprintf('Mass gained from negative concentrations that could not be filled within the water column\n(or, for unicellular groups, from neighbouring size classes):\n');
     fprintf('  %-28s %14s %14s\n', 'Pool', 'Gain per year', '% of pool/yr');
     fPrint = @(name, added, pool, scale, unit) fprintf('  %-28s %9.2e %-4s %14.2e\n', ...
         name, added/years*scale, unit, 100*added/years/pool);
-    fPrint('N', clipStats(2,ixN), massFinal(ixN), 1e-15, 'TgN');
-    if ismember(ixDOC, ixClip)
+    if ismember(ixN, ixClip)
+        fPrint('N', clipStats(2,ixN), massFinal(ixN), 1e-15, 'TgN');
         fPrint('DOC', clipStats(2,ixDOC), massFinal(ixDOC), 1e-18, 'PgC');
+        if bSilicate
+            fPrint('Si', clipStats(2,ixSi), massFinal(ixSi), 1e-15, 'TgSi');
+        end
     end
-    if bSilicate
-        fPrint('Si', clipStats(2,ixSi), massFinal(ixSi), 1e-15, 'TgSi');
-    end
-    for iGroup = 1:p.nGroups
-        ix = p.ixStart(iGroup):p.ixEnd(iGroup);
-        fPrint(p.nameGroup{iGroup}, sum(clipStats(2,ix)), sum(massFinal(ix)), 1e-18, 'PgC');
+    bClipB = ismember(ixB(1), ixClip);
+    if bClipB
+        for iGroup = 1:p.nGroups
+            ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+            fPrint(p.nameGroup{iGroup}, sum(clipStats(2,ix)), sum(massFinal(ix)), 1e-18, 'PgC');
+        end
     end
     NtotFinal = fNtot(u); % gN
     fPrint('Total N (nutrient + biomass)', sum(sim.Nclip), NtotFinal, 1e-12, 'TgN');
+    if ~ismember(ixN, ixClip)
+        fprintf('Negative nutrients at the end of the run (not clipped):\n');
+        fprintf('  %-28s %9.2e TgN  %6.2e %% of pool\n', 'N', ...
+            sim.nutrientsNegative(end,ixN)*1e-12, 100*sim.nutrientsNegative(end,ixN)/(massFinal(ixN)/1000));
+        fprintf('  %-28s %9.2e PgC  %6.2e %% of pool\n', 'DOC', ...
+            sim.nutrientsNegative(end,ixDOC)*1e-15, 100*sim.nutrientsNegative(end,ixDOC)/(massFinal(ixDOC)/1000));
+        if bSilicate
+            fprintf('  %-28s %9.2e TgSi %6.2e %% of pool\n', 'Si', ...
+                sim.nutrientsNegative(end,ixSi)*1e-12, 100*sim.nutrientsNegative(end,ixSi)/(massFinal(ixSi)/1000));
+        end
+    end
+    if ~bClipB
+        fprintf('Negative biomass at the end of the run (not clipped; %.2g%% of the entries are negative):\n', ...
+            100*sim.fracBnegative(end));
+        for iGroup = 1:p.nGroups
+            ix = p.ixStart(iGroup):p.ixEnd(iGroup);
+            fprintf('  %-28s %9.2e PgC  %6.2e %% of pool\n', p.nameGroup{iGroup}, ...
+                sim.Bnegative(end,iGroup)*1e-15, 100*sim.Bnegative(end,iGroup)/(sum(massFinal(ix))/1000));
+        end
+    end
 end
 
 % ---------------------------------------
@@ -546,7 +600,11 @@ end
 sim.t = tSave; % days where solution was saved
 sim.p = p;
 sim.B(sim.B<0) = 0.;
+sim.N(sim.N<0) = 0.;
 sim.DOC(sim.DOC<0) = 0.;
+if bSilicate
+    sim.Si(sim.Si<0) = 0.;
+end
 
 if options.bCalcAnnualAverages
     sim.ProdNet = zeros(nSave,length(sim.x), length(sim.y));
@@ -589,4 +647,163 @@ end
     end
 
 end
+%
+% Checks that all workers of the parallel pool have the same model setup as
+% this session, by comparing the derivatives of a test state.
+%
+function checkWorkerSetup(p)
+uTest = reshape(double(p.u0), 1, []);
+[~, dudt] = calllib(loadNUMmodelLibrary(), 'f_calcderivatives', uTest, 100, 15, 0.0, 0*uTest);
 
+f = parfevalOnAll(@workerDerivatives, 1, uTest);
+dudtWorkers = fetchOutputs(f);
+
+if ~all(all(abs(dudtWorkers - dudt) <= 1e-12*max(abs(dudt))))
+    error('NUMmodel:workerSetup', ['The workers of the parallel pool have a different model setup than this session.\n' ...
+        'Make the setup with bParallel=true (e.g. setupNUMmodel(bParallel=true)), ' ...
+        'or close the pool with delete(gcp).']);
+end
+end
+%
+% Derivatives of the test state on a worker (NaN if its state has another size):
+%
+function dudt = workerDerivatives(uTest)
+sLibname = loadNUMmodelLibrary();
+[n, ~] = calllib(sLibname, 'f_getnumgrid', int32(0), int32(0));
+if n ~= length(uTest)
+    dudt = NaN(size(uTest));
+    return
+end
+[~, dudt] = calllib(sLibname, 'f_calcderivatives', uTest, 100, 15, 0.0, 0*uTest);
+end
+%
+% Removes negative concentrations after a transport step with the raw
+% transport matrices. The mass missing in a negative box is taken from the
+% nearest boxes above and below in the same water column: first from the
+% boxes one step away, then two steps away, etc. The boxes at a given
+% distance give in proportion to their mass. If the whole water column
+% cannot cover the deficit, the remainder is added as new mass (the box is
+% left at zero). No mass is moved between water columns, and each state
+% variable is treated separately.
+%
+% Optionally, a deficit that the water column cannot cover is then taken
+% from the neighbouring size classes of the same group in the same box:
+% first one size class away, then two, etc., in proportion to their mass.
+% That conserves both carbon and nitrogen, and is only meaningful for
+% unicellular groups.
+%
+% Within each water column the negative boxes are corrected from the
+% surface down. Positive boxes are only ever scaled down, so no box ends
+% up negative.
+%
+% In:
+%  u    - state (nb x n concentrations)
+%  dv   - volume of each box (nb x 1, m3)
+%  cols - the water columns (made in the main function), with fields:
+%         order: all boxes, column by column, each from the surface down
+%         pos:   position of each box in order
+%         first, last: position in order of the top and bottom box of
+%                each box's water column
+%  sizeGroup - (optional) n x 2: the first and last column in u of the
+%         group that each state variable belongs to, if the deficit may be
+%         taken from its neighbouring size classes; [0 0] if not.
+%
+% Out:
+%  u  - state without negative values
+%  st - 4 x n statistics for each state variable (concentration * m3):
+%       st(1,:): negative mass removed
+%       st(2,:): mass added because the water column could not cover it
+%       st(3,:): mass taken from boxes more than one step away
+%       st(4,:): mass taken from neighbouring size classes
+%
+function [u, st] = function_clip_negative(u, dv, cols, sizeGroup)
+
+if nargin < 4
+    sizeGroup = zeros(size(u,2), 2);
+end
+st = zeros(4, size(u,2));
+[ib, jt] = find(u < 0);
+if isempty(ib)
+    return
+end
+%
+% Sort the negative entries by state variable and from the surface down:
+%
+[~, s] = sortrows([jt, cols.pos(ib)]);
+ib = ib(s);
+jt = jt(s);
+
+for m = 1:numel(ib)
+    b = ib(m);
+    j = jt(m);
+    d = -u(b,j)*dv(b); % The deficit
+    st(1,j) = st(1,j) + d;
+    u(b,j) = 0;
+
+    q = cols.pos(b);
+    q0 = cols.first(b);
+    q1 = cols.last(b);
+    r = 1;
+    while d > 0 && (q-r >= q0 || q+r <= q1)
+        % The positive boxes r steps above and below:
+        bAbove = 0;
+        bBelow = 0;
+        avail = 0;
+        if q-r >= q0
+            bAbove = cols.order(q-r);
+            if u(bAbove,j) > 0
+                avail = avail + u(bAbove,j)*dv(bAbove);
+            else
+                bAbove = 0;
+            end
+        end
+        if q+r <= q1
+            bBelow = cols.order(q+r);
+            if u(bBelow,j) > 0
+                avail = avail + u(bBelow,j)*dv(bBelow);
+            else
+                bBelow = 0;
+            end
+        end
+        % Take the deficit in proportion to their mass:
+        if avail > 0
+            take = min(d, avail);
+            f = 1 - take/avail;
+            if bAbove > 0
+                u(bAbove,j) = u(bAbove,j)*f;
+            end
+            if bBelow > 0
+                u(bBelow,j) = u(bBelow,j)*f;
+            end
+            if r > 1
+                st(3,j) = st(3,j) + take;
+            end
+            d = d - take;
+        end
+        r = r + 1;
+    end
+    %
+    % Take what is missing from the neighbouring size classes in the box:
+    %
+    j0 = sizeGroup(j,1);
+    j1 = sizeGroup(j,2);
+    r = 1;
+    while d > 0 && j0 > 0 && (j-r >= j0 || j+r <= j1)
+        avail = 0;
+        jj = [j-r, j+r];
+        jj = jj(jj >= j0 & jj <= j1);
+        jj = jj(u(b,jj) > 0);
+        if ~isempty(jj)
+            avail = sum(u(b,jj))*dv(b);
+        end
+        if avail > 0
+            take = min(d, avail);
+            u(b,jj) = u(b,jj)*(1 - take/avail);
+            st(4,j) = st(4,j) + take;
+            d = d - take;
+        end
+        r = r + 1;
+    end
+    st(2,j) = st(2,j) + d; % What could not be covered is added
+end
+end
