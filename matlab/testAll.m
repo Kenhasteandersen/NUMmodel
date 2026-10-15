@@ -17,4 +17,4 @@ testFunction('testWatercolumn',140121);
 testFunction('testGlobal',1606550);
 % Only runs if the UVic transport matrices have been downloaded, so it is not
 % part of the standard suite:
-%testFunction('testGlobalUVic',3727901);
+testFunction('testGlobalUVic',3553121);
