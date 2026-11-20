@@ -132,6 +132,16 @@ loadNUMmodel = function() {
   dyn.load(sLibname)
 }
 
+# Call a Fortran setup routine. The setups take the extra outputs
+# (errorio, errorstr) after their own arguments; R must pass buffers for them.
+callSetup = function(sName, ...) {
+  out = suppressWarnings(.Fortran(sName, ..., errorio = logical(1),
+                 errorstr = strrep(" ", 256)))
+  if (isTRUE(out$errorio))
+    warning(sName, ": error reading input: ", trimws(out$errorstr))
+  invisible(out)
+}
+
 derivativeF = function(t,y,p) {
   derivF = .Fortran("f_calcderivatives", 
                     #nGrid=as.integer(length(y)),
@@ -156,7 +166,7 @@ derivativeF = function(t,y,p) {
 #   # Load library
 #   loadNUMmodel()
 #   # Set parameters
-#   dummy = .Fortran("f_setupgeneralistsonly", as.integer(p$n))
+#   dummy = callSetup("f_setupgeneralistsonly", as.integer(p$n))
 #   
 #   dudtF = derivativeF(0,y,p)
 #   
@@ -172,7 +182,7 @@ simulateChemostatEuler = function(p=parametersChemostat(), bLosses=TRUE) {
   # Load library
   loadNUMmodel()
   # Set parameters
-  dummy = .Fortran("f_setupgeneralistsonly", as.integer(p$n))
+  dummy = callSetup("f_setupgeneralistsonly", as.integer(p$n))
   
   u0 = c(0.1*p$N0, p$DOC0, p$B0)
   uDeep = c(p$N0, 0)
@@ -249,17 +259,17 @@ simulateChemostat = function(p=parametersChemostat(),
     loadNUMmodel()
     # Choose setup:
     if (sSetup=="GeneralistsSimpleOnly") { 
-      dummy = .Fortran("f_setupgeneralistssimpleonly", as.integer(p$n))
+      dummy = callSetup("f_setupgeneralistssimpleonly", as.integer(p$n))
       dummy = .Fortran("f_sethtl", as.double(p$mHTL), as.double(p$mortHTL), 
                        as.logical(FALSE), as.logical(FALSE))
     } 
     else if (sSetup=="GeneralistsOnly") { 
-      dummy = .Fortran("f_setupgeneralistsonly", as.integer(p$n))
+      dummy = callSetup("f_setupgeneralistsonly", as.integer(p$n))
       dummy = .Fortran("f_sethtl", as.double(p$mHTL), as.double(p$mortHTL), 
                        as.logical(FALSE), as.logical(FALSE))
     } 
     else if (sSetup=="Generic") {
-      dummy = .Fortran("f_setupgeneric", as.integer(4), c(1,10,100,1000) )
+      dummy = callSetup("f_setupgeneric", as.integer(4), c(1,10,100,1000))
       p$n = p$n + 4*10
       p$B0 = c(p$B0, rep(1,4*10))
       #dummy = .Fortran("f_sethtl", as.double(p$mHTL), as.double(p$mortHTL), 
