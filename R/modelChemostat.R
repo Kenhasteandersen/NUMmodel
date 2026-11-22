@@ -923,8 +923,12 @@ calcLimitation = function(sim) {
   # No synthesis capacity (too small to photosynthesise) or no net supply:
   resource[r$jMax <= 0 | pmin(supplyN, supplyC) <= 0] = "None (no growth)"
 
+  # Surplus N from Liebig (C limitation), before synthesis saturation:
+  jNsurplus = pmax(0, supplyN - supplyC)
+
   data.frame(m = p$m, supplyN = supplyN, supplyC = supplyC, jMax = r$jMax,
-             element = ifelse(bNlimited, "N", "C"), resource = resource)
+             element = ifelse(bNlimited, "N", "C"), resource = resource,
+             jNsurplus = jNsurplus)
 }
 
 #
@@ -952,8 +956,15 @@ calcLimitationGeneralists = function(sim) {
   # No synthesis capacity or no net growth:
   resource[r$jMax <= 0 | r$jTot <= 0] = "None (no growth)"
 
+  # Surplus N from Liebig: only when dN = 0, where food supplies more N than
+  # the carbon-limited growth before synthesis saturation, jNet/(1-f) (jNet =
+  # jTot + passive loss; f = 0 when there is no synthesis saturation):
+  jNetPre = (r$jTot + r$jLossPassiveF)/(1 - r$f)
+  jNsurplus = ifelse(r$dN <= 0, pmax(0, r$jF - jNetPre), 0)
+
   data.frame(m = p$m, dN = r$dN, jMax = r$jMax,
-             element = ifelse(bNlimited, "N", "C"), resource = resource)
+             element = ifelse(bNlimited, "N", "C"), resource = resource,
+             jNsurplus = jNsurplus)
 }
 
 plotLeaks = function(sim, t=max(sim$t)) {
@@ -980,10 +991,16 @@ plotLeaks = function(sim, t=max(sim$t)) {
                 xlab="Carbon mass ($\\mu$gC)",
                 ylab="Loss rates (1/day)")
   
-  lines(m, r$jNloss-r$jCloss_feeding, col="blue", lwd=4)
+  # N exudation: surplus N from Liebig (C limitation). N that is taken up and
+  # released again because of synthesis saturation is not counted. The actual
+  # release comes from the N budget, because jNloss means different things in
+  # the generalists (Liebig only) and the simple generalists (all N losses).
+  jNreleased = pmax(0, r$jN + r$jFreal - r$jLossPassiveF - r$jTot)
+  jNexudation = pmin(jNreleased, calcLimitation(sim)$jNsurplus)
+  lines(m, jNexudation, col="blue", lwd=4)
   lines(m, r$jCloss_feeding, col="red", lwd=4)
   lines(m, r$jCloss_photouptake, col="green", lwd=4)
-  lines(m, r$jLossPassive, col="darkgreen", lwd=4)
+  lines(m, r$jLossPassiveF, col="darkgreen", lwd=4)
   
   legend(x="topright", cex=cex,
          legend=c("Leaks:","N exudation", "C exudation",
