@@ -133,8 +133,7 @@ uiChemostat <- fluidPage(
           #),
           plotOutput("plotSpectrum", width="600px", height="300px"),
           plotOutput("plotRates", width="600px", height="300px"),
-          plotOutput("plotLeaks", width="600px", height="200px"),
-          plotOutput("plotDeltas", width="600px", height="200px")
+          plotOutput("plotLeaks", width="600px", height="200px")
         )
         ,
         tabPanel(
@@ -200,7 +199,6 @@ serverChemostat <- function(input, output) {
   output$plotRates <- renderPlot(plotRates(sim(), t=input$t,
     bLimitation = input$setup %in% c("GeneralistsSimpleOnly", "GeneralistsOnly")))
   output$plotLeaks = renderPlot(plotLeaks(sim(), input$t))
-  output$plotDeltas = renderPlot(plotDeltas(sim()))
   output$plotComplexRates <- renderPlot(plotComplexRates(sim(), input$t))
   output$plotTime <- renderPlot(plotTimeline(sim(), input$t))
   output$plotSeasonalTimeline <- renderPlot(plotSeasonalTimeline(sim()))
