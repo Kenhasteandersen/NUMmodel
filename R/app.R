@@ -34,8 +34,11 @@ uiChemostat <- fluidPage(
     All groups are able to perform photoharvesting, taking up dissolve nutrients and carbon, and do phagotrophy.
     The trophic strategy (the background colours) is an emergent property.'),
   p('Documentation in:',
-    a("Andersen and Visser (2023)",href="https://www.biorxiv.org/content/10.1101/2022.05.16.492092v2"),'.'),
-  p('Revised version 1.1, January 2023.')
+    a("Andersen and Visser (2023)",href="https://www.sciencedirect.com/science/article/pii/S0079661123000381?via%3Dihub"),
+    ' (unicellular simple) and ',
+    a("Papapostolou et al (2026)",href="https://gmd.copernicus.org/articles/19/6627/2026/"),
+    '(unicellular).'),
+  p('Revised version 1.1, November 2026.')
   ,
   # Sidebar with a slider inputs
   sidebarLayout(
