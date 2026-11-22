@@ -10,6 +10,9 @@ colPhoto = rgb(0,1,0,alpha=alpha)
 colN = rgb(0,0,1,alpha=alpha)
 colMixo = rgb(1,0.5,0.5,alpha=alpha)
 colHetero = rgb(1,0,0,alpha=alpha)
+colOsmoN = rgb(0.35,0.1,0.1,alpha=0.5)  # N-limited osmoheterotrophs
+colOsmoC = rgb(0.75,0.5,0.3,alpha=0.5)    # C-limited osmoheterotrophs
+colNone = grey(0.8)                      # no growth
 
 parametersChemostat = function(p=parameters()) {
   #
@@ -391,6 +394,9 @@ getFrates = function(p) {
                    mort = vector(length=nGrid, mode="numeric")
   )
   
+  rates$jLossPassiveF = rates$jLossPassive # the value the Fortran model uses
+  # Down-regulation of N uptake (generalists only; -1 for other groups):
+  rates$dN = .Fortran("f_getdn", dN = vector(length=nGrid, mode="numeric"))$dN
   rates$jLossPassive = p$Jloss_passive_m/p$m # NOTE HARDCODED
   rates$jCloss_photouptake = (1-p$epsilonL)/p$epsilonL*rates$jLreal
   rates$jCloss_feeding = (1-p$epsilonF)/p$epsilonF*rates$jFreal
@@ -623,7 +629,9 @@ plotFunctionsChemostat <- function(sim) {
 # Returns the trophic strategy as one of: osmoheterotroph, light or nutrient-limited
 # phototroph, mixotroph, or heterotroph.
 #
-calcStrategy = function(sim, bPlot=FALSE, ylim=c(0.1,1000)) {
+# bLimitation: split osmoheterotrophs into N- and C-limited and mark classes
+# that cannot grow (see calcLimitation; simple generalists only).
+calcStrategy = function(sim, bPlot=FALSE, ylim=c(0.1,1000), bLimitation=FALSE) {
   p = sim$p
   r = sim$rates
   
@@ -635,6 +643,17 @@ calcStrategy = function(sim, bPlot=FALSE, ylim=c(0.1,1000)) {
   strategy[r$jDOC > r$jLreal] = "Osmoheterotroph"
   strategy[(r$jNloss>1e-5) & (r$jN<r$jF)] = "Heterotroph"
   strategy[((jLencounter/r$jFreal > 1)  & (r$jF>r$jN)) ] = "Mixotroph"  
+  
+  if (bLimitation) {
+    lim = calcLimitation(sim)
+    ix = strategy=="Osmoheterotroph"
+    strategy[ix] = paste("Osmoheterotroph", lim$element[ix], "limited")
+    # Heterotrophs: C limited with food as the main C source, so they leak
+    # the surplus N from their food. Phagotrophs that are not are mixotrophs:
+    strategy[strategy=="Heterotroph"] = "Mixotroph"
+    strategy[lim$element=="C" & lim$resource=="Food"] = "Heterotroph"
+    strategy[lim$resource=="None (no growth)"] = "None"
+  }
   
   # Plot shadings:
   if (bPlot) {
@@ -659,6 +678,12 @@ calcStrategy = function(sim, bPlot=FALSE, ylim=c(0.1,1000)) {
         col = colN
       if (strategy[i]=="Osmoheterotroph")
         col = colOsmo
+      if (strategy[i]=="Osmoheterotroph N limited")
+        col = colOsmoN
+      if (strategy[i]=="Osmoheterotroph C limited")
+        col = colOsmoC
+      if (strategy[i]=="None")
+        col = colNone
       
       polygon(p$m[i]*c(1/fac,fac,fac,1/fac), 
               ys,
@@ -671,7 +696,7 @@ calcStrategy = function(sim, bPlot=FALSE, ylim=c(0.1,1000)) {
 }
 
 plotSpectrum <- function(sim, t=max(sim$t), bPlot=TRUE, 
-                         bXlabel=TRUE, bLegend=TRUE) {
+                         bXlabel=TRUE, bLegend=TRUE, bLimitation=FALSE) {
   p = sim$p
   m = p$m
   r = sim$rates
@@ -726,7 +751,7 @@ plotSpectrum <- function(sim, t=max(sim$t), bPlot=TRUE,
           col=rgb(0.5,0.5,0.5,alpha=0.25), border=NA)
   
   # Determine limiting process:
-  strategy = calcStrategy(sim,bPlot=TRUE)
+  strategy = calcStrategy(sim,bPlot=TRUE, bLimitation=bLimitation)
   #
   # Add extra size labels
   #
@@ -738,13 +763,23 @@ plotSpectrum <- function(sim, t=max(sim$t), bPlot=TRUE,
   #
   # Legend:
   #
-  if (bLegend)
-  legend(x="topright", bty="n", cex=cex,
-         legend=c("Osmoheterotrophs", "Light limited phototrophs","N limited phototrophs","Mixotrophs","Heterotrophs"),
-         fill=c(colOsmo, colPhoto,colN,colMixo,colHetero,"transparent"),
-         border=c("black","black","black","black","black","transparent"),
-         lwd = c(0,0,0,0,0,3),
-         col=c(NA,NA,NA,NA,NA,1))
+  if (bLegend) {
+    if (bLimitation) {
+      sLegend = c("N limited osmoheterotrophs", "C limited osmoheterotrophs")
+      cols = c(colOsmoN, colOsmoC)
+    } else {
+      sLegend = "Osmoheterotrophs"
+      cols = colOsmo
+    }
+    sLegend = c(sLegend, "Light limited phototrophs","N limited phototrophs","Mixotrophs","Heterotrophs")
+    cols = c(cols, colPhoto,colN,colMixo,colHetero)
+    if (bLimitation) {
+      sLegend = c(sLegend, "No growth")
+      cols = c(cols, colNone)
+    }
+    legend(x="topright", bty="n", cex=cex,
+           legend=sLegend, fill=cols, border="black")
+  }
   #
   # Summary state variables: 
   #
@@ -772,7 +807,7 @@ plotSpectrum <- function(sim, t=max(sim$t), bPlot=TRUE,
 plotRates = function(sim, p=sim$p, 
                      B=sim$B, N=sim$N, DOC=sim$DOC,
                      t=max(sim$t), 
-                     bPlot=TRUE, bLosses=TRUE, bXaxis=TRUE) {
+                     bPlot=TRUE, bLosses=TRUE, bXaxis=TRUE, bLimitation=FALSE) {
   mm = 10^seq(-8,2, length.out = 100)  
   
   L = p$L
@@ -792,7 +827,7 @@ plotRates = function(sim, p=sim$p,
                 xlab="Carbon mass ($\\mu$gC)",
                 ylab="Rates (1/day)",
                 xaxis=bXaxis)
-  calcStrategy(sim,bPlot=TRUE, ylim=ylim)
+  calcStrategy(sim,bPlot=TRUE, ylim=ylim, bLimitation=bLimitation)
   #
   # Gains
   #
@@ -852,6 +887,73 @@ plotRates = function(sim, p=sim$p,
     lines(p$m, 0*p$m, lty=dashed, lwd=2)
   }
   return(r)
+}
+
+#
+# Resource limitation of the simple generalists (GeneralistsSimpleOnly).
+#
+# The model (calcRatesGeneralistsSimple) forms the N and C supplies, takes the
+# smaller one (Liebig) and saturates it against the synthesis capacity Jmax.
+# Rebuild the supplies before that saturation, per unit mass (1/day).
+#
+# min(N, C) equals the supply implied by jTot = f*Jmax to round-off at any
+# temperature.
+#
+calcLimitation = function(sim) {
+  p = sim$p
+  r = sim$rates
+  if (!is.null(r$dN) && all(r$dN >= 0))
+    return(calcLimitationGeneralists(sim))
+
+  jN = r$jN                  # dissolved N uptake (C units)
+  jDOC = r$jDOC
+  jL = r$jL                  # photoharvesting, before down-regulation
+  jF = r$jF                  # food, before down-regulation
+  jLoss = r$jLossPassiveF
+
+  supplyN = jN + jF - jLoss
+  supplyC = jL + jDOC + jF - r$jR - jLoss
+
+  bNlimited = supplyN < supplyC
+  # The source that dominates the supply of the limiting element:
+  resource = ifelse(bNlimited,
+                    ifelse(jN >= jF, "Dissolved N", "Food"),
+                    c("Light", "DOC", "Food")[max.col(cbind(jL, jDOC, jF),
+                                                      ties.method = "first")])
+  # No synthesis capacity (too small to photosynthesise) or no net supply:
+  resource[r$jMax <= 0 | pmin(supplyN, supplyC) <= 0] = "None (no growth)"
+
+  data.frame(m = p$m, supplyN = supplyN, supplyC = supplyC, jMax = r$jMax,
+             element = ifelse(bNlimited, "N", "C"), resource = resource)
+}
+
+#
+# Resource limitation of the generalists (GeneralistsOnly).
+#
+# The model (calcRatesGeneralists) down-regulates dissolved N uptake by dN so
+# that N matches the carbon available after the costs of uptake and growth:
+#   dN = 1      N limited (all the available N is taken up and still too little)
+#   0 < dN < 1  C limited (N uptake reduced to match carbon)
+#   dN = 0      C limited, and food supplies more N than carbon allows; the
+#               surplus N is leaked
+# The costs (bL, bDOC, ...) are not known in R, so the supplies are not rebuilt.
+# The resource is the source of the largest realized uptake of the limiting
+# element.
+#
+calcLimitationGeneralists = function(sim) {
+  p = sim$p
+  r = sim$rates
+
+  bNlimited = r$dN >= 1
+  resource = ifelse(bNlimited,
+                    ifelse(r$jN >= r$jFreal, "Dissolved N", "Food"),
+                    c("Light", "DOC", "Food")[max.col(cbind(r$jLreal, r$jDOC, r$jFreal),
+                                                      ties.method = "first")])
+  # No synthesis capacity or no net growth:
+  resource[r$jMax <= 0 | r$jTot <= 0] = "None (no growth)"
+
+  data.frame(m = p$m, dN = r$dN, jMax = r$jMax,
+             element = ifelse(bNlimited, "N", "C"), resource = resource)
 }
 
 plotLeaks = function(sim, t=max(sim$t)) {
