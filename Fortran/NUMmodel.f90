@@ -1251,7 +1251,7 @@ end subroutine getLost
       i1 = ixStart(iGroup)-nNutrients
       i2 = ixEnd(iGroup)-nNutrients
       ! Extract common fields:
-      jF( i1:i2 ) = group(iGroup)%spec%flvl * group(iGroup)%spec%JFmax / group(iGroup)%spec%m
+      jF( i1:i2 ) = fTemp2 * group(iGroup)%spec%flvl * group(iGroup)%spec%JFmax / group(iGroup)%spec%m
       jFreal( i1:i2 ) = group(iGroup)%spec%JF / group(iGroup)%spec%m
       jFmax( i1:i2 ) = fTemp2 * group(iGroup)%spec%JFmax / group(iGroup)%spec%m
       Jtot( i1:i2 ) = group(iGroup)%spec%Jtot / group(iGroup)%spec%m
@@ -1265,8 +1265,8 @@ end subroutine getLost
 
       select type (spectrum => group(iGroup)%spec)
       class is (spectrumUnicellular)
-        jN( i1:i2 ) = fTemp15 * spectrum%JN / spectrum%m
-        jDOC( i1:i2 ) = fTemp15 * spectrum%JDOC / spectrum%m
+        jN( i1:i2 ) = spectrum%JN / spectrum%m ! Already temperature corrected
+        jDOC( i1:i2 ) = spectrum%JDOC / spectrum%m ! Already temperature corrected
         jL( i1:i2 ) = spectrum%JL / spectrum%m
         jMax( i1:i2 ) = fTemp2 * spectrum%Jmax / spectrum%m
         jLossPassive( i1:i2 ) = spectrum%JlossPassive / spectrum%m
