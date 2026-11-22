@@ -102,6 +102,14 @@ end subroutine
     !call simulateChemostatEuler(u, L, Ndeep, diff, tEnd, dt)
 !end subroutine f_simulateChemostatEuler
 
+  subroutine f_getdN(dN)
+    use globals
+    use NUMmodel, only: getdN, nNutrients, nGrid
+    real(dp), intent(out):: dN(nGrid-nNutrients)
+
+    call getdN(dN)
+  end subroutine f_getdN
+
   subroutine f_getFunctions(u, ProdGross, ProdNet,ProdHTL,ProdBact,eHTL,Bpico,Bnano,Bmicro,mHTL)
     use globals
     use NUMmodel, only: getFunctions, nGrid

@@ -1295,4 +1295,22 @@ end subroutine getLost
    end do
   end subroutine getRates
 
+  ! Returns the down-regulation factor dN of dissolved N uptake from the last call
+  ! to calcDerivatives (generalists only; -1 for other groups). dN = 1 means N
+  ! limitation; dN < 1 means carbon limitation (dN = 0: surplus N from food).
+  subroutine getdN(dN)
+    real(dp), intent(out):: dN(nGrid-nNutrients)
+    integer :: iGroup, i1, i2
+
+    dN = -1.d0
+    do iGroup = 1, nGroups
+      i1 = ixStart(iGroup)-nNutrients
+      i2 = ixEnd(iGroup)-nNutrients
+      select type (spectrum => group(iGroup)%spec)
+      class is (spectrumGeneralists)
+        dN( i1:i2 ) = spectrum%dN
+      end select
+    end do
+  end subroutine getdN
+
 end module NUMmodel
