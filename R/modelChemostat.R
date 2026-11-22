@@ -777,7 +777,7 @@ plotSpectrum <- function(sim, t=max(sim$t), bPlot=TRUE,
       sLegend = c(sLegend, "No growth")
       cols = c(cols, colNone)
     }
-    legend(x="topright", bty="n", cex=cex,
+    legend(x="topright", bty="n", cex=cex, y.intersp=0.75,
            legend=sLegend, fill=cols, border="black")
   }
   #
@@ -852,7 +852,7 @@ plotRates = function(sim, p=sim$p,
   lines(p$m, r$jFreal,lwd=4,col="red")
   lines(p$m, p$epsilonF * r$jFmax ,col="red", lty=dotted)
   
-  legend(x="topright", cex=cex,
+  legend(x="topright", cex=cex, y.intersp=0.75,
          legend=c("Gains:","Light harvesting","Nutrient uptake","DOC uptake","Food consumption","Division rate"),
          col=c("white","green","blue","brown","red","black"),
          lwd=c(0,4,4,4,4,4),
@@ -877,7 +877,7 @@ plotRates = function(sim, p=sim$p,
     #mortPredTheoretical = BSheldon * (1-0.6) * p$AF *sqrt(2*pi)*p$sigma / delta
     #lines(range(p$m), -mortPredTheoretical*c(1,1), lty=dotted, col="red")
     
-    legend(x="bottomright", cex=cex,
+    legend(x="bottomright", cex=cex, y.intersp=0.75,
            legend=c("Losses:", "Predation", "Virulysis", 
                     "Higher trophic levels","Respiration","Passive"),
            col=c(NA,"red", "orange", "magenta","grey","darkgreen"),
